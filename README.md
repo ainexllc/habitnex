@@ -138,12 +138,44 @@ src/
 ## Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run test         # Run Playwright tests
+npm run dev               # Start development server
+npm run build             # Build for production
+npm run start             # Start production server
+npm run lint              # Run ESLint
+npm run test              # Run Playwright tests
+npm run firebase:rules    # Deploy Firestore rules
+npm run firebase:indexes  # Deploy Firestore indexes
+npm run firebase:deploy   # Deploy all Firestore config
 ```
+
+## Firebase CLI Setup
+
+The project includes Firebase CLI configuration for easy deployment of Firestore rules and indexes:
+
+### Initial Setup (One-time)
+1. Install Firebase CLI: `npm install -g firebase-tools`
+2. Login to Firebase: `firebase login`
+3. The project is already configured with `firebase.json` and `.firebaserc`
+
+### Deploy Firestore Configuration
+```bash
+# Deploy only rules
+npm run firebase:rules
+
+# Deploy only indexes
+npm run firebase:indexes
+
+# Deploy both rules and indexes
+npm run firebase:deploy
+```
+
+### Automatic Rules & Indexes
+The project includes:
+- **Firestore Rules**: Security rules in `firestore.rules`
+- **Firestore Indexes**: Composite indexes in `firestore.indexes.json`
+- **Firebase Config**: Project setup in `firebase.json` and `.firebaserc`
+
+Rules are automatically deployed and ensure users can only access their own data.
 
 ## Contributing
 

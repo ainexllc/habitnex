@@ -12,7 +12,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "firebase:rules": "firebase deploy --only firestore:rules",
+    "firebase:indexes": "firebase deploy --only firestore:indexes",
+    "firebase:deploy": "firebase deploy --only firestore"
   },
   "keywords": [],
   "author": "",
