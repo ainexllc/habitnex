@@ -20,8 +20,10 @@ export interface Habit {
   description?: string;
   category: string;
   color: string; // hex color
-  frequency: 'daily' | 'weekly' | 'custom';
+  frequency: 'daily' | 'weekly' | 'interval' | 'custom';
   targetDays: number[]; // For weekly: [0,1,2,3,4,5,6], for daily: [0,1,2,3,4,5,6]
+  intervalDays?: number; // For interval frequency: every X days
+  startDate?: string; // For interval habits: when to start counting (YYYY-MM-DD)
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isArchived: boolean;
@@ -73,8 +75,10 @@ export interface CreateHabitForm {
   description?: string;
   category: string;
   color: string;
-  frequency: 'daily' | 'weekly' | 'custom';
+  frequency: 'daily' | 'weekly' | 'interval' | 'custom';
   targetDays: number[];
+  intervalDays?: number;
+  startDate?: string;
   goal?: {
     type: 'streak' | 'completion';
     target: number;

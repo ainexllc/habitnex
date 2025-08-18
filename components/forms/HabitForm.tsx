@@ -14,13 +14,23 @@ const habitSchema = z.object({
   description: z.string().max(200, 'Description too long').optional(),
   category: z.string().min(1, 'Category is required'),
   color: z.string().min(1, 'Please select a color'),
-  frequency: z.enum(['daily', 'weekly']),
+  frequency: z.enum(['daily', 'weekly', 'interval']),
   targetDays: z.array(z.number()).min(1, 'Select at least one day'),
+  intervalDays: z.number().min(1).max(365).optional(),
+  startDate: z.string().optional(),
   goal: z.object({
     type: z.enum(['streak', 'completion']),
     target: z.number().min(1).max(365),
     period: z.enum(['weekly', 'monthly']),
   }).optional(),
+}).refine((data) => {
+  if (data.frequency === 'interval') {
+    return data.intervalDays && data.intervalDays > 0;
+  }
+  return true;
+}, {
+  message: "Interval days is required for interval frequency",
+  path: ["intervalDays"],
 });
 
 const CATEGORIES = [
@@ -78,6 +88,8 @@ export function HabitForm({
       color: initialData?.color || COLORS[0],
       frequency: initialData?.frequency || 'daily',
       targetDays: initialData?.targetDays || [0, 1, 2, 3, 4, 5, 6],
+      intervalDays: initialData?.intervalDays || 2,
+      startDate: initialData?.startDate || new Date().toISOString().split('T')[0],
       goal: initialData?.goal || undefined,
     },
   });
@@ -95,8 +107,10 @@ export function HabitForm({
   };
 
   const handleFormSubmit = (data: CreateHabitForm) => {
+    console.log('Form data before cleaning:', data);
+    
     // Clean up the data before submitting
-    const cleanedData: CreateHabitForm = {
+    const cleanedData: any = {
       ...data,
       goal: showGoal && data.goal ? data.goal : undefined,
     };
@@ -105,10 +119,27 @@ export function HabitForm({
     if (!cleanedData.goal) {
       delete cleanedData.goal;
     }
-    if (!cleanedData.description) {
+    if (!cleanedData.description || cleanedData.description.trim() === '') {
       delete cleanedData.description;
     }
     
+    // Remove interval fields if not interval frequency
+    if (cleanedData.frequency !== 'interval') {
+      delete cleanedData.intervalDays;
+      delete cleanedData.startDate;
+    }
+    
+    // For daily habits, set all days as target
+    if (cleanedData.frequency === 'daily') {
+      cleanedData.targetDays = [0, 1, 2, 3, 4, 5, 6];
+    }
+    
+    // For interval habits, clear targetDays
+    if (cleanedData.frequency === 'interval') {
+      cleanedData.targetDays = [];
+    }
+    
+    console.log('Cleaned data being submitted:', cleanedData);
     onSubmit(cleanedData);
   };
 
@@ -194,7 +225,7 @@ export function HabitForm({
             <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
               Frequency
             </label>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-4">
               <label className="flex items-center">
                 <input
                   type="radio"
@@ -213,8 +244,54 @@ export function HabitForm({
                 />
                 Specific Days
               </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="interval"
+                  className="mr-2"
+                  {...register('frequency')}
+                />
+                Every X Days
+              </label>
             </div>
           </div>
+
+          {/* Interval Configuration */}
+          {watchFrequency === 'interval' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                    Every X Days
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="365"
+                    className="input w-full"
+                    placeholder="e.g., 2 for every 2 days"
+                    {...register('intervalDays', { valueAsNumber: true })}
+                  />
+                  {errors.intervalDays && (
+                    <p className="text-sm text-error-500 mt-1">{errors.intervalDays.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    className="input w-full"
+                    {...register('startDate')}
+                  />
+                </div>
+              </div>
+              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                This habit will be due every {watch('intervalDays') || 2} days starting from the selected date.
+              </p>
+            </div>
+          )}
 
           {/* Target Days */}
           {watchFrequency === 'weekly' && (

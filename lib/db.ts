@@ -45,30 +45,53 @@ export const getUserProfile = async (userId: string) => {
 
 // Habit operations
 export const createHabit = async (userId: string, habitData: Omit<Habit, 'id' | 'createdAt' | 'updatedAt'>) => {
+  console.log('createHabit called with userId:', userId);
+  console.log('createHabit called with habitData:', habitData);
+  
   try {
     const habitsRef = collection(db, 'users', userId, 'habits');
-    const docRef = await addDoc(habitsRef, {
+    console.log('Created habits collection reference');
+    
+    const dataToWrite = {
       ...habitData,
+      isArchived: false, // Ensure this field is always set
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
-    });
+    };
+    
+    console.log('Data to write to Firestore:', dataToWrite);
+    
+    const docRef = await addDoc(habitsRef, dataToWrite);
+    console.log('Document written with ID:', docRef.id);
+    
     return docRef.id;
   } catch (error) {
+    console.error('Error in createHabit:', error);
     throw error;
   }
 };
 
 export const getUserHabits = async (userId: string) => {
+  console.log('getUserHabits called for userId:', userId);
+  
   try {
     const habitsRef = collection(db, 'users', userId, 'habits');
     const q = query(habitsRef, where('isArchived', '==', false), orderBy('createdAt', 'desc'));
+    
+    console.log('Executing habits query...');
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
+    console.log('Query returned', querySnapshot.size, 'documents');
+    
+    const habits = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Habit[];
+    
+    console.log('Parsed habits:', habits);
+    return habits;
   } catch (error) {
+    console.error('Error in getUserHabits:', error);
     throw error;
   }
 };

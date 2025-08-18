@@ -21,7 +21,12 @@ export function useHabits() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchHabits = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user available for fetching habits');
+      return;
+    }
+
+    console.log('Fetching habits for user:', user.uid);
 
     try {
       setLoading(true);
@@ -31,6 +36,9 @@ export function useHabits() {
         getUserHabits(user.uid),
         getCompletions(user.uid)
       ]);
+      
+      console.log('Fetched habits:', habitsData);
+      console.log('Fetched completions:', completionsData);
       
       setHabits(habitsData);
       setCompletions(completionsData);
@@ -43,11 +51,21 @@ export function useHabits() {
   };
 
   const addHabit = async (habitData: CreateHabitForm) => {
-    if (!user) return;
+    if (!user) {
+      console.error('No user found when trying to create habit');
+      return;
+    }
+
+    console.log('Creating habit for user:', user.uid);
+    console.log('Habit data:', habitData);
 
     try {
       const habitId = await createHabit(user.uid, habitData);
+      console.log('Habit created with ID:', habitId);
+      
       await fetchHabits(); // Refresh the list
+      console.log('Habits refetched after creation');
+      
       return habitId;
     } catch (err) {
       console.error('Error creating habit:', err);

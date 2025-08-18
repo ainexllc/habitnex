@@ -8,17 +8,23 @@ import { QuickActions } from '@/components/habits/QuickActions';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { Button } from '@/components/ui/Button';
 import { useHabits } from '@/hooks/useHabits';
-import { calculateStreak, calculateCompletionRate, getTodayDateString } from '@/lib/utils';
+import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday } from '@/lib/utils';
 import { Target, TrendingUp, Calendar, Zap, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = useHabits();
   
+  // Filter habits that are due today
+  const todayHabits = useMemo(() => {
+    return habits.filter(habit => isHabitDueToday(habit));
+  }, [habits]);
+  
   const stats = useMemo(() => {
     const today = getTodayDateString();
     const todayCompletions = completions.filter(c => c.date === today && c.completed);
     const totalHabits = habits.length;
+    const todayDueHabits = todayHabits.length;
     const completedToday = todayCompletions.length;
     
     // Calculate overall streak (consecutive days with at least one habit completed)
@@ -48,6 +54,7 @@ export default function DashboardPage() {
 
     return {
       totalHabits,
+      todayDueHabits,
       completedToday,
       overallStreak,
       avgCompletionRate,
@@ -105,8 +112,8 @@ export default function DashboardPage() {
             />
             <StatsCard
               title="Completed Today"
-              value={`${stats.completedToday}/${stats.totalHabits}`}
-              description="Habits completed today"
+              value={`${stats.completedToday}/${stats.todayDueHabits}`}
+              description="Due habits completed today"
               icon={Calendar}
             />
             <StatsCard
@@ -163,7 +170,7 @@ export default function DashboardPage() {
                   <QuickActions />
                 </div>
                 <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {habits.map((habit) => (
+                  {todayHabits.map((habit) => (
                     <HabitCard key={habit.id} habit={habit} />
                   ))}
                 </div>

@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Habit } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Check, Edit, Trash2, Target } from 'lucide-react';
+import { Check, Edit, Trash2, Target, Clock, Calendar } from 'lucide-react';
 import { useHabits } from '@/hooks/useHabits';
-import { calculateStreak } from '@/lib/utils';
+import { calculateStreak, isHabitDueToday, getNextDueDate, getDaysUntilDue } from '@/lib/utils';
 
 interface HabitCardProps {
   habit: Habit;
@@ -19,6 +19,11 @@ export function HabitCard({ habit }: HabitCardProps) {
   const isCompleted = isHabitCompleted(habit.id);
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
   const currentStreak = calculateStreak(habitCompletions);
+  
+  // Check if habit is due today
+  const isDueToday = isHabitDueToday(habit);
+  const nextDueDate = getNextDueDate(habit);
+  const daysUntilDue = getDaysUntilDue(habit);
 
   const handleToggleCompletion = async () => {
     try {
@@ -84,12 +89,28 @@ export function HabitCard({ habit }: HabitCardProps) {
             
             <div className="text-center">
               <div className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                {habit.category}
+                {habit.frequency === 'interval' 
+                  ? `Every ${habit.intervalDays} days`
+                  : habit.category
+                }
               </div>
               <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
-                Category
+                {habit.frequency === 'interval' ? 'Frequency' : 'Category'}
               </div>
             </div>
+
+            {/* Next due date for interval habits */}
+            {habit.frequency === 'interval' && !isDueToday && nextDueDate && (
+              <div className="text-center">
+                <div className="flex items-center text-sm text-warning-600 dark:text-warning-400">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {daysUntilDue === 0 ? 'Today' : `${daysUntilDue} days`}
+                </div>
+                <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
+                  Next due
+                </div>
+              </div>
+            )}
 
             {habit.goal && (
               <div className="text-center">
@@ -104,19 +125,30 @@ export function HabitCard({ habit }: HabitCardProps) {
             )}
           </div>
 
-          <Button
-            onClick={handleToggleCompletion}
-            loading={loading}
-            variant={isCompleted ? "secondary" : "primary"}
-            className={`${
-              isCompleted 
-                ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800' 
-                : ''
-            }`}
-          >
-            <Check className={`w-4 h-4 mr-2 ${isCompleted ? 'text-success-600 dark:text-success-400' : ''}`} />
-            {isCompleted ? 'Completed' : 'Mark Done'}
-          </Button>
+          {isDueToday ? (
+            <Button
+              onClick={handleToggleCompletion}
+              loading={loading}
+              variant={isCompleted ? "secondary" : "primary"}
+              className={`${
+                isCompleted 
+                  ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800' 
+                  : ''
+              }`}
+            >
+              <Check className={`w-4 h-4 mr-2 ${isCompleted ? 'text-success-600 dark:text-success-400' : ''}`} />
+              {isCompleted ? 'Completed' : 'Mark Done'}
+            </Button>
+          ) : (
+            <div className="text-center">
+              <div className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                {habit.frequency === 'interval' 
+                  ? `Next due: ${nextDueDate ? new Date(nextDueDate).toLocaleDateString() : 'Not scheduled'}`
+                  : 'Not due today'
+                }
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
