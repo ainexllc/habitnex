@@ -4,7 +4,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   User
 } from 'firebase/auth';
 import { auth } from './firebase';
@@ -30,8 +31,17 @@ export const signIn = async (email: string, password: string) => {
 export const signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
-    const userCredential = await signInWithPopup(auth, provider);
-    return userCredential.user;
+    // Try redirect method to avoid popup blocking
+    await signInWithRedirect(auth, provider);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    return result?.user || null;
   } catch (error) {
     throw error;
   }

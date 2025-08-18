@@ -10,7 +10,8 @@ import {
   where,
   orderBy,
   Timestamp,
-  writeBatch
+  writeBatch,
+  setDoc
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Habit, HabitCompletion, User } from '../types';
@@ -19,11 +20,11 @@ import type { Habit, HabitCompletion, User } from '../types';
 export const createUserProfile = async (userId: string, userData: Partial<User>) => {
   try {
     const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, {
+    await setDoc(userRef, {
       ...userData,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
-    });
+    }, { merge: true });
   } catch (error) {
     throw error;
   }

@@ -78,7 +78,7 @@ export function HabitForm({
       color: initialData?.color || COLORS[0],
       frequency: initialData?.frequency || 'daily',
       targetDays: initialData?.targetDays || [0, 1, 2, 3, 4, 5, 6],
-      goal: initialData?.goal,
+      goal: initialData?.goal || undefined,
     },
   });
 
@@ -94,6 +94,24 @@ export function HabitForm({
     setValue('targetDays', newDays);
   };
 
+  const handleFormSubmit = (data: CreateHabitForm) => {
+    // Clean up the data before submitting
+    const cleanedData: CreateHabitForm = {
+      ...data,
+      goal: showGoal && data.goal ? data.goal : undefined,
+    };
+    
+    // Remove undefined fields to prevent Firestore errors
+    if (!cleanedData.goal) {
+      delete cleanedData.goal;
+    }
+    if (!cleanedData.description) {
+      delete cleanedData.description;
+    }
+    
+    onSubmit(cleanedData);
+  };
+
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
@@ -103,7 +121,7 @@ export function HabitForm({
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <Input
