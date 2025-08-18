@@ -47,7 +47,9 @@ export function HabitCard({ habit }: HabitCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className={`hover:shadow-md transition-shadow ${
+      !isDueToday ? 'opacity-75 border-dashed' : ''
+    }`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">

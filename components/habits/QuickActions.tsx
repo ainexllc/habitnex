@@ -1,14 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useHabits } from '@/hooks/useHabits';
+import { isHabitDueToday } from '@/lib/utils';
 import { CheckSquare, Square } from 'lucide-react';
 
 export function QuickActions() {
   const { habits, isHabitCompleted, toggleCompletion } = useHabits();
   const [loadingHabits, setLoadingHabits] = useState<Set<string>>(new Set());
+
+  // Only show habits that are due today in quick actions
+  const todayHabits = useMemo(() => {
+    return habits.filter(habit => isHabitDueToday(habit));
+  }, [habits]);
 
   const handleToggle = async (habitId: string) => {
     const isCompleted = isHabitCompleted(habitId);
@@ -28,7 +34,7 @@ export function QuickActions() {
     }
   };
 
-  if (habits.length === 0) return null;
+  if (todayHabits.length === 0) return null;
 
   return (
     <Card>
@@ -37,7 +43,7 @@ export function QuickActions() {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {habits.map(habit => {
+          {todayHabits.map(habit => {
             const isCompleted = isHabitCompleted(habit.id);
             const isLoading = loadingHabits.has(habit.id);
 

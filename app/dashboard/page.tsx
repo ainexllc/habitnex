@@ -170,7 +170,7 @@ export default function DashboardPage() {
                   <QuickActions />
                 </div>
                 <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {todayHabits.map((habit) => (
+                  {habits.map((habit) => (
                     <HabitCard key={habit.id} habit={habit} />
                   ))}
                 </div>
