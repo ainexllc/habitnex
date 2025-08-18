@@ -19,7 +19,7 @@ export function QuickActions() {
   const handleToggle = async (habitId: string) => {
     const isCompleted = isHabitCompleted(habitId);
     
-    setLoadingHabits(prev => new Set([...prev, habitId]));
+    setLoadingHabits(prev => new Set([...Array.from(prev), habitId]));
     
     try {
       await toggleCompletion(habitId, undefined, !isCompleted);

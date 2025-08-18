@@ -14,6 +14,11 @@ service cloud.firestore {
       match /completions/{completionId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      
+      // Moods subcollection - users can access their own mood entries
+      match /moods/{moodId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
     
     // Categories collection - read only for all authenticated users

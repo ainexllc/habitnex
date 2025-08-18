@@ -14,7 +14,7 @@ import {
   setDoc
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Habit, HabitCompletion, User } from '../types';
+import type { Habit, HabitCompletion, User, MoodEntry, CreateMoodForm } from '../types';
 
 // User operations
 export const createUserProfile = async (userId: string, userData: Partial<User>) => {
@@ -185,6 +185,109 @@ export const toggleHabitCompletion = async (userId: string, habitId: string, dat
       await updateCompletion(userId, existingDoc.id, { completed, notes });
     }
   } catch (error) {
+    throw error;
+  }
+};
+
+// Mood tracking operations
+export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, date: string) => {
+  console.log('createMoodEntry called with userId:', userId);
+  console.log('createMoodEntry called with moodData:', moodData);
+  
+  try {
+    const moodRef = collection(db, 'users', userId, 'moods');
+    console.log('Created moods collection reference');
+    
+    const dataToWrite = {
+      ...moodData,
+      date,
+      timestamp: Timestamp.now()
+    };
+    
+    console.log('Data to write to Firestore:', dataToWrite);
+    
+    const docRef = await addDoc(moodRef, dataToWrite);
+    console.log('Mood entry written with ID:', docRef.id);
+    
+    return docRef.id;
+  } catch (error) {
+    console.error('Error in createMoodEntry:', error);
+    throw error;
+  }
+};
+
+export const getMoodEntries = async (userId: string, startDate?: string, endDate?: string) => {
+  console.log('getMoodEntries called for userId:', userId);
+  
+  try {
+    const moodRef = collection(db, 'users', userId, 'moods');
+    let q = query(moodRef, orderBy('date', 'desc'));
+
+    if (startDate) {
+      q = query(q, where('date', '>=', startDate));
+    }
+    if (endDate) {
+      q = query(q, where('date', '<=', endDate));
+    }
+
+    console.log('Executing mood query...');
+    const querySnapshot = await getDocs(q);
+    
+    console.log('Query returned', querySnapshot.size, 'mood entries');
+    
+    const moods = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as MoodEntry[];
+    
+    console.log('Parsed mood entries:', moods);
+    return moods;
+  } catch (error) {
+    console.error('Error in getMoodEntries:', error);
+    throw error;
+  }
+};
+
+export const updateMoodEntry = async (userId: string, moodId: string, updates: Partial<MoodEntry>) => {
+  try {
+    const moodRef = doc(db, 'users', userId, 'moods', moodId);
+    await updateDoc(moodRef, {
+      ...updates,
+      timestamp: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error updating mood entry:', error);
+    throw error;
+  }
+};
+
+export const deleteMoodEntry = async (userId: string, moodId: string) => {
+  try {
+    const moodRef = doc(db, 'users', userId, 'moods', moodId);
+    await deleteDoc(moodRef);
+  } catch (error) {
+    console.error('Error deleting mood entry:', error);
+    throw error;
+  }
+};
+
+export const getMoodForDate = async (userId: string, date: string): Promise<MoodEntry | null> => {
+  try {
+    const moodRef = collection(db, 'users', userId, 'moods');
+    const q = query(moodRef, where('date', '==', date));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+    
+    const doc = querySnapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data()
+    } as MoodEntry;
+  } catch (error) {
+    console.error('Error getting mood for date:', error);
     throw error;
   }
 };

@@ -20,7 +20,7 @@ export interface Habit {
   description?: string;
   category: string;
   color: string; // hex color
-  frequency: 'daily' | 'weekly' | 'interval' | 'custom';
+  frequency: 'daily' | 'weekly' | 'interval';
   targetDays: number[]; // For weekly: [0,1,2,3,4,5,6], for daily: [0,1,2,3,4,5,6]
   intervalDays?: number; // For interval frequency: every X days
   startDate?: string; // For interval habits: when to start counting (YYYY-MM-DD)
@@ -40,6 +40,18 @@ export interface HabitCompletion {
   date: string; // YYYY-MM-DD format
   completed: boolean;
   notes?: string;
+  timestamp: Timestamp;
+}
+
+export interface MoodEntry {
+  id: string;
+  date: string; // YYYY-MM-DD format
+  mood: 1 | 2 | 3 | 4 | 5; // 1 = very bad, 5 = excellent
+  energy: 1 | 2 | 3 | 4 | 5; // 1 = very low, 5 = very high
+  stress: 1 | 2 | 3 | 4 | 5; // 1 = very low, 5 = very high
+  sleep: 1 | 2 | 3 | 4 | 5; // 1 = very poor, 5 = excellent
+  notes?: string;
+  tags?: string[]; // e.g., ['work-stress', 'family-time', 'exercise']
   timestamp: Timestamp;
 }
 
@@ -75,7 +87,7 @@ export interface CreateHabitForm {
   description?: string;
   category: string;
   color: string;
-  frequency: 'daily' | 'weekly' | 'interval' | 'custom';
+  frequency: 'daily' | 'weekly' | 'interval';
   targetDays: number[];
   intervalDays?: number;
   startDate?: string;
@@ -94,6 +106,15 @@ export interface AuthForm {
 export interface SignUpForm extends AuthForm {
   confirmPassword: string;
   displayName?: string;
+}
+
+export interface CreateMoodForm {
+  mood: 1 | 2 | 3 | 4 | 5;
+  energy: 1 | 2 | 3 | 4 | 5;
+  stress: 1 | 2 | 3 | 4 | 5;
+  sleep: 1 | 2 | 3 | 4 | 5;
+  notes?: string;
+  tags?: string[];
 }
 
 // API response types

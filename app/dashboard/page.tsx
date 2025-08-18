@@ -1,24 +1,69 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
 import { HabitCard } from '@/components/habits/HabitCard';
 import { QuickActions } from '@/components/habits/QuickActions';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { MoodForm } from '@/components/moods/MoodForm';
+import { MoodCard } from '@/components/moods/MoodCard';
+import { MoodEditModal } from '@/components/moods/MoodEditModal';
 import { Button } from '@/components/ui/Button';
 import { useHabits } from '@/hooks/useHabits';
+import { useMoods } from '@/hooks/useMoods';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday } from '@/lib/utils';
 import { Target, TrendingUp, Calendar, Zap, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { MoodEntry } from '@/types';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = useHabits();
+  const { moods, addMood, editMood, removeMood, getTodayMood, loading: moodsLoading } = useMoods();
+  
+  // State for mood editing
+  const [editingMood, setEditingMood] = useState<MoodEntry | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   // Filter habits that are due today
   const todayHabits = useMemo(() => {
     return habits.filter(habit => isHabitDueToday(habit));
   }, [habits]);
+
+  // Get today's mood
+  const todayMood = getTodayMood();
+
+  const handleMoodSubmit = async (moodData: any) => {
+    try {
+      await addMood(moodData);
+    } catch (error) {
+      console.error('Failed to save mood:', error);
+    }
+  };
+
+  const handleMoodEdit = (mood: MoodEntry) => {
+    setEditingMood(mood);
+    setIsEditModalOpen(true);
+  };
+
+  const handleMoodEditSave = async (moodData: any) => {
+    if (!editingMood) return;
+    
+    try {
+      await editMood(editingMood.id, moodData);
+    } catch (error) {
+      console.error('Failed to edit mood:', error);
+      throw error;
+    }
+  };
+
+  const handleMoodDelete = async (moodId: string) => {
+    try {
+      await removeMood(moodId);
+    } catch (error) {
+      console.error('Failed to delete mood:', error);
+    }
+  };
   
   const stats = useMemo(() => {
     const today = getTodayDateString();
@@ -165,19 +210,84 @@ export default function DashboardPage() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-1">
-                  <QuickActions />
+              <div className="space-y-8">
+                {/* Habits Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <div className="lg:col-span-1">
+                    <QuickActions />
+                  </div>
+                  <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {habits.map((habit) => (
+                      <HabitCard key={habit.id} habit={habit} />
+                    ))}
+                  </div>
                 </div>
-                <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {habits.map((habit) => (
-                    <HabitCard key={habit.id} habit={habit} />
-                  ))}
+
+                {/* Mood Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
+                      Today's Mood
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Mood Form or Today's Mood */}
+                    <div>
+                      {!todayMood ? (
+                        <MoodForm 
+                          onSubmit={handleMoodSubmit}
+                          loading={moodsLoading}
+                          date={getTodayDateString()}
+                        />
+                      ) : (
+                        <MoodCard 
+                          mood={todayMood} 
+                          onEdit={handleMoodEdit}
+                          onDelete={handleMoodDelete}
+                        />
+                      )}
+                    </div>
+
+                    {/* Recent Mood History */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark">
+                        Recent Mood History
+                      </h3>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {moods.slice(0, 3).map((mood) => (
+                          <MoodCard 
+                            key={mood.id} 
+                            mood={mood} 
+                            onEdit={handleMoodEdit}
+                            onDelete={handleMoodDelete}
+                          />
+                        ))}
+                        {moods.length === 0 && !moodsLoading && (
+                          <p className="text-text-secondary-light dark:text-text-secondary-dark text-center py-8">
+                            No mood entries yet. Track your first mood!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </main>
+
+        {/* Mood Edit Modal */}
+        <MoodEditModal
+          mood={editingMood}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingMood(null);
+          }}
+          onSave={handleMoodEditSave}
+          loading={moodsLoading}
+        />
       </div>
     </ProtectedRoute>
   );

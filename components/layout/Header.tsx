@@ -46,6 +46,12 @@ export function Header() {
               Habits
             </Link>
             <Link
+              href="/moods"
+              className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
+            >
+              Moods
+            </Link>
+            <Link
               href="/stats"
               className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
             >

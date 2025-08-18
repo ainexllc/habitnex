@@ -60,7 +60,7 @@ export function useHabits() {
     console.log('Habit data:', habitData);
 
     try {
-      const habitId = await createHabit(user.uid, habitData);
+      const habitId = await createHabit(user.uid, { ...habitData, isArchived: false });
       console.log('Habit created with ID:', habitId);
       
       await fetchHabits(); // Refresh the list
