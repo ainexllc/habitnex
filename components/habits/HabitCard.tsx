@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Check, Edit, Trash2, Target, Clock, Calendar } from 'lucide-react';
 import { useHabits } from '@/hooks/useHabits';
-import { calculateStreak, isHabitDueToday, getNextDueDate, getDaysUntilDue } from '@/lib/utils';
+import { calculateStreak, isHabitDueToday, getNextDueDate, getDaysUntilDue, isHabitOverdue, calculateIntervalStreak } from '@/lib/utils';
 
 interface HabitCardProps {
   habit: Habit;
@@ -18,10 +18,13 @@ export function HabitCard({ habit }: HabitCardProps) {
   
   const isCompleted = isHabitCompleted(habit.id);
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
-  const currentStreak = calculateStreak(habitCompletions);
+  const currentStreak = habit.frequency === 'interval' 
+    ? calculateIntervalStreak(habit, completions)
+    : calculateStreak(habitCompletions);
   
-  // Check if habit is due today
+  // Check if habit is due today or overdue
   const isDueToday = isHabitDueToday(habit);
+  const isOverdue = isHabitOverdue(habit, completions);
   const nextDueDate = getNextDueDate(habit);
   const daysUntilDue = getDaysUntilDue(habit);
 
@@ -47,8 +50,12 @@ export function HabitCard({ habit }: HabitCardProps) {
   };
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${
-      !isDueToday ? 'opacity-75 border-dashed' : ''
+    <Card className={`hover:shadow-md transition-all duration-300 ${
+      !isDueToday && !isOverdue ? 'opacity-75 border-dashed' : ''
+    } ${
+      isCompleted ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 opacity-80' : ''
+    } ${
+      isOverdue && !isCompleted ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800' : ''
     }`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -58,9 +65,17 @@ export function HabitCard({ habit }: HabitCardProps) {
               style={{ backgroundColor: habit.color }}
             />
             <div>
-              <CardTitle className="text-lg">{habit.name}</CardTitle>
+              <CardTitle className={`text-lg transition-all duration-300 ${
+                isCompleted ? 'line-through text-text-muted-light dark:text-text-muted-dark' : ''
+              }`}>
+                {habit.name}
+              </CardTitle>
               {habit.description && (
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mt-1">
+                <p className={`text-sm mt-1 transition-all duration-300 ${
+                  isCompleted 
+                    ? 'line-through text-text-muted-light dark:text-text-muted-dark' 
+                    : 'text-text-secondary-light dark:text-text-secondary-dark'
+                }`}>
                   {habit.description}
                 </p>
               )}
@@ -85,7 +100,7 @@ export function HabitCard({ habit }: HabitCardProps) {
                 {currentStreak}
               </div>
               <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                Day Streak
+                {habit.frequency === 'interval' ? 'Streak' : 'Day Streak'}
               </div>
             </div>
             
@@ -127,7 +142,7 @@ export function HabitCard({ habit }: HabitCardProps) {
             )}
           </div>
 
-          {isDueToday ? (
+          {isDueToday || isOverdue ? (
             <Button
               onClick={handleToggleCompletion}
               loading={loading}
@@ -135,11 +150,13 @@ export function HabitCard({ habit }: HabitCardProps) {
               className={`${
                 isCompleted 
                   ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800' 
+                  : isOverdue 
+                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
                   : ''
               }`}
             >
               <Check className={`w-4 h-4 mr-2 ${isCompleted ? 'text-success-600 dark:text-success-400' : ''}`} />
-              {isCompleted ? 'Completed' : 'Mark Done'}
+              {isCompleted ? 'Completed' : isOverdue ? 'Overdue - Mark Done' : 'Mark Done'}
             </Button>
           ) : (
             <div className="text-center">

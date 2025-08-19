@@ -38,12 +38,25 @@ const MOOD_EMOJIS = {
 
 export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    // Parse YYYY-MM-DD format in local timezone
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     
-    if (date.toDateString() === today) return 'Today';
-    if (date.toDateString() === yesterday) return 'Yesterday';
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Compare dates in local timezone
+    const isToday = date.getFullYear() === today.getFullYear() && 
+                   date.getMonth() === today.getMonth() && 
+                   date.getDate() === today.getDate();
+                   
+    const isYesterday = date.getFullYear() === yesterday.getFullYear() && 
+                       date.getMonth() === yesterday.getMonth() && 
+                       date.getDate() === yesterday.getDate();
+    
+    if (isToday) return 'Today';
+    if (isYesterday) return 'Yesterday';
     
     return date.toLocaleDateString('en-US', { 
       weekday: 'short', 

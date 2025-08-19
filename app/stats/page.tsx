@@ -7,6 +7,7 @@ import { StatsCard } from '@/components/dashboard/StatsCard';
 import { HabitCalendar } from '@/components/charts/HabitCalendar';
 import { ProgressChart } from '@/components/charts/ProgressChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import MoodHabitCorrelationComponent from '@/components/MoodHabitCorrelation';
 import { useHabits } from '@/hooks/useHabits';
 import { calculateStreak, calculateCompletionRate } from '@/lib/utils';
 import { Target, TrendingUp, Calendar, Zap, Award } from 'lucide-react';
@@ -146,6 +147,16 @@ export default function StatsPage() {
                 </CardHeader>
                 <CardContent>
                   <ProgressChart completions={completions} />
+                </CardContent>
+              </Card>
+
+              {/* Mood-Habit Correlation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mood & Habit Correlation</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MoodHabitCorrelationComponent days={30} />
                 </CardContent>
               </Card>
 

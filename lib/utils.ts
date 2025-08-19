@@ -14,11 +14,18 @@ export function formatDate(date: Date | string): string {
 }
 
 export function getTodayDateString(): string {
-  return new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function getDateString(date: Date): string {
-  return date.toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function addDays(date: Date, days: number): Date {
@@ -141,4 +148,70 @@ export function getDaysUntilDue(habit: any, fromDate: string = getTodayDateStrin
   const dueDate = new Date(nextDue);
   
   return Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function isHabitOverdue(habit: any, completions: any[], fromDate: string = getTodayDateString()): boolean {
+  if (habit.frequency === 'interval' && habit.startDate && habit.intervalDays) {
+    const startDate = new Date(habit.startDate);
+    const today = new Date(fromDate);
+    
+    if (today < startDate) return false; // Not started yet
+    
+    const daysSinceStart = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const intervalsPassed = Math.floor(daysSinceStart / habit.intervalDays);
+    
+    // Check if there should have been completions that are missing
+    for (let i = 0; i <= intervalsPassed; i++) {
+      const expectedDate = new Date(startDate);
+      expectedDate.setDate(expectedDate.getDate() + (i * habit.intervalDays));
+      const expectedDateString = getDateString(expectedDate);
+      
+      // If this expected date is in the past and not completed, it's overdue
+      if (expectedDate <= today) {
+        const hasCompletion = completions.some(c => 
+          c.date === expectedDateString && c.completed && c.habitId === habit.id
+        );
+        if (!hasCompletion) {
+          return true; // Found a missing completion = overdue
+        }
+      }
+    }
+  }
+  
+  return false;
+}
+
+export function calculateIntervalStreak(habit: any, completions: any[]): number {
+  if (habit.frequency !== 'interval' || !habit.startDate || !habit.intervalDays) {
+    return calculateStreak(completions); // Fall back to regular streak for non-interval
+  }
+  
+  const startDate = new Date(habit.startDate);
+  const today = new Date();
+  const daysSinceStart = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const intervalsPassed = Math.floor(daysSinceStart / habit.intervalDays);
+  
+  let streak = 0;
+  
+  // Check backwards from the most recent expected completion
+  for (let i = intervalsPassed; i >= 0; i--) {
+    const expectedDate = new Date(startDate);
+    expectedDate.setDate(expectedDate.getDate() + (i * habit.intervalDays));
+    const expectedDateString = getDateString(expectedDate);
+    
+    // Only count if this date is in the past or today
+    if (expectedDate <= today) {
+      const hasCompletion = completions.some(c => 
+        c.date === expectedDateString && c.completed && c.habitId === habit.id
+      );
+      
+      if (hasCompletion) {
+        streak++;
+      } else {
+        break; // Streak broken
+      }
+    }
+  }
+  
+  return streak;
 }

@@ -45,53 +45,37 @@ export const getUserProfile = async (userId: string) => {
 
 // Habit operations
 export const createHabit = async (userId: string, habitData: Omit<Habit, 'id' | 'createdAt' | 'updatedAt'>) => {
-  console.log('createHabit called with userId:', userId);
-  console.log('createHabit called with habitData:', habitData);
-  
   try {
     const habitsRef = collection(db, 'users', userId, 'habits');
-    console.log('Created habits collection reference');
     
     const dataToWrite = {
       ...habitData,
-      isArchived: false, // Ensure this field is always set
+      isArchived: false,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };
     
-    console.log('Data to write to Firestore:', dataToWrite);
-    
     const docRef = await addDoc(habitsRef, dataToWrite);
-    console.log('Document written with ID:', docRef.id);
-    
     return docRef.id;
   } catch (error) {
-    console.error('Error in createHabit:', error);
     throw error;
   }
 };
 
 export const getUserHabits = async (userId: string) => {
-  console.log('getUserHabits called for userId:', userId);
-  
   try {
     const habitsRef = collection(db, 'users', userId, 'habits');
     const q = query(habitsRef, where('isArchived', '==', false), orderBy('createdAt', 'desc'));
     
-    console.log('Executing habits query...');
     const querySnapshot = await getDocs(q);
-    
-    console.log('Query returned', querySnapshot.size, 'documents');
     
     const habits = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Habit[];
     
-    console.log('Parsed habits:', habits);
     return habits;
   } catch (error) {
-    console.error('Error in getUserHabits:', error);
     throw error;
   }
 };
@@ -191,12 +175,8 @@ export const toggleHabitCompletion = async (userId: string, habitId: string, dat
 
 // Mood tracking operations
 export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, date: string) => {
-  console.log('createMoodEntry called with userId:', userId);
-  console.log('createMoodEntry called with moodData:', moodData);
-  
   try {
     const moodRef = collection(db, 'users', userId, 'moods');
-    console.log('Created moods collection reference');
     
     const dataToWrite = {
       ...moodData,
@@ -204,21 +184,14 @@ export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, 
       timestamp: Timestamp.now()
     };
     
-    console.log('Data to write to Firestore:', dataToWrite);
-    
     const docRef = await addDoc(moodRef, dataToWrite);
-    console.log('Mood entry written with ID:', docRef.id);
-    
     return docRef.id;
   } catch (error) {
-    console.error('Error in createMoodEntry:', error);
     throw error;
   }
 };
 
 export const getMoodEntries = async (userId: string, startDate?: string, endDate?: string) => {
-  console.log('getMoodEntries called for userId:', userId);
-  
   try {
     const moodRef = collection(db, 'users', userId, 'moods');
     let q = query(moodRef, orderBy('date', 'desc'));
@@ -230,20 +203,15 @@ export const getMoodEntries = async (userId: string, startDate?: string, endDate
       q = query(q, where('date', '<=', endDate));
     }
 
-    console.log('Executing mood query...');
     const querySnapshot = await getDocs(q);
-    
-    console.log('Query returned', querySnapshot.size, 'mood entries');
     
     const moods = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as MoodEntry[];
     
-    console.log('Parsed mood entries:', moods);
     return moods;
   } catch (error) {
-    console.error('Error in getMoodEntries:', error);
     throw error;
   }
 };
@@ -256,7 +224,6 @@ export const updateMoodEntry = async (userId: string, moodId: string, updates: P
       timestamp: Timestamp.now()
     });
   } catch (error) {
-    console.error('Error updating mood entry:', error);
     throw error;
   }
 };
@@ -266,7 +233,6 @@ export const deleteMoodEntry = async (userId: string, moodId: string) => {
     const moodRef = doc(db, 'users', userId, 'moods', moodId);
     await deleteDoc(moodRef);
   } catch (error) {
-    console.error('Error deleting mood entry:', error);
     throw error;
   }
 };
@@ -287,7 +253,102 @@ export const getMoodForDate = async (userId: string, date: string): Promise<Mood
       ...doc.data()
     } as MoodEntry;
   } catch (error) {
-    console.error('Error getting mood for date:', error);
+    throw error;
+  }
+};
+
+// Mood-Habit Correlation Analysis
+export const getMoodHabitCorrelation = async (userId: string, startDate?: string, endDate?: string) => {
+  try {
+    const [moods, completions] = await Promise.all([
+      getMoodEntries(userId, startDate, endDate),
+      getCompletions(userId, undefined, startDate, endDate)
+    ]);
+
+    // Group completions by date
+    const completionsByDate = completions.reduce((acc, completion) => {
+      if (!acc[completion.date]) {
+        acc[completion.date] = [];
+      }
+      acc[completion.date].push(completion);
+      return acc;
+    }, {} as Record<string, HabitCompletion[]>);
+
+    // Calculate correlation data
+    const correlationData = moods.map(mood => {
+      const dayCompletions = completionsByDate[mood.date] || [];
+      const completedHabits = dayCompletions.filter(c => c.completed).length;
+      const totalHabits = dayCompletions.length;
+      const completionRate = totalHabits > 0 ? completedHabits / totalHabits : 0;
+
+      return {
+        date: mood.date,
+        mood: mood.mood,
+        energy: mood.energy,
+        stress: mood.stress,
+        sleep: mood.sleep,
+        completionRate,
+        completedHabits,
+        totalHabits,
+        moodScore: (mood.mood + mood.energy + (6 - mood.stress) + mood.sleep) / 4 // Composite score
+      };
+    });
+
+    return correlationData;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getHabitMoodImpact = async (userId: string, habitId: string, days: number = 30) => {
+  try {
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    const [completions, moods] = await Promise.all([
+      getCompletions(userId, habitId, startDate, endDate),
+      getMoodEntries(userId, startDate, endDate)
+    ]);
+
+    // Group data by completion status
+    const moodsByDate = moods.reduce((acc, mood) => {
+      acc[mood.date] = mood;
+      return acc;
+    }, {} as Record<string, MoodEntry>);
+
+    const completedDays: number[] = [];
+    const notCompletedDays: number[] = [];
+
+    completions.forEach(completion => {
+      const mood = moodsByDate[completion.date];
+      if (mood) {
+        const moodScore = (mood.mood + mood.energy + (6 - mood.stress) + mood.sleep) / 4;
+        if (completion.completed) {
+          completedDays.push(moodScore);
+        } else {
+          notCompletedDays.push(moodScore);
+        }
+      }
+    });
+
+    const avgMoodCompleted = completedDays.length > 0 
+      ? completedDays.reduce((sum, score) => sum + score, 0) / completedDays.length 
+      : 0;
+    
+    const avgMoodNotCompleted = notCompletedDays.length > 0 
+      ? notCompletedDays.reduce((sum, score) => sum + score, 0) / notCompletedDays.length 
+      : 0;
+
+    return {
+      habitId,
+      avgMoodCompleted,
+      avgMoodNotCompleted,
+      moodDifference: avgMoodCompleted - avgMoodNotCompleted,
+      completedDaysCount: completedDays.length,
+      notCompletedDaysCount: notCompletedDays.length,
+      totalDaysWithData: completedDays.length + notCompletedDays.length
+    };
+  } catch (error) {
     throw error;
   }
 };

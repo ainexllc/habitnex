@@ -12,7 +12,7 @@ import { MoodEditModal } from '@/components/moods/MoodEditModal';
 import { Button } from '@/components/ui/Button';
 import { useHabits } from '@/hooks/useHabits';
 import { useMoods } from '@/hooks/useMoods';
-import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday } from '@/lib/utils';
+import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { Target, TrendingUp, Calendar, Zap, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { MoodEntry } from '@/types';
@@ -25,10 +25,12 @@ export default function DashboardPage() {
   const [editingMood, setEditingMood] = useState<MoodEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // Filter habits that are due today
+  // Filter habits that are due today or overdue
   const todayHabits = useMemo(() => {
-    return habits.filter(habit => isHabitDueToday(habit));
-  }, [habits]);
+    return habits.filter(habit => 
+      isHabitDueToday(habit) || isHabitOverdue(habit, completions)
+    );
+  }, [habits, completions]);
 
   // Get today's mood
   const todayMood = getTodayMood();
@@ -127,52 +129,47 @@ export default function DashboardPage() {
         <Header />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">
                 Dashboard
               </h1>
-              <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
-                Track your daily habits and build consistency
-              </p>
             </div>
             
-            {habits.length === 0 && (
-              <Link href="/habits/new">
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Your First Habit
-                </Button>
-              </Link>
-            )}
-          </div>
-
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatsCard
-              title="Total Habits"
-              value={stats.totalHabits}
-              description="Active habits you're tracking"
-              icon={Target}
-            />
-            <StatsCard
-              title="Completed Today"
-              value={`${stats.completedToday}/${stats.todayDueHabits}`}
-              description="Due habits completed today"
-              icon={Calendar}
-            />
-            <StatsCard
-              title="Current Streak"
-              value={`${stats.overallStreak} days`}
-              description="Consecutive days with progress"
-              icon={Zap}
-            />
-            <StatsCard
-              title="Avg Completion"
-              value={`${stats.avgCompletionRate}%`}
-              description="30-day average completion rate"
-              icon={TrendingUp}
-            />
+            <div className="flex items-center gap-4">
+              {/* Statistics Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <StatsCard
+                  title="Total Habits"
+                  value={stats.totalHabits}
+                  icon={Target}
+                />
+                <StatsCard
+                  title="Completed Today"
+                  value={`${stats.completedToday}/${stats.todayDueHabits}`}
+                  icon={Calendar}
+                />
+                <StatsCard
+                  title="Current Streak"
+                  value={`${stats.overallStreak} days`}
+                  icon={Zap}
+                />
+                <StatsCard
+                  title="Avg Completion"
+                  value={`${stats.avgCompletionRate}%`}
+                  icon={TrendingUp}
+                />
+              </div>
+              
+              {habits.length === 0 && (
+                <Link href="/habits/new">
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Your First Habit
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Today's Habits */}

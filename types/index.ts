@@ -124,6 +124,29 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+// Mood-Habit Correlation types
+export interface MoodHabitCorrelation {
+  date: string;
+  mood: number;
+  energy: number;
+  stress: number;
+  sleep: number;
+  completionRate: number;
+  completedHabits: number;
+  totalHabits: number;
+  moodScore: number;
+}
+
+export interface HabitMoodImpact {
+  habitId: string;
+  avgMoodCompleted: number;
+  avgMoodNotCompleted: number;
+  moodDifference: number;
+  completedDaysCount: number;
+  notCompletedDaysCount: number;
+  totalDaysWithData: number;
+}
+
 // Theme types
 export type Theme = 'light' | 'dark';
 

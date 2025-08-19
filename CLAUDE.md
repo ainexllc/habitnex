@@ -254,6 +254,326 @@ When working on this project, Claude Code can:
 - Project passes TypeScript compilation
 - Ready for continued development on any machine
 
+## Custom Claude Code Agents
+
+These agents provide specialized expertise for this project and can be referenced for similar implementations in other projects.
+
+### 🔐 Firebase Auth Master Agent
+- **Purpose**: Implement complete Google Authentication for Next.js projects
+- **Trigger**: "firebase auth setup", "google auth implementation", "setup authentication"
+- **Template**: This project (✅ PRODUCTION-TESTED)
+- **Expertise Level**: Expert - handles complex OAuth configurations
+
+**Capabilities:**
+1. **Firebase Console Setup**:
+   - Enable Google Sign-in provider with support email (dinohorn35@gmail.com)
+   - Configure public-facing name and branding
+   - Set up authorized domains (localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app)
+
+2. **Google Cloud OAuth Configuration**:
+   - OAuth Client ID: 324797617648-prrbq679kjb59vfg59purusqi8474qu5.apps.googleusercontent.com
+   - Configure authorized JavaScript origins for all environments
+   - Set up redirect URIs with `/__/auth/handler` pattern
+   - Handle SSL certificate requirements
+
+3. **Next.js Implementation** (see implementation in this project):
+   - Environment-based auth method selection (popup for localhost, redirect for production)
+   - Comprehensive error handling with user-friendly messages
+   - Cross-Origin-Opener-Policy resolution with fallback logic
+   - Complete AuthContext with profile management
+   - Automatic dashboard redirect for authenticated users
+
+4. **Troubleshooting Expertise**:
+   - Resolve popup blocking issues
+   - Fix redirect URI mismatches
+   - Handle SSL certificate problems
+   - Debug auth state persistence issues
+
+**Reference Files:**
+- `lib/auth.ts`: Core authentication logic with environment detection
+- `contexts/AuthContext.tsx`: Complete auth state management
+- `app/login/page.tsx` & `app/signup/page.tsx`: Enhanced UI with error handling
+
+### 🚀 Firebase Deployment Agent
+- **Purpose**: Deploy Next.js applications to Firebase Hosting
+- **Trigger**: "deploy to firebase", "firebase hosting setup", "production deployment"
+- **Template**: This project's static export configuration
+
+**Capabilities:**
+1. **Next.js Configuration** (see `next.config.js`):
+   - Configure for static export with `output: 'export'`
+   - Set up image optimization for static hosting
+   - Handle trailing slash requirements
+
+2. **Firebase Hosting Setup** (see `firebase.json`):
+   - Configure hosting with proper rewrites for SPA
+   - Set up client-side routing support
+   - Configure ignore patterns for optimization
+
+3. **Deployment Process**:
+   - Build command: `npm run build`
+   - Deploy command: `firebase deploy --only hosting`
+   - Combined script: `npm run deploy`
+   - Production URL: https://habittracker-eb6bd.web.app
+
+4. **Production Optimization**:
+   - Bundle size optimization (removed debug code)
+   - Clean console logs for production
+   - Optimized static asset handling
+
+### 🗄️ Firestore Schema Master Agent
+- **Purpose**: Design and implement scalable Firestore database schemas
+- **Trigger**: "firestore schema", "database design", "firestore setup"
+- **Template**: This project's multi-dimensional data structure
+
+**Capabilities:**
+1. **Schema Design** (implemented in this project):
+   - User-centric collection structure: `users/{userId}/habits`, `users/{userId}/completions`, `users/{userId}/moods`
+   - Normalized data structure with efficient queries
+   - Type-safe schema definitions in `types/index.ts`
+   - Optimized for real-time subscriptions
+
+2. **Security Implementation** (see `firestore.rules`):
+   - User-based security rules
+   - Field-level validation
+   - Authenticated user access only
+   - Data sanitization patterns
+
+3. **TypeScript Integration** (see `lib/db.ts`):
+   - Complete type definitions for all collections
+   - CRUD operation interfaces with type safety
+   - Error handling patterns
+   - Real-time subscription utilities
+
+4. **Performance Optimization**:
+   - Compound indexes for complex queries (see `firestore.indexes.json`)
+   - Efficient pagination patterns
+   - Batch operation implementations
+   - Real-time subscription management
+
+### 📊 Dashboard Analytics Agent
+- **Purpose**: Create comprehensive analytics dashboards with data visualization
+- **Trigger**: "dashboard analytics", "data visualization", "charts and metrics"
+- **Template**: This project's habit and mood analytics implementation
+
+**Capabilities:**
+1. **Data Aggregation** (see dashboard implementation):
+   - Time-series data processing for habits and moods
+   - Multi-dimensional metric calculations (4D mood tracking)
+   - Trend analysis and pattern detection
+   - Performance metric tracking (streak calculations)
+
+2. **Visualization Implementation** (see components/charts/):
+   - Recharts integration with custom blue theme
+   - Responsive chart configurations
+   - Interactive data exploration
+   - Real-time data updates via Firestore subscriptions
+
+3. **Dashboard Architecture** (see app/dashboard/):
+   - Component-based metric cards (StatsCard)
+   - Lazy-loaded chart components
+   - Optimized data fetching with custom hooks
+   - Mobile-responsive layouts with Tailwind
+
+4. **Advanced Features**:
+   - Calendar heatmap for habit tracking (HabitCalendar)
+   - Progress charts with trend lines (ProgressChart)  
+   - Multi-dimensional mood analytics
+   - Today's snapshot with quick actions
+
+### 🎨 Tailwind Theme Master Agent
+- **Purpose**: Implement comprehensive theming systems with dark/light mode
+- **Trigger**: "tailwind theming", "dark mode setup", "theme system"
+- **Template**: This project's blue-based theme system
+
+**Capabilities:**
+1. **Theme Configuration** (see `tailwind.config.js`):
+   - Custom blue-based color palette (primary-50 to primary-950)
+   - Secondary colors and semantic naming
+   - Dark/light mode variants for all colors
+   - Consistent spacing and typography scales
+
+2. **Theme Implementation** (see `contexts/ThemeContext.tsx`):
+   - React Context-based theme management
+   - LocalStorage persistence across sessions
+   - System preference detection
+   - Smooth theme transitions
+
+3. **Component Theming** (see components/ui/):
+   - Consistent button styling with variants
+   - Form input theming with error states
+   - Card and surface treatments
+   - Interactive state management with proper contrast
+
+4. **Advanced Features**:
+   - Theme-aware component library
+   - Gradient backgrounds for different modes
+   - Accessibility-compliant contrast ratios
+   - Seamless theme switching without flash
+
+**Color System:**
+- **Primary**: Blue palette (50: #eff6ff → 950: #1e3a8a)
+- **Secondary**: Complementary grays and accent colors
+- **Semantic**: Error (red), success (green), warning (yellow)
+- **Surface**: Background and elevated surface treatments
+- **Text**: Primary and secondary text with proper contrast
+
+### 🧪 Playwright Testing Agent
+- **Purpose**: Create comprehensive end-to-end testing suites with Playwright MCP
+- **Trigger**: "setup testing", "e2e tests", "playwright tests", "test automation"
+- **Template**: Authentication and user flow testing patterns
+
+**Capabilities:**
+1. **Authentication Flow Testing**:
+   - Test Google Auth popup and redirect flows
+   - Verify login/logout functionality
+   - Test protected route redirections
+   - Mock authentication states
+
+2. **User Journey Testing**:
+   - Complete habit creation and tracking flows
+   - Mood entry and visualization testing
+   - Dashboard interaction validation
+   - Mobile responsive testing
+
+3. **Visual Testing**:
+   - Screenshot comparison testing
+   - Cross-browser compatibility
+   - Dark/light theme validation
+   - Component visual regression testing
+
+4. **Performance Testing**:
+   - Page load time validation
+   - API response time testing
+   - Bundle size monitoring
+   - Real User Metrics (RUM) collection
+
+**Test Patterns for This Project:**
+- **Auth Tests**: Login flow, protected routes, session persistence
+- **Habit Tests**: Create habit, mark complete, streak tracking
+- **Mood Tests**: Entry forms, analytics visualization, trend analysis
+- **Dashboard Tests**: Data loading, chart rendering, responsive design
+
+**Playwright MCP Integration:**
+- Automated test generation from user interactions
+- Cross-browser testing (Chrome, Firefox, Safari)
+- Mobile device emulation and testing
+- Network condition simulation
+
+### 🔧 Development Workflow Agent
+- **Purpose**: Streamline common development tasks and quality assurance
+- **Trigger**: "dev workflow", "code quality", "development setup"
+- **Template**: This project's development patterns
+
+**Capabilities:**
+1. **Code Quality Enforcement**:
+   - ESLint configuration and rule management
+   - TypeScript strict mode validation
+   - Prettier formatting consistency
+   - Pre-commit hook setup
+
+2. **Development Environment**:
+   - Environment variable management (.env.local setup)
+   - Database connection validation
+   - Firebase emulator configuration
+   - Hot reload optimization
+
+3. **Build and Deploy Pipeline**:
+   - Build error diagnosis and resolution
+   - Bundle analysis and optimization
+   - Deployment verification and rollback
+   - Environment-specific configuration
+
+4. **Debugging and Monitoring**:
+   - Error logging and tracking setup
+   - Performance monitoring integration
+   - User analytics implementation
+   - Debug mode configuration
+
+### 📊 Data Migration Agent
+- **Purpose**: Handle database migrations and data transformations
+- **Trigger**: "data migration", "database update", "schema changes"
+- **Template**: Firestore collection structure evolution
+
+**Capabilities:**
+1. **Schema Evolution**:
+   - Safe field addition/removal procedures
+   - Data type migration strategies
+   - Index optimization during migrations
+   - Backward compatibility maintenance
+
+2. **Data Transformation**:
+   - Batch data processing with Firestore
+   - Cloud Function-based migrations
+   - Data validation and cleanup
+   - Progress monitoring and rollback
+
+3. **Production Safety**:
+   - Migration testing in staging environment
+   - Gradual rollout strategies
+   - Data backup and recovery procedures
+   - Migration status monitoring
+
+### 🚀 Performance Optimization Agent
+- **Purpose**: Optimize application performance and user experience
+- **Trigger**: "performance optimization", "speed optimization", "bundle optimization"
+- **Template**: This project's optimization strategies
+
+**Capabilities:**
+1. **Frontend Optimization**:
+   - Code splitting and lazy loading
+   - Image optimization and CDN setup
+   - Bundle size analysis and reduction
+   - Core Web Vitals optimization
+
+2. **Database Optimization**:
+   - Query optimization and indexing
+   - Real-time subscription management
+   - Caching strategies implementation
+   - Pagination and infinite scroll
+
+3. **Network Optimization**:
+   - API response optimization
+   - Service Worker implementation
+   - Offline functionality setup
+   - Progressive Web App (PWA) features
+
+4. **Monitoring and Analytics**:
+   - Performance metrics tracking
+   - User behavior analytics
+   - Error monitoring and alerting
+   - A/B testing framework setup
+
+### 🔐 Security Hardening Agent
+- **Purpose**: Implement comprehensive security best practices
+- **Trigger**: "security audit", "security hardening", "vulnerability assessment"
+- **Template**: Firebase security rules and authentication patterns
+
+**Capabilities:**
+1. **Authentication Security**:
+   - Multi-factor authentication setup
+   - Session management and timeout
+   - Password policy enforcement
+   - Social login security review
+
+2. **Data Protection**:
+   - Firestore security rules validation
+   - Data encryption at rest and in transit
+   - PII data handling and anonymization
+   - GDPR compliance implementation
+
+3. **Frontend Security**:
+   - XSS prevention and CSP headers
+   - CORS configuration optimization
+   - Secure cookie configuration
+   - Input validation and sanitization
+
+4. **Infrastructure Security**:
+   - Environment variable protection
+   - API key rotation and management
+   - Dependency vulnerability scanning
+   - Security header configuration
+
 ## TODO
 - [ ] Add mood-habit correlation features
 - [ ] Explore BigQuery integration for advanced analytics
