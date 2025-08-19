@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { signUp, signIn, signInWithGoogle, logOut, resetPassword } from '@/lib/auth';
+import { signUp, signIn, signInWithGoogle, logOut, resetPassword, handleRedirectResult, getAuthErrorMessage } from '@/lib/auth';
 import { createUserProfile, getUserProfile } from '@/lib/db';
 import type { User as UserType } from '@/types';
 
@@ -11,11 +11,13 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserType | null;
   loading: boolean;
+  authError: string | null;
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (usePopup?: boolean) => Promise<User | null>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  clearAuthError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,12 +30,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Handle redirect result on app initialization
+    const handleInitialRedirect = async () => {
+      try {
+        console.log('Checking for redirect result...');
+        console.log('Current URL:', window.location.href);
+        console.log('URL search params:', window.location.search);
+        const redirectUser = await handleRedirectResult();
+        if (redirectUser) {
+          console.log('Google sign-in redirect successful:', redirectUser.email);
+          // Auth state change will handle profile creation
+        } else {
+          console.log('No redirect result found');
+        }
+      } catch (error: any) {
+        console.error('Redirect result error:', error);
+        setAuthError(getAuthErrorMessage(error));
+      }
+    };
+
+    handleInitialRedirect();
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('Auth state changed:', firebaseUser ? firebaseUser.email : 'No user');
       setUser(firebaseUser);
       
       if (firebaseUser) {
+        // Clear any previous auth errors on successful sign-in
+        setAuthError(null);
+        
         // Get or create user profile
         try {
           let profile = await getUserProfile(firebaseUser.uid);
@@ -56,6 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUserProfile(profile);
         } catch (error) {
           console.error('Error fetching user profile:', error);
+          setAuthError('Failed to load user profile');
         }
       } else {
         setUserProfile(null);
@@ -84,10 +113,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const handleSignInWithGoogle = async () => {
+  const handleSignInWithGoogle = async (usePopup?: boolean) => {
     try {
-      await signInWithGoogle();
-    } catch (error) {
+      setAuthError(null);
+      const result = await signInWithGoogle(usePopup);
+      return result;
+    } catch (error: any) {
+      const errorMessage = getAuthErrorMessage(error);
+      setAuthError(errorMessage);
       throw error;
     }
   };
@@ -108,15 +141,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const clearAuthError = () => {
+    setAuthError(null);
+  };
+
   const value = {
     user,
     userProfile,
     loading,
+    authError,
     signUp: handleSignUp,
     signIn: handleSignIn,
     signInWithGoogle: handleSignInWithGoogle,
     signOut: handleSignOut,
     resetPassword: handleResetPassword,
+    clearAuthError,
   };
 
   return (

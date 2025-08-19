@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -22,8 +22,16 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, signInWithGoogle } = useAuth();
+  const { user, signIn, signInWithGoogle, authError, clearAuthError, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Redirect to dashboard if user is already authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      console.log('User authenticated, redirecting to dashboard');
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -43,11 +51,24 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    // Auto-detect best method based on environment
+    const isLocalhost = typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const usePopup = !isLocalhost;
     try {
       setLoading(true);
       setError('');
-      await signInWithGoogle();
-      router.push('/dashboard');
+      clearAuthError();
+      
+      const result = await signInWithGoogle(usePopup);
+      
+      // If using popup and we get a result immediately, navigate
+      if (result) {
+        router.push('/dashboard');
+      } else if (!usePopup) {
+        // If using redirect, the page will reload after auth
+        // No need to navigate here
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in with Google');
     } finally {
@@ -86,9 +107,9 @@ export default function LoginPage() {
               {...register('password')}
             />
             
-            {error && (
+            {(error || authError) && (
               <div className="text-sm text-error-500 text-center p-3 bg-error-50 dark:bg-error-900/20 rounded-lg">
-                {error}
+                {error || authError}
               </div>
             )}
             
