@@ -3,8 +3,8 @@
 This file contains important configuration and setup information for this project and development environment.
 
 ## Project Overview
-- **Project Name**: HabitTracker Next.js App
-- **Repository**: https://github.com/ainexllc/habittracker-nextjs
+- **Project Name**: NextVibe - Habit & Mood Tracking App
+- **Repository**: https://github.com/ainexllc/nextvibe
 - **Technology Stack**: Next.js 14, TypeScript, Firebase, Tailwind CSS 3, Recharts
 - **Features**: Habit tracking, mood tracking, analytics, dark/light mode
 
@@ -30,7 +30,7 @@ This file contains important configuration and setup information for this projec
 
 ### Available Repositories
 - ainexllc/nexttask (private)
-- ainexllc/habittracker-nextjs (public) - **Current Project**
+- ainexllc/nextvibe (public) - **Current Project** (formerly habittracker-nextjs)
 - ainexllc/homekeep (private)
 - ainexllc/journal (private)
 - ainexllc/ainex (private)
@@ -253,6 +253,81 @@ When working on this project, Claude Code can:
 - Repository is fully synchronized with remote
 - Project passes TypeScript compilation
 - Ready for continued development on any machine
+
+## ⚠️ CRITICAL: Vercel Auto-Deployment
+**IMPORTANT**: This Next.js project is connected to Vercel with automatic deployment enabled. Any updates to the main branch (through direct commits or merged PRs) will trigger an automatic production deployment to Vercel.
+
+**Requirements for ALL commits to main branch:**
+- ✅ Code MUST build successfully (`npm run build` passes)
+- ✅ TypeScript compilation MUST complete without errors
+- ✅ No breaking changes that would cause Vercel build failures
+- ✅ All environment variables and dependencies properly configured
+- ✅ Static export compatibility maintained for deployment
+
+**Before pushing to main:**
+1. Run `npm run build` locally to verify successful build
+2. Check TypeScript compilation with no errors
+3. Test critical functionality to ensure no breaking changes
+4. Verify all imports and dependencies are correctly resolved
+
+**Vercel will automatically:**
+- Build the project using `npm run build`
+- Deploy to production URL if build succeeds
+- Show build errors in Vercel dashboard if build fails
+- Send notifications about deployment status
+
+**If deployment fails:**
+- Check Vercel dashboard for build error details
+- Fix errors locally and test with `npm run build`
+- Push fix to main branch to trigger new deployment attempt
+
+## Vercel CLI Configuration
+**Status**: ✅ Configured and Connected
+
+**Project Details:**
+- **Project ID**: prj_eUJf0KcVIpHJ83HISRcnzjdDPOXf
+- **Organization**: team_lNWTMcQWMnIRjyREXHHLAcbr
+- **Project Name**: claudecode-realtest
+- **Production URL**: https://claudecode-realtest.vercel.app
+- **Vercel CLI Version**: 46.0.2
+- **Account**: dinohorn35@gmail.com (GitHub authenticated)
+
+**Useful Commands:**
+```bash
+# Deploy to preview
+vercel
+
+# Deploy to production
+vercel --prod
+
+# Check deployment status
+vercel project ls
+
+# View build logs
+vercel inspect <deployment-url> --logs
+
+# Link project (already done)
+vercel link --yes
+
+# View project settings
+vercel project
+
+# Roll back to previous deployment
+vercel rollback <deployment-url>
+
+# Set environment variables
+vercel env add [name]
+
+# Pull environment variables
+vercel env pull
+```
+
+**Auto-Deployment Setup:**
+- ✅ GitHub repository connected to Vercel
+- ✅ Auto-deployment enabled on main branch pushes
+- ✅ Preview deployments created for PRs
+- ✅ Build settings auto-detected (Next.js)
+- ✅ Node.js 22.x runtime configured
 
 ## Custom Claude Code Agents
 
@@ -573,6 +648,62 @@ These agents provide specialized expertise for this project and can be reference
    - API key rotation and management
    - Dependency vulnerability scanning
    - Security header configuration
+
+### 🚀 Vercel Deployment Agent
+- **Purpose**: Expert assistance with Vercel deployment, configuration, and troubleshooting
+- **Trigger**: "vercel deploy", "vercel setup", "deployment issues", "vercel config"
+- **Template**: This project's complete Vercel integration
+- **Expertise Level**: Expert - handles complex deployment scenarios
+
+**Capabilities:**
+1. **Initial Setup and Configuration**:
+   - Install and configure Vercel CLI (`npm install -g vercel`)
+   - GitHub authentication setup (`vercel login --github`)
+   - Project linking and auto-detection (`vercel link --yes`)
+   - Build settings optimization for Next.js projects
+
+2. **Deployment Management**:
+   - Preview deployments (`vercel`) for testing changes
+   - Production deployments (`vercel --prod`) for releases
+   - Deployment inspection and log analysis (`vercel inspect --logs`)
+   - Rollback procedures for failed deployments
+
+3. **Environment and Configuration**:
+   - Environment variable management (`vercel env add/pull`)
+   - Custom domain setup and SSL configuration
+   - Build and runtime configuration optimization
+   - Performance monitoring and optimization
+
+4. **Troubleshooting and Maintenance**:
+   - Build failure diagnosis and resolution
+   - Auto-deployment webhook issues
+   - GitHub integration troubleshooting
+   - Production environment debugging
+
+**Key Commands Reference:**
+```bash
+# Essential deployment commands
+vercel                    # Deploy to preview
+vercel --prod            # Deploy to production
+vercel project ls        # List all projects
+vercel inspect <url>     # Check deployment details
+vercel env add           # Add environment variable
+vercel rollback <url>    # Rollback deployment
+```
+
+**This Project Configuration:**
+- **Project ID**: prj_eUJf0KcVIpHJ83HISRcnzjdDPOXf
+- **Production URL**: https://claudecode-realtest.vercel.app
+- **Auto-deployment**: ✅ Enabled on main branch
+- **Preview deployments**: ✅ Enabled for PRs
+- **Build Command**: `next build` (auto-detected)
+- **Node.js Runtime**: 22.x
+
+**Common Issues and Solutions:**
+- **Build failures**: Check `npm run build` locally first
+- **Environment variables**: Use `vercel env pull` to sync locally
+- **Domain issues**: Verify DNS settings and SSL certificates
+- **Performance**: Analyze bundle size and implement code splitting
 
 ## TODO
 - [ ] Add mood-habit correlation features
