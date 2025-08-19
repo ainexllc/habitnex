@@ -82,9 +82,114 @@ This file contains important configuration and setup information for this projec
 - **Config Location**: ~/.config/claude/
 - **Hooks**: user-prompt-submit.py (disabled)
 
-## MCP Servers
-- **Playwright MCP**: Not currently installed
-- **Other MCP Servers**: To be configured as needed
+## MCP Servers Configuration
+
+### Playwright MCP Server
+- **Status**: ✅ Configured in Claude settings
+- **Package**: @playwright/mcp (version 1.54.2)
+- **Purpose**: Browser automation and testing integration
+- **Capabilities**:
+  - Web page interactions and automation
+  - Screenshot capture
+  - Form automation and testing
+  - UI testing and validation
+  - Performance testing
+
+### Firebase MCP Server
+- **Status**: ✅ Active and configured
+- **Package**: firebase-tools experimental MCP
+- **Version**: Firebase CLI 14.11.2
+- **Purpose**: Firebase project management integration
+- **Project Context**: This directory (/Users/dino/AiFirst/claudecode-realtest)
+- **Capabilities**:
+  - Firestore database operations (read/write/query)
+  - Authentication management (users, providers)
+  - Security rules deployment and testing
+  - Firebase Functions deployment
+  - Project configuration management
+  - Real-time database operations
+
+#### Firebase MCP Usage Examples
+```bash
+# Use Claude Code to:
+# - Enable/disable authentication providers
+# - Query Firestore collections
+# - Deploy security rules
+# - Manage user accounts
+# - Configure Firebase services
+```
+
+## CLI Tools Integration
+
+### GitHub CLI (gh)
+- **Status**: ✅ Authenticated and active
+- **Version**: 2.76.1
+- **Account**: buitwai
+- **Integration**: Seamless git operations, PR management, repository access
+- **Usage**: Repository management, issue tracking, PR operations
+
+### Firebase CLI
+- **Status**: ✅ Authenticated and active
+- **Version**: 14.11.2
+- **Project**: habittracker-eb6bd
+- **Integration**: Project deployment, rules management, emulator testing
+- **Usage**: Deploy functions, update rules, manage hosting
+
+### Google Cloud CLI (gcloud)
+- **Status**: ✅ Installed and authenticated
+- **Version**: Google Cloud SDK 534.0.0
+- **Account**: dinohorn35@gmail.com
+- **Project**: habittracker-eb6bd (same as Firebase)
+- **Components**: gcloud, bq, gsutil, gcloud-crc32c
+- **Integration**: Full Google Cloud Platform access
+- **Capabilities**:
+  - BigQuery data operations (`bq` command)
+  - Cloud Storage management (`gsutil` command)
+  - App Engine deployment
+  - Cloud Functions management
+  - Cloud Run deployment
+  - Resource monitoring and logging
+
+#### Google Cloud Services Available
+- **Firebase Services**: Firestore, Auth, Hosting, Functions
+- **BigQuery**: Data warehouse and analytics
+- **Cloud Storage**: File storage and CDN
+- **Cloud Logging**: Application and system logs
+- **Cloud Monitoring**: Performance and uptime monitoring
+- **Pub/Sub**: Messaging and event streaming
+- **Cloud SQL**: Managed PostgreSQL/MySQL
+- **App Engine**: Serverless web application hosting
+
+### Gemini CLI
+- **Status**: ✅ Available
+- **Version**: @google/gemini-cli@0.1.16
+- **Purpose**: Google Gemini AI model integration
+- **Usage**: Alternative AI assistance and specialized tasks
+
+## Claude Code Tool Permissions
+- **bash**: Command execution and system operations
+- **edit**: File editing and modifications
+- **glob**: File pattern matching and search
+- **grep**: Text search across codebase
+- **ls**: Directory listing and file exploration
+- **read**: File content reading
+- **write**: File creation and content writing
+
+## Integration Workflow
+When working on this project, Claude Code can:
+1. **Use Firebase MCP** to manage database, auth, and deployment
+2. **Use GitHub CLI** for repository operations and PR management
+3. **Use Google Cloud CLI** for advanced cloud operations and analytics
+4. **Use Playwright MCP** for browser testing and automation
+5. **Use built-in tools** for code editing and file management
+
+## Recommended Usage Patterns
+- **Database operations**: Use Firebase MCP for Firestore queries and updates
+- **Authentication**: Use Firebase MCP to manage auth providers and users
+- **Repository management**: Use GitHub CLI for commits, PRs, and issues
+- **Cloud resources**: Use Google Cloud CLI for advanced GCP features
+- **Testing**: Use Playwright MCP for browser automation and testing
+- **Analytics**: Use BigQuery via gcloud/bq for advanced data analysis
 
 ## Notes for Continuation
 - Firebase rules and indexes are up to date
@@ -95,8 +200,9 @@ This file contains important configuration and setup information for this projec
 
 ## TODO
 - [ ] Add mood-habit correlation features
-- [ ] Consider installing Playwright MCP for testing
-- [ ] Set up additional MCP servers as needed
+- [ ] Explore BigQuery integration for advanced analytics
+- [ ] Set up Cloud Functions for background processing
+- [ ] Consider App Engine deployment for scaling
 
 ---
 *Last updated: August 2025*
