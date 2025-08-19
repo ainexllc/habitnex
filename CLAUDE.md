@@ -16,6 +16,14 @@ This file contains important configuration and setup information for this projec
 - **Token Scopes**: 'gist', 'read:org', 'repo', 'workflow'
 - **Config Location**: ~/.config/gh/
 
+### Git Authentication Setup
+- **Solution**: Personal Access Token in remote URL (token secured in git config)
+- **Remote URL**: Configured with embedded token (hidden from logs)
+- **Credential Helper**: osxkeychain
+- **User**: buitwai (dinohorn35@gmail.com)
+- **Status**: ✅ No password prompts required
+- **Setup Command**: `gh auth setup-git` or use `gh auth token` to get current token
+
 ### Available Repositories
 - ainexllc/nexttask (private)
 - ainexllc/habittracker-nextjs (public) - **Current Project**
