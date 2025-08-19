@@ -36,18 +36,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Handle redirect result on app initialization
     const handleInitialRedirect = async () => {
       try {
-        console.log('Checking for redirect result...');
-        console.log('Current URL:', window.location.href);
-        console.log('URL search params:', window.location.search);
         const redirectUser = await handleRedirectResult();
         if (redirectUser) {
-          console.log('Google sign-in redirect successful:', redirectUser.email);
           // Auth state change will handle profile creation
-        } else {
-          console.log('No redirect result found');
         }
       } catch (error: any) {
-        console.error('Redirect result error:', error);
         setAuthError(getAuthErrorMessage(error));
       }
     };
@@ -55,7 +48,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     handleInitialRedirect();
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log('Auth state changed:', firebaseUser ? firebaseUser.email : 'No user');
       setUser(firebaseUser);
       
       if (firebaseUser) {
@@ -83,7 +75,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           setUserProfile(profile);
         } catch (error) {
-          console.error('Error fetching user profile:', error);
           setAuthError('Failed to load user profile');
         }
       } else {

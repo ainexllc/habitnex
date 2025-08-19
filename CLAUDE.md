@@ -59,18 +59,74 @@ This file contains important configuration and setup information for this projec
 ## Firebase Configuration
 - **Project ID**: habittracker-eb6bd
 - **Database**: Firestore
-- **Authentication**: Email/Password + Google Sign-in
+- **Authentication**: Email/Password + Google Sign-in ✅ FULLY CONFIGURED
+- **Production URL**: https://habittracker-eb6bd.web.app
 - **Collections**:
   - users/{userId}/habits
   - users/{userId}/completions
   - users/{userId}/moods
 
+### Google Authentication Complete Setup
+- **Status**: ✅ FULLY WORKING - Local & Production
+- **OAuth Client ID**: 324797617648-prrbq679kjb59vfg59purusqi8474qu5.apps.googleusercontent.com
+- **Local Method**: Popup (works immediately, no CORS issues)
+- **Production Method**: Redirect (better for mobile, SEO-friendly)
+- **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app
+- **Redirect URIs**: 
+  - http://localhost:3000/__/auth/handler
+  - https://habittracker-eb6bd.firebaseapp.com/__/auth/handler
+  - https://nextvibe.app/__/auth/handler
+
+#### Authentication Implementation Details
+- **Environment Detection**: Auto-selects popup/redirect based on hostname
+- **Error Handling**: Comprehensive error messages for all auth scenarios
+- **Cross-Origin-Opener-Policy**: Properly handled with fallback logic
+- **Redirect Result Handling**: Full implementation in AuthContext
+- **State Management**: Complete auth state with user profile creation
+- **Navigation Logic**: Automatic dashboard redirect for authenticated users
+
+## Google Authentication Workflow & Troubleshooting
+
+### Complete Setup Process (REFERENCE FOR FUTURE)
+1. **Firebase Console** → Authentication → Sign-in method → Enable Google
+2. **Google Cloud Console** → APIs & Credentials → OAuth 2.0 Client IDs
+3. **Configure Authorized Domains**: localhost, production domain
+4. **Configure Redirect URIs**: `/__/auth/handler` for each domain
+5. **Environment-based Implementation**: popup for localhost, redirect for production
+
+### Key Files Modified
+- `lib/auth.ts`: Core authentication logic with environment detection
+- `contexts/AuthContext.tsx`: Complete auth state management
+- `app/login/page.tsx` & `app/signup/page.tsx`: Enhanced UI with error handling
+
+### Common Issues & Solutions
+- **Cross-Origin-Opener-Policy**: Use redirect method on localhost
+- **Redirect Not Working**: Ensure redirect URIs include `/__/auth/handler`
+- **Localhost Issues**: Use popup method (auto-detected)
+- **Production Issues**: Verify authorized domains in both Firebase and Google Cloud Console
+
+### Testing Approach
+- **Direct Firebase Test**: `/public/test-auth-direct.html` for isolated testing
+- **Popup vs Redirect**: `/public/test-popup-auth.html` for popup testing
+- **Environment Detection**: Automatic based on `window.location.hostname`
+
+### Deployment Configuration
+- **Next.js Config**: Static export with `output: 'export'`
+- **Firebase Hosting**: Configured in `firebase.json`
+- **Build Command**: `npm run build` (static export)
+- **Deploy Command**: `firebase deploy --only hosting`
+
 ## Recent Implementation Notes
+- ✅ **COMPLETE Google Authentication** with popup/redirect hybrid approach
+- ✅ **Production Deployment** to https://habittracker-eb6bd.web.app
+- ✅ **Environment-based Auth Method Selection** (popup local, redirect production)
+- ✅ **Comprehensive Error Handling** with user-friendly messages
+- ✅ **Cross-Origin-Opener-Policy Resolution** with fallback logic
 - Comprehensive mood tracking system added with 4-dimensional ratings
 - Dashboard integration with today's mood section
 - Dedicated /moods page with analytics and trend visualization
-- All TypeScript errors resolved for Vercel deployment
-- ESLint configuration added for code quality
+- All TypeScript errors resolved for production deployment
+- Firebase Hosting configured for static site deployment
 
 ## System Environment
 - **OS**: macOS (Darwin 25.0.0)

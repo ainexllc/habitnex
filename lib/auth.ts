@@ -45,14 +45,10 @@ export const signInWithGoogle = async (usePopup: boolean = true) => {
   try {
     if ((usePopup && !isLocalhost) || isLocalhost) {
       // Use popup method for localhost or when requested for production
-      console.log('Using popup method for Google auth');
       const result = await signInWithPopup(auth, provider);
       return result.user;
     } else {
       // Use redirect method for production when popup not requested
-      console.log('Using redirect method for Google auth');
-      console.log('Auth domain:', auth.app.options.authDomain);
-      console.log('Current URL:', window.location.href);
       await signInWithRedirect(auth, provider);
       return null; // Redirect doesn't return immediately
     }
@@ -61,7 +57,6 @@ export const signInWithGoogle = async (usePopup: boolean = true) => {
     if (error.code === 'auth/popup-blocked' || 
         error.code === 'auth/popup-closed-by-user' ||
         error.message?.includes('Cross-Origin-Opener-Policy')) {
-      console.log('Popup failed, falling back to redirect...', error.message);
       await signInWithRedirect(auth, provider);
       return null;
     }
@@ -71,16 +66,12 @@ export const signInWithGoogle = async (usePopup: boolean = true) => {
 
 export const handleRedirectResult = async () => {
   try {
-    console.log('Getting redirect result from Firebase...');
     const result = await getRedirectResult(auth);
-    console.log('Redirect result:', result ? `User: ${result.user?.email}` : 'No result');
     if (result && result.user) {
-      console.log('Redirect successful, user:', result.user.email);
       return result.user;
     }
     return null;
   } catch (error) {
-    console.error('Error getting redirect result:', error);
     throw error;
   }
 };
