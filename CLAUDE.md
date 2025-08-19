@@ -17,12 +17,16 @@ This file contains important configuration and setup information for this projec
 - **Config Location**: ~/.config/gh/
 
 ### Git Authentication Setup
-- **Solution**: Personal Access Token in remote URL (token secured in git config)
-- **Remote URL**: Configured with embedded token (hidden from logs)
-- **Credential Helper**: osxkeychain
+- **Solution**: GitHub CLI integrated authentication
+- **Authentication**: Uses `gh auth login` + `gh auth setup-git`
+- **Remote URL**: Standard GitHub HTTPS URL
+- **Credential Helper**: osxkeychain (configured by GitHub CLI)
 - **User**: buitwai (dinohorn35@gmail.com)
 - **Status**: ✅ No password prompts required
-- **Setup Command**: `gh auth setup-git` or use `gh auth token` to get current token
+- **Setup Commands**: 
+  - `gh auth login` (already completed)
+  - `gh auth setup-git` (configures git to use GH CLI auth)
+  - This is the recommended approach for seamless authentication
 
 ### Available Repositories
 - ainexllc/nexttask (private)
