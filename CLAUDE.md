@@ -285,12 +285,13 @@ When working on this project, Claude Code can:
 **Status**: ✅ Configured and Connected
 
 **Project Details:**
-- **Project ID**: prj_eUJf0KcVIpHJ83HISRcnzjdDPOXf
-- **Organization**: team_lNWTMcQWMnIRjyREXHHLAcbr
-- **Project Name**: claudecode-realtest
-- **Production URL**: https://claudecode-realtest.vercel.app
+- **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
+- **Project Name**: nextvibe (Vercel project name)
+- **Production URL**: https://nextvibe.app
+- **Repository**: https://github.com/ainexllc/nextvibe
 - **Vercel CLI Version**: 46.0.2
 - **Account**: dinohorn35@gmail.com (GitHub authenticated)
+- **Organization**: team_lNWTMcQWMnIRjyREXHHLAcbr
 
 **Useful Commands:**
 ```bash
@@ -692,8 +693,10 @@ vercel rollback <url>    # Rollback deployment
 ```
 
 **This Project Configuration:**
-- **Project ID**: prj_eUJf0KcVIpHJ83HISRcnzjdDPOXf
-- **Production URL**: https://claudecode-realtest.vercel.app
+- **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
+- **Project Name**: nextvibe (Vercel project name)
+- **Production URL**: https://nextvibe.app
+- **Repository**: https://github.com/ainexllc/nextvibe
 - **Auto-deployment**: ✅ Enabled on main branch
 - **Preview deployments**: ✅ Enabled for PRs
 - **Build Command**: `next build` (auto-detected)
