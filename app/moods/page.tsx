@@ -21,12 +21,12 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import Link from 'next/link';
 
 export default function MoodsPage() {
   const { moods, addMood, editMood, removeMood, getTodayMood, loading: moodsLoading } = useMoods();
   
   // State management
-  const [showForm, setShowForm] = useState(false);
   const [editingMood, setEditingMood] = useState<MoodEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'mood' | 'energy'>('date');
@@ -94,14 +94,6 @@ export default function MoodsPage() {
     return sorted;
   }, [moods, sortBy, sortOrder]);
 
-  const handleMoodSubmit = async (moodData: any) => {
-    try {
-      await addMood(moodData);
-      setShowForm(false);
-    } catch (error) {
-      console.error('Failed to save mood:', error);
-    }
-  };
 
   const handleMoodEdit = (mood: MoodEntry) => {
     setEditingMood(mood);
@@ -169,42 +161,23 @@ export default function MoodsPage() {
               </p>
             </div>
             
-            {!todayMood && !showForm && (
-              <Button onClick={() => setShowForm(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Track Today's Mood
+            {todayMood ? (
+              <Button disabled variant="secondary">
+                <Heart className="w-4 h-4 mr-2" />
+                Today's Mood Recorded
               </Button>
+            ) : (
+              <Link href="/moods/new">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Mood Entry
+                </Button>
+              </Link>
             )}
           </div>
 
-          {/* Today's Mood Entry */}
-          {showForm && (
-            <div className="mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Track Your Mood Today</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MoodForm
-                    onSubmit={handleMoodSubmit}
-                    loading={moodsLoading}
-                    date={getTodayDateString()}
-                  />
-                  <div className="mt-4">
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => setShowForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
           {/* Today's Mood Display */}
-          {todayMood && !showForm && (
+          {todayMood && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark mb-4">
                 Today's Mood
@@ -379,10 +352,19 @@ export default function MoodsPage() {
                   <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     Start tracking your mood to gain insights into your emotional well-being.
                   </p>
-                  <Button onClick={() => setShowForm(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Track Your First Mood
-                  </Button>
+                  {todayMood ? (
+                    <Button disabled variant="secondary">
+                      <Heart className="w-4 h-4 mr-2" />
+                      Today's Mood Recorded
+                    </Button>
+                  ) : (
+                    <Link href="/moods/new">
+                      <Button>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Track Your First Mood
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             ) : (

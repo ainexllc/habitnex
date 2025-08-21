@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
-import { Plus, User, LogOut } from 'lucide-react';
+import { Heart, User, LogOut } from 'lucide-react';
 
 export function Header() {
   const { user, userProfile, signOut } = useAuth();
@@ -22,12 +22,9 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-white rounded-full"></div>
-              </div>
+            <Link href="/dashboard">
               <span className="text-xl font-bold text-primary-700 dark:text-primary-300">
-                HabitTracker
+                NextVibe
               </span>
             </Link>
           </div>
@@ -60,13 +57,6 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-3">
-            <Link href="/habits/new">
-              <Button size="sm">
-                <Plus className="w-4 h-4 mr-1" />
-                New Habit
-              </Button>
-            </Link>
-            
             <ThemeToggle />
 
             <div className="flex items-center space-x-2">
