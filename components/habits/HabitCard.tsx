@@ -10,9 +10,10 @@ import { calculateStreak, isHabitDueToday, getNextDueDate, getDaysUntilDue, isHa
 
 interface HabitCardProps {
   habit: Habit;
+  onEdit?: (habit: Habit) => void;
 }
 
-export function HabitCard({ habit }: HabitCardProps) {
+export function HabitCard({ habit, onEdit }: HabitCardProps) {
   const [loading, setLoading] = useState(false);
   const { isHabitCompleted, toggleCompletion, completions, removeHabit } = useHabits();
   
@@ -36,6 +37,12 @@ export function HabitCard({ habit }: HabitCardProps) {
       console.error('Failed to toggle completion:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(habit);
     }
   };
 
@@ -82,7 +89,7 @@ export function HabitCard({ habit }: HabitCardProps) {
             </div>
           </div>
           <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={handleEdit}>
               <Edit className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={handleDelete}>
@@ -108,11 +115,14 @@ export function HabitCard({ habit }: HabitCardProps) {
               <div className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
                 {habit.frequency === 'interval' 
                   ? `Every ${habit.intervalDays} days`
-                  : habit.category
+                  : (habit.tags && habit.tags.length > 0 
+                    ? habit.tags.slice(0, 2).map(tag => `#${tag}`).join(' ')
+                    : ((habit as any).category || 'No tags')
+                  )
                 }
               </div>
               <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
-                {habit.frequency === 'interval' ? 'Frequency' : 'Category'}
+                {habit.frequency === 'interval' ? 'Frequency' : 'Tags'}
               </div>
             </div>
 

@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 
 export const metadata: Metadata = {
-  title: 'HabitTracker - Build Better Habits',
+  title: 'NextVibe - Build Better Habits',
   description: 'Track your daily habits and build a better you',
 }
 

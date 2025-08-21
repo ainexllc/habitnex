@@ -6,13 +6,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { TagInput } from '@/components/ui/TagInput';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { HabitEnhancementCard } from '@/components/ai/HabitEnhancementCard';
+import { useClaudeAI } from '@/hooks/useClaudeAI';
 import { CreateHabitForm } from '@/types';
+import { HabitEnhancement } from '@/types/claude';
+import { Sparkles, AlertCircle } from 'lucide-react';
 
 const habitSchema = z.object({
   name: z.string().min(1, 'Habit name is required').max(50, 'Name too long'),
   description: z.string().max(200, 'Description too long').optional(),
-  category: z.string().min(1, 'Category is required'),
+  tags: z.array(z.string()).max(10, 'Maximum 10 tags allowed').optional(),
   color: z.string().min(1, 'Please select a color'),
   frequency: z.enum(['daily', 'weekly', 'interval']),
   targetDays: z.array(z.number()).min(1, 'Select at least one day'),
@@ -23,6 +28,13 @@ const habitSchema = z.object({
     target: z.number().min(1).max(365),
     period: z.enum(['weekly', 'monthly']),
   }).optional(),
+  // AI Enhancement fields
+  aiEnhanced: z.boolean().optional(),
+  tip: z.string().max(500, 'Tip too long').optional(),
+  healthBenefits: z.string().max(1000, 'Health benefits too long').optional(),
+  mentalBenefits: z.string().max(1000, 'Mental benefits too long').optional(),
+  longTermBenefits: z.string().max(1000, 'Long-term benefits too long').optional(),
+  complementary: z.array(z.string()).optional(),
 }).refine((data) => {
   if (data.frequency === 'interval') {
     return data.intervalDays && data.intervalDays > 0;
@@ -33,14 +45,11 @@ const habitSchema = z.object({
   path: ["intervalDays"],
 });
 
-const CATEGORIES = [
-  'Health & Fitness',
-  'Learning & Growth', 
-  'Productivity',
-  'Relationships',
-  'Hobbies',
-  'Mindfulness',
-  'Other'
+// Popular tag suggestions to help users get started
+const SUGGESTED_TAGS = [
+  'morning', 'evening', 'health', 'fitness', 'mindfulness', 'productivity',
+  'learning', 'creativity', 'social', 'routine', 'self-care', 'quick',
+  '5-min', '15-min', 'daily', 'weekly', 'habit-stack', 'goal', 'challenge'
 ];
 
 const COLORS = [
@@ -78,25 +87,41 @@ export function HabitForm({
   submitText = 'Create Habit' 
 }: HabitFormProps) {
   const [showGoal, setShowGoal] = useState(!!initialData?.goal);
+  const [aiEnhancement, setAiEnhancement] = useState<HabitEnhancement | null>(null);
+  const { enhanceHabit, loading: aiLoading, error: aiError, clearError } = useClaudeAI();
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateHabitForm>({
     resolver: zodResolver(habitSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
-      category: initialData?.category || '',
-      color: initialData?.color || COLORS[0],
+      tags: initialData?.tags || [],
+      color: initialData?.color || '#3b82f6', // Default to blue
       frequency: initialData?.frequency || 'daily',
       targetDays: initialData?.targetDays || [0, 1, 2, 3, 4, 5, 6],
       intervalDays: initialData?.intervalDays || 2,
       startDate: initialData?.startDate || new Date().toISOString().split('T')[0],
       goal: initialData?.goal || undefined,
+      // AI Enhancement fields
+      aiEnhanced: initialData?.aiEnhanced || false,
+      tip: initialData?.tip || undefined,
+      healthBenefits: initialData?.healthBenefits || undefined,
+      mentalBenefits: initialData?.mentalBenefits || undefined,
+      longTermBenefits: initialData?.longTermBenefits || undefined,
+      complementary: initialData?.complementary || [],
     },
   });
 
   const watchFrequency = watch('frequency');
   const watchTargetDays = watch('targetDays');
   const watchColor = watch('color');
+  const watchName = watch('name');
+  const watchTags = watch('tags');
+  const watchTip = watch('tip');
+  const watchHealthBenefits = watch('healthBenefits');
+  const watchMentalBenefits = watch('mentalBenefits');
+  const watchLongTermBenefits = watch('longTermBenefits');
+  const watchComplementary = watch('complementary');
 
   const handleTargetDayToggle = (day: number) => {
     const currentDays = watchTargetDays || [];
@@ -104,6 +129,62 @@ export function HabitForm({
       ? currentDays.filter(d => d !== day)
       : [...currentDays, day].sort();
     setValue('targetDays', newDays);
+  };
+
+  const handleAIEnhance = async () => {
+    if (!watchName?.trim()) {
+      return;
+    }
+
+    clearError();
+    
+    try {
+      const response = await enhanceHabit(
+        watchName.trim(),
+        watchTags?.join(', ') || undefined,
+        [] // Could pass existing user habits here
+      );
+
+      if (response?.success && response.data) {
+        setAiEnhancement(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to enhance habit:', error);
+    }
+  };
+
+  const applyAIEnhancement = (enhancement: HabitEnhancement) => {
+    // Mark as AI enhanced
+    setValue('aiEnhanced', true);
+    
+    // Apply AI suggestions to form
+    if (!watch('description') && enhancement.description) {
+      setValue('description', enhancement.description);
+    }
+    
+    // Set detailed benefits
+    if (enhancement.healthBenefits) {
+      setValue('healthBenefits', enhancement.healthBenefits);
+    }
+    
+    if (enhancement.mentalBenefits) {
+      setValue('mentalBenefits', enhancement.mentalBenefits);
+    }
+    
+    if (enhancement.longTermBenefits) {
+      setValue('longTermBenefits', enhancement.longTermBenefits);
+    }
+    
+    if (enhancement.tip) {
+      setValue('tip', enhancement.tip);
+    }
+    
+    if (enhancement.complementary && enhancement.complementary.length > 0) {
+      setValue('complementary', enhancement.complementary);
+    }
+
+    // Close the enhancement card
+    setAiEnhancement(null);
   };
 
   const handleFormSubmit = (data: CreateHabitForm) => {
@@ -115,12 +196,33 @@ export function HabitForm({
       goal: showGoal && data.goal ? data.goal : undefined,
     };
     
-    // Remove undefined fields to prevent Firestore errors
+    // Remove undefined/empty fields to prevent Firestore errors
     if (!cleanedData.goal) {
       delete cleanedData.goal;
     }
     if (!cleanedData.description || cleanedData.description.trim() === '') {
       delete cleanedData.description;
+    }
+    if (!cleanedData.tip || cleanedData.tip.trim() === '') {
+      delete cleanedData.tip;
+    }
+    if (!cleanedData.healthBenefits || cleanedData.healthBenefits.trim() === '') {
+      delete cleanedData.healthBenefits;
+    }
+    if (!cleanedData.mentalBenefits || cleanedData.mentalBenefits.trim() === '') {
+      delete cleanedData.mentalBenefits;
+    }
+    if (!cleanedData.longTermBenefits || cleanedData.longTermBenefits.trim() === '') {
+      delete cleanedData.longTermBenefits;
+    }
+    if (!cleanedData.complementary || cleanedData.complementary.length === 0) {
+      delete cleanedData.complementary;
+    }
+    if (!cleanedData.tags || cleanedData.tags.length === 0) {
+      delete cleanedData.tags;
+    }
+    if (!cleanedData.aiEnhanced) {
+      delete cleanedData.aiEnhanced;
     }
     
     // Remove interval fields if not interval frequency
@@ -155,12 +257,40 @@ export function HabitForm({
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <Input
-              label="Habit Name"
-              placeholder="e.g., Morning meditation, Read 30 minutes"
-              error={errors.name?.message}
-              {...register('name')}
-            />
+            <div>
+              <Input
+                label="Habit Name"
+                placeholder="e.g., Morning meditation, Read 30 minutes"
+                error={errors.name?.message}
+                {...register('name')}
+              />
+              {/* AI Enhancement Button */}
+              {watchName?.trim() && (
+                <div className="mt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAIEnhance}
+                    loading={aiLoading}
+                    className="text-primary-600 border-primary-200 hover:bg-primary-50 dark:text-primary-400 dark:border-primary-800 dark:hover:bg-primary-950"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    ✨ AI Enhance
+                  </Button>
+                  {aiError && (
+                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md dark:bg-red-950 dark:border-red-800">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-red-700 dark:text-red-300">
+                          {aiError}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             
             <div>
               <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
@@ -177,24 +307,29 @@ export function HabitForm({
             </div>
           </div>
 
-          {/* Category */}
+          {/* AI Enhancement Card */}
+          {aiEnhancement && (
+            <HabitEnhancementCard
+              enhancement={aiEnhancement}
+              onApply={applyAIEnhancement}
+              onClose={() => setAiEnhancement(null)}
+            />
+          )}
+
+          {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
-              Category
+              Tags <span className="text-text-muted-light dark:text-text-muted-dark text-xs">(optional)</span>
             </label>
-            <select
-              className="input w-full"
-              {...register('category')}
-            >
-              <option value="">Select a category</option>
-              {CATEGORIES.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="text-sm text-error-500 mt-1">{errors.category.message}</p>
+            <TagInput
+              tags={watchTags || []}
+              onChange={(newTags) => setValue('tags', newTags)}
+              placeholder="Add tags to organize your habit (optional)..."
+              suggestions={SUGGESTED_TAGS}
+              maxTags={10}
+            />
+            {errors.tags && (
+              <p className="text-sm text-error-500 mt-1">{errors.tags.message}</p>
             )}
           </div>
 
@@ -367,6 +502,136 @@ export function HabitForm({
               </div>
             )}
           </div>
+
+          {/* AI Enhancement Fields */}
+          {(watch('aiEnhanced') || watchTip || watchHealthBenefits || watchMentalBenefits || watchLongTermBenefits) && (
+            <div className="bg-primary-50 dark:bg-primary-950 p-4 rounded-lg border border-primary-200 dark:border-primary-800">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-primary-500" />
+                <h3 className="font-medium text-primary-800 dark:text-primary-200">
+                  AI Enhancement Details
+                </h3>
+                {watch('aiEnhanced') && (
+                  <span className="text-xs px-2 py-1 bg-primary-200 text-primary-800 rounded-full dark:bg-primary-800 dark:text-primary-200">
+                    Enhanced
+                  </span>
+                )}
+              </div>
+              
+              {/* Benefits Title */}
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-primary-800 dark:text-primary-200">
+                  Motivation & Benefits
+                </h4>
+                <p className="text-xs text-primary-600 dark:text-primary-400 mt-1">
+                  Detailed benefits help maintain motivation and remind you why this habit matters
+                </p>
+              </div>
+
+              {/* Detailed Benefits */}
+              <div className="space-y-4">
+                {/* Health Benefits */}
+                {(watchHealthBenefits || watch('aiEnhanced')) && (
+                  <div>
+                    <label className="block text-sm font-medium text-primary-800 dark:text-primary-200 mb-2">
+                      💪 Health Benefits
+                    </label>
+                    <textarea
+                      className="input w-full min-h-[80px] resize-none"
+                      placeholder="Physical health improvements and benefits..."
+                      {...register('healthBenefits')}
+                    />
+                    {errors.healthBenefits && (
+                      <p className="text-sm text-error-500 mt-1">{errors.healthBenefits.message}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Mental Benefits */}
+                {(watchMentalBenefits || watch('aiEnhanced')) && (
+                  <div>
+                    <label className="block text-sm font-medium text-primary-800 dark:text-primary-200 mb-2">
+                      🧠 Mental & Emotional Benefits
+                    </label>
+                    <textarea
+                      className="input w-full min-h-[80px] resize-none"
+                      placeholder="Mental, emotional, and cognitive benefits..."
+                      {...register('mentalBenefits')}
+                    />
+                    {errors.mentalBenefits && (
+                      <p className="text-sm text-error-500 mt-1">{errors.mentalBenefits.message}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Long-term Benefits */}
+                {(watchLongTermBenefits || watch('aiEnhanced')) && (
+                  <div>
+                    <label className="block text-sm font-medium text-primary-800 dark:text-primary-200 mb-2">
+                      🎯 Long-term Benefits
+                    </label>
+                    <textarea
+                      className="input w-full min-h-[80px] resize-none"
+                      placeholder="Long-term life improvements and outcomes..."
+                      {...register('longTermBenefits')}
+                    />
+                    {errors.longTermBenefits && (
+                      <p className="text-sm text-error-500 mt-1">{errors.longTermBenefits.message}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Success Tips & Strategies - Elaborated section */}
+                {(watchTip || watch('aiEnhanced')) && (
+                  <div>
+                    <label className="block text-sm font-medium text-primary-800 dark:text-primary-200 mb-2">
+                      💡 Success Tips & Strategies
+                    </label>
+                    <div className="mb-2">
+                      <p className="text-xs text-primary-600 dark:text-primary-400">
+                        Share actionable strategies, timing advice, environmental setup, potential obstacles and how to overcome them, habit stacking opportunities, and motivation techniques.
+                      </p>
+                    </div>
+                    <textarea
+                      className="input w-full min-h-[120px] resize-y"
+                      placeholder="Example: Start with just 5 minutes daily and gradually increase. Set up your environment the night before - lay out workout clothes, prepare healthy snacks, or place your book on your pillow. Link this habit to an existing routine like 'after my morning coffee' or 'before checking emails'. Common obstacles include lack of time (solution: start smaller) or forgetting (solution: set phone reminders). Track your progress visually and celebrate small wins to maintain motivation..."
+                      {...register('tip')}
+                    />
+                    {errors.tip && (
+                      <p className="text-sm text-error-500 mt-1">{errors.tip.message}</p>
+                    )}
+                    <div className="mt-2">
+                      <p className="text-xs text-primary-600 dark:text-primary-400">
+                        💪 Pro tip: The more specific and actionable your strategies, the more likely you are to succeed!
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Complementary Habits */}
+              {watchComplementary && watchComplementary.length > 0 && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-primary-800 dark:text-primary-200 mb-2">
+                    Complementary Habits
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {watchComplementary.map((habit, index) => (
+                      <span 
+                        key={index}
+                        className="px-3 py-1 bg-primary-200 text-primary-800 text-sm rounded-full dark:bg-primary-800 dark:text-primary-200"
+                      >
+                        {habit}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-primary-600 dark:text-primary-400 mt-1">
+                    These habits work well together with your main habit
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <Button type="submit" className="w-full" loading={loading}>
             {submitText}

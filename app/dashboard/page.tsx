@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
 import { HabitCard } from '@/components/habits/HabitCard';
-import { QuickActions } from '@/components/habits/QuickActions';
+import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { MoodForm } from '@/components/moods/MoodForm';
 import { MoodCard } from '@/components/moods/MoodCard';
@@ -15,7 +15,7 @@ import { useMoods } from '@/hooks/useMoods';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { Target, TrendingUp, Calendar, Zap, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { MoodEntry } from '@/types';
+import { MoodEntry, Habit } from '@/types';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = useHabits();
@@ -24,6 +24,9 @@ export default function DashboardPage() {
   // State for mood editing
   const [editingMood, setEditingMood] = useState<MoodEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // State for habit editing
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   
   // Filter habits that are due today or overdue
   const todayHabits = useMemo(() => {
@@ -209,15 +212,14 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-8">
                 {/* Habits Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div className="lg:col-span-1">
-                    <QuickActions />
-                  </div>
-                  <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {habits.map((habit) => (
-                      <HabitCard key={habit.id} habit={habit} />
-                    ))}
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {habits.map((habit) => (
+                    <HabitCard 
+                      key={habit.id} 
+                      habit={habit} 
+                      onEdit={(habit) => setEditingHabit(habit)}
+                    />
+                  ))}
                 </div>
 
                 {/* Mood Section */}
@@ -284,6 +286,12 @@ export default function DashboardPage() {
           }}
           onSave={handleMoodEditSave}
           loading={moodsLoading}
+        />
+
+        <EditHabitModal
+          habit={editingHabit}
+          isOpen={!!editingHabit}
+          onClose={() => setEditingHabit(null)}
         />
       </div>
     </ProtectedRoute>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   getMoodEntries,
@@ -46,6 +46,12 @@ export function useMoods() {
     if (!user) {
       console.error('No user found when trying to create mood entry');
       return;
+    }
+
+    // Check if mood already exists for this date
+    const existingMood = moods.find(mood => mood.date === date);
+    if (existingMood) {
+      throw new Error('A mood entry already exists for this date. You can only add one mood per day.');
     }
 
     console.log('Creating mood entry for user:', user.uid);
@@ -105,9 +111,18 @@ export function useMoods() {
     return moods.find(mood => mood.date === today) || null;
   };
 
+  const hasMoodForDate = (date: string): boolean => {
+    return moods.some(mood => mood.date === date);
+  };
+
   useEffect(() => {
     if (user) {
       fetchMoods();
+    } else {
+      // Reset state when user is not available
+      setMoods([]);
+      setLoading(false);
+      setError(null);
     }
   }, [user]);
 
@@ -120,6 +135,7 @@ export function useMoods() {
     removeMood,
     getMoodByDate,
     getTodayMood,
+    hasMoodForDate,
     refetchMoods: fetchMoods,
   };
 }

@@ -1,33 +1,65 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
 import { HabitCard } from '@/components/habits/HabitCard';
+import { EditHabitModal } from '@/components/habits/EditHabitModal';
+import { ViewSwitcher } from '@/components/habits/ViewSwitcher';
+import { ListView } from '@/components/habits/views/ListView';
+import { CalendarView } from '@/components/habits/views/CalendarView';
+import { TableView } from '@/components/habits/views/TableView';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useHabits } from '@/hooks/useHabits';
+import { Habit } from '@/types';
+import { HabitViewType } from '@/types/views';
 import { Plus, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HabitsPage() {
   const { habits, loading } = useHabits();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [currentView, setCurrentView] = useState<HabitViewType>(HabitViewType.GRID);
 
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(habits.map(h => h.category))).filter(Boolean);
-    return cats.sort();
+  // Load preferred view from localStorage
+  useEffect(() => {
+    const savedView = localStorage.getItem('preferredHabitView') as HabitViewType;
+    if (savedView && Object.values(HabitViewType).includes(savedView)) {
+      setCurrentView(savedView);
+    }
+  }, []);
+
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    habits.forEach(habit => {
+      // Handle both new tags array and legacy category
+      if (habit.tags && habit.tags.length > 0) {
+        habit.tags.forEach(tag => tags.add(tag));
+      } else if ((habit as any).category) {
+        tags.add((habit as any).category.toLowerCase().replace(/\s+/g, '-'));
+      }
+    });
+    return Array.from(tags).filter(Boolean).sort();
   }, [habits]);
 
   const filteredHabits = useMemo(() => {
     return habits.filter(habit => {
       const matchesSearch = habit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            habit.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = !selectedCategory || habit.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+      
+      if (!selectedTag) return matchesSearch;
+      
+      // Check both new tags array and legacy category
+      const habitTags = habit.tags || [];
+      const legacyCategory = (habit as any).category?.toLowerCase().replace(/\s+/g, '-');
+      const matchesTag = habitTags.includes(selectedTag) || legacyCategory === selectedTag;
+      
+      return matchesSearch && matchesTag;
     });
-  }, [habits, searchTerm, selectedCategory]);
+  }, [habits, searchTerm, selectedTag]);
 
   if (loading) {
     return (
@@ -68,9 +100,9 @@ export default function HabitsPage() {
             </Link>
           </div>
 
-          {/* Search and Filter */}
+          {/* Search, Filter, and View Switcher */}
           {habits.length > 0 && (
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="flex flex-col lg:flex-row gap-4 mb-8">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted-light dark:text-text-muted-dark w-4 h-4" />
                 <input
@@ -82,20 +114,28 @@ export default function HabitsPage() {
                 />
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-text-muted-light dark:text-text-muted-dark" />
-                <select
-                  className="input min-w-[150px]"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-text-muted-light dark:text-text-muted-dark" />
+                  <select
+                    className="input min-w-[150px]"
+                    value={selectedTag}
+                  onChange={(e) => setSelectedTag(e.target.value)}
                 >
-                  <option value="">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>
-                      {category}
+                  <option value="">All Tags</option>
+                  {allTags.map(tag => (
+                    <option key={tag} value={tag}>
+                      #{tag}
                     </option>
                   ))}
                 </select>
+                </div>
+                
+                <ViewSwitcher
+                  currentView={currentView}
+                  onViewChange={setCurrentView}
+                  enabledViews={[HabitViewType.GRID, HabitViewType.LIST, HabitViewType.CALENDAR, HabitViewType.TABLE]}
+                />
               </div>
             </div>
           )}
@@ -140,15 +180,55 @@ export default function HabitsPage() {
                   </p>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredHabits.map((habit) => (
-                    <HabitCard key={habit.id} habit={habit} />
-                  ))}
-                </div>
+{/* Conditional View Rendering */}
+                {currentView === HabitViewType.GRID ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredHabits.map((habit) => (
+                      <HabitCard 
+                        key={habit.id} 
+                        habit={habit} 
+                        onEdit={(habit) => setEditingHabit(habit)}
+                      />
+                    ))}
+                  </div>
+                ) : currentView === HabitViewType.LIST ? (
+                  <ListView 
+                    habits={filteredHabits} 
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                ) : currentView === HabitViewType.CALENDAR ? (
+                  <CalendarView 
+                    habits={filteredHabits} 
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                ) : currentView === HabitViewType.TABLE ? (
+                  <TableView 
+                    habits={filteredHabits} 
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                      Coming Soon
+                    </h3>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                      This view is coming in a future update.
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </div>
         </main>
+
+        <EditHabitModal
+          habit={editingHabit}
+          isOpen={!!editingHabit}
+          onClose={() => setEditingHabit(null)}
+        />
       </div>
     </ProtectedRoute>
   );

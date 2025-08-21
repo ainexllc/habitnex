@@ -18,7 +18,7 @@ export interface Habit {
   id: string;
   name: string;
   description?: string;
-  category: string;
+  tags?: string[]; // Flexible custom tags instead of single category (optional)
   color: string; // hex color
   frequency: 'daily' | 'weekly' | 'interval';
   targetDays: number[]; // For weekly: [0,1,2,3,4,5,6], for daily: [0,1,2,3,4,5,6]
@@ -32,6 +32,13 @@ export interface Habit {
     target: number;
     period: 'weekly' | 'monthly';
   };
+  // AI Enhancement fields
+  aiEnhanced?: boolean; // Track if habit was enhanced by AI
+  tip?: string; // Success tip from AI
+  healthBenefits?: string; // Detailed health benefits description
+  mentalBenefits?: string; // Detailed mental/emotional benefits description
+  longTermBenefits?: string; // Detailed long-term benefits description
+  complementary?: string[]; // Complementary habits suggested by AI
 }
 
 export interface HabitCompletion {
@@ -85,7 +92,7 @@ export interface DashboardData {
 export interface CreateHabitForm {
   name: string;
   description?: string;
-  category: string;
+  tags?: string[];
   color: string;
   frequency: 'daily' | 'weekly' | 'interval';
   targetDays: number[];
@@ -96,6 +103,13 @@ export interface CreateHabitForm {
     target: number;
     period: 'weekly' | 'monthly';
   };
+  // AI Enhancement fields
+  aiEnhanced?: boolean;
+  tip?: string;
+  healthBenefits?: string;
+  mentalBenefits?: string;
+  longTermBenefits?: string;
+  complementary?: string[];
 }
 
 export interface AuthForm {

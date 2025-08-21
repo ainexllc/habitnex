@@ -176,6 +176,12 @@ export const toggleHabitCompletion = async (userId: string, habitId: string, dat
 // Mood tracking operations
 export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, date: string) => {
   try {
+    // Check if a mood already exists for this date
+    const existingMood = await getMoodForDate(userId, date);
+    if (existingMood) {
+      throw new Error('A mood entry already exists for this date. You can only add one mood per day.');
+    }
+
     const moodRef = collection(db, 'users', userId, 'moods');
     
     const dataToWrite = {
