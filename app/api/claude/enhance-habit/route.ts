@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { anthropic, AI_CONFIG, calculateCost } from '@/lib/claude/client';
+import { anthropic, AI_CONFIG, calculateCost, isAIEnabled } from '@/lib/claude/client';
 import { HABIT_ENHANCE_PROMPT } from '@/lib/claude/prompts';
 import { 
   getHabitEnhancement, 
@@ -38,6 +38,17 @@ function getUserId(req: NextRequest): string {
 
 export async function POST(req: NextRequest) {
   try {
+    // Check if AI is enabled
+    if (!isAIEnabled()) {
+      return NextResponse.json(
+        { 
+          error: 'AI features are not available. Please configure ANTHROPIC_API_KEY.',
+          success: false 
+        },
+        { status: 503 }
+      );
+    }
+
     const { habitName, category, existingHabits } = await req.json();
     
     if (!habitName || typeof habitName !== 'string') {
@@ -82,7 +93,7 @@ export async function POST(req: NextRequest) {
     const prompt = HABIT_ENHANCE_PROMPT(habitName, category, existingHabits);
     const startTime = Date.now();
     
-    const message = await anthropic.messages.create({
+    const message = await anthropic!.messages.create({
       model: AI_CONFIG.model,
       max_tokens: AI_CONFIG.maxTokens,
       temperature: AI_CONFIG.temperature,

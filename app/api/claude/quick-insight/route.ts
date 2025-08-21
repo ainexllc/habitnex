@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { anthropic, AI_CONFIG, calculateCost } from '@/lib/claude/client';
+import { anthropic, AI_CONFIG, calculateCost, isAIEnabled } from '@/lib/claude/client';
 import { QUICK_INSIGHT_PROMPT } from '@/lib/claude/prompts';
 import { getCachedInsight, setCachedInsight } from '@/lib/claude/cache';
 
@@ -106,13 +106,26 @@ export async function POST(req: NextRequest) {
       });
     }
     
-    // Call Claude for more personalized insight
+    // Call Claude for more personalized insight (only if AI is enabled)
+    if (!isAIEnabled()) {
+      // Fallback to generic motivational message when AI is not available
+      const fallbackInsight = `Keep going with ${habitName}! Every step counts toward building lasting habits. 💪`;
+      setCachedInsight(habitName, streak, completionRate, fallbackInsight, 0);
+      return NextResponse.json({
+        success: true,
+        insight: fallbackInsight,
+        cached: false,
+        cost: 0,
+        method: 'fallback'
+      });
+    }
+    
     console.log(`[API] Generating AI insight for: ${habitName} (${streak} days, ${completionRate}%)`);
     
     const prompt = QUICK_INSIGHT_PROMPT(habitName, streak, completionRate);
     const startTime = Date.now();
     
-    const message = await anthropic.messages.create({
+    const message = await anthropic!.messages.create({
       model: AI_CONFIG.model,
       max_tokens: 100, // Very short responses for insights
       temperature: 0.7, // Bit more creative for motivational messages

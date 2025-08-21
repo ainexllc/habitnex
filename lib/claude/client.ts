@@ -1,12 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error('ANTHROPIC_API_KEY is not set in environment variables');
-}
+// Optional Claude client initialization
+export const anthropic = process.env.ANTHROPIC_API_KEY 
+  ? new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    })
+  : null;
 
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Check if AI features are available
+export const isAIEnabled = (): boolean => {
+  return !!process.env.ANTHROPIC_API_KEY && !!anthropic;
+};
 
 // Cost-effective model configuration
 export const AI_CONFIG = {
