@@ -26,11 +26,22 @@ export function useClaudeAI() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        // Try to parse error response, but handle cases where it's not JSON
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, use the status-based message
+          if (response.status === 503) {
+            errorMessage = 'AI features are currently unavailable. Please try again later.';
+          }
+        }
+        throw new Error(errorMessage);
       }
+
+      const data = await response.json();
 
       return data;
     } catch (err) {
@@ -64,11 +75,22 @@ export function useClaudeAI() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        // Try to parse error response, but handle cases where it's not JSON
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, use the status-based message
+          if (response.status === 503) {
+            errorMessage = 'AI features are currently unavailable. Please try again later.';
+          }
+        }
+        throw new Error(errorMessage);
       }
+
+      const data = await response.json();
 
       return data;
     } catch (err) {
