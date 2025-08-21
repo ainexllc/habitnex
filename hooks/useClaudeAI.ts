@@ -14,7 +14,7 @@ export function useClaudeAI() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/claude/enhance-habit', {
+      const response = await fetch('/api/claude/enhance-habit/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export function useClaudeAI() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/claude/quick-insight', {
+      const response = await fetch('/api/claude/quick-insight/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
