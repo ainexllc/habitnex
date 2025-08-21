@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Only use export output for production builds
-  ...(process.env.NODE_ENV === 'production' && { output: 'export' }),
+  // Disable static export to support API routes in production
+  // ...(process.env.NODE_ENV === 'production' && { output: 'export' }),
   trailingSlash: true,
   images: {
     domains: ['lh3.googleusercontent.com'],
