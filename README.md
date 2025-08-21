@@ -1,4 +1,4 @@
-# HabitTracker - Next.js Habit Tracking App
+# NextVibe - Next.js Habit Tracking App
 
 A modern, full-featured habit tracking application built with Next.js 14, Firebase, and Tailwind CSS.
 
@@ -51,7 +51,7 @@ A modern, full-featured habit tracking application built with Next.js 14, Fireba
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd habittracker
+cd nextvibe
 ```
 
 2. Install dependencies:
