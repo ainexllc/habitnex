@@ -137,77 +137,104 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">
                 Dashboard
               </h1>
+              <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+                Your progress at a glance
+              </p>
             </div>
             
             <div className="flex items-center gap-4">
-              {/* Statistics Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <StatsCard
-                  title="Total Habits"
-                  value={stats.totalHabits}
-                  icon={Target}
-                />
-                <StatsCard
-                  title="Completed Today"
-                  value={`${stats.completedToday}/${stats.todayDueHabits}`}
-                  icon={Calendar}
-                />
-                <StatsCard
-                  title="Current Streak"
-                  value={`${stats.overallStreak} days`}
-                  icon={Zap}
-                />
-                <StatsCard
-                  title="Avg Completion"
-                  value={`${stats.avgCompletionRate}%`}
-                  icon={TrendingUp}
-                />
-              </div>
-              
-              {habits.length === 0 && (
+              {/* Quick Actions */}
+              <div className="flex items-center gap-3">
                 <Link href="/habits/new">
-                  <Button>
+                  <Button size="sm">
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Your First Habit
+                    New Habit
                   </Button>
                 </Link>
-              )}
+                <Link href="/habits">
+                  <Button size="sm" variant="outline">
+                    View All Habits
+                  </Button>
+                </Link>
+              </div>
             </div>
+          </div>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <StatsCard
+              title="Total Habits"
+              value={stats.totalHabits}
+              icon={Target}
+            />
+            <StatsCard
+              title="Completed Today"
+              value={`${stats.completedToday}/${stats.todayDueHabits}`}
+              icon={Calendar}
+            />
+            <StatsCard
+              title="Current Streak"
+              value={`${stats.overallStreak} days`}
+              icon={Zap}
+            />
+            <StatsCard
+              title="Avg Completion"
+              value={`${stats.avgCompletionRate}%`}
+              icon={TrendingUp}
+            />
           </div>
 
           {/* Today's Habits */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
-                Today's Habits
-              </h2>
-              <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </span>
+              <div>
+                <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
+                  Today's Habits
+                </h2>
+                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                  {new Date().toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
+              </div>
+              
+              {habits.length > 0 && (
+                <Link href="/habits/new">
+                  <Button size="sm" variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Habit
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {habits.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+              <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-blue-100 dark:from-primary-900 dark:to-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Target className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
-                  No habits yet
+                <h3 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark mb-3">
+                  Welcome to NextVibe!
                 </h3>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
-                  Start building better habits by creating your first one.
+                <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6 max-w-md mx-auto">
+                  Start your journey to better habits. Create your first habit and begin tracking your progress with our intelligent insights.
                 </p>
-                <Link href="/habits/new">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Habit
-                  </Button>
-                </Link>
+                <div className="flex items-center justify-center gap-3">
+                  <Link href="/habits/new">
+                    <Button size="lg">
+                      <Plus className="w-5 h-5 mr-2" />
+                      Create Your First Habit
+                    </Button>
+                  </Link>
+                  <Link href="/habits">
+                    <Button size="lg" variant="outline">
+                      Learn More
+                    </Button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-8">
@@ -275,6 +302,18 @@ export default function DashboardPage() {
             )}
           </div>
         </main>
+
+        {/* Floating Action Button */}
+        {habits.length > 0 && (
+          <Link href="/habits/new">
+            <button className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-50 group">
+              <Plus className="w-6 h-6" />
+              <span className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                Quick Add Habit
+              </span>
+            </button>
+          </Link>
+        )}
 
         {/* Mood Edit Modal */}
         <MoodEditModal
