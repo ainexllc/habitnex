@@ -72,16 +72,16 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
               style={{ backgroundColor: habit.color }}
             />
             <div>
-              <CardTitle className={`text-lg transition-all duration-300 ${
-                isCompleted ? 'line-through text-text-muted-light dark:text-text-muted-dark' : ''
-              }`}>
+              <CardTitle className={`task-title text-sm font-task-title truncate transition-all duration-300 ${
+                isCompleted ? 'line-through text-text-muted-light dark:text-text-muted-dark' : 'text-gray-900 dark:text-white'
+              }`} title={habit.name}>
                 {habit.name}
               </CardTitle>
               {habit.description && (
-                <p className={`text-sm mt-1 transition-all duration-300 ${
+                <p className={`task-description text-sm font-task-description mt-1 transition-all duration-300 ${
                   isCompleted 
                     ? 'line-through text-text-muted-light dark:text-text-muted-dark' 
-                    : 'text-text-secondary-light dark:text-text-secondary-dark'
+                    : 'text-gray-600 dark:text-gray-400'
                 }`}>
                   {habit.description}
                 </p>

@@ -34,7 +34,37 @@ export function addDays(date: Date, days: number): Date {
   return result;
 }
 
-export function calculateStreak(completions: { date: string; completed: boolean }[]): number {
+export function getDateDaysAgo(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return getDateString(date);
+}
+
+// Overloaded function for calculateStreak
+export function calculateStreak(habitId: string, completions: { habitId: string; date: string; completed: boolean }[]): number;
+export function calculateStreak(completions: { date: string; completed: boolean }[]): number;
+export function calculateStreak(
+  habitIdOrCompletions: string | { date: string; completed: boolean }[], 
+  completions?: { habitId: string; date: string; completed: boolean }[]
+): number {
+  let filteredCompletions: { date: string; completed: boolean }[];
+  
+  if (typeof habitIdOrCompletions === 'string' && completions) {
+    // First overload: filter by habitId
+    filteredCompletions = completions
+      .filter(c => c.habitId === habitIdOrCompletions)
+      .map(c => ({ date: c.date, completed: c.completed }));
+  } else if (Array.isArray(habitIdOrCompletions)) {
+    // Second overload: use completions directly
+    filteredCompletions = habitIdOrCompletions;
+  } else {
+    return 0;
+  }
+  
+  return calculateStreakInternal(filteredCompletions);
+}
+
+function calculateStreakInternal(completions: { date: string; completed: boolean }[]): number {
   if (completions.length === 0) return 0;
   
   const sortedCompletions = completions

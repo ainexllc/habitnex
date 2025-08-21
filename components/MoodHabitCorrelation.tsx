@@ -245,8 +245,8 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
                       style={{ backgroundColor: habit.color }}
                     ></div>
                     <div>
-                      <p className="font-medium text-gray-900">{habit.name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="task-title font-task-title text-gray-900">{habit.name}</p>
+                      <p className="task-description text-sm font-task-description text-gray-600">
                         {impact.completedDaysCount} completed days tracked
                       </p>
                     </div>

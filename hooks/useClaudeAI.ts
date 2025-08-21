@@ -1,9 +1,29 @@
 import { useState } from 'react';
 import { EnhancementResponse, InsightResponse } from '@/types/claude';
+import { auth } from '@/lib/firebase';
 
 export function useClaudeAI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper function to get auth headers
+  const getAuthHeaders = async () => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
+        headers['Authorization'] = `Bearer ${token}`;
+        headers['x-user-id'] = auth.currentUser.uid;
+      } catch (error) {
+        console.warn('Failed to get auth token:', error);
+      }
+    }
+
+    return headers;
+  };
 
   const enhanceHabit = async (
     habitName: string,
@@ -14,11 +34,10 @@ export function useClaudeAI() {
       setLoading(true);
       setError(null);
 
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/claude/enhance-habit/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           habitName: habitName.trim(),
           category,
@@ -63,11 +82,10 @@ export function useClaudeAI() {
       setLoading(true);
       setError(null);
 
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/claude/quick-insight/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           habitName: habitName.trim(),
           streak,

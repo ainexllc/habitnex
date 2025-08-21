@@ -110,11 +110,19 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        'task': ['Work Sans', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      fontWeight: {
+        'task-title': '550',
+        'task-description': '400',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
+        'wave-flow': 'waveFlow 3s ease-in-out infinite',
+        'particle-float': 'particleFloat 2s ease-out forwards',
+        'momentum-pulse': 'momentumPulse 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -128,6 +136,19 @@ module.exports = {
         slideDown: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        waveFlow: {
+          '0%': { transform: 'translateX(-10px)' },
+          '50%': { transform: 'translateX(10px)' },
+          '100%': { transform: 'translateX(-10px)' },
+        },
+        particleFloat: {
+          '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-20px) scale(0)', opacity: '0' },
+        },
+        momentumPulse: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.1)', opacity: '0.8' },
         },
       },
       gridTemplateColumns: {

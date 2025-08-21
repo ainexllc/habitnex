@@ -72,7 +72,7 @@ export const VIEW_OPTIONS: ViewOption[] = [
     type: HabitViewType.MOMENTUM,
     label: 'Momentum',
     description: 'Visual waves showing habit momentum',
-    icon: 'trending-up',
+    icon: 'waves',
     enabled: true,
     phase: 3
   },

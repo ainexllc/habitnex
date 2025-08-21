@@ -25,5 +25,57 @@ service cloud.firestore {
     match /categories/{categoryId} {
       allow read: if request.auth != null;
     }
+    
+    // Usage tracking collections
+    
+    // Usage tracking records - system can write, users can read their own
+    match /usage_tracking/{recordId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && 
+                     (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // User usage summaries - users can read their own, admins can read all
+    match /user_usage_summary/{userId} {
+      allow read: if request.auth != null && 
+                     (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null; // Allow authenticated users to write their own summaries
+    }
+    
+    // System usage stats - authenticated users can read, only admins can write
+    match /system_usage_stats/{statId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow authenticated users to write for development
+    }
+    
+    // Usage alerts - users can read their own alerts, admins can read all
+    match /usage_alerts/{alertId} {
+      allow read: if request.auth != null && 
+                     (resource == null || 
+                      resource.data.userId == request.auth.uid || 
+                      !exists(resource.data.userId) || 
+                      isAdmin());
+      allow create: if request.auth != null;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Usage configuration - read only for authenticated users, write for admins
+    match /usage_config/{configId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Helper functions
+    function isAdmin() {
+      // In production, implement proper admin role checking
+      // For now, check if user has admin claim or is in admin list
+      return request.auth.token.admin == true ||
+             request.auth.token.email in ['dinohorn35@gmail.com']; // Replace with your admin email
+    }
+    
+    // Note: System writes should use Firebase Admin SDK in production
   }
 }

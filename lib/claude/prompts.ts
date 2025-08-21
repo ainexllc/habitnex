@@ -68,6 +68,44 @@ Required JSON:
   ]
 }`;
 
+export const MOOD_PATTERN_ANALYSIS_PROMPT = (
+  correlations: { mood: number; energy: number; stress: number; sleep: number },
+  patterns: { highPerformanceDays: number; lowPerformanceDays: number },
+  trends: { moodTrend: string; habitTrend: string },
+  avgMoodScores: { mood: number; energy: number; stress: number; sleep: number },
+  avgCompletionRate: number
+) => `
+Analyze this user's mood-habit correlation data and provide personalized insights. Return JSON only.
+
+Correlations with habit completion:
+- Mood: ${correlations.mood.toFixed(3)} (${Math.abs(correlations.mood) > 0.3 ? 'significant' : 'weak'})
+- Energy: ${correlations.energy.toFixed(3)} (${Math.abs(correlations.energy) > 0.3 ? 'significant' : 'weak'})
+- Stress: ${correlations.stress.toFixed(3)} (${Math.abs(correlations.stress) > 0.3 ? 'significant' : 'weak'})
+- Sleep: ${correlations.sleep.toFixed(3)} (${Math.abs(correlations.sleep) > 0.3 ? 'significant' : 'weak'})
+
+Performance:
+- High performance days: ${patterns.highPerformanceDays}
+- Low performance days: ${patterns.lowPerformanceDays}
+- Average completion rate: ${avgCompletionRate.toFixed(1)}%
+
+Recent trends:
+- Mood trend: ${trends.moodTrend}
+- Habit completion trend: ${trends.habitTrend}
+
+Average mood scores (1-5 scale):
+- Overall mood: ${avgMoodScores.mood.toFixed(1)}
+- Energy: ${avgMoodScores.energy.toFixed(1)} 
+- Stress: ${avgMoodScores.stress.toFixed(1)} (lower is better)
+- Sleep quality: ${avgMoodScores.sleep.toFixed(1)}
+
+Required JSON:
+{
+  "insight": "2-3 sentences summarizing the key finding about this person's mood-habit relationship",
+  "primaryFactor": "mood"|"energy"|"stress"|"sleep",
+  "recommendation": "specific actionable advice based on their strongest correlation (max 30 words)",
+  "encouragement": "positive motivational message about their patterns and progress (max 25 words)"
+}`;
+
 // Pre-generated common habit enhancements to reduce API calls
 export const COMMON_HABITS = {
   'meditation': {

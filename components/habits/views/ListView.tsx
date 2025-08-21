@@ -134,7 +134,7 @@ export function ListView({ habits, onEdit }: ListViewProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className={`font-medium transition-all ${
+                    <h3 className={`task-title font-task-title transition-all ${
                       isCompleted 
                         ? 'line-through text-gray-500 dark:text-gray-400' 
                         : 'text-gray-900 dark:text-gray-100'
@@ -142,7 +142,7 @@ export function ListView({ habits, onEdit }: ListViewProps) {
                       {habit.name}
                     </h3>
                     {habit.description && (
-                      <p className={`text-sm mt-1 transition-all ${
+                      <p className={`task-description font-task-description text-sm mt-1 transition-all ${
                         isCompleted 
                           ? 'line-through text-gray-400 dark:text-gray-500' 
                           : 'text-gray-600 dark:text-gray-300'

@@ -1,0 +1,73 @@
+/**
+ * Next.js OpenTelemetry instrumentation
+ * This file is automatically loaded by Next.js when the app starts
+ */
+
+export async function register() {
+  // Only initialize telemetry on the server side
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { initializeTelemetry } = await import('./lib/telemetry');
+    
+    try {
+      await initializeTelemetry({
+        serviceName: 'nextvibe',
+        version: process.env.npm_package_version || '1.0.0',
+        environment: process.env.NODE_ENV || 'development',
+        
+        // Enable tracing for all environments but adjust sampling
+        enableTracing: true,
+        samplingRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+        
+        // Enable metrics
+        enableMetrics: true,
+        enableLogging: true,
+        
+        // Exporter configuration based on environment variables
+        exporters: {
+          console: process.env.NODE_ENV === 'development',
+          
+          otlp: {
+            enabled: !!process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+            endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+            headers: process.env.OTEL_EXPORTER_OTLP_HEADERS 
+              ? JSON.parse(process.env.OTEL_EXPORTER_OTLP_HEADERS) 
+              : undefined,
+          },
+          
+          datadog: {
+            enabled: !!process.env.DD_API_KEY,
+            apiKey: process.env.DD_API_KEY,
+            site: process.env.DD_SITE || 'datadoghq.com',
+          },
+          
+          newrelic: {
+            enabled: !!process.env.NEW_RELIC_LICENSE_KEY,
+            licenseKey: process.env.NEW_RELIC_LICENSE_KEY,
+          },
+          
+          honeycomb: {
+            enabled: !!process.env.HONEYCOMB_API_KEY,
+            apiKey: process.env.HONEYCOMB_API_KEY,
+            dataset: process.env.HONEYCOMB_DATASET || 'nextvibe',
+          },
+          
+          vercel: {
+            enabled: !!process.env.VERCEL,
+          },
+        },
+        
+        development: {
+          consoleOutput: process.env.NODE_ENV === 'development',
+          detailedLogging: process.env.OTEL_LOG_LEVEL === 'debug',
+          traceVisualization: process.env.NODE_ENV === 'development',
+        },
+      });
+      
+      console.log('[Telemetry] OpenTelemetry instrumentation registered successfully');
+      
+    } catch (error) {
+      console.error('[Telemetry] Failed to initialize OpenTelemetry:', error);
+      // Don't throw - we want the app to continue even if telemetry fails
+    }
+  }
+}

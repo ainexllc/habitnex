@@ -75,9 +75,10 @@ interface MoodFormProps {
   loading?: boolean;
   initialData?: Partial<CreateMoodForm>;
   date?: string;
+  compact?: boolean;
 }
 
-export function MoodForm({ onSubmit, loading = false, initialData, date }: MoodFormProps) {
+export function MoodForm({ onSubmit, loading = false, initialData, date, compact = false }: MoodFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateMoodForm>({
@@ -132,20 +133,20 @@ export function MoodForm({ onSubmit, loading = false, initialData, date }: MoodF
     labels: Record<number, string>,
     color: string 
   }) => (
-    <div className="space-y-3">
+    <div className={compact ? "space-y-2" : "space-y-3"}>
       <div className="flex items-center space-x-2">
-        <Icon className={`w-5 h-5 ${color}`} />
-        <span className="text-sm font-medium capitalize">{name}</span>
-        <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+        <Icon className={`w-${compact ? '4' : '5'} h-${compact ? '4' : '5'} ${color}`} />
+        <span className={`text-${compact ? 'xs' : 'sm'} font-medium capitalize`}>{name}</span>
+        <span className={`text-${compact ? 'xs' : 'sm'} text-text-secondary-light dark:text-text-secondary-dark`}>
           {labels[value as keyof typeof labels]}
         </span>
       </div>
-      <div className="flex space-x-2">
+      <div className={`flex space-x-${compact ? '1' : '2'}`}>
         {[1, 2, 3, 4, 5].map((rating) => (
           <button
             key={rating}
             type="button"
-            className={`w-10 h-10 rounded-full border-2 text-sm font-medium transition-all ${
+            className={`w-${compact ? '8' : '10'} h-${compact ? '8' : '10'} rounded-full border-2 text-${compact ? 'xs' : 'sm'} font-medium transition-all ${
               value === rating
                 ? `${color.replace('text-', 'border-')} ${color.replace('text-', 'bg-')} text-white`
                 : 'border-border-light dark:border-border-dark hover:border-primary-300'
@@ -158,6 +159,63 @@ export function MoodForm({ onSubmit, loading = false, initialData, date }: MoodF
       </div>
     </div>
   );
+
+  if (compact) {
+    return (
+      <div className="space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <RatingScale
+              name="mood"
+              value={watchMood}
+              icon={Smile}
+              labels={MOOD_LABELS}
+              color="text-primary-600 dark:text-primary-400"
+            />
+            <RatingScale
+              name="energy"
+              value={watchEnergy}
+              icon={Battery}
+              labels={ENERGY_LABELS}
+              color="text-success-600 dark:text-success-400"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <RatingScale
+              name="stress"
+              value={watchStress}
+              icon={Zap}
+              labels={STRESS_LABELS}
+              color="text-warning-600 dark:text-warning-400"
+            />
+            <RatingScale
+              name="sleep"
+              value={watchSleep}
+              icon={Moon}
+              labels={SLEEP_LABELS}
+              color="text-secondary-600 dark:text-secondary-400"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-text-primary-light dark:text-text-primary-dark">
+              Quick notes (optional)
+            </label>
+            <textarea
+              className="input w-full min-h-[60px] resize-none text-sm"
+              placeholder="How are you feeling today?"
+              {...register('notes')}
+            />
+          </div>
+
+          <Button type="submit" className="w-full" loading={loading} size="sm">
+            Save Mood
+          </Button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <Card className="max-w-2xl mx-auto">

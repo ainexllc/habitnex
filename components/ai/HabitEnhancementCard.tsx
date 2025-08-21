@@ -1,13 +1,15 @@
 import { HabitEnhancement } from '@/types/claude';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { UsageBadge, UsageTooltip } from '@/components/ui/UsageIndicator';
 import { 
   Sparkles, 
   Target, 
   Lightbulb, 
   CheckCircle,
   ArrowRight,
-  X
+  X,
+  Zap
 } from 'lucide-react';
 
 interface HabitEnhancementCardProps {
@@ -16,6 +18,8 @@ interface HabitEnhancementCardProps {
   onClose: () => void;
   cached?: boolean;
   cost?: number;
+  remainingRequests?: number;
+  responseTime?: number;
 }
 
 export function HabitEnhancementCard({ 
@@ -23,7 +27,9 @@ export function HabitEnhancementCard({
   onApply, 
   onClose, 
   cached = false, 
-  cost = 0 
+  cost = 0,
+  remainingRequests,
+  responseTime
 }: HabitEnhancementCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -46,6 +52,9 @@ export function HabitEnhancementCard({
                 Cached
               </span>
             )}
+            <UsageTooltip>
+              <UsageBadge className="ml-2" />
+            </UsageTooltip>
           </CardTitle>
           <Button
             variant="ghost"
@@ -56,11 +65,34 @@ export function HabitEnhancementCard({
             <X className="w-4 h-4" />
           </Button>
         </div>
-        {!cached && cost > 0 && (
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            AI Cost: ${cost.toFixed(4)}
-          </p>
-        )}
+        
+        {/* Usage and Cost Information */}
+        <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+          {!cached && cost > 0 && (
+            <div className="flex items-center gap-1">
+              <span>💰</span>
+              <span>Cost: ${cost.toFixed(4)}</span>
+            </div>
+          )}
+          {responseTime && (
+            <div className="flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              <span>{responseTime}ms</span>
+            </div>
+          )}
+          {remainingRequests !== undefined && (
+            <div className="flex items-center gap-1">
+              <span>⚡</span>
+              <span>{remainingRequests} requests left today</span>
+            </div>
+          )}
+          {cached && (
+            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              <span>🎯</span>
+              <span>Free (from cache)</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-4">

@@ -1,0 +1,24 @@
+{
+  "production": {
+    "title": "HabitTracker - Build Better Habits",
+    "contentLength": 14782,
+    "hasContent": true,
+    "requests": 22,
+    "errors": [],
+    "consoleMessages": [
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://nextvibe.app/favicon.ico",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      }
+    ],
+    "url": "https://nextvibe.app/"
+  },
+  "local": {
+    "error": "page.waitForTimeout: Target page, context or browser has been closed"
+  }
+}

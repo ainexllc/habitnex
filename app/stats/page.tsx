@@ -176,7 +176,7 @@ export default function StatsPage() {
                               className="w-4 h-4 rounded-full"
                               style={{ backgroundColor: habit.color }}
                             />
-                            <CardTitle className="text-lg">{habit.name}</CardTitle>
+                            <CardTitle className="task-title text-lg font-task-title">{habit.name}</CardTitle>
                           </div>
                           <div className="flex items-center space-x-6">
                             <div className="text-center">

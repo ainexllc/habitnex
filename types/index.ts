@@ -176,3 +176,220 @@ export interface ThemeColors {
   };
   border: string;
 }
+
+// Mood Pattern Analysis types
+export interface MoodHabitCorrelationData {
+  date: string;
+  mood: number;
+  energy: number;
+  stress: number;
+  sleep: number;
+  completionRate: number;
+  completedHabits: number;
+  totalHabits: number;
+  compositeScore: number;
+}
+
+export interface CorrelationCoefficients {
+  mood: number;
+  energy: number;
+  stress: number;
+  sleep: number;
+}
+
+export interface OptimalMoodRange {
+  mood: [number, number];
+  energy: [number, number];
+  stress: [number, number];
+  sleep: [number, number];
+}
+
+export interface MoodAnalysisInsights {
+  strongestPositiveCorrelation: string;
+  strongestNegativeCorrelation: string;
+  optimalMoodRange: OptimalMoodRange;
+}
+
+export interface MoodAnalysisStatistics {
+  totalDaysAnalyzed: number;
+  avgCompletionRate: number;
+  avgMoodScores: {
+    mood: number;
+    energy: number;
+    stress: number;
+    sleep: number;
+  };
+}
+
+export interface MoodAnalysisResult {
+  correlations: CorrelationCoefficients;
+  insights: MoodAnalysisInsights;
+  recommendations: string[];
+  statistics: MoodAnalysisStatistics;
+  patterns: MoodHabitCorrelationData[];
+}
+
+export interface EnhancedMoodAnalysisResponse extends MoodAnalysisResult {
+  aiInsight: string;
+  primaryFactor: 'mood' | 'energy' | 'stress' | 'sleep';
+  aiRecommendation: string;
+  encouragement: string;
+}
+
+export interface MoodAnalysisRequest {
+  startDate: string;
+  endDate: string;
+  userId?: string;
+}
+
+export interface MoodAnalysisApiResponse {
+  success: boolean;
+  data?: EnhancedMoodAnalysisResponse;
+  error?: string;
+  meta?: {
+    dateRange: { startDate: string; endDate: string };
+    daysAnalyzed: number;
+    hasAiInsights: boolean;
+    generatedAt: string;
+  };
+}
+
+// Usage Tracking Types
+export interface UsageRecord {
+  id: string;
+  userId: string;
+  endpoint: string; // enhance-habit, quick-insight, mood-analysis
+  timestamp: Timestamp;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cost: number; // in USD
+  duration: number; // response time in ms
+  success: boolean;
+  errorCode?: string;
+  cacheHit?: boolean;
+  userAgent?: string;
+  ipAddress?: string;
+  requestId?: string;
+}
+
+export interface DailyUsage {
+  date: string; // YYYY-MM-DD
+  requests: number;
+  totalTokens: number;
+  cost: number;
+  successRate: number;
+  avgResponseTime: number;
+  endpoints: Record<string, number>; // endpoint -> request count
+}
+
+export interface WeeklyUsage {
+  weekStart: string; // YYYY-MM-DD (Monday)
+  requests: number;
+  totalTokens: number;
+  cost: number;
+  successRate: number;
+  avgResponseTime: number;
+  dailyBreakdown: DailyUsage[];
+}
+
+export interface MonthlyUsage {
+  month: string; // YYYY-MM
+  requests: number;
+  totalTokens: number;
+  cost: number;
+  successRate: number;
+  avgResponseTime: number;
+  weeklyBreakdown: WeeklyUsage[];
+}
+
+export interface UserUsageSummary {
+  userId: string;
+  lastUpdated: Timestamp;
+  daily: DailyUsage;
+  weekly: WeeklyUsage;
+  monthly: MonthlyUsage;
+  totalCost: number;
+  totalRequests: number;
+  dailyLimit: number;
+  isLimitExceeded: boolean;
+  nextResetTime: Timestamp;
+}
+
+export interface SystemUsageStats {
+  date: string; // YYYY-MM-DD
+  totalUsers: number;
+  totalRequests: number;
+  totalTokens: number;
+  totalCost: number;
+  avgCostPerRequest: number;
+  avgTokensPerRequest: number;
+  successRate: number;
+  avgResponseTime: number;
+  topEndpoints: Array<{
+    endpoint: string;
+    requests: number;
+    cost: number;
+    avgResponseTime: number;
+  }>;
+  hourlyDistribution: Array<{
+    hour: number; // 0-23
+    requests: number;
+    cost: number;
+  }>;
+}
+
+export interface UsageBudgetConfig {
+  dailyBudget: number; // USD
+  weeklyBudget: number; // USD
+  monthlyBudget: number; // USD
+  userDailyLimit: number; // requests
+  emergencyShutoffThreshold: number; // percentage of monthly budget
+  alertThresholds: {
+    warning: number; // percentage
+    critical: number; // percentage
+  };
+}
+
+export interface UsageAlert {
+  id: string;
+  type: 'budget_warning' | 'budget_critical' | 'user_limit' | 'system_limit' | 'unusual_usage';
+  message: string;
+  threshold: number;
+  currentValue: number;
+  timestamp: Timestamp;
+  resolved: boolean;
+  userId?: string; // if user-specific alert
+}
+
+export interface UsageAnalyticsResponse {
+  success: boolean;
+  data?: {
+    userStats?: UserUsageSummary;
+    systemStats?: SystemUsageStats;
+    alerts?: UsageAlert[];
+    budgetStatus?: {
+      current: UsageBudgetConfig;
+      usage: {
+        daily: { spent: number; percentage: number };
+        weekly: { spent: number; percentage: number };
+        monthly: { spent: number; percentage: number };
+      };
+    };
+  };
+  error?: string;
+}
+
+export interface EndpointUsageStats {
+  endpoint: string;
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  totalCost: number;
+  avgCost: number;
+  avgResponseTime: number;
+  avgTokensPerRequest: number;
+  cacheHitRate: number;
+  lastUsed: Timestamp;
+  hourlyDistribution: number[]; // 24 hours
+}

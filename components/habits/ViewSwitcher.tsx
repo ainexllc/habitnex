@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   Clock,
   ChevronDown,
-  Sparkles
+  Sparkles,
+  Waves
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -24,6 +25,7 @@ const ICON_MAP = {
   'activity': Activity,
   'bot': Bot,
   'trending-up': TrendingUp,
+  'waves': Waves,
   'clock': Clock,
 };
 

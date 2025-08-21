@@ -9,16 +9,22 @@ import { ViewSwitcher } from '@/components/habits/ViewSwitcher';
 import { ListView } from '@/components/habits/views/ListView';
 import { CalendarView } from '@/components/habits/views/CalendarView';
 import { TableView } from '@/components/habits/views/TableView';
+import { HeatmapView } from '@/components/habits/views/HeatmapView';
+import { AICoachView } from '@/components/habits/views/AICoachView';
+import { MomentumWaveView } from '@/components/habits/views/MomentumWaveView';
+import { PredictiveTimelineView } from '@/components/habits/views/PredictiveTimelineView';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useHabits } from '@/hooks/useHabits';
+import { useMoods } from '@/hooks/useMoods';
 import { Habit } from '@/types';
 import { HabitViewType } from '@/types/views';
 import { Plus, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HabitsPage() {
-  const { habits, loading } = useHabits();
+  const { habits, completions, loading } = useHabits();
+  const { moods } = useMoods();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
@@ -134,7 +140,7 @@ export default function HabitsPage() {
                 <ViewSwitcher
                   currentView={currentView}
                   onViewChange={setCurrentView}
-                  enabledViews={[HabitViewType.GRID, HabitViewType.LIST, HabitViewType.CALENDAR, HabitViewType.TABLE]}
+                  enabledViews={[HabitViewType.GRID, HabitViewType.LIST, HabitViewType.CALENDAR, HabitViewType.TABLE, HabitViewType.HEATMAP, HabitViewType.AI_COACH, HabitViewType.MOMENTUM, HabitViewType.TIMELINE]}
                 />
               </div>
             </div>
@@ -204,6 +210,27 @@ export default function HabitsPage() {
                 ) : currentView === HabitViewType.TABLE ? (
                   <TableView 
                     habits={filteredHabits} 
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                ) : currentView === HabitViewType.HEATMAP ? (
+                  <HeatmapView habits={filteredHabits} />
+                ) : currentView === HabitViewType.AI_COACH ? (
+                  <AICoachView 
+                    habits={filteredHabits}
+                    completions={completions}
+                    moods={moods}
+                  />
+                ) : currentView === HabitViewType.MOMENTUM ? (
+                  <MomentumWaveView
+                    habits={filteredHabits}
+                    completions={completions}
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                ) : currentView === HabitViewType.TIMELINE ? (
+                  <PredictiveTimelineView
+                    habits={filteredHabits}
+                    completions={completions}
+                    moods={moods}
                     onEdit={(habit) => setEditingHabit(habit)}
                   />
                 ) : (

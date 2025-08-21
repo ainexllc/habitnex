@@ -2,51 +2,70 @@ import { NextRequest, NextResponse } from 'next/server';
 import { anthropic, AI_CONFIG, calculateCost, isAIEnabled } from '@/lib/claude/client';
 import { QUICK_INSIGHT_PROMPT } from '@/lib/claude/prompts';
 import { getCachedInsight, setCachedInsight } from '@/lib/claude/cache';
-
-function getUserId(req: NextRequest): string {
-  return req.headers.get('x-forwarded-for') || req.ip || 'demo-user';
-}
-
-// Simple rate limiting for insights (more generous since they're cheaper)
-const insightRequests = new Map<string, { count: number; resetTime: number }>();
-
-function checkInsightRateLimit(userId: string, limit: number = 25): boolean {
-  const now = Date.now();
-  const dayStart = new Date().setHours(0, 0, 0, 0);
-  
-  const userLimit = insightRequests.get(userId);
-  
-  if (!userLimit || userLimit.resetTime < dayStart) {
-    insightRequests.set(userId, { count: 1, resetTime: now });
-    return true;
-  }
-  
-  if (userLimit.count >= limit) {
-    return false;
-  }
-  
-  userLimit.count++;
-  return true;
-}
+import { getUserId } from '@/lib/claude/auth';
+import { trackAPIUsage, checkUsageLimits } from '@/lib/usageTracking';
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  let userId: string | null = null;
+  let requestId: string | null = null;
+
   try {
+    // Get user ID for tracking
+    userId = await getUserId(req);
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    requestId = `quick-insight-${userId}-${Date.now()}`;
     const { habitName, streak, completionRate } = await req.json();
     
     if (!habitName || streak === undefined || completionRate === undefined) {
+      const duration = Date.now() - startTime;
+      // Track failed usage
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        0, 0, duration,
+        false,
+        'Invalid input: missing required fields',
+        false,
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
+
       return NextResponse.json(
         { error: 'habitName, streak, and completionRate are required' },
         { status: 400 }
       );
     }
     
-    // Check rate limit
-    const userId = getUserId(req);
-    if (!checkInsightRateLimit(userId, 25)) {
+    // Check usage limits using our new system
+    const limitCheck = await checkUsageLimits(userId);
+    if (!limitCheck.canProceed) {
+      const duration = Date.now() - startTime;
+      // Track rate limited usage
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        0, 0, duration,
+        false,
+        'Rate limited',
+        false,
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
+
       return NextResponse.json(
         { 
-          error: 'Daily insight limit reached (25/day). Resets at midnight.',
-          resetTime: new Date().setHours(24, 0, 0, 0)
+          error: limitCheck.reason,
+          resetTime: limitCheck.resetTime,
+          remainingRequests: limitCheck.remainingRequests
         },
         { status: 429 }
       );
@@ -56,11 +75,29 @@ export async function POST(req: NextRequest) {
     const cached = getCachedInsight(habitName, streak, completionRate);
     if (cached) {
       console.log(`[API] Returning cached insight for: ${habitName}`);
+      const duration = Date.now() - startTime;
+      
+      // Track cache hit
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        0, 0, duration,
+        true,
+        undefined,
+        true, // cache hit
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
+
       return NextResponse.json({
         success: true,
         insight: cached,
         cached: true,
-        cost: 0
+        cost: 0,
+        usage: {
+          remainingRequests: limitCheck.remainingRequests
+        }
       });
     }
     
@@ -96,34 +133,70 @@ export async function POST(req: NextRequest) {
     // Try quick template-based insight first
     const quickInsight = generateQuickInsight(habitName, streak, completionRate);
     if (quickInsight) {
+      const duration = Date.now() - startTime;
       setCachedInsight(habitName, streak, completionRate, quickInsight, 0);
+      
+      // Track template-based insight (no tokens used)
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        0, 0, duration,
+        true,
+        undefined,
+        false,
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
+
       return NextResponse.json({
         success: true,
         insight: quickInsight,
         cached: false,
         cost: 0,
-        method: 'template'
+        method: 'template',
+        usage: {
+          remainingRequests: (limitCheck.remainingRequests || 0) - 1
+        }
       });
     }
     
     // Call Claude for more personalized insight (only if AI is enabled)
     if (!isAIEnabled()) {
       // Fallback to generic motivational message when AI is not available
+      const duration = Date.now() - startTime;
       const fallbackInsight = `Keep going with ${habitName}! Every step counts toward building lasting habits. 💪`;
       setCachedInsight(habitName, streak, completionRate, fallbackInsight, 0);
+      
+      // Track fallback insight (no tokens used)
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        0, 0, duration,
+        true,
+        undefined,
+        false,
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
+
       return NextResponse.json({
         success: true,
         insight: fallbackInsight,
         cached: false,
         cost: 0,
-        method: 'fallback'
+        method: 'fallback',
+        usage: {
+          remainingRequests: (limitCheck.remainingRequests || 0) - 1
+        }
       });
     }
     
     console.log(`[API] Generating AI insight for: ${habitName} (${streak} days, ${completionRate}%)`);
     
     const prompt = QUICK_INSIGHT_PROMPT(habitName, streak, completionRate);
-    const startTime = Date.now();
+    const aiStartTime = Date.now();
     
     const message = await anthropic!.messages.create({
       model: AI_CONFIG.model,
@@ -135,13 +208,28 @@ export async function POST(req: NextRequest) {
       }]
     });
     
-    const responseTime = Date.now() - startTime;
+    const aiResponseTime = Date.now() - aiStartTime;
+    const totalDuration = Date.now() - startTime;
     
     const insight = message.content[0]?.type === 'text' 
       ? message.content[0].text.trim() 
       : '';
     
     if (!insight) {
+      // Track failed AI call
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        message.usage?.input_tokens || 0,
+        0,
+        totalDuration,
+        false,
+        'No insight received from Claude',
+        false,
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
       throw new Error('No insight received from Claude');
     }
     
@@ -153,10 +241,27 @@ export async function POST(req: NextRequest) {
     // Cache the result
     setCachedInsight(habitName, streak, completionRate, insight, cost);
     
+    // Track successful AI usage
+    await trackAPIUsage(
+      userId,
+      'quick-insight',
+      inputTokens,
+      outputTokens,
+      totalDuration,
+      true,
+      undefined,
+      false,
+      req.headers.get('user-agent'),
+      req.headers.get('x-forwarded-for'),
+      requestId
+    );
+    
     console.log(`[API] AI insight generated for "${habitName}":`, {
-      responseTime: `${responseTime}ms`,
+      responseTime: `${aiResponseTime}ms`,
       cost: `$${cost.toFixed(5)}`,
-      tokens: `${inputTokens}+${outputTokens}`
+      tokens: `${inputTokens}+${outputTokens}`,
+      userId,
+      requestId
     });
     
     return NextResponse.json({
@@ -164,17 +269,38 @@ export async function POST(req: NextRequest) {
       insight,
       cached: false,
       cost,
-      responseTime,
+      responseTime: aiResponseTime,
       method: 'ai',
       usage: {
         inputTokens,
         outputTokens,
-        totalTokens: inputTokens + outputTokens
+        totalTokens: inputTokens + outputTokens,
+        remainingRequests: (limitCheck.remainingRequests || 0) - 1
       }
     });
     
   } catch (error) {
     console.error('[API] Error in quick-insight:', error);
+    
+    // Track failed usage
+    if (userId && requestId) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      
+      await trackAPIUsage(
+        userId,
+        'quick-insight',
+        0, 0, duration,
+        false,
+        errorMessage,
+        false,
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      ).catch(trackingError => {
+        console.error('Failed to track error usage:', trackingError);
+      });
+    }
     
     return NextResponse.json(
       { 
@@ -191,14 +317,16 @@ export async function GET() {
     api: 'Claude Quick Insights',
     model: AI_CONFIG.model,
     rateLimit: {
-      dailyLimit: 25,
+      dailyLimit: 10, // Updated to match usage tracking system
       resetTime: new Date().setHours(24, 0, 0, 0)
     },
     features: [
       'Personalized habit motivation',
       'Streak celebration messages', 
       'Encouragement for struggles',
-      'Achievement recognition'
+      'Achievement recognition',
+      'Comprehensive usage tracking',
+      'Cost monitoring'
     ]
   });
 }

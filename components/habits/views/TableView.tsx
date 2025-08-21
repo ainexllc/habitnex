@@ -294,11 +294,11 @@ export function TableView({ habits, onEdit }: TableViewProps) {
                           style={{ backgroundColor: habit.color }}
                         />
                         <div className="min-w-0">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                          <div className="task-title text-sm font-task-title text-gray-900 dark:text-gray-100 truncate">
                             {habit.name}
                           </div>
                           {habit.description && (
-                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                            <div className="task-description text-sm font-task-description text-gray-500 dark:text-gray-400 truncate max-w-xs">
                               {habit.description}
                             </div>
                           )}
