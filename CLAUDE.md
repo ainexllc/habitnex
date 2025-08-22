@@ -5,8 +5,9 @@ This file contains important configuration and setup information for this projec
 ## Project Overview
 - **Project Name**: NextVibe - Habit & Mood Tracking App
 - **Repository**: https://github.com/ainexllc/nextvibe
-- **Technology Stack**: Next.js 14, TypeScript, Firebase, Tailwind CSS 3, Recharts
-- **Features**: Habit tracking, mood tracking, analytics, dark/light mode
+- **Technology Stack**: Next.js 14.2.31, TypeScript 5.9.2, Firebase 12.1.0, Tailwind CSS 3.4.17, Recharts 3.1.2
+- **Features**: Habit tracking, mood tracking, AI-enhanced habits, analytics, dark/light mode
+- **Current Status**: ✅ Production ready with enhanced AI features and improved UX
 
 ## GitHub CLI Configuration
 - **Version**: gh version 2.76.1 (2025-07-23)
@@ -37,16 +38,21 @@ This file contains important configuration and setup information for this projec
 
 ## Development Commands
 ### Firebase
-- `npm run deploy:rules` - Deploy Firestore rules
-- `npm run deploy:indexes` - Deploy Firestore indexes
+- `npm run firebase:rules` - Deploy Firestore rules
+- `npm run firebase:indexes` - Deploy Firestore indexes  
+- `npm run firebase:deploy` - Deploy both rules and indexes
 - `firebase deploy --only firestore:rules` - Deploy rules directly
 - `firebase deploy --only firestore:indexes` - Deploy indexes directly
 
 ### Build & Deploy
-- `npm run dev` - Development server
-- `npm run build` - Production build
-- `npm run lint` - ESLint checking
-- `npx tsc --noEmit` - TypeScript type checking
+- `npm run dev` - Development server (runs on port 3001)
+- `npm run dev:safe` - Safe development with scripts
+- `npm run dev:clean` - Clean cache and start dev server
+- `npm run build` - Production build (static export)
+- `npm run start` - Start production server
+- `npm run lint` - ESLint checking (currently has config issues)
+- `npm run test` - Run Playwright tests
+- `npm run deploy` - Build and deploy to Firebase hosting
 
 ### Git Workflow
 - All commits should include the signature:
@@ -62,9 +68,10 @@ This file contains important configuration and setup information for this projec
 - **Authentication**: Email/Password + Google Sign-in ✅ FULLY CONFIGURED
 - **Production URL**: https://habittracker-eb6bd.web.app
 - **Collections**:
-  - users/{userId}/habits
-  - users/{userId}/completions
-  - users/{userId}/moods
+  - users/{userId}/habits (habit definitions with AI enhancements)
+  - users/{userId}/completions (daily habit completions)
+  - users/{userId}/moods (4-dimensional mood tracking)
+  - users/{userId}/usage (AI usage tracking and rate limiting)
 
 ### Google Authentication Complete Setup
 - **Status**: ✅ FULLY WORKING - Local & Production
@@ -73,66 +80,83 @@ This file contains important configuration and setup information for this projec
 - **Production Method**: Redirect (better for mobile, SEO-friendly)
 - **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app
 - **Redirect URIs**: 
-  - http://localhost:3000/__/auth/handler
+  - http://localhost:3001/__/auth/handler (updated port)
   - https://habittracker-eb6bd.firebaseapp.com/__/auth/handler
   - https://nextvibe.app/__/auth/handler
 
-#### Authentication Implementation Details
-- **Environment Detection**: Auto-selects popup/redirect based on hostname
-- **Error Handling**: Comprehensive error messages for all auth scenarios
-- **Cross-Origin-Opener-Policy**: Properly handled with fallback logic
-- **Redirect Result Handling**: Full implementation in AuthContext
-- **State Management**: Complete auth state with user profile creation
-- **Navigation Logic**: Automatic dashboard redirect for authenticated users
+#### Key Implementation Files
+- **Authentication**: `lib/auth.ts`, `contexts/AuthContext.tsx`
+- **Form Components**: `components/forms/HabitForm.tsx` (enhanced with AI)
+- **UI Components**: `components/ui/Input.tsx` (improved focus states)
+- **AI Integration**: `hooks/useClaudeAI.ts`, `app/api/claude/*`
+- **Styling**: Enhanced form focus states in `app/globals.css`
 
-## Google Authentication Workflow & Troubleshooting
+## AI Enhancement Features
 
-### Complete Setup Process (REFERENCE FOR FUTURE)
-1. **Firebase Console** → Authentication → Sign-in method → Enable Google
-2. **Google Cloud Console** → APIs & Credentials → OAuth 2.0 Client IDs
-3. **Configure Authorized Domains**: localhost, production domain
-4. **Configure Redirect URIs**: `/__/auth/handler` for each domain
-5. **Environment-based Implementation**: popup for localhost, redirect for production
+### Claude AI Integration
+- **Status**: ✅ FULLY OPERATIONAL
+- **Model**: Claude 3 Haiku (claude-3-haiku-20240307)
+- **Token Limit**: 800 tokens (increased for comprehensive responses)
+- **Cost Tracking**: $0.25/1M input, $1.25/1M output tokens
+- **Rate Limiting**: Implemented per user tier
 
-### Key Files Modified
-- `lib/auth.ts`: Core authentication logic with environment detection
-- `contexts/AuthContext.tsx`: Complete auth state management
-- `app/login/page.tsx` & `app/signup/page.tsx`: Enhanced UI with error handling
+### AI Capabilities
+1. **Habit Enhancement** (`/api/claude/enhance-habit`):
+   - Auto-generates optimized habit titles and descriptions
+   - Provides detailed health, mental, and long-term benefits (4-5 sentences each)
+   - Comprehensive success strategies with 6-8 sentence guides
+   - Suggests complementary habits
+   - Form auto-population with AI-generated content
 
-### Common Issues & Solutions
-- **Cross-Origin-Opener-Policy**: Use redirect method on localhost
-- **Redirect Not Working**: Ensure redirect URIs include `/__/auth/handler`
-- **Localhost Issues**: Use popup method (auto-detected)
-- **Production Issues**: Verify authorized domains in both Firebase and Google Cloud Console
+2. **Error Handling & Reliability**:
+   - JSON truncation detection and recovery
+   - Comprehensive field validation
+   - User-friendly error messages
+   - Graceful fallbacks when AI is unavailable
 
-### Testing Approach
-- **Direct Firebase Test**: `/public/test-auth-direct.html` for isolated testing
-- **Popup vs Redirect**: `/public/test-popup-auth.html` for popup testing
-- **Environment Detection**: Automatic based on `window.location.hostname`
+3. **Usage Tracking** (`/hooks/useUsageTracking.ts`):
+   - Per-user request counting
+   - Cost calculation and monitoring
+   - Rate limiting enforcement
+   - Analytics and usage patterns
+
+### AI Enhancement Implementation
+- **Frontend**: `components/forms/HabitForm.tsx` with AI enhance button
+- **Hook**: `hooks/useClaudeAI.ts` for API integration
+- **API**: `app/api/claude/enhance-habit/route.ts` (simplified, no telemetry)
+- **Types**: `types/claude.ts` with comprehensive interfaces
+- **Prompts**: `lib/claude/prompts.ts` with detailed enhancement templates
 
 ### Deployment Configuration
-- **Next.js Config**: Static export with `output: 'export'`
-- **Firebase Hosting**: Configured in `firebase.json`
-- **Build Command**: `npm run build` (static export)
-- **Deploy Command**: `firebase deploy --only hosting`
+- **Next.js Config**: Standard build (no static export, API routes enabled)
+- **Firebase Hosting**: Configured in `firebase.json` with SPA rewrites
+- **Build Command**: `npm run build`
+- **Deploy Command**: `npm run deploy` or `firebase deploy --only hosting`
+- **Current Config**: TypeScript and ESLint checking disabled during builds
+- **Production URLs**: 
+  - Firebase: https://habittracker-eb6bd.web.app
+  - Vercel: https://nextvibe.app (auto-deployment enabled)
 
-## Recent Implementation Notes
-- ✅ **COMPLETE Google Authentication** with popup/redirect hybrid approach
-- ✅ **Production Deployment** to https://habittracker-eb6bd.web.app
-- ✅ **Environment-based Auth Method Selection** (popup local, redirect production)
-- ✅ **Comprehensive Error Handling** with user-friendly messages
-- ✅ **Cross-Origin-Opener-Policy Resolution** with fallback logic
-- Comprehensive mood tracking system added with 4-dimensional ratings
-- Dashboard integration with today's mood section
-- Dedicated /moods page with analytics and trend visualization
-- All TypeScript errors resolved for production deployment
-- Firebase Hosting configured for static site deployment
+## Recent Implementation Notes (Current State)
+- ✅ **Enhanced AI Features** with Claude Haiku integration
+- ✅ **Fixed AI Enhancement System** with 800-token limit and comprehensive responses
+- ✅ **Improved Form UX** with enhanced focus states and visual feedback
+- ✅ **Auto-population of habit fields** from AI enhancement (title, description)
+- ✅ **Robust Error Handling** for AI responses with truncation detection
+- ✅ **Production Deployment** to Firebase Hosting and Vercel
+- ✅ **Complete Google Authentication** with popup/redirect hybrid approach
+- ✅ **Comprehensive mood tracking** with 4-dimensional ratings
+- ✅ **White screen issues resolved** with improved build configuration
+- ✅ **OpenTelemetry issues fixed** by removing from API routes
+- ✅ **Enhanced form UX** with prominent focus states, hover effects, and visual feedback
+- ✅ **Comprehensive testing** with Playwright integration
+- ✅ **Development workflow** optimized with safe restart scripts
 
 ## System Environment
 - **OS**: macOS (Darwin 25.0.0)
 - **Node.js**: Check with `node --version`
 - **NPM**: Check with `npm --version`
-- **Working Directory**: /Users/dino/AiFirst/claudecode-realtest
+- **Working Directory**: /Users/dino/AiFirst/nextvibeapp
 
 ## Claude Configuration
 - **Config Location**: ~/.config/claude/
@@ -140,13 +164,20 @@ This file contains important configuration and setup information for this projec
 
 ## MCP Servers Configuration
 
-### Playwright MCP Server
-- **Status**: ✅ Configured in Claude settings
-- **Package**: @playwright/mcp (version 1.54.2)
-- **Purpose**: Browser automation and testing integration
-- **Capabilities**:
-  - Web page interactions and automation
-  - Screenshot capture
+### Playwright Testing Integration
+- **Status**: ✅ Configured and operational
+- **Package**: @playwright/test (version 1.54.2)
+- **Purpose**: End-to-end testing and automation
+- **Test Scripts**:
+  - `npm run test` - Run all tests
+  - `npm run test:headed` - Run with browser UI
+  - `npm run test:ui` - Interactive test runner
+  - `npm run test:diagnose` - White screen diagnosis
+- **Test Coverage**:
+  - Authentication flows
+  - Page rendering validation
+  - Form interactions
+  - AI feature testing
   - Form automation and testing
   - UI testing and validation
   - Performance testing
@@ -708,11 +739,35 @@ vercel rollback <url>    # Rollback deployment
 - **Domain issues**: Verify DNS settings and SSL certificates
 - **Performance**: Analyze bundle size and implement code splitting
 
-## TODO
-- [ ] Add mood-habit correlation features
-- [ ] Explore BigQuery integration for advanced analytics
-- [ ] Set up Cloud Functions for background processing
-- [ ] Consider App Engine deployment for scaling
+## Current Development Status (August 2025)
+
+### Recently Completed ✅
+- Enhanced AI habit enhancement with comprehensive 4-5 sentence benefits
+- Auto-population of form fields from AI suggestions (title, description)
+- Fixed invalid JSON response errors with increased token limits
+- Improved form UX with prominent focus states and visual feedback
+- Resolved white screen issues with optimized build configuration
+- Removed problematic OpenTelemetry dependencies from API routes
+- Updated to latest dependencies and improved error handling
+
+### Known Issues 🔧
+- ESLint configuration needs updating (unknown options errors)
+- TypeScript checking temporarily disabled during builds
+- Some telemetry dependencies still present but not used
+
+### Next Potential Features 💡
+- Mood-habit correlation analytics
+- Advanced usage analytics dashboard
+- Additional AI features (mood analysis, insights)
+- Progressive Web App (PWA) capabilities
+
+### Development Environment ⚙️
+- **Port**: Development server runs on 3001 (to avoid conflicts)
+- **Build**: Static export disabled, API routes enabled
+- **Testing**: Playwright integrated with comprehensive test suite
+- **AI**: Claude Haiku integration with cost tracking and rate limiting
+- **Authentication**: Google OAuth fully operational
+- **Deployment**: Dual deployment (Firebase + Vercel) with auto-deployment
 
 ---
-*Last updated: August 2025*
+*Last updated: August 2025 - Post AI Enhancement & UX Improvements*
