@@ -1,7 +1,7 @@
 // Token-efficient prompts optimized for Claude Haiku
 
 export const HABIT_ENHANCE_PROMPT = (habitName: string, tags?: string, existingHabits?: string[]) => `
-Enhance this habit with detailed motivational information. Return JSON only, no explanation.
+Create a comprehensive habit enhancement guide with detailed success strategies. Return JSON only, no explanation.
 
 Habit: "${habitName}"
 ${tags ? `Tags: ${tags}` : ''}
@@ -9,13 +9,15 @@ ${existingHabits?.length ? `Existing habits: ${existingHabits.join(', ')}` : ''}
 
 Required JSON format:
 {
-  "description": "1 sentence, max 20 words",
-  "healthBenefits": "2-3 sentences describing physical health improvements and benefits",
-  "mentalBenefits": "2-3 sentences describing mental, emotional, and cognitive benefits", 
-  "longTermBenefits": "2-3 sentences describing long-term life improvements and outcomes",
+  "title": "Engaging, clear habit title (3-6 words, action-oriented and motivating)",
+  "description": "Concise habit description for the form (15-25 words, specific and actionable)",
+  "enhancedDescription": "Clear, inspiring 1-sentence description for the enhancement card (max 25 words)",
+  "healthBenefits": "Detailed 4-5 sentence explanation of specific physical health improvements, citing research where relevant. Include measurable benefits, body systems affected, and timeline for seeing results.",
+  "mentalBenefits": "Comprehensive 4-5 sentence analysis of mental, emotional, and cognitive benefits. Cover mood improvements, stress reduction, focus enhancement, confidence building, and psychological well-being.",
+  "longTermBenefits": "Extensive 4-5 sentence description of transformative life outcomes. Address career benefits, relationship improvements, life satisfaction, aging gracefully, and compound effects over years.",
   "difficulty": "easy"|"medium"|"hard",
-  "tip": "2-4 sentences with actionable strategies, timing advice, environmental setup, obstacle solutions, habit stacking ideas, and motivation techniques",
-  "complementary": ["habit that pairs well", "another habit"]
+  "tip": "Comprehensive 6-8 sentence success guide covering: (1) Optimal timing and frequency, (2) Environmental setup and preparation, (3) Overcoming common obstacles and resistance, (4) Habit stacking with existing routines, (5) Motivation techniques and rewards, (6) Tracking and measurement strategies, (7) Gradual progression and scaling, (8) Recovery from setbacks and maintaining consistency.",
+  "complementary": ["specific habit that synergizes well", "another complementary habit", "third supporting habit"]
 }`;
 
 export const QUICK_INSIGHT_PROMPT = (habitName: string, streak: number, completionRate: number) => `
@@ -109,29 +111,35 @@ Required JSON:
 // Pre-generated common habit enhancements to reduce API calls
 export const COMMON_HABITS = {
   'meditation': {
-    description: 'Daily mindfulness practice to reduce stress and improve focus',
-    healthBenefits: 'Regular meditation reduces cortisol levels by up to 27%, lowering blood pressure and improving immune system function. It also helps regulate sleep patterns and reduces inflammation in the body.',
-    mentalBenefits: 'Meditation significantly improves focus, attention span, and emotional regulation. Studies show it reduces anxiety and depression while increasing self-awareness and empathy towards others.',
-    longTermBenefits: 'Long-term meditation practice leads to structural brain changes that enhance memory, creativity, and decision-making. It builds resilience against stress and creates lasting improvements in overall life satisfaction.',
+    title: 'Daily Mindfulness Meditation',
+    description: 'Practice mindfulness meditation for 10 minutes daily to reduce stress and enhance focus',
+    enhancedDescription: 'Daily mindfulness practice to cultivate inner peace and mental clarity',
+    healthBenefits: 'Regular meditation reduces cortisol levels by up to 27%, significantly lowering blood pressure and strengthening immune system function. It activates the parasympathetic nervous system, promoting healing and reducing chronic inflammation throughout the body. Studies show measurable improvements in heart rate variability and brain structure within just 8 weeks. The practice also improves sleep quality, reduces chronic pain, and can slow cellular aging by protecting telomeres.',
+    mentalBenefits: 'Meditation dramatically enhances focus, attention span, and emotional regulation by strengthening the prefrontal cortex and reducing amygdala reactivity. Research demonstrates significant reductions in anxiety and depression, with effects comparable to antidepressant medications. The practice increases self-awareness, empathy, and emotional intelligence while building resilience against stress. Regular meditators report greater life satisfaction, improved relationships, and enhanced ability to respond rather than react to challenging situations.',
+    longTermBenefits: 'Long-term meditation practice creates profound structural brain changes that enhance memory, creativity, and decision-making for life. It builds unshakeable resilience against stress and creates lasting improvements in overall life satisfaction and meaning. Practitioners often experience career advancement due to improved leadership skills, better relationships from increased empathy, and maintained cognitive function well into old age. The compound effects include reduced healthcare costs, enhanced longevity, and a deep sense of inner peace that transforms how you navigate life\'s challenges.',
     difficulty: 'easy',
-    tip: 'Start with just 2 minutes using a guided app like Headspace',
+    tip: 'Start with just 2 minutes daily at the same time each morning to build consistency. Set up a dedicated quiet space with comfortable seating and remove distractions like phones. Begin with guided apps like Headspace or Calm to learn proper technique. Overcome initial restlessness by gently returning attention to breath without self-judgment. Stack this habit after your morning coffee or before checking emails. Track your sessions and mood changes to stay motivated. Gradually increase duration by 1 minute per week. When you miss a day, simply return the next day without guilt - consistency matters more than perfection.',
     bestTime: 'morning',
     duration: '10',
-    complementary: ['Journaling', 'Deep breathing']
+    complementary: ['Journaling for reflection', 'Gratitude practice', 'Mindful breathing exercises']
   },
   'exercise': {
-    description: 'Physical activity to boost energy, mood, and overall health',
-    healthBenefits: 'Regular exercise strengthens your cardiovascular system, builds bone density, and improves muscle strength. It boosts metabolism, enhances immune function, and reduces risk of chronic diseases by up to 50%.',
-    mentalBenefits: 'Exercise releases endorphins and BDNF, creating natural mood elevation and mental clarity. It reduces anxiety, improves self-confidence, and provides a healthy outlet for stress and frustration.',
-    longTermBenefits: 'Consistent exercise adds years to your life while maintaining independence and mobility as you age. It creates sustainable energy levels, better sleep quality, and a positive relationship with your body.',
+    title: 'Daily Physical Exercise',
+    description: 'Engage in 30 minutes of physical activity daily to boost energy, mood, and overall health',
+    enhancedDescription: 'Regular physical activity to transform your body, mind, and life',
+    healthBenefits: 'Regular exercise strengthens your cardiovascular system, reducing heart disease risk by 40% and stroke risk by 27%. It builds bone density, preventing osteoporosis, while increasing muscle mass and metabolic rate. Exercise boosts immune function by 300%, enhances insulin sensitivity, and reduces inflammation markers throughout the body. Within 2-4 weeks, you\'ll notice improved energy, better sleep, and measurable improvements in blood pressure and cholesterol levels.',
+    mentalBenefits: 'Exercise acts as a natural antidepressant, releasing endorphins, serotonin, and BDNF that create lasting mood elevation and mental clarity. It reduces anxiety and depression symptoms by 20-30%, often matching prescription medications\' effectiveness. Regular movement improves self-confidence, body image, and provides a powerful outlet for stress and frustration. The discipline builds mental toughness that transfers to all life areas, while the achievement of fitness goals creates a positive feedback loop of self-efficacy.',
+    longTermBenefits: 'Consistent exercise can add 7-10 healthy years to your life while maintaining independence, mobility, and cognitive function as you age. It creates sustainable energy levels that enhance career performance and personal relationships. Regular exercisers experience 50% fewer sick days, reduced healthcare costs, and maintain youthful appearance longer. The habit builds discipline that cascades into better nutrition, time management, and goal achievement across all life domains, creating compound benefits for decades.',
     difficulty: 'medium',
-    tip: 'Start with 10-minute walks and gradually increase intensity',
+    tip: 'Begin with 10-minute walks after meals to establish the routine without overwhelming yourself. Choose activities you genuinely enjoy to ensure sustainability - dancing, hiking, swimming, or sports work as well as gym workouts. Schedule exercise at consistent times, treating it as non-negotiable as brushing teeth. Start strength training with bodyweight exercises before progressing to weights. Combat excuses by preparing workout clothes the night before and having a backup 5-minute routine for busy days. Track progress through photos, measurements, or fitness apps to maintain motivation. Join communities or find workout partners for accountability. When motivation wanes, focus on how great you feel after exercising rather than the effort required.',
     bestTime: 'morning',
     duration: '30',
-    complementary: ['Healthy eating', 'Adequate sleep']
+    complementary: ['Protein-rich nutrition', 'Quality sleep habits', 'Active recovery stretching']
   },
   'reading': {
-    description: 'Daily reading to expand knowledge and improve cognitive function',
+    title: 'Daily Reading Practice',
+    description: 'Read for 20 minutes daily to expand knowledge, improve focus, and enhance cognitive function',
+    enhancedDescription: 'Daily reading to expand knowledge and improve cognitive function',
     healthBenefits: 'Reading for just 6 minutes can reduce stress levels by 68%, lowering heart rate and muscle tension. It exercises your brain like a muscle, helping maintain cognitive function as you age.',
     mentalBenefits: 'Regular reading expands vocabulary, improves concentration, and enhances analytical thinking skills. It stimulates imagination, increases empathy by exposing you to different perspectives, and provides mental escape from daily stressors.',
     longTermBenefits: 'Lifelong readers show significantly reduced rates of cognitive decline and dementia. Reading creates a growth mindset, continuous learning habits, and opens doors to new opportunities and deeper conversations.',
@@ -142,7 +150,9 @@ export const COMMON_HABITS = {
     complementary: ['Note-taking', 'Discussion groups']
   },
   'no sugar': {
-    description: 'Eliminate added sugars to improve energy and reduce health risks',
+    title: 'Sugar-Free Living',
+    description: 'Eliminate added sugars from your diet to stabilize energy and improve health',
+    enhancedDescription: 'Eliminate added sugars to improve energy and reduce health risks',
     healthBenefits: 'Cutting sugar reduces inflammation, stabilizes blood glucose levels, and improves dental health. It leads to better weight management, reduced risk of diabetes, and improved heart health markers.',
     mentalBenefits: 'Eliminating sugar crashes creates stable energy throughout the day and improves mood consistency. It reduces brain fog, enhances focus, and breaks the cycle of sugar cravings and emotional eating.',
     longTermBenefits: 'Long-term sugar reduction significantly lowers risk of chronic diseases, maintains youthful skin appearance, and supports healthy aging. It creates sustainable eating habits and improved relationship with food.',
@@ -153,7 +163,9 @@ export const COMMON_HABITS = {
     complementary: ['Healthy meal prep', 'Reading nutrition labels']
   },
   'water': {
-    description: 'Drink adequate water throughout the day for optimal health',
+    title: 'Daily Hydration Habit',
+    description: 'Drink 8 glasses of water daily for optimal health and energy',
+    enhancedDescription: 'Drink adequate water throughout the day for optimal health',
     healthBenefits: 'Proper hydration improves kidney function, regulates body temperature, and supports healthy digestion. It maintains blood pressure, lubricates joints, and helps transport nutrients throughout your body.',
     mentalBenefits: 'Even mild dehydration can impair concentration, memory, and mood. Staying hydrated enhances mental clarity, reduces fatigue, and improves overall cognitive performance throughout the day.',
     longTermBenefits: 'Consistent hydration supports healthy aging, maintains skin elasticity, and prevents kidney stones. It creates sustainable energy levels and reduces risk of chronic health issues related to dehydration.',
@@ -164,7 +176,9 @@ export const COMMON_HABITS = {
     complementary: ['Healthy eating', 'Morning routine']
   },
   'journaling': {
-    description: 'Daily writing practice for self-reflection and mental clarity',
+    title: 'Daily Journaling Practice',
+    description: 'Write in a journal for 10 minutes daily to reflect, process emotions, and gain clarity',
+    enhancedDescription: 'Daily writing practice for self-reflection and mental clarity',
     healthBenefits: 'Journaling reduces stress hormones like cortisol, improves immune system function, and can help lower blood pressure. It also promotes better sleep quality and faster recovery from illness.',
     mentalBenefits: 'Writing thoughts and feelings reduces anxiety, improves emotional processing, and enhances self-awareness. It helps organize thoughts, process difficult experiences, and develop problem-solving skills.',
     longTermBenefits: 'Regular journaling creates a valuable record of personal growth and life patterns. It builds emotional intelligence, improves communication skills, and provides a healthy outlet for lifelong stress management.',

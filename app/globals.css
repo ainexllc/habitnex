@@ -84,12 +84,39 @@
   }
   
   .input {
-    @apply border border-border-light dark:border-border-dark;
+    @apply border-2 border-border-light dark:border-border-dark;
     @apply bg-white dark:bg-surface-dark;
     @apply text-text-primary-light dark:text-text-primary-dark;
     @apply px-3 py-2 rounded-lg;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500;
+    @apply hover:border-primary-300 dark:hover:border-primary-700;
     @apply placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark;
     @apply transition-all duration-200 ease-in-out;
+    @apply cursor-text;
+  }
+  
+  .input:focus {
+    @apply shadow-lg shadow-primary-500/20;
+    @apply transform scale-[1.01];
+    @apply bg-primary-50/50 dark:bg-primary-950/50;
+  }
+  
+  .input:hover:not(:focus) {
+    @apply shadow-md shadow-primary-500/10;
+    @apply border-primary-400 dark:border-primary-600;
+  }
+  
+  /* Enhanced visual cue for active text fields */
+  .input::placeholder {
+    @apply transition-opacity duration-200;
+  }
+  
+  .input:focus::placeholder {
+    @apply opacity-60;
+  }
+  
+  /* Add a subtle left border accent when focused */
+  .input:focus {
+    @apply border-l-4 border-l-primary-500 pl-2;
   }
 }

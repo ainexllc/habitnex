@@ -99,7 +99,7 @@ export function HabitEnhancementCard({
         {/* Description */}
         <div>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-            {enhancement.description}
+            {enhancement.enhancedDescription || enhancement.description}
           </p>
         </div>
 

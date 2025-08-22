@@ -13,6 +13,7 @@ import { useClaudeAI } from '@/hooks/useClaudeAI';
 import { CreateHabitForm } from '@/types';
 import { HabitEnhancement } from '@/types/claude';
 import { Sparkles, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const habitSchema = z.object({
   name: z.string().min(1, 'Habit name is required').max(50, 'Name too long'),
@@ -147,6 +148,14 @@ export function HabitForm({
 
       if (response?.success && response.data) {
         setAiEnhancement(response.data);
+        
+        // Auto-populate form fields with AI-generated content
+        if (response.data.title) {
+          setValue('name', response.data.title);
+        }
+        if (response.data.description) {
+          setValue('description', response.data.description);
+        }
       }
     } catch (error) {
       console.error('Failed to enhance habit:', error);
@@ -296,11 +305,16 @@ export function HabitForm({
               <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
                 Description (optional)
               </label>
-              <textarea
-                className="input w-full min-h-[80px] resize-none"
-                placeholder="Add more details about your habit..."
-                {...register('description')}
-              />
+              <div className="relative">
+                <textarea
+                  className={cn(
+                    "input w-full min-h-[80px] resize-none",
+                    errors.description && 'border-error-500 focus:ring-error-500/30 focus:border-error-500 focus:bg-error-50/30 dark:focus:bg-error-950/30'
+                  )}
+                  placeholder="Add more details about your habit..."
+                  {...register('description')}
+                />
+              </div>
               {errors.description && (
                 <p className="text-sm text-error-500 mt-1">{errors.description.message}</p>
               )}

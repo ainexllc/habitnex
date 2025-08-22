@@ -15,7 +15,7 @@ export const isAIEnabled = (): boolean => {
 // Cost-effective model configuration
 export const AI_CONFIG = {
   model: 'claude-3-haiku-20240307',
-  maxTokens: 300, // Keep responses concise for cost control
+  maxTokens: 800, // Increased for enhanced comprehensive responses
   temperature: 0.3, // Lower temperature for consistent, practical responses
 } as const;
 

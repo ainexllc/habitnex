@@ -1,7 +1,9 @@
 // TypeScript interfaces for Claude AI features
 
 export interface HabitEnhancement {
-  description: string;
+  title: string; // AI-generated optimized habit title
+  description: string; // AI-generated habit description for the form
+  enhancedDescription: string; // Detailed description for the enhancement card
   healthBenefits: string;
   mentalBenefits: string;
   longTermBenefits: string;
