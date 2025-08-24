@@ -38,14 +38,21 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
   }, [isOpen, onClose]);
 
   const handleSubmit = async (data: CreateHabitForm) => {
-    if (!habit) return;
+    if (!habit) {
+      console.error('No habit available for editing');
+      return;
+    }
+    
+    console.log('Submitting edit for habit:', habit.id, 'with data:', data);
     
     try {
       setLoading(true);
       await editHabit(habit.id, data);
+      console.log('Edit submitted successfully');
       onClose();
     } catch (error) {
       console.error('Failed to update habit:', error);
+      alert(`Failed to update habit: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -61,16 +68,16 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
       onClick={handleOverlayClick}
     >
-      <div className="bg-surface-light dark:bg-background-dark rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-surface-light dark:bg-background-dark border-b border-border-light dark:border-border-dark p-6 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Edit Habit
             </h2>
-            <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               Update "{habit.name}" settings
             </p>
           </div>
@@ -78,7 +85,7 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-text-muted-light dark:text-text-muted-dark hover:text-text-primary-light dark:hover:text-text-primary-dark"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -86,7 +93,16 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
         
         <div className="p-6">
           <HabitForm 
-            onSubmit={handleSubmit}
+            onSubmit={(data) => handleSubmit({
+              ...data,
+              // Preserve existing AI enhancement data if not overridden
+              aiEnhanced: data.aiEnhanced ?? habit.aiEnhanced,
+              tip: data.tip ?? habit.tip,
+              healthBenefits: data.healthBenefits ?? habit.healthBenefits,
+              mentalBenefits: data.mentalBenefits ?? habit.mentalBenefits,
+              longTermBenefits: data.longTermBenefits ?? habit.longTermBenefits,
+              complementary: data.complementary ?? habit.complementary,
+            })}
             loading={loading}
             initialData={{
               name: habit.name,
@@ -94,17 +110,19 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
               tags: habit.tags || ((habit as any).category ? [(habit as any).category.toLowerCase().replace(/\s+/g, '-')] : []), // Migrate category to tags
               color: habit.color,
               frequency: habit.frequency,
-              targetDays: habit.targetDays,
+              targetDays: habit.targetDays || [],
               intervalDays: habit.intervalDays,
               startDate: habit.startDate,
+              reminderTime: habit.reminderTime,
+              reminderType: habit.reminderType,
               goal: habit.goal,
-              // AI Enhancement fields
-              aiEnhanced: habit.aiEnhanced,
-              tip: habit.tip,
-              healthBenefits: habit.healthBenefits,
-              mentalBenefits: habit.mentalBenefits,
-              longTermBenefits: habit.longTermBenefits,
-              complementary: habit.complementary
+              // AI Enhancement fields - ensure they're properly set
+              aiEnhanced: habit.aiEnhanced || false,
+              tip: habit.tip || '',
+              healthBenefits: habit.healthBenefits || '',
+              mentalBenefits: habit.mentalBenefits || '',
+              longTermBenefits: habit.longTermBenefits || '',
+              complementary: habit.complementary || []
             }}
             submitText="Update Habit"
           />

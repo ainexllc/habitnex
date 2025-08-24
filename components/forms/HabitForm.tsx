@@ -10,8 +10,10 @@ import { TagInput } from '@/components/ui/TagInput';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { HabitEnhancementCard } from '@/components/ai/HabitEnhancementCard';
 import { useClaudeAI } from '@/hooks/useClaudeAI';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { CreateHabitForm } from '@/types';
 import { HabitEnhancement } from '@/types/claude';
+import { getTimeFormatOptions, getTimePlaceholder } from '@/lib/timeUtils';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,9 +23,11 @@ const habitSchema = z.object({
   tags: z.array(z.string()).max(10, 'Maximum 10 tags allowed').optional(),
   color: z.string().min(1, 'Please select a color'),
   frequency: z.enum(['daily', 'weekly', 'interval']),
-  targetDays: z.array(z.number()).min(1, 'Select at least one day'),
+  targetDays: z.array(z.number()),
   intervalDays: z.number().min(1).max(365).optional(),
   startDate: z.string().optional(),
+  reminderTime: z.string().optional(),
+  reminderType: z.enum(['specific', 'general']).optional(),
   goal: z.object({
     type: z.enum(['streak', 'completion']),
     target: z.number().min(1).max(365),
@@ -31,7 +35,7 @@ const habitSchema = z.object({
   }).optional(),
   // AI Enhancement fields
   aiEnhanced: z.boolean().optional(),
-  tip: z.string().max(500, 'Tip too long').optional(),
+  tip: z.string().max(2000, 'Tip too long').optional(),
   healthBenefits: z.string().max(1000, 'Health benefits too long').optional(),
   mentalBenefits: z.string().max(1000, 'Mental benefits too long').optional(),
   longTermBenefits: z.string().max(1000, 'Long-term benefits too long').optional(),
@@ -44,6 +48,14 @@ const habitSchema = z.object({
 }, {
   message: "Interval days is required for interval frequency",
   path: ["intervalDays"],
+}).refine((data) => {
+  if (data.frequency === 'weekly') {
+    return data.targetDays && data.targetDays.length > 0;
+  }
+  return true;
+}, {
+  message: "Select at least one day",
+  path: ["targetDays"],
 });
 
 // Popular tag suggestions to help users get started
@@ -90,6 +102,7 @@ export function HabitForm({
   const [showGoal, setShowGoal] = useState(!!initialData?.goal);
   const [aiEnhancement, setAiEnhancement] = useState<HabitEnhancement | null>(null);
   const { enhanceHabit, loading: aiLoading, error: aiError, clearError } = useClaudeAI();
+  const { timeFormatPreferences } = useUserPreferences();
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateHabitForm>({
     resolver: zodResolver(habitSchema),
@@ -102,6 +115,8 @@ export function HabitForm({
       targetDays: initialData?.targetDays || [0, 1, 2, 3, 4, 5, 6],
       intervalDays: initialData?.intervalDays || 2,
       startDate: initialData?.startDate || new Date().toISOString().split('T')[0],
+      reminderTime: initialData?.reminderTime || '',
+      reminderType: initialData?.reminderType || 'general',
       goal: initialData?.goal || undefined,
       // AI Enhancement fields
       aiEnhanced: initialData?.aiEnhanced || false,
@@ -119,6 +134,7 @@ export function HabitForm({
   const watchName = watch('name');
   const watchTags = watch('tags');
   const watchTip = watch('tip');
+  const watchReminderType = watch('reminderType');
   const watchHealthBenefits = watch('healthBenefits');
   const watchMentalBenefits = watch('mentalBenefits');
   const watchLongTermBenefits = watch('longTermBenefits');
@@ -238,6 +254,14 @@ export function HabitForm({
     if (cleanedData.frequency !== 'interval') {
       delete cleanedData.intervalDays;
       delete cleanedData.startDate;
+      delete cleanedData.reminderTime;
+      delete cleanedData.reminderType;
+    } else {
+      // For interval habits, clean up reminder fields if not set
+      if (!cleanedData.reminderTime || cleanedData.reminderTime.trim() === '') {
+        delete cleanedData.reminderTime;
+        delete cleanedData.reminderType;
+      }
     }
     
     // For daily habits, set all days as target
@@ -436,8 +460,66 @@ export function HabitForm({
                   />
                 </div>
               </div>
+              
+              {/* Time Configuration */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-3">
+                  Preferred Time (Optional)
+                </label>
+                <div className="space-y-3">
+                  {/* Time Type Selection */}
+                  <div className="flex items-center space-x-6">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        value="general"
+                        className="mr-2"
+                        {...register('reminderType')}
+                      />
+                      General Time
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        value="specific"
+                        className="mr-2"
+                        {...register('reminderType')}
+                      />
+                      Specific Time
+                    </label>
+                  </div>
+                  
+                  {/* Time Input based on selection */}
+                  {watchReminderType === 'general' && (
+                    <select
+                      className="input w-full"
+                      {...register('reminderTime')}
+                    >
+                      <option value="">No preference</option>
+                      {getTimeFormatOptions(timeFormatPreferences).map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  
+                  {watchReminderType === 'specific' && (
+                    <input
+                      type="time"
+                      className="input w-full"
+                      placeholder={getTimePlaceholder(timeFormatPreferences)}
+                      {...register('reminderTime')}
+                    />
+                  )}
+                </div>
+                <p className="text-xs text-text-muted-light dark:text-text-muted-dark mt-1">
+                  Set when you prefer to do this habit to make it more actionable
+                </p>
+              </div>
+              
               <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                This habit will be due every {watch('intervalDays') || 2} days starting from the selected date.
+                This habit will be due every {watch('intervalDays') || 2} days starting from the selected date{watch('reminderTime') && watchReminderType === 'general' ? ` in the ${watch('reminderTime')}` : watch('reminderTime') && watchReminderType === 'specific' ? ` at ${watch('reminderTime')}` : ''}.
               </p>
             </div>
           )}

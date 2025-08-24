@@ -73,12 +73,15 @@ export function useHabits() {
     }
   };
 
-  const editHabit = async (habitId: string, updates: Partial<Habit>) => {
+  const editHabit = async (habitId: string, updates: Partial<Habit> | CreateHabitForm) => {
     if (!user) return;
+
+    console.log('Editing habit:', habitId, 'with updates:', updates);
 
     try {
       await updateHabit(user.uid, habitId, updates);
       await fetchHabits(); // Refresh the list
+      console.log('Habit updated successfully');
     } catch (err) {
       console.error('Error updating habit:', err);
       throw new Error('Failed to update habit');
