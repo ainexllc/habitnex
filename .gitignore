@@ -41,3 +41,14 @@ playwright/.cache/
 
 # firebase
 .firebase/
+
+# debug files and scripts
+debug-*.js
+debug-*.png
+*-debug.png
+*-debug.js
+test-screenshots/
+test-update-*.js
+
+# development temporary files  
+components/debug/
