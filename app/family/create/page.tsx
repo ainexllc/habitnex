@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { CreateFamilyRequest } from '@/types/family';
 import { Home, ArrowLeft, Users, Settings } from 'lucide-react';
+import { familyBackgrounds, familyText, familyIcons, getFamilyButton, getFamilyInput, familyAnimations } from '@/lib/familyThemes';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function CreateFamilyPage() {
@@ -65,19 +67,25 @@ export default function CreateFamilyPage() {
   
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className={cn(familyBackgrounds.page.normal, "py-8 px-4")}>
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
+              <div className={cn(
+                "w-20 h-20 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center shadow-lg dark:shadow-blue-500/20",
+                familyAnimations.hover
+              )}>
                 <Home className="w-10 h-10 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className={cn(
+              familyText.primary,
+              "text-3xl font-bold mb-2"
+            )}>
               Create Your Family
             </h1>
-            <p className="text-gray-600">
+            <p className={familyText.secondary}>
               Set up your family habit tracking system
             </p>
           </div>
@@ -85,8 +93,11 @@ export default function CreateFamilyPage() {
           {/* Back Button */}
           <div className="mb-6">
             <Link href="/dashboard">
-              <Button variant="ghost" className="flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <Button variant="ghost" className={cn(
+                "flex items-center",
+                familyAnimations.hover
+              )}>
+                <ArrowLeft className={cn("w-4 h-4 mr-2", familyIcons.primary)} />
                 Back to Dashboard
               </Button>
             </Link>

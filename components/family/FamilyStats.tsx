@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/Progress';
 import { Trophy, Target, Star, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { familyText, familyIcons, familyProgress, familyAlerts, familyAnimations } from '@/lib/familyThemes';
 
 interface FamilyStatsProps {
   members: FamilyMember[];
@@ -57,7 +58,8 @@ export function FamilyStats({
   
   return (
     <Card className={cn(
-      "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 shadow-lg",
+      "bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800 shadow-lg dark:shadow-blue-900/10",
+      familyAnimations.fade,
       className
     )}>
       <CardContent className={cn(
@@ -67,11 +69,12 @@ export function FamilyStats({
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className={cn(
-              "font-bold text-gray-900 flex items-center",
+              familyText.primary,
+              "font-bold flex items-center",
               touchMode ? "text-2xl" : "text-lg"
             )}>
               <Trophy className={cn(
-                "mr-2 text-yellow-600",
+                "mr-2 text-yellow-600 dark:text-yellow-500",
                 touchMode ? "w-7 h-7" : "w-5 h-5"
               )} />
               Family Progress Today
@@ -80,11 +83,11 @@ export function FamilyStats({
               "text-right",
               touchMode ? "text-xl" : "text-lg"
             )}>
-              <span className="font-bold text-blue-600">
+              <span className={cn("font-bold", familyProgress.text.primary)}>
                 {familyStats.totalCompleted}
               </span>
-              <span className="text-gray-500 mx-1">/</span>
-              <span className="font-bold text-gray-900">
+              <span className={cn("mx-1", familyText.muted)}>/</span>
+              <span className={cn("font-bold", familyText.primary)}>
                 {familyStats.totalHabits}
               </span>
             </div>
@@ -93,20 +96,20 @@ export function FamilyStats({
           <Progress 
             value={familyCompletionRate} 
             className={cn(
-              "w-full bg-white",
+              "w-full bg-white dark:bg-gray-700",
               touchMode ? "h-4" : "h-3"
             )}
           />
           
           <div className="flex justify-between mt-2">
             <span className={cn(
-              "text-gray-600",
+              familyText.secondary,
               touchMode ? "text-base" : "text-sm"
             )}>
               {Math.round(familyCompletionRate)}% Complete
             </span>
             <span className={cn(
-              "text-gray-600",
+              familyText.secondary,
               touchMode ? "text-base" : "text-sm"
             )}>
               {familyStats.totalPending} remaining
@@ -122,16 +125,17 @@ export function FamilyStats({
           {/* Total Points */}
           <div className="text-center">
             <div className={cn(
-              "font-bold text-purple-600",
+              "font-bold text-purple-600 dark:text-purple-400",
               touchMode ? "text-3xl" : "text-2xl"
             )}>
               {familyStats.totalPoints}
             </div>
             <div className={cn(
-              "text-gray-600 flex items-center justify-center",
+              familyText.secondary,
+              "flex items-center justify-center",
               touchMode ? "text-base" : "text-sm"
             )}>
-              <Star className="w-4 h-4 mr-1 text-purple-500" />
+              <Star className="w-4 h-4 mr-1 text-purple-500 dark:text-purple-400" />
               Total Points
             </div>
           </div>
@@ -139,16 +143,17 @@ export function FamilyStats({
           {/* Team Streak */}
           <div className="text-center">
             <div className={cn(
-              "font-bold text-green-600",
+              "font-bold text-green-600 dark:text-green-400",
               touchMode ? "text-3xl" : "text-2xl"
             )}>
               {teamStreak}
             </div>
             <div className={cn(
-              "text-gray-600 flex items-center justify-center",
+              familyText.secondary,
+              "flex items-center justify-center",
               touchMode ? "text-base" : "text-sm"
             )}>
-              <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+              <TrendingUp className="w-4 h-4 mr-1 text-green-500 dark:text-green-400" />
               Team Streak
             </div>
           </div>
@@ -156,16 +161,17 @@ export function FamilyStats({
           {/* Active Members */}
           <div className="text-center">
             <div className={cn(
-              "font-bold text-blue-600",
+              "font-bold text-blue-600 dark:text-blue-400",
               touchMode ? "text-3xl" : "text-2xl"
             )}>
               {members.length}
             </div>
             <div className={cn(
-              "text-gray-600 flex items-center justify-center",
+              familyText.secondary,
+              "flex items-center justify-center",
               touchMode ? "text-base" : "text-sm"
             )}>
-              <Target className="w-4 h-4 mr-1 text-blue-500" />
+              <Target className="w-4 h-4 mr-1 text-blue-500 dark:text-blue-400" />
               Members
             </div>
           </div>
@@ -174,14 +180,14 @@ export function FamilyStats({
           <div className="text-center">
             <div className={cn(
               "font-bold",
-              familyCompletionRate >= 80 ? "text-green-600" : 
-              familyCompletionRate >= 60 ? "text-yellow-600" : "text-red-600",
+              familyCompletionRate >= 80 ? "text-green-600 dark:text-green-400" : 
+              familyCompletionRate >= 60 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400",
               touchMode ? "text-3xl" : "text-2xl"
             )}>
               {Math.round(familyCompletionRate)}%
             </div>
             <div className={cn(
-              "text-gray-600",
+              familyText.secondary,
               touchMode ? "text-base" : "text-sm"
             )}>
               Success Rate
@@ -192,13 +198,13 @@ export function FamilyStats({
         {/* Top Performer */}
         {topPerformer && getMemberStats(topPerformer.id).completionRate > 0 && (
           <div className={cn(
-            "mt-4 pt-4 border-t border-blue-200",
+            "mt-4 pt-4 border-t border-blue-200 dark:border-blue-800",
             touchMode && "mt-6 pt-6"
           )}>
             <div className="flex items-center justify-center space-x-2">
               <div className="text-center">
                 <div className={cn(
-                  "text-yellow-600 font-bold mb-1",
+                  "text-yellow-600 dark:text-yellow-500 font-bold mb-1",
                   touchMode ? "text-lg" : "text-sm"
                 )}>
                   🏆 Today's Champion
@@ -206,7 +212,8 @@ export function FamilyStats({
                 <div className="flex items-center justify-center space-x-2">
                   <div 
                     className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm",
+                      "w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg",
+                      familyAnimations.hover,
                       touchMode && "w-10 h-10 text-base"
                     )}
                     style={{ backgroundColor: topPerformer.color }}
@@ -214,13 +221,14 @@ export function FamilyStats({
                     {topPerformer.avatar}
                   </div>
                   <span className={cn(
-                    "font-medium text-gray-900",
+                    familyText.primary,
+                    "font-medium",
                     touchMode ? "text-lg" : "text-base"
                   )}>
                     {topPerformer.displayName}
                   </span>
                   <span className={cn(
-                    "text-gray-500",
+                    familyText.muted,
                     touchMode ? "text-base" : "text-sm"
                   )}>
                     {Math.round(getMemberStats(topPerformer.id).completionRate)}%
@@ -234,11 +242,13 @@ export function FamilyStats({
         {/* Motivational Messages */}
         {familyCompletionRate === 100 && (
           <div className={cn(
-            "mt-4 p-3 bg-green-100 border border-green-200 rounded-lg text-center",
+            familyAlerts.success,
+            "mt-4 p-3 rounded-lg text-center",
+            familyAnimations.bounce,
             touchMode && "mt-6 p-4"
           )}>
             <div className={cn(
-              "text-green-800 font-bold",
+              "font-bold",
               touchMode ? "text-xl" : "text-lg"
             )}>
               🎉 Perfect Day! Everyone completed their habits! 🎉
@@ -248,11 +258,13 @@ export function FamilyStats({
         
         {familyCompletionRate >= 80 && familyCompletionRate < 100 && (
           <div className={cn(
-            "mt-4 p-3 bg-blue-100 border border-blue-200 rounded-lg text-center",
+            familyAlerts.info,
+            "mt-4 p-3 rounded-lg text-center",
+            familyAnimations.pulse,
             touchMode && "mt-6 p-4"
           )}>
             <div className={cn(
-              "text-blue-800 font-medium",
+              "font-medium",
               touchMode ? "text-lg" : "text-base"
             )}>
               ⭐ Amazing work! You're almost there! ⭐
@@ -262,11 +274,13 @@ export function FamilyStats({
         
         {familyCompletionRate < 50 && familyStats.totalHabits > 0 && (
           <div className={cn(
-            "mt-4 p-3 bg-yellow-100 border border-yellow-200 rounded-lg text-center",
+            familyAlerts.warning,
+            "mt-4 p-3 rounded-lg text-center",
+            familyAnimations.hover,
             touchMode && "mt-6 p-4"
           )}>
             <div className={cn(
-              "text-yellow-800 font-medium",
+              "font-medium",
               touchMode ? "text-lg" : "text-base"
             )}>
               💪 Keep going! Every habit completed is a victory! 💪

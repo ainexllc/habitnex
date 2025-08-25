@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Settings, Users, Calendar, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { familyText, familyIcons, getFamilyButton, familyAnimations } from '@/lib/familyThemes';
 import Link from 'next/link';
 
 interface FamilyHeaderProps {
@@ -38,7 +39,8 @@ export function FamilyHeader({
         {/* Family Info */}
         <div className="flex items-center space-x-4">
           <div className={cn(
-            "flex items-center justify-center rounded-full bg-blue-600 text-white font-bold",
+            "flex items-center justify-center rounded-full bg-blue-600 dark:bg-blue-500 text-white font-bold shadow-lg dark:shadow-blue-500/20",
+            familyAnimations.hover,
             touchMode ? "w-16 h-16 text-2xl" : "w-12 h-12 text-lg"
           )}>
             <Home className={cn(
@@ -48,13 +50,15 @@ export function FamilyHeader({
           </div>
           <div>
             <h1 className={cn(
-              "font-bold text-gray-900",
+              familyText.primary,
+              "font-bold",
               touchMode ? "text-4xl" : "text-2xl md:text-3xl"
             )}>
               {familyName}
             </h1>
             <div className={cn(
-              "text-gray-600 font-medium",
+              familyText.secondary,
+              "font-medium",
               touchMode ? "text-xl" : "text-sm md:text-base"
             )}>
               {date}
@@ -70,13 +74,15 @@ export function FamilyHeader({
             touchMode && "mr-4"
           )}>
             <div className={cn(
-              "font-bold text-gray-900",
+              familyText.primary,
+              "font-bold",
               touchMode ? "text-3xl" : "text-xl"
             )}>
               {time}
             </div>
             <div className={cn(
-              "text-gray-500 text-sm",
+              familyText.muted,
+              "text-sm",
               touchMode && "text-base"
             )}>
               Right now
@@ -88,17 +94,17 @@ export function FamilyHeader({
             /* Desktop Controls */
             <div className="flex items-center space-x-2">
               <Link href="/family/calendar">
-                <Button variant="ghost" size="sm">
-                  <Calendar className="w-4 h-4" />
+                <Button variant="ghost" size="sm" className={familyAnimations.hover}>
+                  <Calendar className={cn("w-4 h-4", familyIcons.interactive)} />
                 </Button>
               </Link>
               <Link href="/family/members">
-                <Button variant="ghost" size="sm">
-                  <Users className="w-4 h-4" />
+                <Button variant="ghost" size="sm" className={familyAnimations.hover}>
+                  <Users className={cn("w-4 h-4", familyIcons.interactive)} />
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={onSettingsClick}>
-                <Settings className="w-4 h-4" />
+              <Button variant="ghost" size="sm" onClick={onSettingsClick} className={familyAnimations.hover}>
+                <Settings className={cn("w-4 h-4", familyIcons.interactive)} />
               </Button>
             </div>
           ) : (
@@ -107,24 +113,32 @@ export function FamilyHeader({
               <Button
                 variant="ghost"
                 size="lg"
-                className="w-16 h-16 rounded-full"
+                className={cn(
+                  "w-16 h-16 rounded-full",
+                  familyAnimations.hover,
+                  familyAnimations.press
+                )}
                 onClick={() => setShowMenu(!showMenu)}
               >
-                <Settings className="w-8 h-8" />
+                <Settings className={cn("w-8 h-8", familyIcons.interactive)} />
               </Button>
               
               {/* Touch Menu */}
               {showMenu && (
-                <div className="absolute right-0 top-20 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 min-w-[200px] z-50">
+                <div className="absolute right-0 top-20 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 min-w-[200px] z-50">
                   <div className="space-y-2">
                     <Link href="/family/calendar">
                       <Button 
                         variant="ghost" 
                         size="lg" 
-                        className="w-full justify-start h-14 text-lg"
+                        className={cn(
+                          "w-full justify-start h-14 text-lg",
+                          familyText.primary,
+                          familyAnimations.hover
+                        )}
                         onClick={() => setShowMenu(false)}
                       >
-                        <Calendar className="w-6 h-6 mr-3" />
+                        <Calendar className={cn("w-6 h-6 mr-3", familyIcons.primary)} />
                         Calendar
                       </Button>
                     </Link>
@@ -132,23 +146,31 @@ export function FamilyHeader({
                       <Button 
                         variant="ghost" 
                         size="lg" 
-                        className="w-full justify-start h-14 text-lg"
+                        className={cn(
+                          "w-full justify-start h-14 text-lg",
+                          familyText.primary,
+                          familyAnimations.hover
+                        )}
                         onClick={() => setShowMenu(false)}
                       >
-                        <Users className="w-6 h-6 mr-3" />
+                        <Users className={cn("w-6 h-6 mr-3", familyIcons.primary)} />
                         Members
                       </Button>
                     </Link>
                     <Button 
                       variant="ghost" 
                       size="lg" 
-                      className="w-full justify-start h-14 text-lg"
+                      className={cn(
+                        "w-full justify-start h-14 text-lg",
+                        familyText.primary,
+                        familyAnimations.hover
+                      )}
                       onClick={() => {
                         setShowMenu(false);
                         onSettingsClick?.();
                       }}
                     >
-                      <Settings className="w-6 h-6 mr-3" />
+                      <Settings className={cn("w-6 h-6 mr-3", familyIcons.primary)} />
                       Settings
                     </Button>
                   </div>
