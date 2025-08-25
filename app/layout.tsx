@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -10,6 +10,13 @@ import { SoundFeedback } from '@/components/celebration/SoundFeedback'
 export const metadata: Metadata = {
   title: 'NextVibe - Build Better Habits',
   description: 'Track your daily habits and build a better you',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({

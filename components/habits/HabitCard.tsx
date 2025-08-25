@@ -130,7 +130,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
             {habit.frequency === 'interval' && !isDueToday && nextDueDate && (
               <div className="text-center">
                 <div className="flex items-center text-sm text-warning-600 dark:text-warning-400">
-                  <Clock className="w-3 h-3 mr-1" />
+                  <Clock className="w-4 h-4 mr-1" />
                   {daysUntilDue === 0 ? 'Today' : `${daysUntilDue} days`}
                 </div>
                 <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
@@ -142,7 +142,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
             {habit.goal && (
               <div className="text-center">
                 <div className="flex items-center text-sm text-warning-600 dark:text-warning-400">
-                  <Target className="w-3 h-3 mr-1" />
+                  <Target className="w-4 h-4 mr-1" />
                   {habit.goal.target}
                 </div>
                 <div className="text-xs text-text-muted-light dark:text-text-muted-dark">

@@ -118,7 +118,7 @@ export function ListView({ habits, onEdit }: ListViewProps) {
                 } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 {isLoading ? (
-                  <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" />
                 ) : isCompleted ? (
                   <Check className="w-4 h-4" />
                 ) : null}
@@ -126,7 +126,7 @@ export function ListView({ habits, onEdit }: ListViewProps) {
 
               {/* Color Indicator */}
               <div
-                className="flex-shrink-0 w-3 h-3 rounded-full"
+                className="flex-shrink-0 w-4 h-4 rounded-full"
                 style={{ backgroundColor: habit.color }}
               />
 

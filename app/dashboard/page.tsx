@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
 import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
@@ -8,12 +8,16 @@ import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { MoodBar } from '@/components/moods/MoodBar';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
+import { DashboardViewSwitcher } from '@/components/dashboard/DashboardViewSwitcher';
+import { FocusView } from '@/components/dashboard/FocusView';
+import { CompactView } from '@/components/dashboard/CompactView';
 import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { Target, Plus, Users, Home } from 'lucide-react';
 import Link from 'next/link';
 import { Habit } from '@/types';
+import { DashboardViewType } from '@/types/dashboard';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = useHabits();
@@ -21,6 +25,17 @@ export default function DashboardPage() {
   
   // State for habit editing
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  
+  // Dashboard view state
+  const [currentView, setCurrentView] = useState<DashboardViewType>(DashboardViewType.FOCUS);
+
+  // Load preferred view from localStorage
+  useEffect(() => {
+    const savedView = localStorage.getItem('preferredDashboardView') as DashboardViewType;
+    if (savedView && Object.values(DashboardViewType).includes(savedView)) {
+      setCurrentView(savedView);
+    }
+  }, []);
   
   // Filter habits that are due today or overdue
   const todayHabits = useMemo(() => {
@@ -170,12 +185,12 @@ export default function DashboardPage() {
           {/* Mood Bar */}
           <MoodBar className="mb-8" />
 
-          {/* Today's Habits */}
+          {/* Habits Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
-                  Today's Habits
+                  {currentView === DashboardViewType.FOCUS ? 'Today\'s Focus' : 'Your Habits'}
                 </h2>
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                   {new Date().toLocaleDateString('en-US', { 
@@ -187,14 +202,21 @@ export default function DashboardPage() {
                 </p>
               </div>
               
-              {habits.length > 0 && (
+              <div className="flex items-center gap-3">
+                {habits.length > 0 && (
+                  <DashboardViewSwitcher
+                    currentView={currentView}
+                    onViewChange={setCurrentView}
+                    habitCount={habits.length}
+                  />
+                )}
                 <Link href="/habits/new">
                   <Button size="sm" variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Habit
                   </Button>
                 </Link>
-              )}
+              </div>
             </div>
 
             {habits.length === 0 ? (
@@ -224,16 +246,53 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Habits Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {habits.map((habit) => (
-                    <BenefitsHabitCard 
-                      key={habit.id} 
-                      habit={habit} 
-                      onEdit={(habit) => setEditingHabit(habit)}
-                    />
-                  ))}
-                </div>
+                {/* Dynamic View Rendering */}
+                {currentView === DashboardViewType.FOCUS && (
+                  <FocusView 
+                    habits={habits}
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                )}
+                
+                {currentView === DashboardViewType.COMPACT && (
+                  <CompactView 
+                    habits={habits}
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                )}
+                
+                {currentView === DashboardViewType.CARDS && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {habits.map((habit) => (
+                      <BenefitsHabitCard 
+                        key={habit.id} 
+                        habit={habit} 
+                        onEdit={(habit) => setEditingHabit(habit)}
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {(currentView === DashboardViewType.PRIORITY || currentView === DashboardViewType.CATEGORIES) && (
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center">
+                    <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      Coming Soon
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                      {currentView === DashboardViewType.PRIORITY 
+                        ? 'Priority Matrix view is coming in the next update.'
+                        : 'Category Groups view is coming in the next update.'
+                      }
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setCurrentView(DashboardViewType.FOCUS)}
+                    >
+                      Switch to Focus View
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

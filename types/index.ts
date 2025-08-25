@@ -11,6 +11,8 @@ export interface User {
     theme: 'light' | 'dark';
     weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, etc.
     notifications: boolean;
+    timeFormat: '12h' | '24h'; // 12-hour or 24-hour time format
+    locale: string; // For date/time formatting (e.g., 'en-US', 'en-GB')
   };
 }
 
@@ -24,6 +26,8 @@ export interface Habit {
   targetDays: number[]; // For weekly: [0,1,2,3,4,5,6], for daily: [0,1,2,3,4,5,6]
   intervalDays?: number; // For interval frequency: every X days
   startDate?: string; // For interval habits: when to start counting (YYYY-MM-DD)
+  reminderTime?: string; // For interval habits: preferred time (HH:MM format or morning/afternoon/evening)
+  reminderType?: 'specific' | 'general'; // specific = HH:MM, general = morning/afternoon/evening
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isArchived: boolean;
@@ -34,7 +38,7 @@ export interface Habit {
   };
   // AI Enhancement fields
   aiEnhanced?: boolean; // Track if habit was enhanced by AI
-  tip?: string; // Success tip from AI
+  tip?: string; // Comprehensive success strategy from AI (up to 2000 chars)
   healthBenefits?: string; // Detailed health benefits description
   mentalBenefits?: string; // Detailed mental/emotional benefits description
   longTermBenefits?: string; // Detailed long-term benefits description
@@ -98,6 +102,8 @@ export interface CreateHabitForm {
   targetDays: number[];
   intervalDays?: number;
   startDate?: string;
+  reminderTime?: string;
+  reminderType?: 'specific' | 'general';
   goal?: {
     type: 'streak' | 'completion';
     target: number;
@@ -105,7 +111,7 @@ export interface CreateHabitForm {
   };
   // AI Enhancement fields
   aiEnhanced?: boolean;
-  tip?: string;
+  tip?: string; // Comprehensive success strategy from AI (up to 2000 chars)
   healthBenefits?: string;
   mentalBenefits?: string;
   longTermBenefits?: string;

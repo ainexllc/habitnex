@@ -68,6 +68,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 theme: 'light',
                 weekStartsOn: 0,
                 notifications: true,
+                timeFormat: '12h', // Default to 12-hour format
+                locale: navigator.language || 'en-US', // Auto-detect user's locale
               },
             });
             profile = await getUserProfile(firebaseUser.uid);

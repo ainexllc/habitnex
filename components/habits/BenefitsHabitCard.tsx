@@ -22,6 +22,7 @@ import {
   Timer
 } from 'lucide-react';
 import { useHabits } from '@/hooks/useHabits';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { 
   calculateStreak, 
   isHabitDueToday, 
@@ -31,16 +32,19 @@ import {
   calculateIntervalStreak,
   calculateCompletionRate 
 } from '@/lib/utils';
+import { formatTime } from '@/lib/timeUtils';
 
 interface BenefitsHabitCardProps {
   habit: Habit;
   onEdit?: (habit: Habit) => void;
+  compact?: boolean;
 }
 
-export function BenefitsHabitCard({ habit, onEdit }: BenefitsHabitCardProps) {
+export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHabitCardProps) {
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const { isHabitCompleted, toggleCompletion, completions, removeHabit } = useHabits();
+  const { timeFormatPreferences } = useUserPreferences();
   
   const isCompleted = isHabitCompleted(habit.id);
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
@@ -250,7 +254,11 @@ export function BenefitsHabitCard({ habit, onEdit }: BenefitsHabitCardProps) {
                 <Calendar className="w-4 h-4" />
                 <span>
                   {habit.frequency === 'interval' && nextDueDate
-                    ? `Next: ${daysUntilDue === 0 ? 'Today' : `${daysUntilDue}d`}`
+                    ? `Next: ${daysUntilDue === 0 ? 'Today' : `${daysUntilDue}d`}${
+                        habit.reminderTime 
+                          ? ` (${formatTime(habit.reminderTime, timeFormatPreferences)})`
+                          : ''
+                      }`
                     : 'Not due today'
                   }
                 </span>
