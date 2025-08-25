@@ -256,7 +256,7 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
                   {habit.frequency === 'interval' && nextDueDate
                     ? `Next: ${daysUntilDue === 0 ? 'Today' : `${daysUntilDue}d`}${
                         habit.reminderTime 
-                          ? ` (${formatTime(habit.reminderTime, timeFormatPreferences)})`
+                          ? ` (${formatTime(new Date(`1970-01-01T${habit.reminderTime}`), timeFormatPreferences.is24Hour)})`
                           : ''
                       }`
                     : 'Not due today'

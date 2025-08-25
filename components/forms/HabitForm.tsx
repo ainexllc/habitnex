@@ -13,7 +13,7 @@ import { useClaudeAI } from '@/hooks/useClaudeAI';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { CreateHabitForm } from '@/types';
 import { HabitEnhancement } from '@/types/claude';
-import { getTimeFormatOptions, getTimePlaceholder } from '@/lib/timeUtils';
+import { getTimeOptions, getTimePlaceholder } from '@/lib/timeUtils';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -496,7 +496,7 @@ export function HabitForm({
                       {...register('reminderTime')}
                     >
                       <option value="">No preference</option>
-                      {getTimeFormatOptions(timeFormatPreferences).map(option => (
+                      {getTimeOptions(timeFormatPreferences.is24Hour).map(option => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -508,7 +508,7 @@ export function HabitForm({
                     <input
                       type="time"
                       className="input w-full"
-                      placeholder={getTimePlaceholder(timeFormatPreferences)}
+                      placeholder={getTimePlaceholder(timeFormatPreferences.is24Hour)}
                       {...register('reminderTime')}
                     />
                   )}

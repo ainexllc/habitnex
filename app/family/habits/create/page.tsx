@@ -84,10 +84,10 @@ export default function CreateFamilyHabitPage() {
         setAiEnhancement(response.data);
         
         // Auto-populate enhanced fields
-        if (response.data.title && response.data.title !== formData.name) {
+        if (response.data?.title && response.data.title !== formData.name) {
           setFormData(prev => ({ ...prev, name: response.data.title }));
         }
-        if (response.data.enhancedDescription) {
+        if (response.data?.enhancedDescription) {
           setFormData(prev => ({ ...prev, description: response.data.enhancedDescription }));
         }
       } else {

@@ -10,6 +10,7 @@ export function TouchScreenOptimizer() {
     // Disable text selection for touch screens
     document.body.style.userSelect = 'none';
     document.body.style.webkitUserSelect = 'none';
+    // @ts-ignore - msUserSelect is IE/Edge specific
     document.body.style.msUserSelect = 'none';
     
     // Disable zoom on touch screens

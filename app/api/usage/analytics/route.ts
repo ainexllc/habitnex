@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
 
     } else if (type === 'system') {
       // Get system-wide analytics (admin only)
-      const systemStats = await getSystemUsageStats(date);
+      const systemStats = await getSystemUsageStats(date || undefined);
       const systemAlerts = await getActiveAlerts();
 
       responseData = {

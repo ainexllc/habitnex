@@ -58,17 +58,11 @@ export function FamilyMemberZone({
           celebrateHabitCompletion({
             member,
             habit: completedHabit,
-            completion: result // Assuming toggleCompletion returns completion data
+            completion: {} // toggleCompletion doesn't return completion data
           });
 
-          // Check for streak milestones
-          if (result.streakCount) {
-            celebrateStreakMilestone({
-              member,
-              habit: completedHabit,
-              completion: result
-            });
-          }
+          // Check for streak milestones - result doesn't contain streakCount, skip for now
+          // TODO: Calculate streak from updated data after loadData() completes
 
           // Check for first habit completion
           if (member.stats.habitsCompleted === 0) {
@@ -272,14 +266,13 @@ export function FamilyMemberZone({
                 {/* Completion Button */}
                 <VisualFeedback
                   feedbackType={habit.completed ? "success" : "info"}
-                  onInteraction={(e) => {
-                    e.stopPropagation();
+                  onInteraction={() => {
                     handleHabitToggle(habit.id, habit.completed);
                   }}
                   disabled={loading}
                 >
                   <Button
-                    variant={habit.completed ? "default" : "ghost"}
+                    variant={habit.completed ? "primary" : "ghost"}
                     size={touchMode ? "lg" : "sm"}
                     className={cn(
                       "flex-shrink-0 rounded-full",

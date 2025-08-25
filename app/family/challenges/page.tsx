@@ -266,7 +266,7 @@ export default function FamilyChallengesPage() {
                   
                   {challenge.status === 'active' && completionRate >= 100 && (
                     <Button
-                      onClick={() => completeChallenge(challenge.id, leaderId)}
+                      onClick={() => completeChallenge(challenge.id, leaderId || undefined)}
                       disabled={loading}
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-700"

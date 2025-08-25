@@ -91,7 +91,7 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
       {/* Completion Button */}
       <Button
         size="sm"
-        variant={isCompleted ? "default" : "outline"}
+        variant={isCompleted ? "primary" : "outline"}
         onClick={handleToggleCompletion}
         disabled={loading}
         className={`flex-shrink-0 w-9 h-9 p-0 rounded-full ${
@@ -121,17 +121,17 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
           {/* Time indicator for interval habits */}
           {habit.frequency === 'interval' && habit.reminderTime && (
             <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
-              {formatTime(habit.reminderTime, timeFormatPreferences)}
+              {formatTime(new Date(`1970-01-01T${habit.reminderTime}`), timeFormatPreferences.is24Hour)}
             </span>
           )}
           
           {/* Status indicators */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {isOverdue && (
-              <AlertCircle className="w-4 h-4 text-red-500" title="Overdue" />
+              <AlertCircle className="w-4 h-4 text-red-500" />
             )}
             {isDueToday && !isCompleted && (
-              <Clock className="w-4 h-4 text-blue-500" title="Due today" />
+              <Clock className="w-4 h-4 text-blue-500" />
             )}
             {currentStreak > 0 && (
               <div className="flex items-center gap-1">

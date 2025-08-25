@@ -1,17 +1,25 @@
 import { useState, useEffect } from 'react';
 
 interface UserPreferences {
-  timeFormat: '12' | '24';
+  timeFormat: '12h' | '24h';
+  locale: string;
+  theme: 'light' | 'dark';
+  notifications: boolean;
+  weekStartsOn: number;
 }
 
 interface TimeFormatPreferences {
   is24Hour: boolean;
-  format: '12' | '24';
+  format: '12h' | '24h';
 }
 
 export function useUserPreferences() {
   const [preferences, setPreferences] = useState<UserPreferences>({
-    timeFormat: '12'
+    timeFormat: '12h',
+    locale: 'en-US',
+    theme: 'light',
+    notifications: true,
+    weekStartsOn: 0
   });
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export function useUserPreferences() {
   };
 
   const timeFormatPreferences: TimeFormatPreferences = {
-    is24Hour: preferences.timeFormat === '24',
+    is24Hour: preferences.timeFormat === '24h',
     format: preferences.timeFormat
   };
 

@@ -172,7 +172,7 @@ export default function FamilyRewardsPage() {
               {/* Category Filter */}
               <div className="flex items-center space-x-2">
                 <Button
-                  variant={selectedCategory === null ? "default" : "outline"}
+                  variant={selectedCategory === null ? "primary" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory(null)}
                 >
@@ -182,7 +182,7 @@ export default function FamilyRewardsPage() {
                   categoryRewards.length > 0 && (
                     <Button
                       key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
+                      variant={selectedCategory === category ? "primary" : "outline"}
                       size="sm"
                       onClick={() => setSelectedCategory(category)}
                       className="flex items-center space-x-1"
@@ -224,9 +224,9 @@ export default function FamilyRewardsPage() {
           {rewards.length > 0 && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(selectedCategory 
-                ? categories[selectedCategory] || []
+                ? categories[selectedCategory as keyof typeof categories] || []
                 : rewards
-              ).map((reward) => {
+              ).map((reward: any) => {
                 const canAfford = memberPoints >= reward.pointsRequired;
                 const isAvailable = availableRewards.some(r => r.id === reward.id);
                 const isRedemptionPending = redeeming === reward.id;

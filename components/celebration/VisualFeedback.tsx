@@ -240,7 +240,7 @@ export function FeedbackButton({
   return (
     <VisualFeedback 
       feedbackType={feedbackType}
-      onInteraction={onClick}
+      onInteraction={onClick ? () => onClick({} as any) : undefined}
       disabled={disabled}
     >
       <button 

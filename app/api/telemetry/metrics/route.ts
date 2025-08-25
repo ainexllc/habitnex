@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMetrics, calculateBusinessMetrics } from '@/lib/telemetry/metrics';
 import { getTelemetryProvider } from '@/lib/telemetry';
+import { BusinessMetrics } from '@/lib/telemetry/types';
 
 /**
  * Get current telemetry metrics
@@ -48,7 +49,18 @@ export async function GET(req: NextRequest) {
             aiFeatureAdoption: businessMetrics.aiFeatureAdoption,
             userRetentionRate: businessMetrics.userRetentionRate,
             featureUsageDistribution: businessMetrics.featureUsageDistribution,
-          };
+            // Include required fields with default values
+            apiResponseTime: { p50: 0, p90: 0, p95: 0, p99: 0 },
+            errorRate: 0,
+            claudeApiCost: 0,
+            databaseQueryPerformance: 0,
+            memoryUsage: 0,
+            pageLoadTime: { lcp: 0, fid: 0, cls: 0 },
+            timeToInteractive: 0,
+            bounceRate: 0,
+            featureCompletionRate: 0,
+            errorRecoveryRate: 0
+          } as BusinessMetrics;
           break;
         
         case 'technical':
@@ -58,7 +70,18 @@ export async function GET(req: NextRequest) {
             claudeApiCost: businessMetrics.claudeApiCost,
             databaseQueryPerformance: businessMetrics.databaseQueryPerformance,
             memoryUsage: businessMetrics.memoryUsage,
-          };
+            // Include required fields with default values
+            habitCompletionRate: 0,
+            moodEntriesPerDay: 0,
+            aiFeatureAdoption: 0,
+            userRetentionRate: 0,
+            featureUsageDistribution: {},
+            pageLoadTime: { lcp: 0, fid: 0, cls: 0 },
+            timeToInteractive: 0,
+            bounceRate: 0,
+            featureCompletionRate: 0,
+            errorRecoveryRate: 0
+          } as BusinessMetrics;
           break;
         
         case 'ux':
@@ -68,7 +91,18 @@ export async function GET(req: NextRequest) {
             bounceRate: businessMetrics.bounceRate,
             featureCompletionRate: businessMetrics.featureCompletionRate,
             errorRecoveryRate: businessMetrics.errorRecoveryRate,
-          };
+            // Include required fields with default values
+            habitCompletionRate: 0,
+            moodEntriesPerDay: 0,
+            aiFeatureAdoption: 0,
+            userRetentionRate: 0,
+            featureUsageDistribution: {},
+            apiResponseTime: { p50: 0, p90: 0, p95: 0, p99: 0 },
+            errorRate: 0,
+            claudeApiCost: 0,
+            databaseQueryPerformance: 0,
+            memoryUsage: 0
+          } as BusinessMetrics;
           break;
       }
     }

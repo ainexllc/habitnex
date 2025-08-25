@@ -52,10 +52,10 @@ export function DiceBearAvatar({
       const collection = styleCollections[style];
       if (!collection) {
         console.warn(`Avatar style "${style}" not found, falling back to personas`);
-        return createAvatar(personas, { seed }).toString();
+        return createAvatar(personas as any, { seed }).toString();
       }
 
-      return createAvatar(collection, {
+      return createAvatar(collection as any, {
         seed,
         // Common options for better consistency
         size,
@@ -107,7 +107,7 @@ export function useAvatarPreview(baseSeed: string, style: AvatarStyle) {
       variants.push({
         id: i,
         seed,
-        svg: createAvatar(styleCollections[style], { seed, size: 64 }).toString()
+        svg: createAvatar(styleCollections[style] as any, { seed, size: 64 }).toString()
       });
     }
     return variants;

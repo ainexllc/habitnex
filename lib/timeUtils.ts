@@ -38,3 +38,65 @@ export function parseTimeString(timeString: string): { hours: number; minutes: n
 
   return { hours, minutes };
 }
+
+export function detectSystemTimeFormat(): '12h' | '24h' {
+  // Try to detect system time format by creating a test date
+  const testDate = new Date();
+  const timeString = testDate.toLocaleTimeString();
+  
+  // Check if the time string contains AM/PM indicators
+  if (timeString.toLowerCase().includes('am') || timeString.toLowerCase().includes('pm')) {
+    return '12h';
+  } else {
+    return '24h';
+  }
+}
+
+export function getTimeOptions(is24Hour: boolean): Array<{value: string; label: string}> {
+  const options = [];
+  
+  if (is24Hour) {
+    // 24-hour format
+    for (let hour = 6; hour <= 23; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        options.push({
+          value: timeStr,
+          label: timeStr
+        });
+      }
+    }
+  } else {
+    // 12-hour format
+    for (let hour = 6; hour <= 11; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeStr = `${hour}:${minute.toString().padStart(2, '0')}`;
+        options.push({
+          value: timeStr,
+          label: `${timeStr} AM`
+        });
+      }
+    }
+    for (let hour = 12; hour <= 11; hour++) {
+      if (hour > 12) break;
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeStr = `${hour}:${minute.toString().padStart(2, '0')}`;
+        options.push({
+          value: timeStr,
+          label: `${timeStr} PM`
+        });
+      }
+    }
+    for (let hour = 1; hour <= 11; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeStr = `${hour}:${minute.toString().padStart(2, '0')}`;
+        options.push({
+          value: timeStr,
+          label: `${timeStr} PM`
+        });
+      }
+    }
+  }
+  
+  return options;
+}
