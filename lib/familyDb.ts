@@ -34,6 +34,51 @@ import type {
   FamilyDashboardData
 } from '../types/family';
 
+// Get families that a user is a member of
+export const getUserFamilies = async (userId: string): Promise<Array<{ familyId: string; familyName: string; member: FamilyMember }>> => {
+  try {
+    console.log('Searching for families where user is a member:', userId);
+    
+    // Query all families
+    const familiesSnapshot = await getDocs(collection(db, 'families'));
+    const userFamilies: Array<{ familyId: string; familyName: string; member: FamilyMember }> = [];
+    
+    // Check each family for membership
+    for (const familyDoc of familiesSnapshot.docs) {
+      const familyData = familyDoc.data();
+      
+      // Skip inactive families
+      if (!familyData.isActive) continue;
+      
+      // Check if user is a member of this family
+      const memberDoc = await getDoc(doc(db, 'families', familyDoc.id, 'members', userId));
+      
+      if (memberDoc.exists()) {
+        const memberData = memberDoc.data() as Omit<FamilyMember, 'id'>;
+        
+        // Only include active members
+        if (memberData.isActive) {
+          userFamilies.push({
+            familyId: familyDoc.id,
+            familyName: familyData.name,
+            member: {
+              id: memberDoc.id,
+              ...memberData
+            }
+          });
+        }
+      }
+    }
+    
+    console.log(`Found ${userFamilies.length} families for user:`, userFamilies.map(f => f.familyName));
+    return userFamilies;
+    
+  } catch (error) {
+    console.error('Error getting user families:', error);
+    return [];
+  }
+};
+
 // Family Operations
 export const createFamily = async (creatorUserId: string, request: CreateFamilyRequest): Promise<string> => {
   try {

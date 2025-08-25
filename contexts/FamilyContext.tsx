@@ -17,7 +17,8 @@ import {
   subscribeFamilyData,
   addDirectFamilyMember,
   updateFamilyMemberInDb,
-  updateFamilySettingsInDb
+  updateFamilySettingsInDb,
+  getUserFamilies
 } from '@/lib/familyDb';
 
 interface FamilyContextType {
@@ -93,14 +94,35 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
         const lastFamilyId = localStorage.getItem(`lastFamily_${user.uid}`);
         
         if (lastFamilyId) {
-          await switchFamily(lastFamilyId);
+          try {
+            await switchFamily(lastFamilyId);
+            return; // Successfully loaded from localStorage
+          } catch (err) {
+            console.warn('Failed to load family from localStorage, searching for user families:', err);
+            // Clear invalid family ID from localStorage
+            localStorage.removeItem(`lastFamily_${user.uid}`);
+          }
+        }
+        
+        // If localStorage failed or is empty, discover user's families
+        console.log('Discovering families for user:', user.uid);
+        const userFamilies = await getUserFamilies(user.uid);
+        
+        if (userFamilies.length > 0) {
+          // Auto-select the first family (or most recently used)
+          const selectedFamily = userFamilies[0];
+          console.log('Auto-selecting family:', selectedFamily.familyName);
+          await switchFamily(selectedFamily.familyId);
+        } else {
+          console.log('No families found for user');
+          // Clear any existing family state
+          setCurrentFamily(null);
+          setCurrentMember(null);
+          setDashboardData(null);
         }
       } catch (err) {
         console.error('Failed to load user family:', err);
-        // Clear invalid family ID from localStorage
-        if (user?.uid) {
-          localStorage.removeItem(`lastFamily_${user.uid}`);
-        }
+        setError('Failed to load family data');
       } finally {
         setLoading(false);
       }
