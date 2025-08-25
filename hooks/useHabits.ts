@@ -9,7 +9,7 @@ import {
   deleteHabit,
   getCompletions,
   toggleHabitCompletion 
-} from '@/lib/db';
+} from '@/lib/unifiedDb';
 import { Habit, HabitCompletion, CreateHabitForm } from '@/types';
 import { getTodayDateString } from '@/lib/utils';
 

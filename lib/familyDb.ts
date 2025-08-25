@@ -96,6 +96,7 @@ export const createFamily = async (creatorUserId: string, request: CreateFamilyR
       updatedAt: Timestamp.now(),
       inviteCode,
       isActive: true,
+      isPersonal: request.isPersonal || false,
       settings: {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         weekStartsOn: 1, // Monday
@@ -123,20 +124,24 @@ export const createFamily = async (creatorUserId: string, request: CreateFamilyR
     
     // Create creator as first family member (parent)
     const memberRef = doc(collection(familyRef, 'members'), creatorUserId);
+    const creatorProfile = request.creatorProfile;
     const memberData: Omit<FamilyMember, 'id'> = {
       familyId: familyRef.id,
       userId: creatorUserId,
-      name: 'Family Admin',
-      displayName: 'Admin',
-      avatar: '👨‍💼',
-      color: '#3B82F6',
-      role: 'parent',
+      name: creatorProfile?.name || 'Family Admin',
+      displayName: creatorProfile?.displayName || 'Admin',
+      avatar: creatorProfile?.avatar || '👨‍💼',
+      avatarStyle: creatorProfile?.avatarStyle || request.settings?.avatarStyle || 'personas',
+      avatarSeed: creatorProfile?.avatarSeed,
+      color: creatorProfile?.color || '#3B82F6',
+      role: creatorProfile?.role || 'parent',
+      birthYear: creatorProfile?.birthYear,
       isActive: true,
       joinedAt: Timestamp.now(),
       preferences: {
         favoriteEmojis: ['⭐', '🎉', '💪'],
         difficulty: 'normal',
-        motivationStyle: 'progress'
+        motivationStyle: creatorProfile?.motivationStyle || 'progress'
       },
       stats: {
         totalPoints: 0,

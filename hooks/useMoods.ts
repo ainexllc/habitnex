@@ -8,7 +8,7 @@ import {
   updateMoodEntry,
   deleteMoodEntry,
   getMoodForDate
-} from '@/lib/db';
+} from '@/lib/unifiedDb';
 import { MoodEntry, CreateMoodForm } from '@/types';
 import { getTodayDateString } from '@/lib/utils';
 

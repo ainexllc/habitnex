@@ -8,6 +8,7 @@ export interface Family {
   updatedAt: Timestamp;
   inviteCode: string;          // 6-digit code for joining family
   isActive: boolean;
+  isPersonal?: boolean;        // True for auto-created personal families
   settings: FamilySettings;
   members: FamilyMember[];
 }
@@ -253,7 +254,20 @@ export interface FamilyMoodEntry {
 // API Types
 export interface CreateFamilyRequest {
   name: string;
+  description?: string;
+  isPersonal?: boolean;
   settings?: Partial<FamilySettings>;
+  creatorProfile?: {
+    name: string;
+    displayName: string;
+    avatar: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarSeed?: string;
+    color: string;
+    role: 'parent' | 'child' | 'teen' | 'adult';
+    birthYear?: number;
+    motivationStyle?: 'rewards' | 'progress' | 'competition';
+  };
 }
 
 export interface JoinFamilyRequest {
