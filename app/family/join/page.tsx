@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { JoinFamilyRequest } from '@/types/family';
 import { Users, ArrowLeft, UserPlus, Palette } from 'lucide-react';
+import { familyBackgrounds, familyText, familyIcons, familyAlerts, familyAnimations, getFamilyInput } from '@/lib/familyThemes';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 const memberColors = [
@@ -82,19 +84,25 @@ export default function JoinFamilyPage() {
   
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-8 px-4">
+      <div className={cn(familyBackgrounds.page.normal, "py-8 px-4")}>
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center">
+              <div className={cn(
+                "w-20 h-20 bg-green-600 dark:bg-green-500 rounded-full flex items-center justify-center shadow-lg dark:shadow-green-500/20",
+                familyAnimations.hover
+              )}>
                 <UserPlus className="w-10 h-10 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className={cn(
+              familyText.primary,
+              "text-3xl font-bold mb-2"
+            )}>
               Join a Family
             </h1>
-            <p className="text-gray-600">
+            <p className={familyText.secondary}>
               Enter your family's invite code to get started
             </p>
           </div>
@@ -102,8 +110,11 @@ export default function JoinFamilyPage() {
           {/* Back Button */}
           <div className="mb-6">
             <Link href="/dashboard">
-              <Button variant="ghost" className="flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <Button variant="ghost" className={cn(
+                "flex items-center",
+                familyAnimations.hover
+              )}>
+                <ArrowLeft className={cn("w-4 h-4 mr-2", familyIcons.primary)} />
                 Back to Dashboard
               </Button>
             </Link>
