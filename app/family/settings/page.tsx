@@ -86,10 +86,10 @@ export default function FamilySettingsPage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-blue-600 font-medium">Loading settings...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+          <p className="text-blue-600 dark:text-blue-400 font-medium">Loading settings...</p>
         </div>
       </div>
     );
@@ -97,10 +97,10 @@ export default function FamilySettingsPage() {
   
   if (!currentFamily || !currentMember || !isParent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-          <p className="text-gray-600 mb-6">Only parents can access family settings.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Access Denied</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Only parents can access family settings.</p>
           <Link href="/family/dashboard">
             <Button>Back to Dashboard</Button>
           </Link>
@@ -110,7 +110,7 @@ export default function FamilySettingsPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
@@ -123,8 +123,8 @@ export default function FamilySettingsPage() {
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Family Settings</h1>
-              <p className="text-gray-600 mt-1">Customize your family's experience</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Family Settings</h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">Customize your family's experience</p>
             </div>
             
             <Button 
@@ -144,12 +144,12 @@ export default function FamilySettingsPage() {
         </div>
         
         {/* Avatar Style Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Palette className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Avatar Style</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Avatar Style</h2>
           </div>
-          <p className="text-gray-600 mb-6">Choose a consistent avatar style for all family members</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Choose a consistent avatar style for all family members</p>
           
           <div className="grid md:grid-cols-2 gap-4">
             {avatarStyles.map((style) => (
@@ -168,13 +168,13 @@ export default function FamilySettingsPage() {
                 <div className={cn(
                   "p-4 border-2 rounded-lg transition-all",
                   settings.avatarStyle === style.value 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 )}>
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="font-medium text-gray-900">{style.label}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{style.description}</p>
+                      <h3 className="font-medium text-gray-900 dark:text-white">{style.label}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{style.description}</p>
                     </div>
                     {settings.avatarStyle === style.value && (
                       <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
@@ -202,13 +202,13 @@ export default function FamilySettingsPage() {
         </div>
         
         {/* Theme Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             {settings.theme === 'light' ? 
               <Sun className="w-5 h-5 text-yellow-500" /> : 
               <Moon className="w-5 h-5 text-blue-600" />
             }
-            <h2 className="text-xl font-semibold text-gray-900">Theme</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Theme</h2>
           </div>
           
           <div className="flex gap-4">
@@ -224,8 +224,8 @@ export default function FamilySettingsPage() {
               <div className={cn(
                 "p-4 border-2 rounded-lg text-center",
                 settings.theme === 'light' 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
+                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               )}>
                 <Sun className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
                 <p className="font-medium">Light Mode</p>
@@ -244,8 +244,8 @@ export default function FamilySettingsPage() {
               <div className={cn(
                 "p-4 border-2 rounded-lg text-center",
                 settings.theme === 'dark' 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
+                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               )}>
                 <Moon className="w-8 h-8 mx-auto mb-2 text-blue-600" />
                 <p className="font-medium">Dark Mode</p>
@@ -255,16 +255,16 @@ export default function FamilySettingsPage() {
         </div>
         
         {/* Touch Screen Mode */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Monitor className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Touch Screen Mode</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Touch Screen Mode</h2>
           </div>
           
           <label className="flex items-center justify-between cursor-pointer">
             <div>
-              <p className="font-medium text-gray-900">Enable Touch Screen Mode</p>
-              <p className="text-sm text-gray-600">Optimized for wall-mounted displays and tablets</p>
+              <p className="font-medium text-gray-900 dark:text-white">Enable Touch Screen Mode</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Optimized for wall-mounted displays and tablets</p>
             </div>
             <div className="relative">
               <input
@@ -309,17 +309,17 @@ export default function FamilySettingsPage() {
         </div>
         
         {/* Notifications */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-2 mb-4">
             <Bell className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Notifications</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Notifications</h2>
           </div>
           
           <div className="space-y-4">
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Daily Reminders</p>
-                <p className="text-sm text-gray-600">Get reminded to complete habits</p>
+                <p className="font-medium text-gray-900 dark:text-white">Daily Reminders</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Get reminded to complete habits</p>
               </div>
               <input
                 type="checkbox"
@@ -337,8 +337,8 @@ export default function FamilySettingsPage() {
             
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Weekly Reports</p>
-                <p className="text-sm text-gray-600">Receive weekly progress summaries</p>
+                <p className="font-medium text-gray-900 dark:text-white">Weekly Reports</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Receive weekly progress summaries</p>
               </div>
               <input
                 type="checkbox"
@@ -356,8 +356,8 @@ export default function FamilySettingsPage() {
             
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Reward Alerts</p>
-                <p className="text-sm text-gray-600">Notify when rewards are earned</p>
+                <p className="font-medium text-gray-900 dark:text-white">Reward Alerts</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Notify when rewards are earned</p>
               </div>
               <input
                 type="checkbox"

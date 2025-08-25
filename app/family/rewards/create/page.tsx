@@ -147,7 +147,7 @@ export default function CreateRewardPage() {
   
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 py-8 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -158,12 +158,12 @@ export default function CreateRewardPage() {
                   Back to Family Dashboard
                 </Button>
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Create Family Reward</h1>
-              <p className="text-gray-600">Set up incentives for your family members</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create Family Reward</h1>
+              <p className="text-gray-600 dark:text-gray-300">Set up incentives for your family members</p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">Creating for</div>
-              <div className="font-medium text-gray-900">{currentFamily.name}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Creating for</div>
+              <div className="font-medium text-gray-900 dark:text-white">{currentFamily.name}</div>
             </div>
           </div>
           
@@ -175,12 +175,12 @@ export default function CreateRewardPage() {
                   <div className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
                     step === stepName ? 'bg-purple-600 text-white' : 
-                    ['template', 'details', 'settings', 'preview'].indexOf(step) > index ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'
+                    ['template', 'details', 'settings', 'preview'].indexOf(step) > index ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                   )}>
                     {index + 1}
                   </div>
                   {index < 3 && (
-                    <div className="w-8 h-1 bg-gray-200 mx-2">
+                    <div className="w-8 h-1 bg-gray-200 dark:bg-gray-700 mx-2">
                       <div className={cn(
                         "h-full bg-purple-600 transition-all duration-300",
                         ['template', 'details', 'settings', 'preview'].indexOf(step) > index ? 'w-full' : 'w-0'

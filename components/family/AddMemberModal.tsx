@@ -241,13 +241,13 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <UserPlus className="w-12 h-12 mx-auto text-blue-600 mb-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Member Profile</h3>
-              <p className="text-gray-600">Basic information about the new family member</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Member Profile</h3>
+              <p className="text-gray-600 dark:text-gray-300">Basic information about the new family member</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Full Name *
                 </label>
                 <Input
@@ -260,7 +260,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Display Name *
                 </label>
                 <Input
@@ -285,8 +285,8 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                     className={cn(
                       "p-2 rounded-lg border-2 hover:scale-105 transition-transform",
                       selectedAvatarIndex === index
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                     )}
                     onClick={() => setSelectedAvatarIndex(index)}
                   >
@@ -306,7 +306,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                   setAvatarGenerationKey(prev => prev + 1);
                   setSelectedAvatarIndex(0); // Reset selection to first avatar
                 }}
-                className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
               >
                 <Shuffle className="w-3 h-3" />
                 Generate new avatars
@@ -317,7 +317,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Personal Color
               </label>
-              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-600">
                 {memberColors.map((color) => (
                   <button
                     key={color}

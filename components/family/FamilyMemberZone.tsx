@@ -95,6 +95,7 @@ export function FamilyMemberZone({
     <Card 
       className={cn(
         "relative overflow-hidden transition-all duration-300 hover:shadow-lg",
+        "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
         touchMode && "touch-optimized shadow-xl",
         isExpanded && touchMode && "scale-105 shadow-2xl z-10",
         "border-2",
@@ -132,12 +133,12 @@ export function FamilyMemberZone({
             )}
             <div>
               <h3 className={cn(
-                "font-bold text-gray-900",
+                "font-bold text-gray-900 dark:text-white",
                 touchMode ? "text-2xl" : "text-lg"
               )}>
                 {member.displayName}
               </h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 <Star className="w-4 h-4 text-yellow-500" />
                 <span className="font-medium">Level {level}</span>
                 <span>•</span>
@@ -151,12 +152,12 @@ export function FamilyMemberZone({
             <div className={cn(
               "font-bold",
               touchMode ? "text-2xl" : "text-lg",
-              completionRate === 100 ? "text-green-600" : "text-gray-900"
+              completionRate === 100 ? "text-green-600 dark:text-green-400" : "text-gray-900 dark:text-white"
             )}>
               {stats.completed}/{stats.total}
             </div>
             <div className={cn(
-              "text-sm text-gray-500",
+              "text-sm text-gray-500 dark:text-gray-400",
               touchMode && "text-base"
             )}>
               {Math.round(completionRate)}% today
@@ -180,7 +181,7 @@ export function FamilyMemberZone({
         
         {/* Level Progress */}
         <div className="mt-2">
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>Level {level}</span>
             <span>{pointsToNextLevel} pts to next level</span>
           </div>

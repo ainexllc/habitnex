@@ -67,10 +67,10 @@ export default function FamilyDashboardPage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-blue-600 font-medium">Loading family dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+          <p className="text-blue-600 dark:text-blue-400 font-medium">Loading family dashboard...</p>
         </div>
       </div>
     );
@@ -78,10 +78,10 @@ export default function FamilyDashboardPage() {
   
   if (!currentFamily || !currentMember) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Family Found</h2>
-          <p className="text-gray-600 mb-6">You need to create or join a family first.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Family Found</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">You need to create or join a family first.</p>
           <div className="space-x-4">
             <Link href="/family/create">
               <Button>Create Family</Button>
@@ -110,8 +110,8 @@ export default function FamilyDashboardPage() {
       <div className={cn(
         "min-h-screen transition-all duration-300",
         touchMode 
-          ? "bg-gradient-to-br from-blue-100 to-purple-100 p-4 md:p-8" 
-          : "bg-gradient-to-br from-blue-50 to-indigo-100 p-4"
+          ? "bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-900 dark:to-purple-900 p-4 md:p-8" 
+          : "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4"
       )}>
         {/* Header */}
         <FamilyHeader 
