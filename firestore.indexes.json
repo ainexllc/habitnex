@@ -167,11 +167,23 @@
       ]
     },
     {
-      "collectionGroup": "system_usage_stats",
+      "collectionGroup": "habits",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "date",
+          "fieldPath": "assignedMembers",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
           "order": "DESCENDING"
         }
       ]

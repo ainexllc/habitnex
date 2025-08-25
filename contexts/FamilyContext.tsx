@@ -1,0 +1,446 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useAuth } from './AuthContext';
+import { 
+  Family, 
+  FamilyMember, 
+  FamilyDashboardData,
+  CreateFamilyRequest,
+  JoinFamilyRequest 
+} from '@/types/family';
+import { 
+  createFamily, 
+  joinFamily, 
+  getFamily, 
+  getFamilyDashboardData,
+  subscribeFamilyData,
+  addDirectFamilyMember,
+  updateFamilyMemberInDb,
+  updateFamilySettingsInDb
+} from '@/lib/familyDb';
+
+interface FamilyContextType {
+  // State
+  currentFamily: Family | null;
+  currentMember: FamilyMember | null;
+  dashboardData: FamilyDashboardData | null;
+  loading: boolean;
+  error: string | null;
+  
+  // Actions
+  createNewFamily: (request: CreateFamilyRequest) => Promise<void>;
+  joinExistingFamily: (request: JoinFamilyRequest) => Promise<void>;
+  addDirectMember: (memberInfo: {
+    name: string;
+    displayName: string;
+    avatar: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarSeed?: string;
+    color: string;
+    role: 'parent' | 'child' | 'teen' | 'adult';
+    birthYear?: number;
+    motivationStyle?: 'rewards' | 'progress' | 'competition';
+  }) => Promise<void>;
+  updateFamilyMember: (memberId: string, updates: {
+    displayName?: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarSeed?: string;
+    color?: string;
+    role?: 'parent' | 'child' | 'teen' | 'adult';
+  }) => Promise<void>;
+  updateFamilySettings: (settings: Partial<Family['settings']>) => Promise<void>;
+  switchFamily: (familyId: string) => Promise<void>;
+  leaveFamily: () => Promise<void>;
+  refreshDashboard: () => Promise<void>;
+  
+  // Utilities
+  isParent: boolean;
+  canManageFamily: boolean;
+  clearError: () => void;
+}
+
+const FamilyContext = createContext<FamilyContextType | undefined>(undefined);
+
+export function FamilyProvider({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
+  
+  // State
+  const [currentFamily, setCurrentFamily] = useState<Family | null>(null);
+  const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
+  const [dashboardData, setDashboardData] = useState<FamilyDashboardData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Computed properties
+  const isParent = currentMember?.role === 'parent' || currentMember?.role === 'adult';
+  const canManageFamily = isParent || currentFamily?.createdBy === user?.uid;
+  
+  // Clear error
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+  
+  // Load family data on user login
+  useEffect(() => {
+    if (!user || authLoading) return;
+    
+    const loadUserFamily = async () => {
+      try {
+        setLoading(true);
+        
+        // Check localStorage for last family
+        const lastFamilyId = localStorage.getItem(`lastFamily_${user.uid}`);
+        
+        if (lastFamilyId) {
+          await switchFamily(lastFamilyId);
+        }
+      } catch (err) {
+        console.error('Failed to load user family:', err);
+        // Clear invalid family ID from localStorage
+        if (user?.uid) {
+          localStorage.removeItem(`lastFamily_${user.uid}`);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadUserFamily();
+  }, [user, authLoading]);
+  
+  // Real-time subscription to family data
+  useEffect(() => {
+    if (!currentFamily?.id) return;
+    
+    console.log('Setting up family subscription for:', currentFamily.id);
+    
+    const unsubscribe = subscribeFamilyData(currentFamily.id, (updates) => {
+      console.log('Family data updates received:', updates);
+      
+      // Update family if it's included in the updates
+      if (updates.family) {
+        setCurrentFamily(updates.family);
+        // Update current member if it exists in the updated family
+        const updatedMember = updates.family.members.find(m => m.userId === user?.uid);
+        if (updatedMember) {
+          setCurrentMember(updatedMember);
+        }
+      }
+      
+      setDashboardData(prev => {
+        if (!prev) return prev;
+        
+        return {
+          ...prev,
+          ...updates
+        };
+      });
+    });
+    
+    return unsubscribe;
+  }, [currentFamily?.id, user?.uid]);
+  
+  // Create new family
+  const createNewFamily = useCallback(async (request: CreateFamilyRequest) => {
+    if (!user) throw new Error('User must be logged in');
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const familyId = await createFamily(user.uid, request);
+      await switchFamily(familyId);
+      
+      // Store as last family
+      localStorage.setItem(`lastFamily_${user.uid}`, familyId);
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create family';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+  
+  // Join existing family
+  const joinExistingFamily = useCallback(async (request: JoinFamilyRequest) => {
+    if (!user) throw new Error('User must be logged in');
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const familyId = await joinFamily(user.uid, request);
+      await switchFamily(familyId);
+      
+      // Store as last family
+      localStorage.setItem(`lastFamily_${user.uid}`, familyId);
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to join family';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Add direct family member (no user account required)
+  const addDirectMember = useCallback(async (memberInfo: {
+    name: string;
+    displayName: string;
+    avatar: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarSeed?: string;
+    color: string;
+    role: 'parent' | 'child' | 'teen' | 'adult';
+    birthYear?: number;
+    motivationStyle?: 'rewards' | 'progress' | 'competition';
+  }) => {
+    if (!user) throw new Error('User must be logged in');
+    if (!currentFamily || !currentMember) throw new Error('Must be in a family to add members');
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await addDirectFamilyMember(currentFamily.id, currentMember.id, memberInfo);
+      
+      // Refresh family data to include the new member
+      const updatedFamily = await getFamily(currentFamily.id);
+      if (updatedFamily) {
+        setCurrentFamily(updatedFamily);
+      }
+      await refreshDashboard();
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add family member';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user, currentFamily, currentMember]);
+  
+  // Update family member
+  const updateFamilyMember = useCallback(async (memberId: string, updates: {
+    displayName?: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarSeed?: string;
+    color?: string;
+    role?: 'parent' | 'child' | 'teen' | 'adult';
+  }) => {
+    if (!user) throw new Error('User must be logged in');
+    if (!currentFamily) throw new Error('No family selected');
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await updateFamilyMemberInDb(currentFamily.id, memberId, updates);
+      
+      // Refresh family data to show updates
+      const updatedFamily = await getFamily(currentFamily.id);
+      if (updatedFamily) {
+        setCurrentFamily(updatedFamily);
+        // Update current member if it's the one being edited
+        if (currentMember?.id === memberId) {
+          const updatedMember = updatedFamily.members.find(m => m.id === memberId);
+          if (updatedMember) {
+            setCurrentMember(updatedMember);
+          }
+        }
+      }
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update member';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user, currentFamily, currentMember]);
+
+  // Update family settings
+  const updateFamilySettings = useCallback(async (settings: Partial<Family['settings']>) => {
+    if (!user) throw new Error('User must be logged in');
+    if (!currentFamily) throw new Error('No family selected');
+    if (!isParent && currentFamily.createdBy !== user.uid) {
+      throw new Error('Only parents can update family settings');
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await updateFamilySettingsInDb(currentFamily.id, settings);
+      
+      // Refresh family data to show updates
+      const updatedFamily = await getFamily(currentFamily.id);
+      if (updatedFamily) {
+        setCurrentFamily(updatedFamily);
+      }
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update settings';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user, currentFamily, isParent]);
+  
+  // Switch to different family
+  const switchFamily = useCallback(async (familyId: string) => {
+    if (!user) throw new Error('User must be logged in');
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Load family data
+      const family = await getFamily(familyId);
+      if (!family) {
+        throw new Error('Family not found');
+      }
+      
+      // Find current user's member record
+      const member = family.members.find(m => m.userId === user.uid);
+      if (!member) {
+        throw new Error('You are not a member of this family');
+      }
+      
+      // Load dashboard data
+      const dashboard = await getFamilyDashboardData(familyId);
+      
+      // Update state
+      setCurrentFamily(family);
+      setCurrentMember(member);
+      setDashboardData(dashboard);
+      
+      // Store as last family
+      localStorage.setItem(`lastFamily_${user.uid}`, familyId);
+      
+      console.log('Switched to family:', family.name, 'as member:', member.displayName);
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to switch family';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+  
+  // Leave current family
+  const leaveFamily = useCallback(async () => {
+    if (!user || !currentFamily) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Clear state
+      setCurrentFamily(null);
+      setCurrentMember(null);
+      setDashboardData(null);
+      
+      // Clear localStorage
+      localStorage.removeItem(`lastFamily_${user.uid}`);
+      
+      // TODO: Implement actual leave family logic in backend
+      console.log('Left family:', currentFamily.name);
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to leave family';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [user, currentFamily]);
+  
+  // Refresh dashboard data
+  const refreshDashboard = useCallback(async () => {
+    if (!currentFamily?.id) return;
+    
+    try {
+      const dashboard = await getFamilyDashboardData(currentFamily.id);
+      setDashboardData(dashboard);
+    } catch (err) {
+      console.error('Failed to refresh dashboard:', err);
+    }
+  }, [currentFamily?.id]);
+  
+  const value: FamilyContextType = {
+    // State
+    currentFamily,
+    currentMember,
+    dashboardData,
+    loading: loading || authLoading,
+    error,
+    
+    // Actions
+    createNewFamily,
+    joinExistingFamily,
+    addDirectMember,
+    updateFamilyMember,
+    updateFamilySettings,
+    switchFamily,
+    leaveFamily,
+    refreshDashboard,
+    
+    // Utilities
+    isParent,
+    canManageFamily,
+    clearError
+  };
+  
+  return (
+    <FamilyContext.Provider value={value}>
+      {children}
+    </FamilyContext.Provider>
+  );
+}
+
+export function useFamily() {
+  const context = useContext(FamilyContext);
+  
+  if (context === undefined) {
+    throw new Error('useFamily must be used within a FamilyProvider');
+  }
+  
+  return context;
+}
+
+// Hook for checking if user has a family
+export function useFamilyStatus() {
+  const { currentFamily, currentMember, loading } = useFamily();
+  
+  return {
+    hasFamily: !!currentFamily,
+    isMember: !!currentMember,
+    loading,
+    familyName: currentFamily?.name,
+    memberName: currentMember?.displayName
+  };
+}
+
+// Hook for family member utilities
+export function useFamilyMember(memberId: string) {
+  const { currentFamily } = useFamily();
+  
+  const member = currentFamily?.members.find(m => m.id === memberId);
+  
+  return {
+    member,
+    isCurrentUser: member?.userId === member?.userId, // TODO: Fix with actual user comparison
+    displayName: member?.displayName || 'Unknown',
+    avatar: member?.avatar || '👤',
+    color: member?.color || '#6B7280',
+    role: member?.role || 'child',
+    stats: member?.stats
+  };
+}

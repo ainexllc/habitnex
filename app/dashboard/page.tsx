@@ -7,14 +7,17 @@ import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { MoodBar } from '@/components/moods/MoodBar';
 import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
 import { useHabits } from '@/hooks/useHabits';
+import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
-import { Target, Plus } from 'lucide-react';
+import { Target, Plus, Users, Home } from 'lucide-react';
 import Link from 'next/link';
 import { Habit } from '@/types';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = useHabits();
+  const { hasFamily, familyName, loading: familyLoading } = useFamilyStatus();
   
   // State for habit editing
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
@@ -89,6 +92,56 @@ export default function DashboardPage() {
         <Header />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Family Mode Banner */}
+          {!familyLoading && !hasFamily && (
+            <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <Home className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Try Family Mode!</h3>
+                      <p className="text-gray-600">Track habits together, earn rewards, and celebrate as a family</p>
+                    </div>
+                  </div>
+                  <Link href="/family/onboarding">
+                    <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                      <Users className="w-4 h-4 mr-2" />
+                      Get Started
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Family Mode Active */}
+          {hasFamily && (
+            <Card className="mb-8 border-2 border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <Home className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">{familyName}</h3>
+                      <p className="text-gray-600">Your family dashboard is ready!</p>
+                    </div>
+                  </div>
+                  <Link href="/family/dashboard">
+                    <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
+                      <Users className="w-4 h-4 mr-2" />
+                      Family Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">

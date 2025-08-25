@@ -5,19 +5,111 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       
-      // Habits subcollection - users can access their own habits
+      // Legacy habits subcollection - users can access their own habits
       match /habits/{habitId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
       
-      // Completions subcollection - users can access their own completions  
+      // Legacy completions subcollection - users can access their own completions  
       match /completions/{completionId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
       
-      // Moods subcollection - users can access their own mood entries
+      // Legacy moods subcollection - users can access their own mood entries
       match /moods/{moodId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // FAMILY COLLECTIONS
+    
+    // Families collection - users can read/write families they belong to
+    match /families/{familyId} {
+      allow read: if request.auth != null && (isFamilyMember(familyId) || request.auth.uid == resource.data.createdBy);
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.createdBy;
+      allow update: if request.auth != null && (isFamilyParent(familyId) || request.auth.uid == resource.data.createdBy);
+      allow delete: if request.auth != null && request.auth.uid == resource.data.createdBy;
+      
+      // Family members subcollection
+      match /members/{memberId} {
+        allow read: if request.auth != null && (isFamilyMember(familyId) || request.auth.uid == memberId);
+        allow create: if request.auth != null && 
+                         (request.auth.uid == memberId || // Self-creating member
+                          isFamilyParent(familyId)); // Parent adding member
+        allow update: if request.auth != null && 
+                         (request.auth.uid == memberId || // Self-updating
+                          isFamilyParent(familyId)); // Parent updating
+        allow delete: if request.auth != null && isFamilyParent(familyId);
+      }
+      
+      // Family habits subcollection
+      match /habits/{habitId} {
+        allow read: if request.auth != null && isFamilyMember(familyId);
+        allow create: if request.auth != null && isFamilyMember(familyId);
+        allow update: if request.auth != null && 
+                         (isFamilyParent(familyId) || 
+                          resource.data.createdBy == getUserMemberId(familyId));
+        allow delete: if request.auth != null && 
+                         (isFamilyParent(familyId) || 
+                          resource.data.createdBy == getUserMemberId(familyId));
+      }
+      
+      // Family completions subcollection
+      match /completions/{completionId} {
+        allow read: if request.auth != null && isFamilyMember(familyId);
+        allow create: if request.auth != null && 
+                         (isFamilyMember(familyId) && 
+                          resource.data.memberId == getUserMemberId(familyId));
+        allow update: if request.auth != null && 
+                         (isFamilyParent(familyId) || 
+                          resource.data.memberId == getUserMemberId(familyId));
+        allow delete: if request.auth != null && isFamilyParent(familyId);
+      }
+      
+      // Family moods subcollection
+      match /moods/{moodId} {
+        allow read: if request.auth != null && 
+                       (isFamilyParent(familyId) || 
+                        (isFamilyMember(familyId) && resource.data.sharedWithFamily == true) ||
+                        resource.data.memberId == getUserMemberId(familyId));
+        allow create: if request.auth != null && 
+                         (isFamilyMember(familyId) && 
+                          resource.data.memberId == getUserMemberId(familyId));
+        allow update: if request.auth != null && 
+                         (isFamilyParent(familyId) || 
+                          resource.data.memberId == getUserMemberId(familyId));
+        allow delete: if request.auth != null && 
+                         (isFamilyParent(familyId) || 
+                          resource.data.memberId == getUserMemberId(familyId));
+      }
+      
+      // Family rewards subcollection
+      match /rewards/{rewardId} {
+        allow read: if request.auth != null && isFamilyMember(familyId);
+        allow create: if request.auth != null && isFamilyParent(familyId);
+        allow update: if request.auth != null && isFamilyParent(familyId);
+        allow delete: if request.auth != null && isFamilyParent(familyId);
+      }
+      
+      // Reward redemptions subcollection
+      match /redemptions/{redemptionId} {
+        allow read: if request.auth != null && isFamilyMember(familyId);
+        allow create: if request.auth != null && 
+                         (isFamilyMember(familyId) && 
+                          resource.data.memberId == getUserMemberId(familyId));
+        allow update: if request.auth != null && 
+                         (isFamilyParent(familyId) || 
+                          (resource.data.memberId == getUserMemberId(familyId) && 
+                           resource.data.status == 'pending'));
+        allow delete: if request.auth != null && isFamilyParent(familyId);
+      }
+      
+      // Family challenges subcollection
+      match /challenges/{challengeId} {
+        allow read: if request.auth != null && isFamilyMember(familyId);
+        allow create: if request.auth != null && isFamilyParent(familyId);
+        allow update: if request.auth != null && isFamilyParent(familyId);
+        allow delete: if request.auth != null && isFamilyParent(familyId);
       }
     }
     
@@ -74,6 +166,30 @@ service cloud.firestore {
       // For now, check if user has admin claim or is in admin list
       return request.auth.token.admin == true ||
              request.auth.token.email in ['dinohorn35@gmail.com']; // Replace with your admin email
+    }
+    
+    // Family helper functions
+    function isFamilyMember(familyId) {
+      // Check if the current user is a member of the family
+      return exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
+    }
+    
+    function isFamilyParent(familyId) {
+      // Check if the current user is a parent in the family
+      let memberDoc = get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
+      return memberDoc.data.role in ['parent', 'adult'];
+    }
+    
+    function isFamilyCreator(familyId) {
+      // Check if the current user created the family
+      let familyDoc = get(/databases/$(database)/documents/families/$(familyId));
+      return familyDoc.data.createdBy == request.auth.uid;
+    }
+    
+    function getUserMemberId(familyId) {
+      // Get the member ID for the current user in this family
+      // In our system, member IDs match user IDs for simplicity
+      return request.auth.uid;
     }
     
     // Note: System writes should use Firebase Admin SDK in production
