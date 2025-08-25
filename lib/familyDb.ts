@@ -37,10 +37,11 @@ import type {
 // Get families that a user is a member of
 export const getUserFamilies = async (userId: string): Promise<Array<{ familyId: string; familyName: string; member: FamilyMember }>> => {
   try {
-    console.log('Searching for families where user is a member:', userId);
+    console.log('🔍 Searching for families where user is a member:', userId);
     
     // Query all families
     const familiesSnapshot = await getDocs(collection(db, 'families'));
+    console.log(`📊 Total families in database: ${familiesSnapshot.size}`);
     const userFamilies: Array<{ familyId: string; familyName: string; member: FamilyMember }> = [];
     
     // Check each family for membership
@@ -48,13 +49,17 @@ export const getUserFamilies = async (userId: string): Promise<Array<{ familyId:
       const familyData = familyDoc.data();
       
       // Skip inactive families
-      if (!familyData.isActive) continue;
+      if (!familyData.isActive) {
+        console.log(`⏩ Skipping inactive family: ${familyData.name}`);
+        continue;
+      }
       
       // Check if user is a member of this family
       const memberDoc = await getDoc(doc(db, 'families', familyDoc.id, 'members', userId));
       
       if (memberDoc.exists()) {
         const memberData = memberDoc.data() as Omit<FamilyMember, 'id'>;
+        console.log(`✅ User is member of "${familyData.name}" (${familyDoc.id})`);
         
         // Only include active members
         if (memberData.isActive) {
@@ -66,11 +71,15 @@ export const getUserFamilies = async (userId: string): Promise<Array<{ familyId:
               ...memberData
             }
           });
+        } else {
+          console.log(`⚠️ Member is inactive in family "${familyData.name}"`);
         }
+      } else {
+        console.log(`❌ User is NOT member of "${familyData.name}"`);
       }
     }
     
-    console.log(`Found ${userFamilies.length} families for user:`, userFamilies.map(f => f.familyName));
+    console.log(`📋 Found ${userFamilies.length} families for user:`, userFamilies.map(f => f.familyName));
     return userFamilies;
     
   } catch (error) {

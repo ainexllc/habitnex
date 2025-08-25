@@ -20,6 +20,7 @@ import {
   updateFamilySettingsInDb,
   getUserFamilies
 } from '@/lib/familyDb';
+import { recoverOrphanedFamilies } from '@/lib/familyRecovery';
 
 interface FamilyContextType {
   // State
@@ -106,7 +107,18 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
         
         // If localStorage failed or is empty, discover user's families
         console.log('Discovering families for user:', user.uid);
-        const userFamilies = await getUserFamilies(user.uid);
+        let userFamilies = await getUserFamilies(user.uid);
+        
+        // If no families found, try to recover orphaned families
+        if (userFamilies.length === 0 && user.email) {
+          console.log('No families found, attempting recovery...');
+          const recovered = await recoverOrphanedFamilies(user.uid, user.email);
+          
+          if (recovered) {
+            // Re-fetch families after recovery
+            userFamilies = await getUserFamilies(user.uid);
+          }
+        }
         
         if (userFamilies.length > 0) {
           // Auto-select the first family (or most recently used)
