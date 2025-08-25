@@ -125,7 +125,7 @@ export default function FamilyAnalyticsPage() {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try Again
               </Button>
-              <Link href="/family/dashboard">
+              <Link href="/dashboard/family">
                 <Button variant="outline">Back to Dashboard</Button>
               </Link>
             </CardContent>
@@ -142,7 +142,7 @@ export default function FamilyAnalyticsPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <Link href="/family/dashboard">
+              <Link href="/dashboard/family">
                 <Button variant="ghost" className="flex items-center mb-4">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Family Dashboard

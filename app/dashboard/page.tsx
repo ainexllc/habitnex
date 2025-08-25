@@ -146,7 +146,7 @@ export default function DashboardPage() {
                       <p className="text-gray-600">Your family dashboard is ready!</p>
                     </div>
                   </div>
-                  <Link href="/family/dashboard">
+                  <Link href="/dashboard/family">
                     <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
                       <Users className="w-4 h-4 mr-2" />
                       Family Dashboard

@@ -101,7 +101,7 @@ export default function FamilySettingsPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Access Denied</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">Only parents can access family settings.</p>
-          <Link href="/family/dashboard">
+          <Link href="/dashboard/family">
             <Button>Back to Dashboard</Button>
           </Link>
         </div>
@@ -114,7 +114,7 @@ export default function FamilySettingsPage() {
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/family/dashboard">
+          <Link href="/dashboard/family">
             <Button variant="ghost" size="sm" className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard

@@ -32,7 +32,7 @@ export function EmergencyButton({
     <>
       {/* Emergency Button */}
       <div className={cn(
-        "fixed top-6 right-6 z-50",
+        "fixed bottom-6 right-6 z-50",
         className
       )}>
         <Button

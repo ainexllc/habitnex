@@ -58,7 +58,7 @@ export default function CreateFamilyPage() {
       };
       
       await createNewFamily(request);
-      router.push('/family/dashboard');
+      router.push('/dashboard/family');
       
     } catch (err) {
       console.error('Failed to create family:', err);

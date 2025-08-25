@@ -84,7 +84,7 @@ export default function FamilyMembersPage() {
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/family/dashboard">
+          <Link href="/dashboard/family">
             <Button variant="ghost" size="sm" className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard

@@ -6,6 +6,7 @@ import { FamilyProvider } from '@/contexts/FamilyContext'
 import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay'
 import { SoundFeedback } from '@/components/celebration/SoundFeedback'
+import { FloatingTime } from '@/components/ui/FloatingTime'
 
 export const metadata: Metadata = {
   title: 'NextVibe - Build Better Habits',
@@ -31,6 +32,7 @@ export default function RootLayout({
           <AuthProvider>
             <FamilyProvider>
               <CelebrationProvider>
+                <FloatingTime />
                 {children}
                 <CelebrationOverlay />
                 <SoundFeedback />

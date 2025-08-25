@@ -150,7 +150,7 @@ export default function CreateFamilyHabitPage() {
       };
       
       await createHabit(habitData);
-      router.push('/family/dashboard');
+      router.push('/dashboard/family');
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create habit');
@@ -182,7 +182,7 @@ export default function CreateFamilyHabitPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <Link href="/family/dashboard">
+              <Link href="/dashboard/family">
                 <Button variant="ghost" className="flex items-center mb-4">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Family Dashboard

@@ -24,12 +24,6 @@ export function FamilyHeader({
 }: FamilyHeaderProps) {
   const [showMenu, setShowMenu] = useState(false);
   
-  const time = new Date().toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-  
   return (
     <header className={cn(
       "mb-6 md:mb-8",
@@ -66,30 +60,8 @@ export function FamilyHeader({
           </div>
         </div>
         
-        {/* Time and Controls */}
+        {/* Controls */}
         <div className="flex items-center space-x-4">
-          {/* Current Time */}
-          <div className={cn(
-            "text-right",
-            touchMode && "mr-4"
-          )}>
-            <div className={cn(
-              familyText.primary,
-              "font-bold",
-              touchMode ? "text-3xl" : "text-xl"
-            )}>
-              {time}
-            </div>
-            <div className={cn(
-              familyText.muted,
-              "text-sm",
-              touchMode && "text-base"
-            )}>
-              Right now
-            </div>
-          </div>
-          
-          {/* Controls */}
           {!touchMode ? (
             /* Desktop Controls */
             <div className="flex items-center space-x-2">

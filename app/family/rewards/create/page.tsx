@@ -135,7 +135,7 @@ export default function CreateRewardPage() {
             <CardContent className="p-6 text-center">
               <h2 className="text-xl font-bold mb-2">Parents Only</h2>
               <p className="text-gray-600 mb-4">Only parents can create and manage family rewards.</p>
-              <Link href="/family/dashboard">
+              <Link href="/dashboard/family">
                 <Button>Back to Dashboard</Button>
               </Link>
             </CardContent>
@@ -152,7 +152,7 @@ export default function CreateRewardPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <Link href="/family/dashboard">
+              <Link href="/dashboard/family">
                 <Button variant="ghost" className="flex items-center mb-4">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Family Dashboard
