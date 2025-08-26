@@ -11,7 +11,7 @@ import { EmergencyButton } from '@/components/touch/EmergencyButton';
 import { FamilyStats } from '@/components/family/FamilyStats';
 import { AddMemberModal } from '@/components/family/AddMemberModal';
 import { Button } from '@/components/ui/Button';
-import { Plus, Settings, Users, Trophy, BarChart3, UserPlus } from 'lucide-react';
+import { Plus, Settings, Users, Trophy, BarChart3, UserPlus, User } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -123,6 +123,12 @@ export default function FamilyDashboardPage() {
         
         {/* Quick Links Bar - Always visible */}
         <div className="mb-6 flex gap-2 flex-wrap">
+          <Link href="/dashboard">
+            <Button variant="outline" size="sm">
+              <User className="w-4 h-4 mr-2" />
+              Individual Dashboard
+            </Button>
+          </Link>
           <Link href="/family/members">
             <Button variant="outline" size="sm">
               <Users className="w-4 h-4 mr-2" />

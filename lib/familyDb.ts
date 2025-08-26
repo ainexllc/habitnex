@@ -1,5 +1,6 @@
 import {
   collection,
+  collectionGroup,
   doc,
   addDoc,
   updateDoc,
@@ -34,53 +35,65 @@ import type {
   FamilyDashboardData
 } from '../types/family';
 
-// Get families that a user is a member of
+// Get families that a user is a member of (simplified approach to avoid data pollution)
 export const getUserFamilies = async (userId: string): Promise<Array<{ familyId: string; familyName: string; member: FamilyMember }>> => {
   try {
     console.log('🔍 Searching for families where user is a member:', userId);
     
-    // Query all families
-    const familiesSnapshot = await getDocs(collection(db, 'families'));
-    console.log(`📊 Total families in database: ${familiesSnapshot.size}`);
-    const userFamilies: Array<{ familyId: string; familyName: string; member: FamilyMember }> = [];
+    // First, check if user has any families at all by querying user document
+    const userDocRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userDocRef);
     
-    // Check each family for membership
-    for (const familyDoc of familiesSnapshot.docs) {
-      const familyData = familyDoc.data();
-      
-      // Skip inactive families
-      if (!familyData.isActive) {
-        console.log(`⏩ Skipping inactive family: ${familyData.name}`);
-        continue;
-      }
-      
-      // Check if user is a member of this family
-      const memberDoc = await getDoc(doc(db, 'families', familyDoc.id, 'members', userId));
-      
-      if (memberDoc.exists()) {
-        const memberData = memberDoc.data() as Omit<FamilyMember, 'id'>;
-        console.log(`✅ User is member of "${familyData.name}" (${familyDoc.id})`);
-        
-        // Only include active members
-        if (memberData.isActive) {
-          userFamilies.push({
-            familyId: familyDoc.id,
-            familyName: familyData.name,
-            member: {
-              id: memberDoc.id,
-              ...memberData
-            }
-          });
-        } else {
-          console.log(`⚠️ Member is inactive in family "${familyData.name}"`);
-        }
-      } else {
-        console.log(`❌ User is NOT member of "${familyData.name}"`);
-      }
+    if (!userDoc.exists()) {
+      console.log('📊 User document does not exist, no families');
+      return [];
     }
     
-    console.log(`📋 Found ${userFamilies.length} families for user:`, userFamilies.map(f => f.familyName));
-    return userFamilies;
+    // Get families with reasonable limit to prevent data pollution
+    const familiesQuery = query(
+      collection(db, 'families'),
+      where('isActive', '==', true),
+      limit(20) // Reasonable limit - most users should have < 20 families
+    );
+    
+    const familiesSnapshot = await getDocs(familiesQuery);
+    console.log(`📊 Checking ${familiesSnapshot.size} active families for membership`);
+    
+    // Check membership in parallel, but only for reasonable number of families
+    const membershipChecks = familiesSnapshot.docs.map(async (familyDoc) => {
+      const familyData = familyDoc.data();
+      
+      try {
+        // Check if user is a member of this family
+        const memberDoc = await getDoc(doc(db, 'families', familyDoc.id, 'members', userId));
+        
+        if (memberDoc.exists()) {
+          const memberData = memberDoc.data() as Omit<FamilyMember, 'id'>;
+          
+          // Only include active members
+          if (memberData.isActive) {
+            return {
+              familyId: familyDoc.id,
+              familyName: familyData.name,
+              member: {
+                id: memberDoc.id,
+                ...memberData
+              }
+            };
+          }
+        }
+      } catch (err) {
+        // Skip families with access issues
+        console.warn(`Cannot access family ${familyDoc.id}:`, err.message);
+      }
+      return null;
+    });
+    
+    const results = await Promise.all(membershipChecks);
+    const validFamilies = results.filter(family => family !== null);
+    
+    console.log(`✅ User is member of ${validFamilies.length} families`);
+    return validFamilies;
     
   } catch (error) {
     console.error('Error getting user families:', error);

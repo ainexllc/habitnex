@@ -174,19 +174,23 @@ const migrateUserDataToFamily = async (
 };
 
 /**
- * Checks if a user already has a personal family
+ * Checks if a user already has a personal family (optimized)
  */
 export const checkForPersonalFamily = async (userId: string): Promise<{ familyId: string; memberId: string } | null> => {
   try {
-    // Look for families where the user is a member and isPersonal = true
-    const familiesSnapshot = await getDocs(collection(db, 'families'));
+    // Much more efficient: query only personal families instead of ALL families
+    const personalFamiliesQuery = query(
+      collection(db, 'families'),
+      where('isPersonal', '==', true),
+      where('isActive', '==', true)
+    );
     
-    for (const familyDoc of familiesSnapshot.docs) {
-      const familyData = familyDoc.data();
-      
-      // Check if this is a personal family
-      if (familyData.isPersonal) {
-        // Check if user is a member
+    const personalFamiliesSnapshot = await getDocs(personalFamiliesQuery);
+    console.log(`🔍 Found ${personalFamiliesSnapshot.size} personal families to check`);
+    
+    // Check membership in parallel for much better performance
+    const membershipChecks = personalFamiliesSnapshot.docs.map(async (familyDoc) => {
+      try {
         const memberDoc = await getDoc(doc(db, 'families', familyDoc.id, 'members', userId));
         if (memberDoc.exists() && memberDoc.data().isActive) {
           return {
@@ -194,7 +198,19 @@ export const checkForPersonalFamily = async (userId: string): Promise<{ familyId
             memberId: userId
           };
         }
+      } catch (err) {
+        // Skip families with access issues
+        console.warn(`Cannot access personal family ${familyDoc.id}:`, err.message);
       }
+      return null;
+    });
+    
+    const results = await Promise.all(membershipChecks);
+    const userPersonalFamily = results.find(result => result !== null);
+    
+    if (userPersonalFamily) {
+      console.log(`✅ Found existing personal family: ${userPersonalFamily.familyId}`);
+      return userPersonalFamily;
     }
     
     return null;

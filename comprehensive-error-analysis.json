@@ -1,0 +1,96 @@
+{
+  "timestamp": "2025-08-26T14:31:19.350Z",
+  "testSummary": {
+    "url": "http://localhost:3000/forgot-password/",
+    "title": "NextVibe - Build Better Habits",
+    "totalErrors": 4,
+    "totalWarnings": 0,
+    "networkIssues": 3
+  },
+  "errors": {
+    "console": [
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "url": "http://localhost:3000/favicon.ico",
+        "line": 0,
+        "timestamp": "2025-08-26T14:30:26.429Z"
+      },
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 400 ()",
+        "url": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDojt2j9hrgI8_lXcfzUvVcn64RUuvrZ14",
+        "line": 0,
+        "timestamp": "2025-08-26T14:30:33.495Z"
+      },
+      {
+        "type": "error",
+        "message": "Cross-Origin-Opener-Policy policy would block the window.closed call.",
+        "url": "webpack-internal:///(app-pages-browser)/./node_modules/firebase/node_modules/@firebase/auth/dist/esm/index-9ccb475d.js",
+        "line": 9737,
+        "timestamp": "2025-08-26T14:30:44.550Z"
+      },
+      {
+        "type": "error",
+        "message": "Cross-Origin-Opener-Policy policy would block the window.closed call.",
+        "url": "webpack-internal:///(app-pages-browser)/./node_modules/firebase/node_modules/@firebase/auth/dist/esm/index-9ccb475d.js",
+        "line": 9737,
+        "timestamp": "2025-08-26T14:30:44.551Z"
+      }
+    ],
+    "network": [
+      {
+        "url": "http://localhost:3000/dashboard",
+        "status": 308,
+        "statusText": "Permanent Redirect",
+        "timestamp": "2025-08-26T14:30:29.373Z"
+      },
+      {
+        "url": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDojt2j9hrgI8_lXcfzUvVcn64RUuvrZ14",
+        "status": 400,
+        "statusText": "",
+        "timestamp": "2025-08-26T14:30:33.494Z"
+      },
+      {
+        "url": "http://localhost:3000/dashboard",
+        "status": 308,
+        "statusText": "Permanent Redirect",
+        "timestamp": "2025-08-26T14:30:38.375Z"
+      }
+    ],
+    "page": [],
+    "warnings": [],
+    "performance": {
+      "navigationTiming": {
+        "loadComplete": null,
+        "domReady": null,
+        "firstPaint": null
+      },
+      "resourceCount": 21,
+      "largeResources": []
+    },
+    "auth": [
+      {
+        "type": "error",
+        "message": "Cross-Origin-Opener-Policy policy would block the window.closed call.",
+        "url": "webpack-internal:///(app-pages-browser)/./node_modules/firebase/node_modules/@firebase/auth/dist/esm/index-9ccb475d.js",
+        "line": 9737,
+        "timestamp": "2025-08-26T14:30:44.550Z",
+        "category": "auth_popup"
+      },
+      {
+        "type": "error",
+        "message": "Cross-Origin-Opener-Policy policy would block the window.closed call.",
+        "url": "webpack-internal:///(app-pages-browser)/./node_modules/firebase/node_modules/@firebase/auth/dist/esm/index-9ccb475d.js",
+        "line": 9737,
+        "timestamp": "2025-08-26T14:30:44.551Z",
+        "category": "auth_popup"
+      }
+    ],
+    "firebase": []
+  },
+  "recommendations": [
+    "Review auth configuration",
+    "Review redirect config"
+  ]
+}

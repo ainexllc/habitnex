@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3001",
     "dev:safe": "./scripts/dev-safe.sh",
     "dev:clean": "rm -rf .next node_modules/.cache && npm run dev",
     "fix-white-screen": "./scripts/fix-white-screen.sh",

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Settings, Users, Calendar, Home } from 'lucide-react';
+import { Settings, Users, Calendar, Home, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { familyText, familyIcons, getFamilyButton, familyAnimations } from '@/lib/familyThemes';
 import Link from 'next/link';
@@ -65,6 +65,11 @@ export function FamilyHeader({
           {!touchMode ? (
             /* Desktop Controls */
             <div className="flex items-center space-x-2">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className={familyAnimations.hover} title="Individual Dashboard">
+                  <User className={cn("w-4 h-4", familyIcons.interactive)} />
+                </Button>
+              </Link>
               <Link href="/family/calendar">
                 <Button variant="ghost" size="sm" className={familyAnimations.hover}>
                   <Calendar className={cn("w-4 h-4", familyIcons.interactive)} />
@@ -99,6 +104,21 @@ export function FamilyHeader({
               {showMenu && (
                 <div className="absolute right-0 top-20 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 min-w-[200px] z-50">
                   <div className="space-y-2">
+                    <Link href="/dashboard">
+                      <Button 
+                        variant="ghost" 
+                        size="lg" 
+                        className={cn(
+                          "w-full justify-start h-14 text-lg",
+                          familyText.primary,
+                          familyAnimations.hover
+                        )}
+                        onClick={() => setShowMenu(false)}
+                      >
+                        <User className={cn("w-6 h-6 mr-3", familyIcons.primary)} />
+                        Individual Dashboard
+                      </Button>
+                    </Link>
                     <Link href="/family/calendar">
                       <Button 
                         variant="ghost" 

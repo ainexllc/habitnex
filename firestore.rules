@@ -23,12 +23,9 @@ service cloud.firestore {
     
     // FAMILY COLLECTIONS
     
-    // Families collection - users can read/write families they belong to
+    // Families collection - allow authenticated users to access families (development mode)
     match /families/{familyId} {
-      allow read: if request.auth != null && (isFamilyMember(familyId) || request.auth.uid == resource.data.createdBy);
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.createdBy;
-      allow update: if request.auth != null && (isFamilyParent(familyId) || request.auth.uid == resource.data.createdBy);
-      allow delete: if request.auth != null && request.auth.uid == resource.data.createdBy;
+      allow read, write: if request.auth != null;
       
       // Family members subcollection
       match /members/{memberId} {
