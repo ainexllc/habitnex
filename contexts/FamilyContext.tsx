@@ -20,6 +20,11 @@ import {
   updateFamilySettingsInDb,
   getUserFamilies
 } from '@/lib/familyDb';
+import { 
+  updateUserSelectedFamily, 
+  getUserSelectedFamily, 
+  clearUserSelectedFamily 
+} from '@/lib/db';
 import { recoverOrphanedFamilies } from '@/lib/familyRecovery';
 
 interface FamilyContextType {
@@ -91,27 +96,25 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       try {
         setLoading(true);
         
-        // Check localStorage for last family
-        const lastFamilyId = localStorage.getItem(`lastFamily_${user.uid}`);
+        // Check Firestore user profile for last family
+        const lastFamilyId = await getUserSelectedFamily(user.uid);
         
         if (lastFamilyId) {
           try {
             await switchFamily(lastFamilyId);
-            return; // Successfully loaded from localStorage
+            return; // Successfully loaded from user profile
           } catch (err) {
-            console.warn('Failed to load family from localStorage, searching for user families:', err);
-            // Clear invalid family ID from localStorage
-            localStorage.removeItem(`lastFamily_${user.uid}`);
+            console.warn('Failed to load family from user profile, searching for user families:', err);
+            // Clear invalid family ID from user profile
+            await clearUserSelectedFamily(user.uid);
           }
         }
         
         // If localStorage failed or is empty, discover user's families
-        console.log('Discovering families for user:', user.uid);
         let userFamilies = await getUserFamilies(user.uid);
         
         // If no families found, try to recover orphaned families
         if (userFamilies.length === 0 && user.email) {
-          console.log('No families found, attempting recovery...');
           const recovered = await recoverOrphanedFamilies(user.uid, user.email);
           
           if (recovered) {
@@ -123,10 +126,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
         if (userFamilies.length > 0) {
           // Auto-select the first family (or most recently used)
           const selectedFamily = userFamilies[0];
-          console.log('Auto-selecting family:', selectedFamily.familyName);
           await switchFamily(selectedFamily.familyId);
         } else {
-          console.log('No families found for user');
           // Clear any existing family state
           setCurrentFamily(null);
           setCurrentMember(null);
@@ -145,12 +146,17 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   
   // Real-time subscription to family data
   useEffect(() => {
+    // Clean up immediately if no user
+    if (!user) {
+      setCurrentFamily(null);
+      setCurrentMember(null);
+      setDashboardData(null);
+      return;
+    }
+    
     if (!currentFamily?.id) return;
     
-    console.log('Setting up family subscription for:', currentFamily.id);
-    
     const unsubscribe = subscribeFamilyData(currentFamily.id, (updates) => {
-      console.log('Family data updates received:', updates);
       
       // Update family if it's included in the updates
       if (updates.family) {
@@ -186,8 +192,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       const familyId = await createFamily(user.uid, request);
       await switchFamily(familyId);
       
-      // Store as last family
-      localStorage.setItem(`lastFamily_${user.uid}`, familyId);
+      // Store as last family in user profile
+      await updateUserSelectedFamily(user.uid, familyId);
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create family';
@@ -209,8 +215,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       const familyId = await joinFamily(user.uid, request);
       await switchFamily(familyId);
       
-      // Store as last family
-      localStorage.setItem(`lastFamily_${user.uid}`, familyId);
+      // Store as last family in user profile
+      await updateUserSelectedFamily(user.uid, familyId);
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to join family';
@@ -354,10 +360,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       setCurrentMember(member);
       setDashboardData(dashboard);
       
-      // Store as last family
-      localStorage.setItem(`lastFamily_${user.uid}`, familyId);
-      
-      console.log('Switched to family:', family.name, 'as member:', member.displayName);
+      // Store as last family in user profile
+      await updateUserSelectedFamily(user.uid, familyId);
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to switch family';
@@ -381,8 +385,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       setCurrentMember(null);
       setDashboardData(null);
       
-      // Clear localStorage
-      localStorage.removeItem(`lastFamily_${user.uid}`);
+      // Clear user profile family selection
+      await clearUserSelectedFamily(user.uid);
       
       // TODO: Implement actual leave family logic in backend
       console.log('Left family:', currentFamily.name);

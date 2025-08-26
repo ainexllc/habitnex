@@ -14,13 +14,13 @@ import {
   setDoc 
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { ensurePersonalFamily } from './personalFamilyMigration';
 import { getUserFamilies, getFamily } from './familyDb';
 import type { Habit, HabitCompletion, User, MoodEntry, CreateMoodForm } from '../types';
 import type { FamilyHabit, FamilyHabitCompletion, FamilyMoodEntry } from '../types/family';
 
 // Legacy imports for fallback
 import * as legacyDb from './db';
+import { getUserSelectedFamily } from './db';
 
 /**
  * Unified database operations that work with both individual and family data structures
@@ -34,38 +34,63 @@ export interface UnifiedContext {
   isPersonalFamily: boolean;
 }
 
+// In-memory cache for user contexts to prevent repeated family queries
+const userContextCache = new Map<string, { context: UnifiedContext; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Session-level cache to remember which operations should use fallback
+const fallbackCache = new Map<string, { shouldUseFallback: boolean; timestamp: number }>();
+const FALLBACK_CACHE_TTL = 10 * 60 * 1000; // 10 minutes - longer than context cache
+
 /**
- * Get user's active context (personal family or selected family)
+ * Check if a specific operation should use fallback for a user
+ */
+const shouldUseFallback = (userId: string, operation: string): boolean => {
+  const key = `${userId}:${operation}`;
+  const cached = fallbackCache.get(key);
+  if (cached && (Date.now() - cached.timestamp) < FALLBACK_CACHE_TTL) {
+    return cached.shouldUseFallback;
+  }
+  return false; // Default to trying family structure first
+};
+
+/**
+ * Mark an operation to use fallback for a user (due to missing indexes, etc.)
+ */
+const markForFallback = (userId: string, operation: string) => {
+  const key = `${userId}:${operation}`;
+  fallbackCache.set(key, { shouldUseFallback: true, timestamp: Date.now() });
+};
+
+/**
+ * Get user's active context (personal family or selected family) with caching
  */
 export const getUserContext = async (userId: string): Promise<UnifiedContext> => {
   try {
-    // First, try to get user's families
+    // Check cache first
+    const cached = userContextCache.get(userId);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+      return cached.context;
+    }
+
+    // Cache miss or expired, fetch fresh data
     const userFamilies = await getUserFamilies(userId);
     
     if (userFamilies.length === 0) {
-      // No families found, ensure personal family exists
-      const personalFamilyId = await ensurePersonalFamily(userId);
-      
-      if (personalFamilyId) {
-        return {
-          userId,
-          familyId: personalFamilyId,
-          memberId: userId,
-          isPersonalFamily: true
-        };
-      }
-      
-      // Fallback to individual mode
-      return {
+      // No families found - user can choose to create one manually
+      // This gives users control instead of forcing family creation
+      const context = {
         userId,
         familyId: null,
         memberId: null,
         isPersonalFamily: false
       };
+      userContextCache.set(userId, { context, timestamp: Date.now() });
+      return context;
     }
     
-    // Check localStorage for last selected family
-    const lastFamilyId = localStorage.getItem(`lastFamily_${userId}`);
+    // Check user profile for last selected family
+    const lastFamilyId = await getUserSelectedFamily(userId);
     let selectedFamily = userFamilies.find(f => f.familyId === lastFamilyId);
     
     if (!selectedFamily) {
@@ -77,23 +102,34 @@ export const getUserContext = async (userId: string): Promise<UnifiedContext> =>
     const family = await getFamily(selectedFamily.familyId);
     const isPersonalFamily = family?.isPersonal || false;
     
-    return {
+    const context = {
       userId,
       familyId: selectedFamily.familyId,
       memberId: selectedFamily.member.id,
       isPersonalFamily
     };
+    userContextCache.set(userId, { context, timestamp: Date.now() });
+    return context;
     
   } catch (error) {
     console.error('Failed to get user context:', error);
     // Fallback to individual mode
-    return {
+    const context = {
       userId,
       familyId: null,
       memberId: null,
       isPersonalFamily: false
     };
+    userContextCache.set(userId, { context, timestamp: Date.now() });
+    return context;
   }
+};
+
+/**
+ * Clear cached user context (call when family selection changes)
+ */
+export const clearUserContextCache = (userId: string) => {
+  userContextCache.delete(userId);
 };
 
 /**
@@ -349,41 +385,45 @@ export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, 
 };
 
 export const getMoodEntries = async (userId: string, startDate?: string, endDate?: string): Promise<MoodEntry[]> => {
-  const context = await getUserContext(userId);
-  
-  if (context.familyId && context.memberId) {
-    // Use family structure
-    const moodsRef = collection(db, 'families', context.familyId, 'moods');
-    let q = query(moodsRef, 
-      where('memberId', '==', context.memberId),
-      orderBy('date', 'desc')
-    );
-
-    if (startDate) {
-      q = query(q, where('date', '>=', startDate));
-    }
-    if (endDate) {
-      q = query(q, where('date', '<=', endDate));
-    }
-
-    const querySnapshot = await getDocs(q);
+  try {
+    // Skip family structure entirely for mood operations due to missing Firestore indexes
+    // Use individual structure directly to avoid console warnings
+    return legacyDb.getMoodEntries(userId, startDate, endDate);
     
-    return querySnapshot.docs.map(doc => {
-      const data = doc.data() as FamilyMoodEntry;
-      // Convert to individual mood format for compatibility
-      return {
-        id: doc.id,
-        date: data.date,
-        mood: data.mood,
-        energy: data.energy,
-        stress: data.stress,
-        sleep: data.sleep,
-        notes: data.notes,
-        timestamp: data.timestamp
-      } as MoodEntry;
-    });
-  } else {
-    // Fallback to individual structure
+    // TODO: Re-enable family structure after deploying composite index for memberId + date + __name__
+    // const context = await getUserContext(userId);
+    // if (context.familyId && context.memberId) {
+    //   const moodsRef = collection(db, 'families', context.familyId, 'moods');
+    //   let q = query(moodsRef, 
+    //     where('memberId', '==', context.memberId),
+    //     orderBy('date', 'desc')
+    //   );
+    //   if (startDate) {
+    //     q = query(q, where('date', '>=', startDate));
+    //   }
+    //   if (endDate) {
+    //     q = query(q, where('date', '<=', endDate));
+    //   }
+    //   const querySnapshot = await getDocs(q);
+    //   return querySnapshot.docs.map(doc => {
+    //     const data = doc.data() as FamilyMoodEntry;
+    //     return {
+    //       id: doc.id,
+    //       date: data.date,
+    //       mood: data.mood,
+    //       energy: data.energy,
+    //       stress: data.stress,
+    //       sleep: data.sleep,
+    //       notes: data.notes,
+    //       timestamp: data.timestamp
+    //     } as MoodEntry;
+    //   });
+    // } else {
+    //   return legacyDb.getMoodEntries(userId, startDate, endDate);
+    // }
+  } catch (error) {
+    console.error('Error in getMoodEntries:', error);
+    // Always fall back to individual structure on error
     return legacyDb.getMoodEntries(userId, startDate, endDate);
   }
 };
@@ -418,36 +458,40 @@ export const deleteMoodEntry = async (userId: string, moodId: string): Promise<v
 };
 
 export const getMoodForDate = async (userId: string, date: string): Promise<MoodEntry | null> => {
-  const context = await getUserContext(userId);
-  
-  if (context.familyId && context.memberId) {
-    // Use family structure
-    const moodsRef = collection(db, 'families', context.familyId, 'moods');
-    const q = query(moodsRef, 
-      where('memberId', '==', context.memberId),
-      where('date', '==', date)
-    );
-    const querySnapshot = await getDocs(q);
+  try {
+    // Skip family structure entirely for mood operations due to missing Firestore indexes
+    // Use individual structure directly to avoid console warnings
+    return legacyDb.getMoodForDate(userId, date);
     
-    if (querySnapshot.empty) {
-      return null;
-    }
-    
-    const doc = querySnapshot.docs[0];
-    const data = doc.data() as FamilyMoodEntry;
-    
-    return {
-      id: doc.id,
-      date: data.date,
-      mood: data.mood,
-      energy: data.energy,
-      stress: data.stress,
-      sleep: data.sleep,
-      notes: data.notes,
-      timestamp: data.timestamp
-    } as MoodEntry;
-  } else {
-    // Fallback to individual structure
+    // TODO: Re-enable family structure after deploying composite index for memberId + date + __name__
+    // const context = await getUserContext(userId);
+    // if (context.familyId && context.memberId) {
+    //   const moodsRef = collection(db, 'families', context.familyId, 'moods');
+    //   const q = query(moodsRef, 
+    //     where('memberId', '==', context.memberId),
+    //     where('date', '==', date)
+    //   );
+    //   const querySnapshot = await getDocs(q);
+    //   if (querySnapshot.empty) {
+    //     return null;
+    //   }
+    //   const doc = querySnapshot.docs[0];
+    //   const data = doc.data() as FamilyMoodEntry;
+    //   return {
+    //     id: doc.id,
+    //     date: data.date,
+    //     mood: data.mood,
+    //     energy: data.energy,
+    //     stress: data.stress,
+    //     sleep: data.sleep,
+    //     notes: data.notes,
+    //     timestamp: data.timestamp
+    //   } as MoodEntry;
+    // } else {
+    //   return legacyDb.getMoodForDate(userId, date);
+    // }
+  } catch (error) {
+    console.error('Error in getMoodForDate:', error);
     return legacyDb.getMoodForDate(userId, date);
   }
 };

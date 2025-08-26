@@ -43,6 +43,49 @@ export const getUserProfile = async (userId: string) => {
   }
 };
 
+export const updateUserSelectedFamily = async (userId: string, familyId: string) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      lastSelectedFamilyId: familyId,
+      lastSelectedFamilyUpdatedAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error updating user selected family:', error);
+    throw error;
+  }
+};
+
+export const getUserSelectedFamily = async (userId: string): Promise<string | null> => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      return userData.lastSelectedFamilyId || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting user selected family:', error);
+    return null;
+  }
+};
+
+export const clearUserSelectedFamily = async (userId: string) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      lastSelectedFamilyId: null,
+      lastSelectedFamilyUpdatedAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error clearing user selected family:', error);
+    throw error;
+  }
+};
+
 // Habit operations
 export const createHabit = async (userId: string, habitData: Omit<Habit, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {

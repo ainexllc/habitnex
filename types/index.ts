@@ -7,6 +7,9 @@ export interface User {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   timezone: string;
+  // Cross-device family synchronization
+  lastSelectedFamilyId?: string;
+  lastSelectedFamilyUpdatedAt?: Timestamp;
   preferences: {
     theme: 'light' | 'dark';
     weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, etc.

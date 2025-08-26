@@ -5,7 +5,6 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { signUp, signIn, signInWithGoogle, logOut, resetPassword, handleRedirectResult, getAuthErrorMessage } from '@/lib/auth';
 import { createUserProfile, getUserProfile } from '@/lib/db';
-import { ensurePersonalFamily } from '@/lib/personalFamilyMigration';
 import type { User as UserType } from '@/types';
 
 interface AuthContextType {
@@ -78,12 +77,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           setUserProfile(profile);
           
-          // Ensure personal family exists for unified data architecture
-          // This happens in the background and doesn't block UI
-          ensurePersonalFamily(firebaseUser.uid).catch(error => {
-            console.warn('Failed to ensure personal family:', error);
-            // Don't throw error to avoid breaking auth flow
-          });
+          // Family creation is now optional - users can create families manually
+          // This gives users choice and control over their data structure
         } catch (error) {
           setAuthError('Failed to load user profile');
         }
@@ -128,8 +123,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const handleSignOut = async () => {
     try {
+      // Clear user profile immediately for faster state cleanup
+      setUserProfile(null);
       await logOut();
     } catch (error) {
+      console.error('Sign out error:', error);
       throw error;
     }
   };
