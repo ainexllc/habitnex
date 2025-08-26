@@ -18,14 +18,18 @@ export function FamilyCreationBanner({ onCreateFamily, onJoinFamily }: FamilyCre
 
   // Check if banner was previously dismissed
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setIsVisible(false);
+      return;
+    }
     
     const dismissedKey = `familyBannerDismissed_${user.uid}`;
     const wasDismissed = localStorage.getItem(dismissedKey) === 'true';
     setIsDismissed(wasDismissed);
     
-    // Show banner if user has no family and hasn't dismissed it
-    const shouldShow = !loading && !currentFamily && !wasDismissed;
+    // Show banner immediately for new users (don't wait for family loading)
+    // Hide it only if user has a family OR has dismissed it
+    const shouldShow = !wasDismissed && !currentFamily;
     setIsVisible(shouldShow);
   }, [user, currentFamily, loading]);
 
@@ -46,7 +50,8 @@ export function FamilyCreationBanner({ onCreateFamily, onJoinFamily }: FamilyCre
     onJoinFamily?.();
   };
 
-  if (!isVisible || currentFamily || loading) {
+  // Don't show if user has a family or dismissed it
+  if (!isVisible || currentFamily) {
     return null;
   }
 
