@@ -206,59 +206,43 @@ export function FamilyMemberZone({
               <div
                 key={habit.id}
                 className={cn(
-                  "relative flex items-center justify-between p-3 rounded-lg transition-all duration-200",
-                  touchMode ? "p-4 min-h-[80px]" : "p-3 min-h-[60px]",
+                  "relative flex items-center justify-between p-2 rounded-lg transition-all duration-200",
+                  touchMode ? "p-3 min-h-[60px]" : "p-2 min-h-[48px]",
                   habit.completed 
-                    ? "bg-green-50 border border-green-200" 
-                    : "bg-gray-50 hover:bg-gray-100 border border-gray-200",
-                  celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
+                    ? "bg-green-500/20 dark:bg-green-400/20 border border-green-400/40 dark:border-green-400/30" 
+                    : "bg-gray-700/50 dark:bg-gray-800/80 hover:bg-gray-600/60 dark:hover:bg-gray-700/90 border border-gray-600/40 dark:border-gray-600/30",
+                  celebratingHabitId === habit.id && "animate-pulse bg-yellow-400/30 border-yellow-400/50",
                   loading && "opacity-50 pointer-events-none"
                 )}
               >
                 {/* Habit Info */}
-                <div className="flex items-center space-x-3 flex-1">
+                <div className="flex items-center space-x-2 flex-1">
                   <div 
                     className={cn(
                       "flex-shrink-0 text-center",
-                      touchMode ? "text-2xl w-8" : "text-xl w-6"
+                      touchMode ? "text-lg w-6" : "text-base w-5"
                     )}
                   >
                     {habit.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className={cn(
-                      "font-medium text-gray-900 truncate",
-                      touchMode ? "text-lg" : "text-sm",
-                      habit.completed && "text-green-700"
+                      "font-medium truncate",
+                      touchMode ? "text-base" : "text-sm",
+                      habit.completed 
+                        ? "text-green-700 dark:text-green-300" 
+                        : "text-gray-100 dark:text-gray-200"
                     )}>
                       {habit.name}
                     </h4>
-                    {habit.description && (
-                      <p className={cn(
-                        "text-gray-500 truncate",
-                        touchMode ? "text-base" : "text-xs"
+                    <div className="flex items-center space-x-1">
+                      <Zap className="w-3 h-3 text-yellow-400" />
+                      <span className={cn(
+                        "text-yellow-400 font-medium",
+                        touchMode ? "text-sm" : "text-xs"
                       )}>
-                        {habit.description}
-                      </p>
-                    )}
-                    <div className="flex items-center space-x-2 mt-1">
-                      <div className="flex items-center space-x-1">
-                        <Zap className="w-3 h-3 text-yellow-500" />
-                        <span className={cn(
-                          "text-yellow-600 font-medium",
-                          touchMode ? "text-sm" : "text-xs"
-                        )}>
-                          {habit.basePoints} pts
-                        </span>
-                      </div>
-                      <div className={cn(
-                        "px-2 py-1 rounded-full text-xs font-medium",
-                        habit.difficulty === 'easy' && "bg-green-100 text-green-700",
-                        habit.difficulty === 'medium' && "bg-yellow-100 text-yellow-700",
-                        habit.difficulty === 'hard' && "bg-red-100 text-red-700"
-                      )}>
-                        {habit.difficulty}
-                      </div>
+                        {habit.basePoints} pts
+                      </span>
                     </div>
                   </div>
                 </div>

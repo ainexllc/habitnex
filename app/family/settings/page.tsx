@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { Button } from '@/components/ui/Button';
 import { DiceBearAvatar, AvatarStyle } from '@/components/ui/DiceBearAvatar';
+import { FeedbackDisplay } from '@/components/feedback/FeedbackDisplay';
 import { ArrowLeft, Save, Palette, Users, Moon, Sun, Bell, Monitor, Edit2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -153,6 +154,9 @@ export default function FamilySettingsPage() {
             </div>
           )}
         </div>
+        
+        {/* Family Feedback Display */}
+        <FeedbackDisplay />
         
         {/* Family Name Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">

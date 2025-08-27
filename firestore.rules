@@ -108,6 +108,11 @@ service cloud.firestore {
         allow update: if request.auth != null && isFamilyParent(familyId);
         allow delete: if request.auth != null && isFamilyParent(familyId);
       }
+      
+      // Family feedback subcollection - TEMPORARILY OPEN FOR DEBUGGING
+      match /feedback/{feedbackId} {
+        allow read, write: if request.auth != null;
+      }
     }
     
     // Categories collection - read only for all authenticated users
@@ -173,8 +178,8 @@ service cloud.firestore {
     
     function isFamilyParent(familyId) {
       // Check if the current user is a parent in the family
-      let memberDoc = get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
-      return memberDoc.data.role in ['parent', 'adult'];
+      return exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.role in ['parent', 'adult'];
     }
     
     function isFamilyCreator(familyId) {

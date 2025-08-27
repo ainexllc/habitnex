@@ -6,6 +6,7 @@ import { FamilyProvider } from '@/contexts/FamilyContext'
 import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay'
 import { SoundFeedback } from '@/components/celebration/SoundFeedback'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'NextVibe - Build Better Habits',
@@ -34,6 +35,31 @@ export default function RootLayout({
                 {children}
                 <CelebrationOverlay />
                 <SoundFeedback />
+                <Toaster 
+                  position="top-center"
+                  reverseOrder={false}
+                  gutter={8}
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: 'var(--toast-bg)',
+                      color: 'var(--toast-color)',
+                      border: '1px solid var(--toast-border)',
+                    },
+                    success: {
+                      iconTheme: {
+                        primary: '#10B981',
+                        secondary: '#ffffff',
+                      },
+                    },
+                    error: {
+                      iconTheme: {
+                        primary: '#EF4444',
+                        secondary: '#ffffff',
+                      },
+                    },
+                  }}
+                />
               </CelebrationProvider>
             </FamilyProvider>
           </AuthProvider>

@@ -7,9 +7,9 @@ import { useFamilyChallenges } from '@/hooks/useFamilyChallenges';
 import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
 import { FamilyHeader } from '@/components/family/FamilyHeader';
 import { TouchScreenOptimizer } from '@/components/touch/TouchScreenOptimizer';
-import { EmergencyButton } from '@/components/touch/EmergencyButton';
 import { AddMemberModal } from '@/components/family/AddMemberModal';
 import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
+import { FeedbackSystem } from '@/components/feedback';
 import { Button } from '@/components/ui/Button';
 import { Plus, Settings, Users, BarChart3, UserPlus, User, Trophy, Gift } from 'lucide-react';
 import Link from 'next/link';
@@ -221,10 +221,6 @@ export default function FamilyDashboardPage() {
           </div>
         )}
         
-        {/* Emergency Button for Touch Screens */}
-        {touchMode && (
-          <EmergencyButton />
-        )}
         
         {/* Member Zones Grid */}
         <div className={cn(
@@ -262,6 +258,9 @@ export default function FamilyDashboardPage() {
         isOpen={showAddMemberModal}
         onClose={() => setShowAddMemberModal(false)}
       />
+      
+      {/* Feedback System */}
+      <FeedbackSystem />
     </>
   );
 }
