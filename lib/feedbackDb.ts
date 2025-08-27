@@ -336,8 +336,7 @@ export async function getFeedbackAnalytics(
       'submitted': 0,
       'read': 0,
       'in_progress': 0,
-      'resolved': 0,
-      'archived': 0
+      'resolved': 0
     };
     
     let totalRating = 0;
