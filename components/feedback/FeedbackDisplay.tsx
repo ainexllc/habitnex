@@ -25,6 +25,7 @@ import {
   Eye,
   Clock,
   CheckCircle2,
+  Archive,
   Trash2,
   Download,
   Star,
@@ -65,6 +66,12 @@ const STATUS_CONFIG = {
     variant: 'success' as const, 
     icon: CheckCircle2,
     description: 'Issue has been resolved'
+  },
+  archived: { 
+    label: 'Archived', 
+    variant: 'secondary' as const, 
+    icon: Archive,
+    description: 'Legacy archived status - can be deleted'
   }
 };
 
@@ -529,30 +536,39 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
                       
                       {/* Actions */}
                       <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            Update status:
-                          </span>
-                          {Object.entries(STATUS_CONFIG).map(([status, config]) => {
-                            if (status === item.status) return null;
-                            const ActionIcon = config.icon;
-                            
-                            return (
-                              <Button
-                                key={status}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleStatusUpdate(item.id, status as FeedbackStatus)}
-                                disabled={updating === item.id}
-                                className="flex items-center gap-1"
-                                title={config.description}
-                              >
-                                <ActionIcon className="w-4 h-4" />
-                                {config.label}
-                              </Button>
-                            );
-                          })}
-                        </div>
+                        {/* Show status update buttons only for non-archived items */}
+                        {item.status !== 'archived' ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Update status:
+                            </span>
+                            {Object.entries(STATUS_CONFIG).map(([status, config]) => {
+                              if (status === item.status || status === 'archived') return null;
+                              const ActionIcon = config.icon;
+                              
+                              return (
+                                <Button
+                                  key={status}
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleStatusUpdate(item.id, status as FeedbackStatus)}
+                                  disabled={updating === item.id}
+                                  className="flex items-center gap-1"
+                                  title={config.description}
+                                >
+                                  <ActionIcon className="w-4 h-4" />
+                                  {config.label}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              This feedback has been archived and can be deleted
+                            </span>
+                          </div>
+                        )}
                         
                         <Button
                           variant="ghost"
