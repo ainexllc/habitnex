@@ -9,6 +9,7 @@ import { FamilyHeader } from '@/components/family/FamilyHeader';
 import { TouchScreenOptimizer } from '@/components/touch/TouchScreenOptimizer';
 import { EmergencyButton } from '@/components/touch/EmergencyButton';
 import { AddMemberModal } from '@/components/family/AddMemberModal';
+import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
 import { Button } from '@/components/ui/Button';
 import { Plus, Settings, Users, BarChart3, UserPlus, User, Trophy, Gift } from 'lucide-react';
 import Link from 'next/link';
@@ -175,7 +176,7 @@ export default function FamilyDashboardPage() {
             
             {/* Right side - Actions (for parents) */}
             {isParent && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
                 <Link href="/family/habits/create">
                   <Button size={touchMode ? "default" : "sm"} className={cn(touchMode && "px-6")}>
                     <Plus className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
@@ -191,6 +192,14 @@ export default function FamilyDashboardPage() {
                   <UserPlus className={cn(touchMode ? "w-5 h-5" : "w-4 h-4")} />
                   <span className="ml-2 hidden sm:inline">Add Member</span>
                 </Button>
+                <InviteCodeDisplay 
+                  variant="inline"
+                  showTitle={false}
+                  className={cn(
+                    "ml-2",
+                    touchMode ? "scale-110" : "scale-90"
+                  )}
+                />
                 <Link href="/family/settings">
                   <Button variant="ghost" size={touchMode ? "default" : "sm"}>
                     <Settings className={touchMode ? "w-5 h-5" : "w-4 h-4"} />
@@ -200,6 +209,17 @@ export default function FamilyDashboardPage() {
             )}
           </div>
         </div>
+        
+        {/* Invite Code Section - Card variant for non-touch mode when there's space */}
+        {isParent && !touchMode && (
+          <div className="mb-6">
+            <InviteCodeDisplay 
+              variant="card"
+              showTitle={true}
+              className="max-w-md mx-auto"
+            />
+          </div>
+        )}
         
         {/* Emergency Button for Touch Screens */}
         {touchMode && (
