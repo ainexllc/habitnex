@@ -5,6 +5,7 @@ import {
   updateDoc, 
   getDocs, 
   getDoc,
+  deleteDoc,
   query, 
   where, 
   orderBy, 
@@ -275,15 +276,12 @@ export async function deleteFeedback(
 ): Promise<void> {
   try {
     const feedbackRef = doc(db, 'families', familyId, 'feedback', feedbackId);
-    await updateDoc(feedbackRef, {
-      status: 'archived',
-      archivedAt: serverTimestamp()
-    });
+    await deleteDoc(feedbackRef);
     
-    console.log('Feedback archived successfully:', feedbackId);
+    console.log('Feedback deleted successfully:', feedbackId);
   } catch (error) {
-    console.error('Error archiving feedback:', error);
-    throw new Error('Failed to archive feedback');
+    console.error('Error deleting feedback:', error);
+    throw new Error('Failed to delete feedback');
   }
 }
 

@@ -206,16 +206,23 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
     }
   };
 
-  // Handle delete/archive
-  const handleArchive = async (feedbackId: string) => {
+  // Handle delete feedback
+  const handleDelete = async (feedbackId: string, subject: string) => {
     if (!currentFamily) return;
+    
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to delete this feedback?\n\nSubject: "${subject}"\n\nThis action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
     
     try {
       setUpdating(feedbackId);
       await deleteFeedback(currentFamily.id, feedbackId);
       // Real-time subscription will update the UI
     } catch (error) {
-      console.error('Failed to archive feedback:', error);
+      console.error('Failed to delete feedback:', error);
     } finally {
       setUpdating(null);
     }
@@ -557,12 +564,12 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleArchive(item.id)}
+                          onClick={() => handleDelete(item.id, item.subject)}
                           disabled={updating === item.id}
                           className="text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-1"
                         >
                           <Trash2 className="w-4 h-4" />
-                          Archive
+                          Delete
                         </Button>
                       </div>
                     </div>
