@@ -9,6 +9,7 @@ import {
   createFamilyHabit,
   getFamilyHabits,
   updateFamilyHabit,
+  deleteFamilyHabit,
   toggleFamilyHabitCompletion,
   getFamilyCompletions
 } from '@/lib/familyDb';
@@ -347,6 +348,127 @@ export function useAllFamilyHabits() {
     };
   }, [allHabits, allCompletions]);
   
+  // Update habit
+  const updateHabit = useCallback(async (habitId: string, updates: Partial<FamilyHabit>) => {
+    if (!currentFamily?.id) {
+      throw new Error('Must be in a family to update habits');
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await updateFamilyHabit(currentFamily.id, habitId, updates);
+      await loadAllData(); // Refresh data
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update habit';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentFamily?.id, loadAllData]);
+
+  // Delete habit
+  const deleteHabit = useCallback(async (habitId: string) => {
+    if (!currentFamily?.id) {
+      throw new Error('Must be in a family to delete habits');
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await deleteFamilyHabit(currentFamily.id, habitId);
+      await loadAllData(); // Refresh data
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete habit';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentFamily?.id, loadAllData]);
+
+  // Toggle completion for any family member
+  const toggleMemberCompletion = useCallback(async (
+    habitId: string, 
+    memberId: string,
+    currentCompleted: boolean,
+    date: string = new Date().toISOString().split('T')[0],
+    notes?: string
+  ) => {
+    if (!currentFamily?.id) {
+      throw new Error('Must be in a family to toggle completions');
+    }
+    
+    const todayString = new Date().toISOString().split('T')[0];
+    
+    // Optimistic update - immediately update the UI
+    const optimisticCompletion = {
+      id: `temp-${Date.now()}`,
+      familyId: currentFamily.id,
+      habitId,
+      memberId,
+      date: todayString,
+      completed: !currentCompleted,
+      pointsEarned: 0,
+      streakCount: 0,
+      notes: notes || '',
+      timestamp: new Date(),
+      encouragements: []
+    };
+    
+    // Update completions state immediately for instant UI feedback
+    setAllCompletions(prev => {
+      const filtered = prev.filter(c => !(c.habitId === habitId && c.memberId === memberId && c.date === todayString));
+      return !currentCompleted ? [...filtered, optimisticCompletion] : filtered;
+    });
+    
+    try {
+      setError(null);
+      
+      // Save to database in background without loading state
+      toggleFamilyHabitCompletion(
+        currentFamily.id,
+        habitId,
+        memberId,
+        date,
+        !currentCompleted, // Toggle the current state
+        notes
+      ).then(() => {
+        console.log('✅ Habit completion saved to database');
+      }).catch((err) => {
+        // Revert optimistic update on error
+        console.error('❌ Toggle failed, reverting optimistic update');
+        setAllCompletions(prev => {
+          const filtered = prev.filter(c => !(c.habitId === habitId && c.memberId === memberId && c.date === todayString));
+          // Restore original state
+          if (currentCompleted) {
+            const revertCompletion = {
+              ...optimisticCompletion,
+              completed: true,
+              id: `revert-${Date.now()}`
+            };
+            return [...filtered, revertCompletion];
+          }
+          return filtered;
+        });
+        
+        const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
+        setError(errorMessage);
+      });
+      
+    } catch (err) {
+      // Immediate error (non-async)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
+      setError(errorMessage);
+      throw err;
+    }
+  }, [currentFamily?.id]);
+
   return {
     // Data
     allHabits,
@@ -357,6 +479,9 @@ export function useAllFamilyHabits() {
     error,
     
     // Actions
+    updateHabit,
+    deleteHabit,
+    toggleMemberCompletion,
     refresh: loadAllData,
     
     // Utilities

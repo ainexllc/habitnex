@@ -518,6 +518,20 @@ export const updateFamilyHabit = async (familyId: string, habitId: string, updat
   }
 };
 
+export const deleteFamilyHabit = async (familyId: string, habitId: string): Promise<void> => {
+  try {
+    const habitRef = doc(db, 'families', familyId, 'habits', habitId);
+    // Soft delete by setting isActive to false to preserve completion history
+    await updateDoc(habitRef, {
+      isActive: false,
+      isArchived: true,
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Family Completion Operations
 export const addFamilyCompletion = async (
   familyId: string,

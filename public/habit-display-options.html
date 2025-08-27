@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Dashboard - Habit Display Options</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .strikethrough { text-decoration: line-through; }
+        .habit-pill { 
+            display: inline-block; 
+            padding: 4px 12px; 
+            border-radius: 16px; 
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .progress-bar {
+            display: inline-block;
+            width: 80px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 name class="text-3xl font-bold mb-2">Family Dashboard - Habit Display Options</h1>
+        <p class="text-gray-600 mb-8">Compare different compact habit display styles for the family member zones</p>
+
+        <!-- Current Implementation (for comparison) -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Current Implementation (Full Size)</h2>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg">🏃</span>
+                        <div>
+                            <div class="font-medium text-green-700">Morning Run</div>
+                            <div class="text-xs text-yellow-600">⚡ 10 pts</div>
+                        </div>
+                    </div>
+                    <button class="w-10 h-10 bg-green-600 text-white rounded-full">✓</button>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg">📚</span>
+                        <div>
+                            <div class="font-medium text-gray-700">Read Book</div>
+                            <div class="text-xs text-yellow-600">⚡ 5 pts</div>
+                        </div>
+                    </div>
+                    <button class="w-10 h-10 border-2 border-gray-300 rounded-full">○</button>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height per habit: ~60px | Total space: ~180px for 3 habits</div>
+        </div>
+
+        <!-- Option 1: Minimal Inline List -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 1: Minimal Inline List ⭐ Recommended</h2>
+            <div class="space-y-1">
+                <div class="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50">
+                    <div class="flex items-center space-x-2">
+                        <span>🏃</span>
+                        <span class="text-gray-500 line-through">Morning Run</span>
+                        <span class="text-yellow-600 text-sm">• 10pts</span>
+                    </div>
+                    <span class="text-green-600">✓</span>
+                </div>
+                <div class="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50">
+                    <div class="flex items-center space-x-2">
+                        <span>📚</span>
+                        <span class="text-gray-900">Read Book</span>
+                        <span class="text-yellow-600 text-sm">• 5pts</span>
+                    </div>
+                    <span class="text-gray-400">○</span>
+                </div>
+                <div class="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50">
+                    <div class="flex items-center space-x-2">
+                        <span>💧</span>
+                        <span class="text-gray-500 line-through">Drink Water</span>
+                        <span class="text-yellow-600 text-sm">• 3pts</span>
+                    </div>
+                    <span class="text-green-600">✓</span>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height per habit: ~32px | Total space: ~96px for 3 habits | <span class="text-green-600 font-bold">47% space saved</span></div>
+        </div>
+
+        <!-- Option 2: Pills/Badges Style -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 2: Pills/Badges Style</h2>
+            <div class="flex flex-wrap">
+                <span class="habit-pill bg-green-100 text-green-700 border border-green-300">🏃 Morning Run • 10pts ✓</span>
+                <span class="habit-pill bg-gray-100 text-gray-700 border border-gray-300">📚 Read Book • 5pts ○</span>
+                <span class="habit-pill bg-green-100 text-green-700 border border-green-300">💧 Drink Water • 3pts ✓</span>
+                <span class="habit-pill bg-gray-100 text-gray-700 border border-gray-300">🧘 Meditate • 8pts ○</span>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height: ~40px for all habits | <span class="text-green-600 font-bold">78% space saved</span></div>
+        </div>
+
+        <!-- Option 3: Progress Bar Style -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 3: Progress Bar Style</h2>
+            <div class="space-y-1">
+                <div class="flex items-center space-x-3 py-1">
+                    <span>🏃</span>
+                    <span class="text-sm w-24">Morning Run</span>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+                    <span class="text-sm text-yellow-600">10pts</span>
+                    <span class="text-green-600">✓</span>
+                </div>
+                <div class="flex items-center space-x-3 py-1">
+                    <span>📚</span>
+                    <span class="text-sm w-24">Read Book</span>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+                    <span class="text-sm text-yellow-600">5pts</span>
+                    <span class="text-gray-400">○</span>
+                </div>
+                <div class="flex items-center space-x-3 py-1">
+                    <span>💧</span>
+                    <span class="text-sm w-24">Drink Water</span>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+                    <span class="text-sm text-yellow-600">3pts</span>
+                    <span class="text-green-600">✓</span>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height per habit: ~36px | Total space: ~108px for 3 habits | <span class="text-green-600 font-bold">40% space saved</span></div>
+        </div>
+
+        <!-- Option 4: Checkbox List -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 4: Checkbox List (Traditional)</h2>
+            <div class="space-y-0.5">
+                <div class="flex items-center space-x-2 py-1">
+                    <input type="checkbox" checked class="w-4 h-4 text-green-600">
+                    <span class="strikethrough text-gray-500">Morning Run (10pts)</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <input type="checkbox" class="w-4 h-4">
+                    <span>Read Book (5pts)</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <input type="checkbox" checked class="w-4 h-4 text-green-600">
+                    <span class="strikethrough text-gray-500">Drink Water (3pts)</span>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height per habit: ~28px | Total space: ~84px for 3 habits | <span class="text-green-600 font-bold">53% space saved</span></div>
+        </div>
+
+        <!-- Option 5: Status Dots -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 5: Status Dots (Ultra Minimal)</h2>
+            <div class="space-y-0.5">
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-green-600">●</span>
+                    <span class="text-gray-500">Morning Run - 10pts</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-gray-400">○</span>
+                    <span>Read Book - 5pts</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-green-600">●</span>
+                    <span class="text-gray-500">Drink Water - 3pts</span>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height per habit: ~30px | Total space: ~90px for 3 habits | <span class="text-green-600 font-bold">50% space saved</span></div>
+        </div>
+
+        <!-- Option 6: Combined Stats Bar -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 6: Combined Stats Bar</h2>
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <div class="text-sm font-medium mb-2">Today's Habits: 2/3 complete • 13pts earned</div>
+                <div class="flex space-x-2">
+                    <span class="inline-block bg-green-100 text-green-700 p-2 rounded">🏃✓</span>
+                    <span class="inline-block bg-gray-200 text-gray-600 p-2 rounded">📚○</span>
+                    <span class="inline-block bg-green-100 text-green-700 p-2 rounded">💧✓</span>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Total height: ~60px for all habits | <span class="text-green-600 font-bold">67% space saved</span></div>
+        </div>
+
+        <!-- Option 7: Two-Column Compact -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 7: Two-Column Layout</h2>
+            <div class="grid grid-cols-2 gap-x-4">
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-green-600">✓</span>
+                    <span class="text-sm">Morning Run (10)</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-gray-400">○</span>
+                    <span class="text-sm">Read Book (5)</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-green-600">✓</span>
+                    <span class="text-sm">Drink Water (3)</span>
+                </div>
+                <div class="flex items-center space-x-2 py-1">
+                    <span class="text-gray-400">○</span>
+                    <span class="text-sm">Meditate (8)</span>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Height: ~60px for 4 habits | <span class="text-green-600 font-bold">67% space saved</span></div>
+        </div>
+
+        <!-- Option 8: Icon-Only Mode -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 8: Icon-Only (Ultra Compact)</h2>
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <div class="flex space-x-3 mb-2">
+                    <span class="relative">
+                        🏃
+                        <span class="absolute -bottom-1 -right-1 text-xs text-green-600">✓</span>
+                    </span>
+                    <span class="relative">
+                        📚
+                        <span class="absolute -bottom-1 -right-1 text-xs text-gray-400">○</span>
+                    </span>
+                    <span class="relative">
+                        💧
+                        <span class="absolute -bottom-1 -right-1 text-xs text-green-600">✓</span>
+                    </span>
+                    <span class="relative">
+                        🧘
+                        <span class="absolute -bottom-1 -right-1 text-xs text-gray-400">○</span>
+                    </span>
+                    <span class="relative">
+                        🎯
+                        <span class="absolute -bottom-1 -right-1 text-xs text-green-600">✓</span>
+                    </span>
+                </div>
+                <div class="text-sm text-gray-600">Total: 3/5 • 28pts</div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Total height: ~50px for all habits | <span class="text-green-600 font-bold">72% space saved</span></div>
+        </div>
+
+        <!-- Option 9: Progressive Disclosure -->
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Option 9: Progressive Disclosure (Expandable)</h2>
+            
+            <div class="mb-4">
+                <div class="bg-gray-50 p-3 rounded-lg cursor-pointer hover:bg-gray-100">
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium">Habits: 2/3 done • 13pts</span>
+                        <span class="text-gray-500">▼</span>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500 mt-2">Collapsed state (default)</div>
+            </div>
+
+            <div class="border-t pt-4">
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <div class="flex items-center justify-between mb-2 cursor-pointer">
+                        <span class="font-medium">Habits: 2/3 done • 13pts</span>
+                        <span class="text-gray-500">▲</span>
+                    </div>
+                    <div class="space-y-1 mt-3 pl-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span>✓ Morning Run (10pts)</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span>○ Read Book (5pts)</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span>✓ Drink Water (3pts)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500 mt-2">Expanded state</div>
+            </div>
+            
+            <div class="mt-4 text-sm text-gray-500">Collapsed: ~40px | Expanded: ~120px | <span class="text-green-600 font-bold">78% space saved when collapsed</span></div>
+        </div>
+
+        <!-- Comparison with Multiple Members -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Side-by-Side Member Comparison</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Current Design -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h3 class="font-bold mb-2">Current Design</h3>
+                    <div class="bg-blue-50 rounded p-3 mb-2">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full mr-2"></div>
+                            <div>
+                                <div class="font-bold">Sarah</div>
+                                <div class="text-xs text-gray-600">Level 3 • 320pts</div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="bg-green-100 p-2 rounded text-sm">🏃 Morning Run ✓</div>
+                            <div class="bg-gray-100 p-2 rounded text-sm">📚 Read Book ○</div>
+                            <div class="bg-green-100 p-2 rounded text-sm">💧 Drink Water ✓</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">Height: ~200px per member</div>
+                </div>
+
+                <!-- Option 1 (Recommended) -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h3 class="font-bold mb-2">Option 1 (Compact List)</h3>
+                    <div class="bg-blue-50 rounded p-3 mb-2">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full mr-2"></div>
+                            <div>
+                                <div class="font-bold">Sarah</div>
+                                <div class="text-xs text-gray-600">Level 3 • 320pts</div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5 text-sm">
+                            <div class="flex justify-between">
+                                <span>🏃 Morning Run • 10pts</span>
+                                <span class="text-green-600">✓</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>📚 Read Book • 5pts</span>
+                                <span class="text-gray-400">○</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>💧 Drink Water • 3pts</span>
+                                <span class="text-green-600">✓</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">Height: ~140px per member</div>
+                </div>
+
+                <!-- Option 6 (Most Compact) -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h3 class="font-bold mb-2">Option 6 (Stats Bar)</h3>
+                    <div class="bg-blue-50 rounded p-3 mb-2">
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full mr-2"></div>
+                            <div>
+                                <div class="font-bold">Sarah</div>
+                                <div class="text-xs text-gray-600">Level 3 • 320pts</div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-100 p-2 rounded">
+                            <div class="text-xs mb-1">2/3 done • 13pts today</div>
+                            <div class="flex space-x-1">
+                                <span class="bg-green-200 p-1 rounded text-xs">🏃✓</span>
+                                <span class="bg-gray-300 p-1 rounded text-xs">📚○</span>
+                                <span class="bg-green-200 p-1 rounded text-xs">💧✓</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">Height: ~110px per member</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="bg-blue-50 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 text-blue-900">Summary & Recommendation</h2>
+            <div class="space-y-2 text-blue-800">
+                <p><strong>Most Compact:</strong> Option 6 (Stats Bar) - 67% space saved</p>
+                <p><strong>Best Balance:</strong> Option 1 (Minimal List) - 47% space saved with good visibility</p>
+                <p><strong>Most Traditional:</strong> Option 4 (Checkbox) - Familiar UX pattern</p>
+                <p><strong>Most Flexible:</strong> Option 9 (Progressive) - User controls visibility</p>
+            </div>
+            <div class="mt-4 p-4 bg-white rounded">
+                <p class="font-semibold text-gray-800">🏆 Recommended: Option 1 (Minimal Inline List)</p>
+                <p class="text-sm text-gray-600 mt-1">Provides the best balance of compactness, readability, and visual feedback for completed states.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

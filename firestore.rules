@@ -55,8 +55,9 @@ service cloud.firestore {
       match /completions/{completionId} {
         allow read: if request.auth != null && isFamilyMember(familyId);
         allow create: if request.auth != null && 
-                         (isFamilyMember(familyId) && 
-                          resource.data.memberId == getUserMemberId(familyId));
+                         (isFamilyParent(familyId) || // Parents can create completions for any family member
+                          (isFamilyMember(familyId) && 
+                           resource.data.memberId == getUserMemberId(familyId))); // Members can create their own
         allow update: if request.auth != null && 
                          (isFamilyParent(familyId) || 
                           resource.data.memberId == getUserMemberId(familyId));

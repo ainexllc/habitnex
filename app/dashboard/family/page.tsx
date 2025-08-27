@@ -11,14 +11,14 @@ import { AddMemberModal } from '@/components/family/AddMemberModal';
 import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
 import { FeedbackSystem } from '@/components/feedback';
 import { Button } from '@/components/ui/Button';
-import { Plus, Settings, Users, BarChart3, UserPlus, User, Trophy, Gift } from 'lucide-react';
+import { Plus, Settings, Users, BarChart3, UserPlus, User, Trophy, Gift, Target } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 
 export default function FamilyDashboardPage() {
   const { currentFamily, currentMember, loading: familyLoading, isParent } = useFamily();
-  const { allHabits, getHabitsByMember, getMemberStats, loading: habitsLoading } = useAllFamilyHabits();
+  const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion, loading: habitsLoading } = useAllFamilyHabits();
   const { activeChallenges, challengeProgress } = useFamilyChallenges();
   
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
@@ -154,6 +154,12 @@ export default function FamilyDashboardPage() {
                   Members
                 </Button>
               </Link>
+              <Link href="/family/habits">
+                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                  <Target className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  Habits
+                </Button>
+              </Link>
               <Link href="/family/challenges">
                 <Button variant="ghost" size={touchMode ? "default" : "sm"}>
                   <Trophy className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
@@ -239,6 +245,7 @@ export default function FamilyDashboardPage() {
               touchMode={touchMode}
               isExpanded={selectedMember === member.id}
               onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
+              onToggleHabit={toggleMemberCompletion}
               className={cn(
                 "transition-all duration-300",
                 touchMode && "min-h-[400px]",

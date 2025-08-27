@@ -6,7 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview } from '@/components/ui/DiceBearAvatar';
-import { UserPlus, Palette, Users, Crown, Star, Trophy, Shuffle } from 'lucide-react';
+import { UserPlus, Palette, Users, Crown, Star, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AddMemberModalProps {
@@ -121,12 +121,10 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
   const [step, setStep] = useState<'profile' | 'preferences' | 'preview'>('profile');
   const [error, setError] = useState<string | null>(null);
-  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
-  const [avatarGenerationKey, setAvatarGenerationKey] = useState(0);
 
-  // Generate avatar previews based on name + style + generation key for randomization
+  // Generate professional avatar based on name
   const avatarPreviews = useAvatarPreview(
-    `${formData.displayName || 'member'}-gen${avatarGenerationKey}`, 
+    `${formData.displayName || 'member'}`, 
     familyAvatarStyle as AvatarStyle
   );
 
@@ -135,15 +133,15 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
     setFormData(prev => ({ ...prev, avatarStyle: familyAvatarStyle as AvatarStyle }));
   }, [familyAvatarStyle]);
 
-  // Update avatar seed when selection changes
+  // Automatically use first generated professional avatar
   React.useEffect(() => {
-    if (avatarPreviews[selectedAvatarIndex]) {
+    if (avatarPreviews[0]) {
       setFormData(prev => ({ 
         ...prev, 
-        avatarSeed: avatarPreviews[selectedAvatarIndex].seed 
+        avatarSeed: avatarPreviews[0].seed 
       }));
     }
-  }, [selectedAvatarIndex, avatarPreviews]);
+  }, [avatarPreviews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,45 +271,6 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Avatar Style
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {avatarPreviews.map((preview, index) => (
-                  <button
-                    key={preview.seed}
-                    type="button"
-                    className={cn(
-                      "p-2 rounded-lg border-2 hover:scale-105 transition-transform",
-                      selectedAvatarIndex === index
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                    )}
-                    onClick={() => setSelectedAvatarIndex(index)}
-                  >
-                    <DiceBearAvatar
-                      seed={preview.seed}
-                      style={familyAvatarStyle as AvatarStyle}
-                      size={40}
-                      className="mx-auto"
-                    />
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  // Increment generation key to force new avatar generation
-                  setAvatarGenerationKey(prev => prev + 1);
-                  setSelectedAvatarIndex(0); // Reset selection to first avatar
-                }}
-                className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
-              >
-                <Shuffle className="w-3 h-3" />
-                Generate new avatars
-              </button>
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -2,49 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/Button';
-import { DiceBearAvatar, AvatarStyle } from '@/components/ui/DiceBearAvatar';
 import { FeedbackDisplay } from '@/components/feedback/FeedbackDisplay';
-import { ArrowLeft, Save, Palette, Users, Moon, Sun, Bell, Monitor, Edit2 } from 'lucide-react';
+import { ArrowLeft, Save, Users, Moon, Sun, Bell, Monitor, Edit2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { familyBackgrounds } from '@/lib/familyThemes';
 
-const avatarStyles = [
-  { 
-    value: 'fun-emoji' as AvatarStyle, 
-    label: 'Fun Emoji', 
-    description: 'Colorful, playful emoji-style faces',
-    preview: ['happy', 'excited', 'cool', 'silly']
-  },
-  { 
-    value: 'avataaars' as AvatarStyle, 
-    label: 'Illustrated', 
-    description: 'Popular cartoon-style avatars',
-    preview: ['person1', 'person2', 'person3', 'person4']
-  },
-  { 
-    value: 'bottts' as AvatarStyle, 
-    label: 'Robots', 
-    description: 'Fun robot avatars (great for kids)',
-    preview: ['bot1', 'bot2', 'bot3', 'bot4']
-  },
-  { 
-    value: 'personas' as AvatarStyle, 
-    label: 'Professional', 
-    description: 'Clean, professional avatars',
-    preview: ['pro1', 'pro2', 'pro3', 'pro4']
-  }
-];
 
 export default function FamilySettingsPage() {
   const { currentFamily, currentMember, isParent, loading, updateFamilySettings, updateFamilyName } = useFamily();
+  const { theme, setTheme } = useTheme();
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [familyName, setFamilyName] = useState('');
   
   const [settings, setSettings] = useState({
-    avatarStyle: 'personas' as AvatarStyle,
-    theme: 'light' as 'light' | 'dark',
     touchScreenMode: false,
     autoTimeout: 5,
     notifications: {
@@ -60,8 +34,6 @@ export default function FamilySettingsPage() {
       setFamilyName(currentFamily.name || '');
       if (currentFamily.settings) {
         setSettings({
-          avatarStyle: currentFamily.settings.avatarStyle || 'personas',
-          theme: currentFamily.settings.theme || 'light',
           touchScreenMode: currentFamily.settings.touchScreenMode || false,
           autoTimeout: currentFamily.settings.autoTimeout || 5,
           notifications: currentFamily.settings.notifications || {
@@ -122,7 +94,7 @@ export default function FamilySettingsPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className={familyBackgrounds.page.normal}>
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
@@ -188,68 +160,11 @@ export default function FamilySettingsPage() {
           )}
         </div>
         
-        {/* Avatar Style Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Palette className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Avatar Style</h2>
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">Choose a consistent avatar style for all family members</p>
-          
-          <div className="grid md:grid-cols-2 gap-4">
-            {avatarStyles.map((style) => (
-              <label key={style.value} className="cursor-pointer">
-                <input
-                  type="radio"
-                  name="avatarStyle"
-                  value={style.value}
-                  checked={settings.avatarStyle === style.value}
-                  onChange={(e) => setSettings(prev => ({ 
-                    ...prev, 
-                    avatarStyle: e.target.value as AvatarStyle 
-                  }))}
-                  className="sr-only"
-                />
-                <div className={cn(
-                  "p-4 border-2 rounded-lg transition-all",
-                  settings.avatarStyle === style.value 
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                )}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">{style.label}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{style.description}</p>
-                    </div>
-                    {settings.avatarStyle === style.value && (
-                      <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {style.preview.map((seed, index) => (
-                      <DiceBearAvatar
-                        key={seed}
-                        seed={seed}
-                        style={style.value}
-                        size={32}
-                        className="rounded-full"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </label>
-            ))}
-          </div>
-        </div>
         
         {/* Theme Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
-            {settings.theme === 'light' ? 
+            {theme === 'light' ? 
               <Sun className="w-5 h-5 text-yellow-500" /> : 
               <Moon className="w-5 h-5 text-blue-600" />
             }
@@ -262,13 +177,13 @@ export default function FamilySettingsPage() {
                 type="radio"
                 name="theme"
                 value="light"
-                checked={settings.theme === 'light'}
-                onChange={(e) => setSettings(prev => ({ ...prev, theme: 'light' }))}
+                checked={theme === 'light'}
+                onChange={() => setTheme('light')}
                 className="sr-only"
               />
               <div className={cn(
                 "p-4 border-2 rounded-lg text-center",
-                settings.theme === 'light' 
+                theme === 'light' 
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               )}>
@@ -282,13 +197,13 @@ export default function FamilySettingsPage() {
                 type="radio"
                 name="theme"
                 value="dark"
-                checked={settings.theme === 'dark'}
-                onChange={(e) => setSettings(prev => ({ ...prev, theme: 'dark' }))}
+                checked={theme === 'dark'}
+                onChange={() => setTheme('dark')}
                 className="sr-only"
               />
               <div className={cn(
                 "p-4 border-2 rounded-lg text-center",
-                settings.theme === 'dark' 
+                theme === 'dark' 
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' 
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               )}>
@@ -334,9 +249,9 @@ export default function FamilySettingsPage() {
           </label>
           
           {settings.touchScreenMode && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <label className="block">
-                <span className="text-sm font-medium text-gray-700">Auto-timeout (minutes)</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto-timeout (minutes)</span>
                 <input
                   type="number"
                   min="1"
@@ -346,7 +261,7 @@ export default function FamilySettingsPage() {
                     ...prev, 
                     autoTimeout: parseInt(e.target.value) || 5 
                   }))}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </label>
             </div>
