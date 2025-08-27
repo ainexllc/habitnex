@@ -18,6 +18,7 @@ import {
   addDirectFamilyMember,
   updateFamilyMemberInDb,
   updateFamilySettingsInDb,
+  updateFamilyName as updateFamilyNameInDb,
   getUserFamilies
 } from '@/lib/familyDb';
 import { 
@@ -57,6 +58,7 @@ interface FamilyContextType {
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => Promise<void>;
   updateFamilySettings: (settings: Partial<Family['settings']>) => Promise<void>;
+  updateFamilyName: (name: string) => Promise<void>;
   switchFamily: (familyId: string) => Promise<void>;
   leaveFamily: () => Promise<void>;
   refreshDashboard: () => Promise<void>;
@@ -332,6 +334,35 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, currentFamily, isParent]);
   
+  // Update family name
+  const updateFamilyName = useCallback(async (name: string) => {
+    if (!user) throw new Error('User must be logged in');
+    if (!currentFamily) throw new Error('No family selected');
+    if (!isParent && currentFamily.createdBy !== user.uid) {
+      throw new Error('Only parents can update family name');
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await updateFamilyNameInDb(currentFamily.id, name);
+      
+      // Refresh family data to show updates
+      const updatedFamily = await getFamily(currentFamily.id);
+      if (updatedFamily) {
+        setCurrentFamily(updatedFamily);
+      }
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update family name';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, currentFamily, isParent]);
+  
   // Switch to different family
   const switchFamily = useCallback(async (familyId: string) => {
     if (!user) throw new Error('User must be logged in');
@@ -426,6 +457,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     addDirectMember,
     updateFamilyMember,
     updateFamilySettings,
+    updateFamilyName,
     switchFamily,
     leaveFamily,
     refreshDashboard,

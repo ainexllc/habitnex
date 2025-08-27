@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { Button } from '@/components/ui/Button';
 import { DiceBearAvatar, AvatarStyle } from '@/components/ui/DiceBearAvatar';
-import { ArrowLeft, Save, Palette, Users, Moon, Sun, Bell, Monitor } from 'lucide-react';
+import { ArrowLeft, Save, Palette, Users, Moon, Sun, Bell, Monitor, Edit2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -36,9 +36,10 @@ const avatarStyles = [
 ];
 
 export default function FamilySettingsPage() {
-  const { currentFamily, currentMember, isParent, loading, updateFamilySettings } = useFamily();
+  const { currentFamily, currentMember, isParent, loading, updateFamilySettings, updateFamilyName } = useFamily();
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [familyName, setFamilyName] = useState('');
   
   const [settings, setSettings] = useState({
     avatarStyle: 'personas' as AvatarStyle,
@@ -54,18 +55,21 @@ export default function FamilySettingsPage() {
   
   // Initialize settings from current family
   useEffect(() => {
-    if (currentFamily?.settings) {
-      setSettings({
-        avatarStyle: currentFamily.settings.avatarStyle || 'personas',
-        theme: currentFamily.settings.theme || 'light',
-        touchScreenMode: currentFamily.settings.touchScreenMode || false,
-        autoTimeout: currentFamily.settings.autoTimeout || 5,
-        notifications: currentFamily.settings.notifications || {
-          dailyReminders: true,
-          weeklyReports: true,
-          rewardAlerts: true
-        }
-      });
+    if (currentFamily) {
+      setFamilyName(currentFamily.name || '');
+      if (currentFamily.settings) {
+        setSettings({
+          avatarStyle: currentFamily.settings.avatarStyle || 'personas',
+          theme: currentFamily.settings.theme || 'light',
+          touchScreenMode: currentFamily.settings.touchScreenMode || false,
+          autoTimeout: currentFamily.settings.autoTimeout || 5,
+          notifications: currentFamily.settings.notifications || {
+            dailyReminders: true,
+            weeklyReports: true,
+            rewardAlerts: true
+          }
+        });
+      }
     }
   }, [currentFamily]);
   
@@ -74,7 +78,14 @@ export default function FamilySettingsPage() {
     setSuccessMessage('');
     
     try {
+      // Update family name if changed
+      if (familyName && familyName !== currentFamily?.name) {
+        await updateFamilyName(familyName);
+      }
+      
+      // Update settings
       await updateFamilySettings(settings);
+      
       setSuccessMessage('Settings saved successfully!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
@@ -140,6 +151,36 @@ export default function FamilySettingsPage() {
             <div className="mt-4 p-3 bg-green-100 border border-green-300 text-green-800 rounded-lg">
               {successMessage}
             </div>
+          )}
+        </div>
+        
+        {/* Family Name Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-blue-600" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Family Name</h2>
+          </div>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={familyName}
+              onChange={(e) => setFamilyName(e.target.value)}
+              placeholder="Enter family name"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-600 dark:text-gray-300"
+              title="Edit family name"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+          </div>
+          {currentFamily?.isPersonal && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              This is your personal dashboard name
+            </p>
           )}
         </div>
         

@@ -8,12 +8,12 @@ import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
 import { FamilyHeader } from '@/components/family/FamilyHeader';
 import { TouchScreenOptimizer } from '@/components/touch/TouchScreenOptimizer';
 import { EmergencyButton } from '@/components/touch/EmergencyButton';
-import { FamilyStats } from '@/components/family/FamilyStats';
 import { AddMemberModal } from '@/components/family/AddMemberModal';
 import { Button } from '@/components/ui/Button';
-import { Plus, Settings, Users, Trophy, BarChart3, UserPlus, User } from 'lucide-react';
+import { Plus, Settings, Users, BarChart3, UserPlus, User, Trophy, Gift } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 export default function FamilyDashboardPage() {
   const { currentFamily, currentMember, loading: familyLoading, isParent } = useFamily();
@@ -80,8 +80,8 @@ export default function FamilyDashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Family Found</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">You need to create or join a family first.</p>
+          <h2 className={`text-2xl font-bold ${theme.text.primary} mb-4`}>No Family Found</h2>
+          <p className={`${theme.text.secondary} mb-6`}>You need to create or join a family first.</p>
           <div className="space-x-4">
             <Link href="/family/create">
               <Button>Create Family</Button>
@@ -113,54 +113,98 @@ export default function FamilyDashboardPage() {
           ? "bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-900 dark:to-purple-900 p-4 md:p-8" 
           : "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4"
       )}>
-        {/* Header */}
+        {/* Family Name - Prominent at the top */}
+        <div className="text-center mb-6 pb-4 border-b-2 border-blue-200 dark:border-blue-800">
+          <h1 className={cn(
+            "font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text",
+            touchMode ? "text-5xl md:text-6xl" : "text-3xl md:text-4xl lg:text-5xl",
+            "drop-shadow-sm"
+          )}>
+            {currentFamily.name}
+          </h1>
+        </div>
+        
+        {/* Header - Date and controls only, name is above */}
         <FamilyHeader 
-          familyName={currentFamily.name}
+          familyName=""
           date={today}
           touchMode={touchMode}
           onSettingsClick={() => {/* TODO: Implement settings */}}
         />
         
-        {/* Quick Links Bar - Always visible */}
-        <div className="mb-6 flex gap-2 flex-wrap">
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm">
-              <User className="w-4 h-4 mr-2" />
-              Individual Dashboard
-            </Button>
-          </Link>
-          <Link href="/family/members">
-            <Button variant="outline" size="sm">
-              <Users className="w-4 h-4 mr-2" />
-              View Members
-            </Button>
-          </Link>
-          {isParent && (
-            <>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowAddMemberModal(true)}
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add Member
-              </Button>
-            </>
-          )}
+        {/* Combined Navigation Bar */}
+        <div className={cn(
+          `mb-6 p-4 ${theme.surface.primary} rounded-lg ${theme.shadow.md}`,
+          touchMode && "p-6"
+        )}>
+          <div className="flex items-center justify-between gap-4 overflow-x-auto">
+            {/* Left side - Navigation */}
+            <div className="flex gap-2">
+              <Link href="/dashboard">
+                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                  <User className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  <span className="hidden sm:inline">Individual</span>
+                  <span className="sm:hidden">Me</span>
+                </Button>
+              </Link>
+              <Link href="/family/members">
+                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                  <Users className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  Members
+                </Button>
+              </Link>
+              <Link href="/family/challenges">
+                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                  <Trophy className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  Challenges
+                </Button>
+              </Link>
+              <Link href="/family/rewards">
+                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                  <Gift className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  Rewards
+                </Button>
+              </Link>
+              <Link href="/family/analytics">
+                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                  <BarChart3 className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  Analytics
+                </Button>
+              </Link>
+            </div>
+            
+            {/* Right side - Actions (for parents) */}
+            {isParent && (
+              <div className="flex gap-2">
+                <Link href="/family/habits/create">
+                  <Button size={touchMode ? "default" : "sm"} className={cn(touchMode && "px-6")}>
+                    <Plus className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                    Add Habit
+                  </Button>
+                </Link>
+                <Button 
+                  variant="secondary"
+                  size={touchMode ? "default" : "sm"}
+                  className={cn(touchMode && "px-6")}
+                  onClick={() => setShowAddMemberModal(true)}
+                >
+                  <UserPlus className={cn(touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                  <span className="ml-2 hidden sm:inline">Add Member</span>
+                </Button>
+                <Link href="/family/settings">
+                  <Button variant="ghost" size={touchMode ? "default" : "sm"}>
+                    <Settings className={touchMode ? "w-5 h-5" : "w-4 h-4"} />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Emergency Button for Touch Screens */}
         {touchMode && (
           <EmergencyButton />
         )}
-        
-        {/* Family Stats Overview */}
-        <FamilyStats 
-          members={members}
-          getMemberStats={getMemberStats}
-          touchMode={touchMode}
-          className="mb-6"
-        />
         
         {/* Member Zones Grid */}
         <div className={cn(
@@ -188,94 +232,6 @@ export default function FamilyDashboardPage() {
           ))}
         </div>
         
-        {/* Quick Actions Bar */}
-        {isParent && !touchMode && (
-          <div className="fixed bottom-6 right-6 flex flex-col space-y-2">
-            <Link href="/family/habits/create">
-              <Button size="lg" className="rounded-full shadow-lg">
-                <Plus className="w-5 h-5 mr-2" />
-                Add Habit
-              </Button>
-            </Link>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="rounded-full shadow-lg"
-              onClick={() => setShowAddMemberModal(true)}
-            >
-              <UserPlus className="w-5 h-5 mr-2" />
-              Add Member
-            </Button>
-            <Link href="/family/challenges">
-              <Button variant="outline" size="lg" className="rounded-full shadow-lg">
-                <Trophy className="w-5 h-5 mr-2" />
-                Challenges
-              </Button>
-            </Link>
-            <Link href="/family/analytics">
-              <Button variant="outline" size="lg" className="rounded-full shadow-lg">
-                <BarChart3 className="w-5 h-5 mr-2" />
-                Analytics
-              </Button>
-            </Link>
-            <Link href="/family/members">
-              <Button variant="outline" size="lg" className="rounded-full shadow-lg">
-                <Users className="w-5 h-5 mr-2" />
-                Members
-              </Button>
-            </Link>
-            <Link href="/family/settings">
-              <Button variant="outline" size="lg" className="rounded-full shadow-lg">
-                <Settings className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        )}
-        
-        {/* Touch Mode Quick Actions */}
-        {isParent && touchMode && (
-          <div className="mt-8 flex justify-center space-x-4 flex-wrap">
-            <Link href="/family/habits/create">
-              <Button size="lg" className="px-8 py-4 text-lg mb-2">
-                <Plus className="w-6 h-6 mr-2" />
-                Add New Habit
-              </Button>
-            </Link>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="px-8 py-4 text-lg mb-2"
-              onClick={() => setShowAddMemberModal(true)}
-            >
-              <UserPlus className="w-6 h-6 mr-2" />
-              Add Member
-            </Button>
-            <Link href="/family/rewards/create">
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg mb-2">
-                <Plus className="w-6 h-6 mr-2" />
-                Add Reward
-              </Button>
-            </Link>
-            <Link href="/family/challenges/create">
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg mb-2">
-                <Trophy className="w-6 h-6 mr-2" />
-                Create Challenge
-              </Button>
-            </Link>
-            <Link href="/family/analytics">
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg mb-2">
-                <BarChart3 className="w-6 h-6 mr-2" />
-                View Analytics
-              </Button>
-            </Link>
-            <Link href="/family/members">
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg mb-2">
-                <Users className="w-6 h-6 mr-2" />
-                Manage Members
-              </Button>
-            </Link>
-          </div>
-        )}
         
         {/* Celebration Overlay */}
         {/* TODO: Add celebration animations when habits are completed */}

@@ -2,38 +2,39 @@
 
 import { useTheme } from '../../contexts/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
+import { theme } from '@/lib/theme';
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme: currentTheme, toggleTheme } = useTheme();
 
   return (
     <button
       onClick={toggleTheme}
-      className="
+      className={`
         relative p-2 rounded-lg
-        bg-surface-light dark:bg-surface-dark
-        border border-border-light dark:border-border-dark
-        hover:bg-secondary-100 dark:hover:bg-secondary-800
-        transition-all duration-200 ease-in-out
-        focus:outline-none focus:ring-2 focus:ring-primary-500
-      "
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        ${theme.surface.primary}
+        border ${theme.border.default}
+        ${theme.surface.hover}
+        ${theme.animation.transition}
+        focus:outline-none focus:ring-2 focus:ring-blue-500
+      `}
+      aria-label={`Switch to ${currentTheme === 'light' ? 'dark' : 'light'} mode`}
     >
       <div className="relative w-5 h-5">
         <Sun
           className={`
             absolute inset-0 w-5 h-5
-            text-secondary-600 dark:text-secondary-400
+            ${theme.text.secondary}
             transition-all duration-300 ease-in-out
-            ${theme === 'light' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'}
+            ${currentTheme === 'light' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'}
           `}
         />
         <Moon
           className={`
             absolute inset-0 w-5 h-5
-            text-secondary-600 dark:text-secondary-400
+            ${theme.text.secondary}
             transition-all duration-300 ease-in-out
-            ${theme === 'dark' ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}
+            ${currentTheme === 'dark' ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}
           `}
         />
       </div>

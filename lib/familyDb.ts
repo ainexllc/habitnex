@@ -287,6 +287,18 @@ export const updateFamilySettings = async (familyId: string, settings: Partial<F
   }
 };
 
+export const updateFamilyName = async (familyId: string, name: string) => {
+  try {
+    const familyRef = doc(db, 'families', familyId);
+    await updateDoc(familyRef, {
+      name: name,
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Family Member Operations
 export const getFamilyMembers = async (familyId: string): Promise<FamilyMember[]> => {
   try {
