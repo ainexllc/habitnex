@@ -38,6 +38,51 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
+// Simple confirmation dialog component
+interface DeleteConfirmDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  feedbackSubject: string;
+}
+
+function DeleteConfirmDialog({ isOpen, onClose, onConfirm, feedbackSubject }: DeleteConfirmDialogProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4 shadow-xl">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Delete Feedback?
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-2">
+          Are you sure you want to delete this feedback?
+        </p>
+        <p className="text-gray-900 dark:text-white font-medium mb-6 bg-gray-50 dark:bg-gray-700 p-3 rounded">
+          "{feedbackSubject}"
+        </p>
+        <p className="text-sm text-red-600 dark:text-red-400 mb-6">
+          This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface FeedbackDisplayProps {
   className?: string;
 }
@@ -87,6 +132,17 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
   const [typeFilter, setTypeFilter] = useState<FeedbackType | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Delete confirmation dialog state
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    feedbackId: string;
+    subject: string;
+  }>({
+    isOpen: false,
+    feedbackId: '',
+    subject: ''
+  });
   
   // Load feedback data
   const loadFeedback = useCallback(async () => {
@@ -201,26 +257,34 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
     }
   };
 
-  // Handle delete feedback
-  const handleDelete = async (feedbackId: string, subject: string) => {
-    if (!currentFamily) return;
-    
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to delete this feedback?\n\nSubject: "${subject}"\n\nThis action cannot be undone.`
-    );
-    
-    if (!confirmed) return;
+  // Handle delete feedback - show confirmation dialog
+  const handleDelete = (feedbackId: string, subject: string) => {
+    setDeleteConfirm({
+      isOpen: true,
+      feedbackId,
+      subject
+    });
+  };
+
+  // Confirm delete feedback - actually perform deletion
+  const confirmDelete = async () => {
+    if (!currentFamily || !deleteConfirm.feedbackId) return;
     
     try {
-      setUpdating(feedbackId);
-      await deleteFeedback(currentFamily.id, feedbackId);
+      setUpdating(deleteConfirm.feedbackId);
+      await deleteFeedback(currentFamily.id, deleteConfirm.feedbackId);
       // Real-time subscription will update the UI
     } catch (error) {
       console.error('Failed to delete feedback:', error);
     } finally {
       setUpdating(null);
+      setDeleteConfirm({ isOpen: false, feedbackId: '', subject: '' });
     }
+  };
+
+  // Cancel delete confirmation
+  const cancelDelete = () => {
+    setDeleteConfirm({ isOpen: false, feedbackId: '', subject: '' });
   };
 
   // Handle export
@@ -597,6 +661,14 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        feedbackSubject={deleteConfirm.subject}
+      />
     </div>
   );
 }
