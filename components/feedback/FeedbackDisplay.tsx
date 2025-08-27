@@ -66,13 +66,8 @@ const STATUS_CONFIG = {
     variant: 'success' as const, 
     icon: CheckCircle2,
     description: 'Issue has been resolved'
-  },
-  archived: { 
-    label: 'Archived', 
-    variant: 'secondary' as const, 
-    icon: Archive,
-    description: 'Legacy archived status - can be deleted'
   }
+  // Note: archived status exists in types for backward compatibility but not displayed
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -427,7 +422,9 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
       ) : (
         <div className="space-y-4">
           {paginatedFeedback.map((item) => {
-            const statusConfig = STATUS_CONFIG[item.status];
+            // Handle archived status (legacy) by treating it as resolved for display
+            const displayStatus = item.status === 'archived' ? 'resolved' : item.status;
+            const statusConfig = STATUS_CONFIG[displayStatus];
             const typeConfig = FEEDBACK_TYPE_CONFIG[item.type];
             const isExpanded = expandedItems.has(item.id);
             const StatusIcon = statusConfig.icon;
@@ -508,20 +505,6 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
                   
                   {isExpanded && (
                     <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      {/* Technical Details */}
-                      {(item.device || item.url) && (
-                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                            Technical Details
-                          </h4>
-                          <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                            {item.device && <div>Device: {item.device}</div>}
-                            {item.url && <div>Page: {item.url}</div>}
-                            {item.version && <div>Version: {item.version}</div>}
-                          </div>
-                        </div>
-                      )}
-                      
                       {/* Response Notes */}
                       {item.responseNotes && (
                         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
@@ -536,39 +519,31 @@ export function FeedbackDisplay({ className }: FeedbackDisplayProps) {
                       
                       {/* Actions */}
                       <div className="flex items-center justify-between pt-2">
-                        {/* Show status update buttons only for non-archived items */}
-                        {item.status !== 'archived' ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Update status:
-                            </span>
-                            {Object.entries(STATUS_CONFIG).map(([status, config]) => {
-                              if (status === item.status || status === 'archived') return null;
-                              const ActionIcon = config.icon;
-                              
-                              return (
-                                <Button
-                                  key={status}
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleStatusUpdate(item.id, status as FeedbackStatus)}
-                                  disabled={updating === item.id}
-                                  className="flex items-center gap-1"
-                                  title={config.description}
-                                >
-                                  <ActionIcon className="w-4 h-4" />
-                                  {config.label}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              This feedback has been archived and can be deleted
-                            </span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Update status:
+                          </span>
+                          {Object.entries(STATUS_CONFIG).map(([status, config]) => {
+                            // Skip current status and archived status (archived items can only be deleted)
+                            if (status === displayStatus || (item.status === 'archived')) return null;
+                            const ActionIcon = config.icon;
+                            
+                            return (
+                              <Button
+                                key={status}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleStatusUpdate(item.id, status as FeedbackStatus)}
+                                disabled={updating === item.id}
+                                className="flex items-center gap-1"
+                                title={config.description}
+                              >
+                                <ActionIcon className="w-4 h-4" />
+                                {config.label}
+                              </Button>
+                            );
+                          })}
+                        </div>
                         
                         <Button
                           variant="ghost"
