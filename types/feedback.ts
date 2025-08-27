@@ -13,8 +13,7 @@ export type FeedbackStatus =
   | 'submitted'    // Initial status when feedback is created
   | 'read'         // Parent has viewed the feedback
   | 'in_progress'  // Parent is working on addressing it
-  | 'resolved'     // Issue has been resolved
-  | 'archived';    // No longer active/relevant
+  | 'resolved';    // Issue has been resolved
 
 // Priority levels for feedback (internal use)
 export type FeedbackPriority = 

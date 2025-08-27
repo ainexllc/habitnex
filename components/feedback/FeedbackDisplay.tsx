@@ -25,7 +25,6 @@ import {
   Eye,
   Clock,
   CheckCircle2,
-  Archive,
   Trash2,
   Download,
   Star,
@@ -66,12 +65,6 @@ const STATUS_CONFIG = {
     variant: 'success' as const, 
     icon: CheckCircle2,
     description: 'Issue has been resolved'
-  },
-  archived: { 
-    label: 'Archived', 
-    variant: 'secondary' as const, 
-    icon: Archive,
-    description: 'Archived and no longer active'
   }
 };
 
