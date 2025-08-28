@@ -3,11 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
+import { useClaudeAI } from '@/hooks/useClaudeAI';
+import { HabitEnhancementCard } from '@/components/ai/HabitEnhancementCard';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { FamilyHabit } from '@/types/family';
-import { Edit3, Target } from 'lucide-react';
+import { HabitEnhancement } from '@/types/claude';
+import { Edit3, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EditFamilyHabitModalProps {
@@ -43,6 +46,8 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
   });
   
   const [error, setError] = useState<string | null>(null);
+  const [aiEnhancement, setAiEnhancement] = useState<HabitEnhancement | null>(null);
+  const { enhanceHabit, loading: aiLoading } = useClaudeAI();
 
   // Initialize form data when habit changes
   useEffect(() => {
@@ -58,6 +63,50 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
       });
     }
   }, [habit]);
+
+  const handleAiEnhancement = async () => {
+    if (!formData.name.trim()) {
+      setError('Please enter a habit name first');
+      return;
+    }
+
+    setError(null);
+
+    try {
+      const response = await enhanceHabit({
+        habitName: formData.name.trim(),
+        category: 'general', // You could make this dynamic based on the habit
+        existingHabits: []
+      });
+
+      if (response?.success && response.data) {
+        setAiEnhancement(response.data);
+        
+        // Auto-populate enhanced fields
+        if (response.data?.title && response.data.title !== formData.name) {
+          setFormData(prev => ({ ...prev, name: response.data.title }));
+        }
+        if (response.data?.enhancedDescription) {
+          setFormData(prev => ({ ...prev, description: response.data.enhancedDescription }));
+        }
+      } else {
+        // Handle specific AI unavailable error
+        if (response?.error?.includes('AI features are not available')) {
+          setError('AI enhancement is currently unavailable. You can still edit your habit manually.');
+        } else {
+          setError(response?.error || 'Failed to enhance habit with AI');
+        }
+      }
+
+    } catch (err) {
+      // Handle network errors or other issues
+      if (err instanceof Error && err.message.includes('fetch')) {
+        setError('AI enhancement is currently unavailable. You can still edit your habit manually.');
+      } else {
+        setError('Failed to enhance habit with AI. Please try again.');
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +139,7 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
 
   const handleClose = () => {
     setError(null);
+    setAiEnhancement(null);
     onClose();
   };
 
@@ -134,9 +184,22 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
         
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Description
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAiEnhancement}
+              disabled={aiLoading || !formData.name.trim()}
+              className="flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-700 dark:hover:bg-blue-900/20"
+            >
+              <Sparkles className="w-4 h-4" />
+              {aiLoading ? 'AI Enhancing...' : 'AI Enhance'}
+            </Button>
+          </div>
           <textarea
             placeholder="Brief description of the habit..."
             value={formData.description}
@@ -144,6 +207,38 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 resize-none"
             rows={3}
           />
+
+          {/* AI Enhancement Display */}
+          {aiEnhancement && (
+            <div className="mt-4">
+              <HabitEnhancementCard
+                enhancement={aiEnhancement}
+                onApplyDescription={() => {
+                  if (aiEnhancement.enhancedDescription) {
+                    setFormData(prev => ({ ...prev, description: aiEnhancement.enhancedDescription }));
+                  }
+                }}
+                onClose={() => setAiEnhancement(null)}
+              />
+            </div>
+          )}
+
+          {/* AI Enhancement Info */}
+          {!aiEnhancement && formData.name.trim() && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    Try AI Enhancement
+                  </p>
+                  <p className="text-blue-700 dark:text-blue-300">
+                    Click the "AI Enhance" button to get personalized suggestions for improving your habit description, benefits, and success tips.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Emoji Selection */}
