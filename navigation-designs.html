@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Dashboard Navigation Designs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f4f8;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1e40af;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .design-option {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .design-label {
+            background: #1e40af;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .design-content {
+            padding: 0;
+            min-height: 120px;
+        }
+        
+        /* Common styles */
+        .nav-link {
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .nav-link.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        /* Design 1: Classic Header with Tabs */
+        .design1 {
+            padding: 20px;
+        }
+        
+        .design1-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .design1-left {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .design1-family {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+        
+        .design1-date {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .design1-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .design1-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .design1-nav {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+        
+        /* Design 2: Compact Single Bar */
+        .design2 {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to right, #f0f9ff, #ede9fe);
+        }
+        
+        .design2-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .design2-family {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+        
+        .design2-date {
+            color: #6b7280;
+            font-size: 13px;
+            padding: 4px 8px;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .design2-nav {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .design2-nav a {
+            font-size: 13px;
+            padding: 6px 12px;
+            color: #4b5563;
+        }
+        
+        .design2-message {
+            font-size: 13px;
+            color: #7c3aed;
+            font-style: italic;
+        }
+        
+        /* Design 3: Sidebar Style */
+        .design3 {
+            display: flex;
+            height: 150px;
+        }
+        
+        .design3-sidebar {
+            width: 200px;
+            background: #1e293b;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .design3-sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .design3-sidebar a:hover {
+            background: #334155;
+        }
+        
+        .design3-content {
+            flex: 1;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        
+        .design3-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .design3-family {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        
+        .design3-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .design3-date {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .design3-message {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        /* Design 4: Card Based */
+        .design4 {
+            padding: 20px;
+            background: #f1f5f9;
+        }
+        
+        .design4-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .design4-family-block {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .design4-family {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+        
+        .design4-date {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        
+        .design4-message {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 14px;
+            color: #059669;
+            max-width: 400px;
+        }
+        
+        .design4-actions {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .design4-nav {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            gap: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Design 5: Floating Action Bar */
+        .design5 {
+            padding: 20px;
+            position: relative;
+        }
+        
+        .design5-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .design5-family {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .design5-date {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        .design5-message {
+            color: #10b981;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .design5-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 5px;
+        }
+        
+        .design5-nav a {
+            padding: 8px 16px;
+            color: #4b5563;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        /* Design 6: Metro Style */
+        .design6 {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 15px;
+            padding: 15px;
+            background: #e0e7ff;
+        }
+        
+        .design6-tile {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .design6-family-tile {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        .design6-family {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .design6-date {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+        
+        .design6-message {
+            font-size: 15px;
+            color: #4f46e5;
+            line-height: 1.5;
+        }
+        
+        .design6-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .design6-nav a {
+            color: #4b5563;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .design6-nav a:hover {
+            background: #e0e7ff;
+        }
+        
+        /* Design 7: Minimal with Breadcrumb */
+        .design7 {
+            padding: 25px;
+        }
+        
+        .design7-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .design7-breadcrumb span {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .design7-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .design7-left {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .design7-family {
+            font-size: 36px;
+            font-weight: 300;
+            color: #111827;
+        }
+        
+        .design7-nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .design7-nav a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 15px;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .design7-nav a:hover {
+            color: #111827;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .design7-right {
+            text-align: right;
+        }
+        
+        .design7-date {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 10px;
+        }
+        
+        .design7-message {
+            font-size: 14px;
+            color: #059669;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+        
+        /* Design 8: Magazine Style */
+        .design8 {
+            background: #fafafa;
+            border-top: 4px solid #dc2626;
+        }
+        
+        .design8-top {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .design8-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .design8-family {
+            font-size: 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            color: #111827;
+        }
+        
+        .design8-date {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .design8-message {
+            background: #fef3c7;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #92400e;
+            border-left: 3px solid #f59e0b;
+        }
+        
+        .design8-nav {
+            padding: 15px 20px;
+            background: #111827;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .design8-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Design 9: Dashboard Pro */
+        .design9 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .design9-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .design9-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .design9-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .design9-family {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        .design9-date-badge {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .design9-message {
+            color: #7c3aed;
+            font-size: 14px;
+        }
+        
+        .design9-nav {
+            display: flex;
+            background: #f8fafc;
+            padding: 4px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+        
+        .design9-nav a {
+            padding: 8px 16px;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .design9-nav a.active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Design 10: Spotify-inspired */
+        .design10 {
+            background: #121212;
+            color: white;
+            padding: 0;
+        }
+        
+        .design10-header {
+            background: linear-gradient(to bottom, #1db954, #121212);
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+        
+        .design10-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .design10-family {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .design10-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .design10-btn {
+            background: rgba(0,0,0,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .design10-btn:hover {
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .design10-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        .design10-message {
+            color: #1db954;
+            font-weight: 500;
+        }
+        
+        .design10-nav {
+            background: #121212;
+            padding: 0 20px;
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid #282828;
+        }
+        
+        .design10-nav a {
+            color: #b3b3b3;
+            text-decoration: none;
+            padding: 15px 0;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        
+        .design10-nav a.active {
+            color: white;
+            border-bottom-color: #1db954;
+        }
+        
+        /* Emoji icons */
+        .icon {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Family Dashboard Navigation Designs - 10 Options</h1>
+        
+        <!-- Design 1: Classic Header with Tabs -->
+        <div class="design-option">
+            <div class="design-label">Option 1: Classic Header with Tabs</div>
+            <div class="design-content design1">
+                <div class="design1-header">
+                    <div class="design1-left">
+                        <div class="design1-family">The Johnson Family</div>
+                        <div class="design1-date">Monday, December 2, 2024</div>
+                    </div>
+                    <div class="design1-message">
+                        ✨ Every small step counts! Let's make today amazing together!
+                    </div>
+                    <div class="design1-actions">
+                        <button class="btn btn-primary"><span class="icon">➕</span> Add Habit</button>
+                        <button class="btn btn-secondary"><span class="icon">⚙️</span></button>
+                    </div>
+                </div>
+                <nav class="design1-nav">
+                    <a href="#" class="nav-link active"><span class="icon">👥</span> Members</a>
+                    <a href="#" class="nav-link"><span class="icon">🎯</span> Habits</a>
+                    <a href="#" class="nav-link"><span class="icon">🏆</span> Challenges</a>
+                    <a href="#" class="nav-link"><span class="icon">🎁</span> Rewards</a>
+                    <a href="#" class="nav-link"><span class="icon">📊</span> Analytics</a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Design 2: Compact Single Bar -->
+        <div class="design-option">
+            <div class="design-label">Option 2: Compact Single Bar</div>
+            <div class="design-content design2">
+                <div class="design2-left">
+                    <div class="design2-family">The Johnson Family</div>
+                    <div class="design2-date">Mon, Dec 2</div>
+                    <nav class="design2-nav">
+                        <a href="#" class="nav-link active">Members</a>
+                        <a href="#" class="nav-link">Habits</a>
+                        <a href="#" class="nav-link">Challenges</a>
+                        <a href="#" class="nav-link">Rewards</a>
+                        <a href="#" class="nav-link">Analytics</a>
+                    </nav>
+                </div>
+                <div class="design2-message">
+                    "Great progress this week! Keep it up!" ⭐
+                </div>
+                <div>
+                    <button class="btn btn-primary btn-sm">+ Habit</button>
+                    <button class="btn btn-secondary btn-sm">⚙️</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Design 3: Sidebar Style -->
+        <div class="design-option">
+            <div class="design-label">Option 3: Sidebar Navigation</div>
+            <div class="design-content design3">
+                <nav class="design3-sidebar">
+                    <a href="#">👥 Members</a>
+                    <a href="#">🎯 Habits</a>
+                    <a href="#">🏆 Challenges</a>
+                    <a href="#">🎁 Rewards</a>
+                    <a href="#">📊 Analytics</a>
+                </nav>
+                <div class="design3-content">
+                    <div class="design3-header">
+                        <div>
+                            <div class="design3-family">The Johnson Family</div>
+                        </div>
+                        <div class="design3-info">
+                            <div class="design3-date">Monday, December 2, 2024</div>
+                            <div class="design3-message">💪 Stay consistent!</div>
+                            <button class="btn btn-primary">+ Add Habit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Design 4: Card Based -->
+        <div class="design-option">
+            <div class="design-label">Option 4: Card-Based Layout</div>
+            <div class="design-content design4">
+                <div class="design4-top">
+                    <div class="design4-family-block">
+                        <div class="design4-family">The Johnson Family</div>
+                        <div class="design4-date">Monday, December 2, 2024</div>
+                    </div>
+                    <div class="design4-message">
+                        🌟 "Together we achieve more! 5 habits completed today!"
+                    </div>
+                    <div class="design4-actions">
+                        <button class="btn btn-primary">+ Habit</button>
+                        <button class="btn btn-secondary">👤 Member</button>
+                        <button class="btn btn-secondary">⚙️</button>
+                    </div>
+                </div>
+                <nav class="design4-nav">
+                    <a href="#" class="nav-link active">👥 Members</a>
+                    <a href="#" class="nav-link">🎯 Habits</a>
+                    <a href="#" class="nav-link">🏆 Challenges</a>
+                    <a href="#" class="nav-link">🎁 Rewards</a>
+                    <a href="#" class="nav-link">📊 Analytics</a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Design 5: Floating Action Bar -->
+        <div class="design-option">
+            <div class="design-label">Option 5: Centered with Floating Nav</div>
+            <div class="design-content design5">
+                <div class="design5-header">
+                    <div class="design5-family">The Johnson Family</div>
+                    <div class="design5-date">Monday, December 2, 2024</div>
+                    <div class="design5-message">🎉 "Amazing streak! 7 days of consistency!"</div>
+                </div>
+                <nav class="design5-nav">
+                    <a href="#">Members</a>
+                    <a href="#" style="background: #3b82f6; color: white;">Habits</a>
+                    <a href="#">Challenges</a>
+                    <a href="#">Rewards</a>
+                    <a href="#">Analytics</a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Design 6: Metro Style -->
+        <div class="design-option">
+            <div class="design-label">Option 6: Metro Tiles</div>
+            <div class="design-content design6">
+                <div class="design6-tile design6-family-tile">
+                    <div class="design6-family">The Johnson Family</div>
+                    <div class="design6-date">Monday, December 2, 2024</div>
+                </div>
+                <div class="design6-tile">
+                    <div class="design6-message">
+                        "Building healthy habits together makes the journey more enjoyable! Keep supporting each other!"
+                    </div>
+                </div>
+                <div class="design6-tile">
+                    <nav class="design6-nav">
+                        <a href="#">👥 Members</a>
+                        <a href="#">🎯 Habits</a>
+                        <a href="#">🏆 Challenges</a>
+                        <a href="#">🎁 Rewards</a>
+                        <a href="#">📊 Analytics</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Design 7: Minimal with Breadcrumb -->
+        <div class="design-option">
+            <div class="design-label">Option 7: Minimal & Clean</div>
+            <div class="design-content design7">
+                <div class="design7-breadcrumb">
+                    Dashboard / <span>The Johnson Family</span>
+                </div>
+                <div class="design7-main">
+                    <div class="design7-left">
+                        <div class="design7-family">The Johnson Family</div>
+                        <nav class="design7-nav">
+                            <a href="#">Members</a>
+                            <a href="#">Habits</a>
+                            <a href="#">Challenges</a>
+                            <a href="#">Rewards</a>
+                            <a href="#">Analytics</a>
+                        </nav>
+                    </div>
+                    <div class="design7-right">
+                        <div class="design7-date">Monday, December 2, 2024</div>
+                        <div class="design7-message">
+                            "Small steps daily lead to big changes yearly. Keep going!"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Design 8: Magazine Style -->
+        <div class="design-option">
+            <div class="design-label">Option 8: Magazine Header</div>
+            <div class="design-content design8">
+                <div class="design8-top">
+                    <div class="design8-header">
+                        <div class="design8-family">The Johnson Family</div>
+                        <div class="design8-date">Monday • December 2, 2024</div>
+                    </div>
+                    <div class="design8-message">
+                        💡 Today's Motivation: "The secret of getting ahead is getting started!"
+                    </div>
+                </div>
+                <nav class="design8-nav">
+                    <a href="#">Members</a>
+                    <a href="#">Habits</a>
+                    <a href="#">Challenges</a>
+                    <a href="#">Rewards</a>
+                    <a href="#">Analytics</a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Design 9: Dashboard Pro -->
+        <div class="design-option">
+            <div class="design-label">Option 9: Professional Dashboard</div>
+            <div class="design-content design9">
+                <div class="design9-glass">
+                    <div class="design9-top">
+                        <div class="design9-left">
+                            <div class="design9-family">The Johnson Family</div>
+                            <div class="design9-date-badge">Dec 2, 2024</div>
+                        </div>
+                        <div class="design9-message">
+                            ✨ "Consistency is key - 85% completion rate this week!"
+                        </div>
+                        <div>
+                            <button class="btn btn-primary">+ Add Habit</button>
+                        </div>
+                    </div>
+                    <nav class="design9-nav">
+                        <a href="#" class="active">👥 Members</a>
+                        <a href="#">🎯 Habits</a>
+                        <a href="#">🏆 Challenges</a>
+                        <a href="#">🎁 Rewards</a>
+                        <a href="#">📊 Analytics</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Design 10: Spotify-inspired -->
+        <div class="design-option">
+            <div class="design-label">Option 10: Modern Streaming Style</div>
+            <div class="design-content design10">
+                <div class="design10-header">
+                    <div class="design10-top">
+                        <div class="design10-family">The Johnson Family</div>
+                        <div class="design10-actions">
+                            <button class="design10-btn">+ Add Habit</button>
+                            <button class="design10-btn">⚙️ Settings</button>
+                        </div>
+                    </div>
+                    <div class="design10-info">
+                        <span>Monday, December 2, 2024</span>
+                        <span>•</span>
+                        <span class="design10-message">🔥 On a 7-day streak!</span>
+                    </div>
+                </div>
+                <nav class="design10-nav">
+                    <a href="#" class="active">Members</a>
+                    <a href="#">Habits</a>
+                    <a href="#">Challenges</a>
+                    <a href="#">Rewards</a>
+                    <a href="#">Analytics</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
