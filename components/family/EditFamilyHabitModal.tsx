@@ -73,11 +73,11 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
     setError(null);
 
     try {
-      const response = await enhanceHabit({
-        habitName: formData.name.trim(),
-        category: 'general', // You could make this dynamic based on the habit
-        existingHabits: []
-      });
+      const response = await enhanceHabit(
+        formData.name.trim(),
+        'general', // You could make this dynamic based on the habit
+        []
+      );
 
       if (response?.success && response.data) {
         setAiEnhancement(response.data);
