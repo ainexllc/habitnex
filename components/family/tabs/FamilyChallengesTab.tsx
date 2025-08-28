@@ -230,7 +230,7 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
   };
 
   return (
-    <div>
+    <div className="px-6">
       {/* Tab Header with Actions */}
       <div className="flex items-center justify-between mb-6">
         <div>

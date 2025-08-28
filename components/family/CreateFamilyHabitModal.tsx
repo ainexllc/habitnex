@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useClaudeAI } from '@/hooks/useClaudeAI';
+import { HabitEnhancementCard } from '@/components/ai/HabitEnhancementCard';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { TagInput } from '@/components/ui/TagInput';
-import { HabitEnhancementCard } from '@/components/ai/HabitEnhancementCard';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { CreateFamilyHabitRequest } from '@/types/family';
 import { HabitEnhancement } from '@/types/claude';
@@ -121,11 +121,21 @@ export function CreateFamilyHabitModal({ isOpen, onClose }: CreateFamilyHabitMod
           setFormData(prev => ({ ...prev, description: response.data.enhancedDescription }));
         }
       } else {
-        setError(response?.error || 'Failed to enhance habit with AI');
+        // Handle specific AI unavailable error
+        if (response?.error?.includes('AI features are not available')) {
+          setError('AI enhancement is currently unavailable. You can still create your habit manually.');
+        } else {
+          setError(response?.error || 'Failed to enhance habit with AI');
+        }
       }
 
     } catch (err) {
-      setError('Failed to enhance habit with AI. Please try again.');
+      // Handle network errors or other issues
+      if (err instanceof Error && err.message.includes('fetch')) {
+        setError('AI enhancement is currently unavailable. You can still create your habit manually.');
+      } else {
+        setError('Failed to enhance habit with AI. Please try again.');
+      }
     }
   };
 
@@ -338,6 +348,23 @@ export function CreateFamilyHabitModal({ isOpen, onClose }: CreateFamilyHabitMod
                     }}
                     onClose={() => setAiEnhancement(null)}
                   />
+                </div>
+              )}
+
+              {/* AI Enhancement Info */}
+              {!aiEnhancement && formData.name.trim() && (
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                        Try AI Enhancement
+                      </p>
+                      <p className="text-blue-700 dark:text-blue-300">
+                        Click the "AI Enhance" button above to get personalized suggestions for your habit description, benefits, and success tips.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 

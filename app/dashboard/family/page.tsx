@@ -123,11 +123,9 @@ export default function FamilyDashboard() {
 
       />
 
-      {/* Tab Content - Constrained Width */}
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="min-h-[600px]">
-          {renderTabContent()}
-        </div>
+      {/* Tab Content - Full Width */}
+      <div className="min-h-[600px]">
+        {renderTabContent()}
       </div>
 
       {/* Modals */}

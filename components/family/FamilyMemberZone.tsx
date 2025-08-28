@@ -28,6 +28,7 @@ interface FamilyMemberZoneProps {
   onExpand?: () => void;
   className?: string;
   onToggleHabit?: (habitId: string, memberId: string, currentCompleted: boolean) => Promise<void>;
+  onHabitClick?: (habit: FamilyHabit & { completed: boolean }) => void;
 }
 
 export function FamilyMemberZone({
@@ -38,7 +39,8 @@ export function FamilyMemberZone({
   isExpanded = false,
   onExpand,
   className,
-  onToggleHabit
+  onToggleHabit,
+  onHabitClick
 }: FamilyMemberZoneProps) {
   const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
@@ -108,11 +110,11 @@ export function FamilyMemberZone({
     >
       {/* Member Header */}
       <CardHeader className={cn(
-        "pb-3",
-        touchMode ? "!p-[2px]" : "p-4"
+        "pb-4",
+        touchMode ? "!p-[2px]" : "p-5"
       )}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {member.avatarStyle && member.avatarSeed ? (
               <DiceBearAvatar
                 seed={member.avatarSeed}
@@ -143,7 +145,7 @@ export function FamilyMemberZone({
               }}>
                 {member.displayName}
               </h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
                 <Star className="w-4 h-4 text-yellow-500" />
                 <span className="font-medium">Level {level}</span>
                 <span>•</span>
@@ -171,29 +173,29 @@ export function FamilyMemberZone({
         </div>
         
         {/* Progress Bar */}
-        <div className="mt-3">
-          <Progress 
-            value={completionRate} 
+        <div className="mt-4">
+          <Progress
+            value={completionRate}
             className={cn(
               "w-full",
               touchMode ? "h-3" : "h-2"
             )}
-            style={{ 
+            style={{
               backgroundColor: `${member.color}20`,
             }}
           />
         </div>
-        
+
         {/* Level Progress */}
-        <div className="mt-2">
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-4">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
             <span>Level {level}</span>
             <span>{pointsToNextLevel} pts to next level</span>
           </div>
-          <Progress 
-            value={(member.stats.totalPoints % 100)} 
+          <Progress
+            value={(member.stats.totalPoints % 100)}
             className={cn(
-              "w-full mt-1",
+              "w-full",
               touchMode ? "h-2" : "h-1"
             )}
           />
@@ -204,10 +206,13 @@ export function FamilyMemberZone({
       <CardContent className={cn(
         touchMode ? "!p-[2px] !pt-0" : "p-4 pt-0"
       )}>
-        <div className="space-y-1">
+        {/* Section Divider */}
+        <div className="border-t border-gray-200 dark:border-gray-700 my-3"></div>
+
+        <div className="space-y-2">
           {habits.length === 0 ? (
-            <div className="text-center py-6 text-gray-500">
-              <Trophy className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <div className="text-center py-8 text-gray-500">
+              <Trophy className="w-10 h-10 mx-auto mb-3 opacity-50" />
               <p className={touchMode ? "text-lg" : "text-sm"}>
                 No habits for today
               </p>
@@ -218,15 +223,23 @@ export function FamilyMemberZone({
                 key={habit.id}
                 className={cn(
                   "relative flex items-center justify-between rounded-lg transition-all duration-200",
-                  touchMode ? "px-1.5 py-0.5 min-h-[22px]" : "px-1.5 py-0 min-h-[16px]",
-                  habit.completed 
-                    ? "bg-gray-600 dark:bg-gray-600 border border-gray-500 dark:border-gray-500" 
+                  touchMode ? "px-3 py-2 min-h-[28px]" : "px-3 py-1.5 min-h-[20px]",
+                  habit.completed
+                    ? "bg-gray-600 dark:bg-gray-600 border border-gray-500 dark:border-gray-500"
                     : "bg-gray-700 dark:bg-gray-700 hover:bg-gray-600 dark:hover:bg-gray-600 border border-gray-600 dark:border-gray-600",
                   celebratingHabitId === habit.id && "animate-pulse bg-yellow-400/30 border-yellow-400/50"
                 )}
               >
                 {/* Habit Info - 2 Row Layout */}
-                <div className="flex-1 min-w-0">
+                <div
+                  className="flex-1 min-w-0 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onHabitClick) {
+                      onHabitClick(habit);
+                    }
+                  }}
+                >
                   {/* Top Row: Emoji + Title */}
                   <div className="flex items-center space-x-2">
                     <span 
