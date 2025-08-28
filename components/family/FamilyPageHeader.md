@@ -134,12 +134,10 @@ interface FamilyPageHeaderProps {
   title="Family Habits"
   subtitle="Manage all family habits in one place"
   actions={
-    <Link href="/family/habits/create">
-      <Button>
-        <Plus className="w-5 h-5 mr-2" />
-        Create Habit
-      </Button>
-    </Link>
+    <Button onClick={() => setShowCreateHabitModal(true)}>
+      <Plus className="w-5 h-5 mr-2" />
+      Create Habit
+    </Button>
   }
 />
 ```

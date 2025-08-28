@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useFamilyRewards } from '@/hooks/useFamilyRewards';
 import { approveRedemption, denyRedemption } from '@/lib/familyDb';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { CreateFamilyRewardModal } from '@/components/family/CreateFamilyRewardModal';
+import { ManageFamilyRewardsModal } from '@/components/family/ManageFamilyRewardsModal';
 import { Gift, Plus, Star, Clock, Users, DollarSign, Crown, CheckCircle, XCircle, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -25,6 +28,8 @@ export function FamilyRewardsTab() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [redeeming, setRedeeming] = useState<string | null>(null);
   const [processingApproval, setProcessingApproval] = useState<string | null>(null);
+  const [showCreateRewardModal, setShowCreateRewardModal] = useState(false);
+  const [showManageRewardsModal, setShowManageRewardsModal] = useState(false);
   
   if (!currentFamily || !currentMember) {
     return null;
@@ -93,18 +98,17 @@ export function FamilyRewardsTab() {
         
         {isParent && (
           <div className="flex items-center space-x-4">
-            <Link href="/family/rewards/manage">
-              <Button variant="outline">
-                <Settings className="w-5 h-5 mr-2" />
-                Manage
-              </Button>
-            </Link>
-            <Link href="/family/rewards/create">
-              <Button>
-                <Plus className="w-5 h-5 mr-2" />
-                Create Reward
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              onClick={() => setShowManageRewardsModal(true)}
+            >
+              <Settings className="w-5 h-5 mr-2" />
+              Manage
+            </Button>
+            <Button onClick={() => setShowCreateRewardModal(true)}>
+              <Plus className="w-5 h-5 mr-2" />
+              Create Reward
+            </Button>
           </div>
         )}
       </div>
@@ -189,12 +193,10 @@ export function FamilyRewardsTab() {
               : "Ask a parent to set up some rewards for the family."}
           </p>
           {isParent && (
-            <Link href="/family/rewards/create">
-              <Button>
-                <Plus className="w-5 h-5 mr-2" />
-                Create First Reward
-              </Button>
-            </Link>
+            <Button onClick={() => setShowCreateRewardModal(true)}>
+              <Plus className="w-5 h-5 mr-2" />
+              Create First Reward
+            </Button>
           )}
         </div>
       )}
@@ -375,6 +377,17 @@ export function FamilyRewardsTab() {
           </CardContent>
         </Card>
       )}
+
+      {/* Modals */}
+      <CreateFamilyRewardModal
+        isOpen={showCreateRewardModal}
+        onClose={() => setShowCreateRewardModal(false)}
+      />
+
+      <ManageFamilyRewardsModal
+        isOpen={showManageRewardsModal}
+        onClose={() => setShowManageRewardsModal(false)}
+      />
     </div>
   );
 }

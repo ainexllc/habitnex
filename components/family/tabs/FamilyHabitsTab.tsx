@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
 import { EditFamilyHabitModal } from '@/components/family/EditFamilyHabitModal';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -12,7 +13,11 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { FamilyHabit } from '@/types/family';
 
-export function FamilyHabitsTab() {
+interface FamilyHabitsTabProps {
+  onCreateHabit?: () => void;
+}
+
+export function FamilyHabitsTab({ onCreateHabit }: FamilyHabitsTabProps = {}) {
   const { currentFamily, isParent } = useFamily();
   const { allHabits, deleteHabit, loading: habitsLoading } = useAllFamilyHabits();
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,70 +88,13 @@ export function FamilyHabitsTab() {
           <p className="text-gray-600 dark:text-gray-300 text-sm">Manage all family habits in one place</p>
         </div>
         
-        <Link href="/family/habits/create">
-          <Button>
-            <Plus className="w-5 h-5 mr-2" />
-            Create Habit
-          </Button>
-        </Link>
+        <Button onClick={onCreateHabit}>
+          <Plus className="w-5 h-5 mr-2" />
+          Create Habit
+        </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Habits</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{allHabits.length}</p>
-              </div>
-              <Target className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Members</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{currentFamily.members.filter(m => m.isActive).length}</p>
-              </div>
-              <Users className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Points</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {allHabits.reduce((sum, habit) => sum + habit.basePoints, 0)}
-                </p>
-              </div>
-              <BarChart3 className="w-8 h-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Difficulty</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {allHabits.length > 0 ? Math.round(allHabits.reduce((sum, habit) => sum + habit.basePoints, 0) / allHabits.length) : 0}
-                </p>
-              </div>
-              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">⚡</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
 
       {/* Search and Filters */}
       <Card className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -173,12 +121,10 @@ export function FamilyHabitsTab() {
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             {searchTerm ? 'No habits match your search.' : 'Create your first family habit to get started.'}
           </p>
-          <Link href="/family/habits/create">
-            <Button>
-              <Plus className="w-5 h-5 mr-2" />
-              Create First Habit
-            </Button>
-          </Link>
+          <Button onClick={onCreateHabit}>
+            <Plus className="w-5 h-5 mr-2" />
+            Create First Habit
+          </Button>
         </div>
       ) : (
         <div className="space-y-6">

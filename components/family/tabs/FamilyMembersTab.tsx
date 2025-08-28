@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { EditMemberModal } from '@/components/family/EditMemberModal';
+
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { FamilyMember } from '@/types/family';
 import { Button } from '@/components/ui/Button';
@@ -102,7 +103,12 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{member.displayName}</h3>
+                  <h3 className="font-bold text-lg" style={{
+                    fontFamily: '"Flavors", cursive',
+                    color: member.color
+                  }}>
+                    {member.displayName}
+                  </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{member.name}</p>
                 </div>
               </div>

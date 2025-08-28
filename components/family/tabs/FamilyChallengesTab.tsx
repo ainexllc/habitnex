@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useFamilyChallenges } from '@/hooks/useFamilyChallenges';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { 
@@ -26,7 +27,11 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { FamilyChallenge, ChallengeType } from '@/types/family';
 
-export function FamilyChallengesTab() {
+interface FamilyChallengesTabProps {
+  onCreateChallenge?: () => void;
+}
+
+export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabProps = {}) {
   const { currentFamily, currentMember, isParent } = useFamily();
   const { 
     activeChallenges, 
@@ -234,12 +239,10 @@ export function FamilyChallengesTab() {
         </div>
         
         {isParent && (
-          <Link href="/family/challenges/create">
-            <Button>
-              <Plus className="w-5 h-5 mr-2" />
-              Create Challenge
-            </Button>
-          </Link>
+          <Button onClick={onCreateChallenge}>
+            <Plus className="w-5 h-5 mr-2" />
+            Create Challenge
+          </Button>
         )}
       </div>
       
@@ -314,12 +317,10 @@ export function FamilyChallengesTab() {
                'Complete some challenges to see them here!'}
             </p>
             {isParent && selectedTab !== 'completed' && (
-              <Link href="/family/challenges/create">
-                <Button>
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create First Challenge
-                </Button>
-              </Link>
+              <Button onClick={onCreateChallenge}>
+                <Plus className="w-5 h-5 mr-2" />
+                Create First Challenge
+              </Button>
             )}
           </div>
         ) : (

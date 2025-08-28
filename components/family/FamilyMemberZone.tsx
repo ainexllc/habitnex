@@ -135,9 +135,12 @@ export function FamilyMemberZone({
             )}
             <div>
               <h3 className={cn(
-                "font-bold text-gray-900 dark:text-white",
+                "font-bold",
                 touchMode ? "text-2xl" : "text-lg"
-              )}>
+              )} style={{
+                fontFamily: '"Flavors", cursive',
+                color: member.color
+              }}>
                 {member.displayName}
               </h3>
               <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">

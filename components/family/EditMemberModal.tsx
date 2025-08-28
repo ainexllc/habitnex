@@ -133,13 +133,13 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center mb-6">
-          <UserPen className="w-12 h-12 mx-auto text-blue-600 mb-2" />
-          <h3 className="text-lg font-semibold text-gray-900">Edit Member Details</h3>
-          <p className="text-gray-600">Update {member.name}'s profile</p>
+          <UserPen className="w-12 h-12 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Member Details</h3>
+          <p className="text-gray-600 dark:text-gray-400">Update {member.name}'s profile</p>
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Display Name
           </label>
           <Input
@@ -150,22 +150,71 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
             required
           />
         </div>
-        
-        
+
+        {/* Avatar Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Avatar
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                // Force re-generation by changing a temporary state
+                setFormData(prev => ({ ...prev, displayName: prev.displayName + ' ' }));
+                setTimeout(() => {
+                  setFormData(prev => ({ ...prev, displayName: prev.displayName.trim() }));
+                }, 100);
+              }}
+              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
+            >
+              Generate New Avatars
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Choose from generated avatars based on your name</p>
+          <div className="flex justify-center">
+            <div className="grid grid-cols-6 gap-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 max-w-fit">
+              {avatarPreviews.map((preview) => (
+                <button
+                  key={preview.id}
+                  type="button"
+                  className={cn(
+                    "rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center",
+                    formData.avatarSeed === preview.seed
+                      ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-300 dark:ring-blue-400'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                  )}
+                  onClick={() => setFormData(prev => ({ ...prev, avatarSeed: preview.seed }))}
+                  title={`Avatar ${preview.id + 1}`}
+                >
+                  <div
+                    className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center"
+                    dangerouslySetInnerHTML={{ __html: preview.svg }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Avatars are automatically generated based on your display name
+          </p>
+        </div>
+
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Personal Color
           </label>
-          <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+          <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
             {memberColors.map((color) => (
               <button
                 key={color}
                 type="button"
                 className={cn(
                   "rounded-full border transition-all relative flex-shrink-0",
-                  formData.color === color 
-                    ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110 z-10' 
-                    : 'border-gray-400 hover:scale-110 hover:border-gray-600'
+                  formData.color === color
+                    ? 'border-gray-900 dark:border-gray-100 shadow-sm ring-2 ring-blue-400 dark:ring-blue-500 scale-110 z-10'
+                    : 'border-gray-400 dark:border-gray-600 hover:scale-110 hover:border-gray-600 dark:hover:border-gray-400'
                 )}
                 style={{ 
                   backgroundColor: color,
@@ -186,7 +235,7 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Family Role
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -202,12 +251,12 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
                 />
                 <div className={cn(
                   "p-3 border-2 rounded-lg",
-                  formData.role === option.value 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                  formData.role === option.value
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 )}>
-                  <div className="font-medium text-gray-900">{option.label}</div>
-                  <div className="text-xs text-gray-600 mt-1">{option.description}</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{option.label}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{option.description}</div>
                 </div>
               </label>
             ))}
@@ -215,7 +264,7 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
         </div>
         
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
             {error}
           </div>
         )}

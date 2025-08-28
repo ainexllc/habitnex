@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
 import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
+import { CreateHabitModal } from '@/components/habits/CreateHabitModal';
 import { MoodBar } from '@/components/moods/MoodBar';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -28,6 +29,7 @@ export default function DashboardPage() {
   
   // State for habit editing
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
   
   // Dashboard view state
   const [currentView, setCurrentView] = useState<DashboardViewType>(DashboardViewType.FOCUS);
@@ -160,12 +162,10 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               {/* Quick Actions */}
               <div className="flex items-center gap-3">
-                <Link href="/habits/new">
-                  <Button size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Habit
-                  </Button>
-                </Link>
+                <Button size="sm" onClick={() => setShowCreateHabitModal(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Habit
+                </Button>
                 <Link href="/habits">
                   <Button size="sm" variant="outline">
                     View All Habits
@@ -203,12 +203,10 @@ export default function DashboardPage() {
                     habitCount={habits.length}
                   />
                 )}
-                <Link href="/habits/new">
-                  <Button size="sm" variant="outline">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Habit
-                  </Button>
-                </Link>
+                <Button size="sm" variant="outline" onClick={() => setShowCreateHabitModal(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Habit
+                </Button>
               </div>
             </div>
 
@@ -224,12 +222,10 @@ export default function DashboardPage() {
                   Start your journey to better habits. Create your first habit and begin tracking your progress with our intelligent insights.
                 </p>
                 <div className="flex items-center justify-center gap-3">
-                  <Link href="/habits/new">
-                    <Button size="lg">
-                      <Plus className="w-5 h-5 mr-2" />
-                      Create Your First Habit
-                    </Button>
-                  </Link>
+                  <Button size="lg" onClick={() => setShowCreateHabitModal(true)}>
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create Your First Habit
+                  </Button>
                   <Link href="/habits">
                     <Button size="lg" variant="outline">
                       Learn More
@@ -293,20 +289,26 @@ export default function DashboardPage() {
 
         {/* Floating Action Button */}
         {habits.length > 0 && (
-          <Link href="/habits/new">
-            <button className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-50 group">
-              <Plus className="w-6 h-6" />
-              <span className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                Quick Add Habit
-              </span>
-            </button>
-          </Link>
+          <button
+            onClick={() => setShowCreateHabitModal(true)}
+            className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-50 group"
+          >
+            <Plus className="w-6 h-6" />
+            <span className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+              Quick Add Habit
+            </span>
+          </button>
         )}
 
         <EditHabitModal
           habit={editingHabit}
           isOpen={!!editingHabit}
           onClose={() => setEditingHabit(null)}
+        />
+
+        <CreateHabitModal
+          isOpen={showCreateHabitModal}
+          onClose={() => setShowCreateHabitModal(false)}
         />
       </div>
     </ProtectedRoute>
