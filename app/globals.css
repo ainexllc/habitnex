@@ -7,6 +7,23 @@
 /* Try Universal Sans Text via alternative approach - create fallback with similar weights */
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap');
 
+/* Google Font for Family Name Display */
+@import url('https://fonts.googleapis.com/css2?family=Kablammo:wght@400;500;600;700&display=swap');
+
+/* Google Font for Member Names */
+@import url('https://fonts.googleapis.com/css2?family=Flavors&display=swap');
+
+/* Ensure font loads properly */
+@layer utilities {
+  .font-kablammo {
+    font-family: 'Kablammo', sans-serif;
+    font-weight: 700;
+  }
+  .font-flavors {
+    font-family: 'Flavors', cursive !important;
+  }
+}
+
 @layer base {
   
   body {

@@ -111,6 +111,7 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         'task': ['Work Sans', 'Inter', 'system-ui', 'sans-serif'],
+        'kablammo': ['Kablammo', 'sans-serif'],
       },
       fontWeight: {
         'task-title': '550',

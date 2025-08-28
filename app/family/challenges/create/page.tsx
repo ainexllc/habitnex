@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
-import { 
+import { CreateFamilyHabitModal } from '@/components/family/CreateFamilyHabitModal';
+import {
   ArrowLeft,
   Trophy,
   Target,
@@ -25,7 +26,6 @@ import {
   X,
   CheckCircle
 } from 'lucide-react';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { ChallengeType, FamilyHabit } from '@/types/family';
 
@@ -112,6 +112,7 @@ export default function CreateChallengePage() {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
 
   if (!currentFamily || !isParent) {
     return (
@@ -532,12 +533,13 @@ export default function CreateChallengePage() {
                     <div className="text-center py-8">
                       <Target className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                       <p className="text-gray-600">No active habits found. Create some habits first!</p>
-                      <Link href="/family/habits/create">
-                        <Button className="mt-4">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Habit
-                        </Button>
-                      </Link>
+                      <Button 
+                        className="mt-4"
+                        onClick={() => setShowCreateHabitModal(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Habit
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -715,6 +717,12 @@ export default function CreateChallengePage() {
           </Card>
         </div>
       </div>
+
+      {/* Create Habit Modal */}
+      <CreateFamilyHabitModal
+        isOpen={showCreateHabitModal}
+        onClose={() => setShowCreateHabitModal(false)}
+      />
     </ProtectedRoute>
   );
 }

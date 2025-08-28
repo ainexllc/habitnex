@@ -1,68 +1,64 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useFamily } from '@/contexts/FamilyContext';
-import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
-import { useFamilyChallenges } from '@/hooks/useFamilyChallenges';
-import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
-import { ModernFamilyHeader } from '@/components/family/ModernFamilyHeader';
-import { TouchScreenOptimizer } from '@/components/touch/TouchScreenOptimizer';
-import { AddMemberModal } from '@/components/family/AddMemberModal';
-import { FeedbackSystem } from '@/components/feedback';
 import { Button } from '@/components/ui/Button';
+import { Home, Users, Target, Trophy, Gift, BarChart3, Settings } from 'lucide-react';
+import { FamilyMembersTab } from '@/components/family/tabs/FamilyMembersTab';
+import { FamilyHabitsTab } from '@/components/family/tabs/FamilyHabitsTab';
+import { FamilyChallengesTab } from '@/components/family/tabs/FamilyChallengesTab';
+import { FamilyRewardsTab } from '@/components/family/tabs/FamilyRewardsTab';
+import { FamilyAnalyticsTab } from '@/components/family/tabs/FamilyAnalyticsTab';
+import { FamilyOverviewTab } from '@/components/family/tabs/FamilyOverviewTab';
+import { FamilySettingsTab } from '@/components/family/tabs/FamilySettingsTab';
+import { AddMemberModal } from '@/components/family/AddMemberModal';
+import { CreateFamilyHabitModal } from '@/components/family/CreateFamilyHabitModal';
+import { CreateFamilyChallengeModal } from '@/components/family/CreateFamilyChallengeModal';
+import { ModernFamilyHeader } from '@/components/family/ModernFamilyHeader';
+import { FeedbackSystem } from '@/components/feedback';
+
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-export default function FamilyDashboardPage() {
-  const { currentFamily, currentMember, loading: familyLoading, isParent } = useFamily();
-  const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion, loading: habitsLoading } = useAllFamilyHabits();
-  const { activeChallenges, challengeProgress } = useFamilyChallenges();
-  
-  const [selectedMember, setSelectedMember] = useState<string | null>(null);
-  const [touchMode, setTouchMode] = useState(false);
-  const [lastActivity, setLastActivity] = useState(Date.now());
+type FamilyTab = 'overview' | 'members' | 'habits' | 'challenges' | 'rewards' | 'analytics' | 'settings';
+
+const FAMILY_TABS = [
+  { id: 'overview', label: 'Overview', icon: Home },
+  { id: 'members', label: 'Members', icon: Users },
+  { id: 'habits', label: 'Habits', icon: Target },
+  { id: 'challenges', label: 'Challenges', icon: Trophy },
+  { id: 'rewards', label: 'Rewards', icon: Gift },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  { id: 'settings', label: 'Settings', icon: Settings },
+] as const;
+
+
+
+export default function FamilyDashboard() {
+  const { currentFamily, currentMember, loading, isParent } = useFamily();
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<FamilyTab>('overview');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
-  
-  const loading = familyLoading || habitsLoading;
-  
-  // Touch screen optimization
+  const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
+  const [showCreateChallengeModal, setShowCreateChallengeModal] = useState(false);
+
+  // Format today's date for the header
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Handle URL tab parameter
   useEffect(() => {
-    if (currentFamily?.settings.touchScreenMode) {
-      setTouchMode(true);
+    const tabFromUrl = searchParams.get('tab') as FamilyTab;
+    if (tabFromUrl && FAMILY_TABS.some(tab => tab.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
     }
-  }, [currentFamily?.settings.touchScreenMode]);
-  
-  // Activity tracking for auto-timeout
-  useEffect(() => {
-    const handleActivity = () => setLastActivity(Date.now());
-    
-    window.addEventListener('touchstart', handleActivity);
-    window.addEventListener('mousedown', handleActivity);
-    window.addEventListener('keydown', handleActivity);
-    
-    return () => {
-      window.removeEventListener('touchstart', handleActivity);
-      window.removeEventListener('mousedown', handleActivity);
-      window.removeEventListener('keydown', handleActivity);
-    };
-  }, []);
-  
-  // Auto-timeout for touch screens
-  useEffect(() => {
-    if (!touchMode || !currentFamily?.settings.autoTimeout) return;
-    
-    const timeoutMs = currentFamily.settings.autoTimeout * 60 * 1000; // Convert to milliseconds
-    
-    const checkTimeout = () => {
-      if (Date.now() - lastActivity > timeoutMs) {
-        setSelectedMember(null); // Return to main view
-      }
-    };
-    
-    const interval = setInterval(checkTimeout, 10000); // Check every 10 seconds
-    return () => clearInterval(interval);
-  }, [touchMode, currentFamily?.settings.autoTimeout, lastActivity]);
-  
+  }, [searchParams]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
@@ -73,13 +69,13 @@ export default function FamilyDashboardPage() {
       </div>
     );
   }
-  
+
   if (!currentFamily || !currentMember) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Family Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">You need to create or join a family first.</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">You need to create or join a family first.</p>
           <div className="space-x-4">
             <Link href="/family/create">
               <Button>Create Family</Button>
@@ -92,76 +88,66 @@ export default function FamilyDashboardPage() {
       </div>
     );
   }
-  
-  const members = currentFamily.members.filter(m => m.isActive);
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-  
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return <FamilyOverviewTab />;
+      case 'members':
+        return <FamilyMembersTab onAddMember={() => setShowAddMemberModal(true)} />;
+      case 'habits':
+        return <FamilyHabitsTab onCreateHabit={() => setShowCreateHabitModal(true)} />;
+      case 'challenges':
+        return <FamilyChallengesTab onCreateChallenge={() => setShowCreateChallengeModal(true)} />;
+      case 'rewards':
+        return <FamilyRewardsTab />;
+      case 'analytics':
+        return <FamilyAnalyticsTab />;
+      case 'settings':
+        return <FamilySettingsTab />;
+      default:
+        return <FamilyOverviewTab />;
+    }
+  };
+
   return (
-    <>
-      {touchMode && <TouchScreenOptimizer />}
-      
-      {/* Modern Streaming Style Header */}
-      <ModernFamilyHeader 
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Modern Family Header - Full Width */}
+      <ModernFamilyHeader
         familyName={currentFamily.name}
         date={today}
-        touchMode={touchMode}
         isParent={isParent}
-        onAddMemberClick={() => setShowAddMemberModal(true)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+
+
       />
-      
-      <div className={cn(
-        "min-h-screen transition-all duration-300",
-        touchMode 
-          ? "bg-gray-100 dark:bg-gray-800 p-4 md:p-8" 
-          : "bg-gray-50 dark:bg-gray-900 p-4"
-      )}>
-        
-        
-        {/* Member Zones Grid */}
-        <div className={cn(
-          "grid gap-4 md:gap-6",
-          touchMode ? "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-          members.length === 2 && "md:grid-cols-2",
-          members.length === 3 && "lg:grid-cols-3",
-          members.length >= 4 && "xl:grid-cols-4"
-        )}>
-          {members.map((member) => (
-            <FamilyMemberZone
-              key={member.id}
-              member={member}
-              habits={getHabitsByMember(member.id)}
-              stats={getMemberStats(member.id)}
-              touchMode={touchMode}
-              isExpanded={selectedMember === member.id}
-              onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
-              onToggleHabit={toggleMemberCompletion}
-              className={cn(
-                "transition-all duration-300",
-                touchMode && "min-h-[400px]",
-                selectedMember && selectedMember !== member.id && touchMode && "opacity-50 scale-95"
-              )}
-            />
-          ))}
+
+      {/* Tab Content - Constrained Width */}
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="min-h-[600px]">
+          {renderTabContent()}
         </div>
-        
-        
-        {/* Celebration Overlay */}
-        {/* TODO: Add celebration animations when habits are completed */}
       </div>
-      
-      {/* Add Member Modal */}
+
+      {/* Modals */}
       <AddMemberModal
         isOpen={showAddMemberModal}
         onClose={() => setShowAddMemberModal(false)}
       />
-      
+
+      <CreateFamilyHabitModal
+        isOpen={showCreateHabitModal}
+        onClose={() => setShowCreateHabitModal(false)}
+      />
+
+      <CreateFamilyChallengeModal
+        isOpen={showCreateChallengeModal}
+        onClose={() => setShowCreateChallengeModal(false)}
+      />
+
       {/* Feedback System */}
       <FeedbackSystem />
-    </>
+    </div>
   );
 }

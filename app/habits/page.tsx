@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
 import { HabitCard } from '@/components/habits/HabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
+import { CreateHabitModal } from '@/components/habits/CreateHabitModal';
 import { ViewSwitcher } from '@/components/habits/ViewSwitcher';
 import { ListView } from '@/components/habits/views/ListView';
 import { CalendarView } from '@/components/habits/views/CalendarView';
@@ -28,6 +29,7 @@ export default function HabitsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
   const [currentView, setCurrentView] = useState<HabitViewType>(HabitViewType.GRID);
 
   // Load preferred view from localStorage
@@ -98,12 +100,10 @@ export default function HabitsPage() {
               </p>
             </div>
             
-            <Link href="/habits/new">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                New Habit
-              </Button>
-            </Link>
+            <Button onClick={() => setShowCreateHabitModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Habit
+            </Button>
           </div>
 
           {/* Search, Filter, and View Switcher */}
@@ -159,12 +159,10 @@ export default function HabitsPage() {
                 <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
                   Start building better habits by creating your first one.
                 </p>
-                <Link href="/habits/new">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Habit
-                  </Button>
-                </Link>
+                <Button onClick={() => setShowCreateHabitModal(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Habit
+                </Button>
               </div>
             ) : filteredHabits.length === 0 ? (
               <div className="text-center py-12">
@@ -255,6 +253,11 @@ export default function HabitsPage() {
           habit={editingHabit}
           isOpen={!!editingHabit}
           onClose={() => setEditingHabit(null)}
+        />
+
+        <CreateHabitModal
+          isOpen={showCreateHabitModal}
+          onClose={() => setShowCreateHabitModal(false)}
         />
       </div>
     </ProtectedRoute>
