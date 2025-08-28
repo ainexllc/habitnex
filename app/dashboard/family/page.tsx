@@ -5,16 +5,13 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useFamilyChallenges } from '@/hooks/useFamilyChallenges';
 import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
-import { FamilyHeader } from '@/components/family/FamilyHeader';
+import { ModernFamilyHeader } from '@/components/family/ModernFamilyHeader';
 import { TouchScreenOptimizer } from '@/components/touch/TouchScreenOptimizer';
 import { AddMemberModal } from '@/components/family/AddMemberModal';
-import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
 import { FeedbackSystem } from '@/components/feedback';
 import { Button } from '@/components/ui/Button';
-import { Plus, Settings, Users, BarChart3, UserPlus, User, Trophy, Gift, Target } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { theme } from '@/lib/theme';
 
 export default function FamilyDashboardPage() {
   const { currentFamily, currentMember, loading: familyLoading, isParent } = useFamily();
@@ -81,8 +78,8 @@ export default function FamilyDashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <h2 className={`text-2xl font-bold ${theme.text.primary} mb-4`}>No Family Found</h2>
-          <p className={`${theme.text.secondary} mb-6`}>You need to create or join a family first.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Family Found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">You need to create or join a family first.</p>
           <div className="space-x-4">
             <Link href="/family/create">
               <Button>Create Family</Button>
@@ -108,124 +105,21 @@ export default function FamilyDashboardPage() {
     <>
       {touchMode && <TouchScreenOptimizer />}
       
+      {/* Modern Streaming Style Header */}
+      <ModernFamilyHeader 
+        familyName={currentFamily.name}
+        date={today}
+        touchMode={touchMode}
+        isParent={isParent}
+        onAddMemberClick={() => setShowAddMemberModal(true)}
+      />
+      
       <div className={cn(
         "min-h-screen transition-all duration-300",
         touchMode 
-          ? "bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-900 dark:to-purple-900 p-4 md:p-8" 
-          : "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4"
+          ? "bg-gray-100 dark:bg-gray-800 p-4 md:p-8" 
+          : "bg-gray-50 dark:bg-gray-900 p-4"
       )}>
-        {/* Family Name - Prominent at the top */}
-        <div className="text-center mb-6 pb-4 border-b-2 border-blue-200 dark:border-blue-800">
-          <h1 className={cn(
-            "font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text",
-            touchMode ? "text-5xl md:text-6xl" : "text-3xl md:text-4xl lg:text-5xl",
-            "drop-shadow-sm"
-          )}>
-            {currentFamily.name}
-          </h1>
-        </div>
-        
-        {/* Header - Date and controls only, name is above */}
-        <FamilyHeader 
-          familyName=""
-          date={today}
-          touchMode={touchMode}
-          onSettingsClick={() => {/* TODO: Implement settings */}}
-        />
-        
-        {/* Combined Navigation Bar */}
-        <div className={cn(
-          `mb-6 p-4 ${theme.surface.primary} rounded-lg ${theme.shadow.md}`,
-          touchMode && "p-6"
-        )}>
-          <div className="flex items-center justify-between gap-4 overflow-x-auto">
-            {/* Left side - Navigation */}
-            <div className="flex gap-2">
-              <Link href="/dashboard">
-                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                  <User className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  <span className="hidden sm:inline">Individual</span>
-                  <span className="sm:hidden">Me</span>
-                </Button>
-              </Link>
-              <Link href="/family/members">
-                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                  <Users className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  Members
-                </Button>
-              </Link>
-              <Link href="/family/habits">
-                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                  <Target className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  Habits
-                </Button>
-              </Link>
-              <Link href="/family/challenges">
-                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                  <Trophy className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  Challenges
-                </Button>
-              </Link>
-              <Link href="/family/rewards">
-                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                  <Gift className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  Rewards
-                </Button>
-              </Link>
-              <Link href="/family/analytics">
-                <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                  <BarChart3 className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  Analytics
-                </Button>
-              </Link>
-            </div>
-            
-            {/* Right side - Actions (for parents) */}
-            {isParent && (
-              <div className="flex gap-2 items-center">
-                <Link href="/family/habits/create">
-                  <Button size={touchMode ? "default" : "sm"} className={cn(touchMode && "px-6")}>
-                    <Plus className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                    Add Habit
-                  </Button>
-                </Link>
-                <Button 
-                  variant="secondary"
-                  size={touchMode ? "default" : "sm"}
-                  className={cn(touchMode && "px-6")}
-                  onClick={() => setShowAddMemberModal(true)}
-                >
-                  <UserPlus className={cn(touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  <span className="ml-2 hidden sm:inline">Add Member</span>
-                </Button>
-                <InviteCodeDisplay 
-                  variant="inline"
-                  showTitle={false}
-                  className={cn(
-                    "ml-2",
-                    touchMode ? "scale-110" : "scale-90"
-                  )}
-                />
-                <Link href="/family/settings">
-                  <Button variant="ghost" size={touchMode ? "default" : "sm"}>
-                    <Settings className={touchMode ? "w-5 h-5" : "w-4 h-4"} />
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Invite Code Section - Card variant for non-touch mode when there's space */}
-        {isParent && !touchMode && (
-          <div className="mb-6">
-            <InviteCodeDisplay 
-              variant="card"
-              showTitle={true}
-              className="max-w-md mx-auto"
-            />
-          </div>
-        )}
         
         
         {/* Member Zones Grid */}
