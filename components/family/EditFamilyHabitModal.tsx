@@ -213,10 +213,16 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
             <div className="mt-4">
               <HabitEnhancementCard
                 enhancement={aiEnhancement}
-                onApplyDescription={() => {
-                  if (aiEnhancement.enhancedDescription) {
-                    setFormData(prev => ({ ...prev, description: aiEnhancement.enhancedDescription }));
+                onApply={(enhancement) => {
+                  // Apply title if different from current
+                  if (enhancement.title && enhancement.title !== formData.name) {
+                    setFormData(prev => ({ ...prev, name: enhancement.title }));
                   }
+                  // Apply enhanced description
+                  if (enhancement.enhancedDescription) {
+                    setFormData(prev => ({ ...prev, description: enhancement.enhancedDescription }));
+                  }
+                  setAiEnhancement(null);
                 }}
                 onClose={() => setAiEnhancement(null)}
               />
