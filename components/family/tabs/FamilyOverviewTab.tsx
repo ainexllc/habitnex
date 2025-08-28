@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
 import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
+import { HabitDetailsModal } from '@/components/habits/HabitDetailsModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { FamilyHabit } from '@/types/family';
 
 
 
@@ -18,6 +20,9 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
   const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion } = useAllFamilyHabits();
 
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [selectedHabit, setSelectedHabit] = useState<(FamilyHabit & { completed: boolean }) | null>(null);
+  const [showHabitModal, setShowHabitModal] = useState(false);
+  const [completingHabitId, setCompletingHabitId] = useState<string | null>(null);
   const [touchMode, setTouchMode] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
 
@@ -57,6 +62,26 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
     return () => clearInterval(interval);
   }, [touchMode, currentFamily?.settings.autoTimeout, lastActivity]);
 
+  const handleHabitClick = (habit: FamilyHabit & { completed: boolean }) => {
+    setSelectedHabit(habit);
+    setShowHabitModal(true);
+  };
+
+  const handleCompleteHabit = async () => {
+    if (!selectedHabit || !currentMember) return;
+
+    try {
+      setCompletingHabitId(selectedHabit.id);
+      await toggleMemberCompletion(selectedHabit.id, currentMember.id, selectedHabit.completed);
+      setShowHabitModal(false);
+      setSelectedHabit(null);
+    } catch (error) {
+      console.error('Failed to complete habit:', error);
+    } finally {
+      setCompletingHabitId(null);
+    }
+  };
+
   if (!currentFamily || !currentMember) {
     return null;
   }
@@ -72,23 +97,18 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
 
 
   return (
-    <div>
+    <div className="px-6">
       {/* Tab Header with Actions */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Family Overview</h2>
           <p className="text-gray-600 dark:text-gray-300 text-sm">Welcome to your family dashboard - {today}</p>
         </div>
-
-
       </div>
-
-
 
       {/* Member Zones Grid */}
       <div className={cn(
-        "mt-8",
-        "grid gap-4 md:gap-6",
+        "grid gap-6 md:gap-8 lg:gap-10",
         touchMode ? "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
         members.length === 2 && "md:grid-cols-2",
         members.length === 3 && "lg:grid-cols-3",
@@ -104,6 +124,7 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
             isExpanded={selectedMember === member.id}
             onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
             onToggleHabit={toggleMemberCompletion}
+            onHabitClick={handleHabitClick}
             className={cn(
               "transition-all duration-300",
               touchMode && "min-h-[400px]",
@@ -112,6 +133,20 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
           />
         ))}
       </div>
+
+      {/* Habit Details Modal */}
+      <HabitDetailsModal
+        isOpen={showHabitModal}
+        onClose={() => {
+          setShowHabitModal(false);
+          setSelectedHabit(null);
+        }}
+        habit={selectedHabit}
+        onComplete={handleCompleteHabit}
+        memberName={selectedHabit ? currentFamily.members.find(m => m.id === selectedHabit.assignedMembers?.[0])?.displayName : undefined}
+        memberColor={selectedHabit ? currentFamily.members.find(m => m.id === selectedHabit.assignedMembers?.[0])?.color : undefined}
+        isCompleting={completingHabitId === selectedHabit?.id}
+      />
     </div>
   );
 }

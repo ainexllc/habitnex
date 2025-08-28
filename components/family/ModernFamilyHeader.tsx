@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { WeatherWidget } from '@/components/weather/WeatherWidget';
-import { Users, Target, Trophy, Gift, BarChart3, Home, Settings, LayoutDashboard } from 'lucide-react';
+import { Users, Target, Trophy, Gift, BarChart3, Home, Settings, LayoutDashboard, Maximize, Minimize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -43,13 +42,64 @@ export function ModernFamilyHeader({
   onTabChange
 }: ModernFamilyHeaderProps) {
   const [currentMessage, setCurrentMessage] = useState(encouragingMessages[0]);
-  
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   // Rotate encouraging message daily
   useEffect(() => {
     const today = new Date().getDate();
     const messageIndex = today % encouragingMessages.length;
     setCurrentMessage(encouragingMessages[messageIndex]);
   }, []);
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Toggle fullscreen
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // Enter fullscreen
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        } else if ((document.documentElement as any).webkitRequestFullscreen) {
+          await (document.documentElement as any).webkitRequestFullscreen();
+        } else if ((document.documentElement as any).mozRequestFullScreen) {
+          await (document.documentElement as any).mozRequestFullScreen();
+        } else if ((document.documentElement as any).msRequestFullscreen) {
+          await (document.documentElement as any).msRequestFullscreen();
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) {
+          await (document as any).mozCancelFullScreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling fullscreen:', error);
+    }
+  };
 
   const navigationLinks = [
     { id: 'overview', label: 'Overview', icon: Home },
@@ -106,6 +156,23 @@ export function ModernFamilyHeader({
             
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size={touchMode ? "default" : "sm"}
+                onClick={toggleFullscreen}
+                className={cn(
+                  "bg-black/20 hover:bg-black/30 text-white border-none",
+                  touchMode && "min-h-[48px] px-6"
+                )}
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? (
+                  <Minimize className={cn(touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                ) : (
+                  <Maximize className={cn(touchMode ? "w-5 h-5" : "w-4 h-4")} />
+                )}
+              </Button>
+
               <Link href="/dashboard">
                 <Button
                   variant="ghost"
@@ -119,33 +186,30 @@ export function ModernFamilyHeader({
                   <LayoutDashboard className={cn(touchMode ? "w-5 h-5" : "w-4 h-4")} />
                 </Button>
               </Link>
-              
+
 
             </div>
           </div>
           
           {/* Info Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white/90">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <span className={cn(
-                "font-medium",
-                touchMode ? "text-lg" : "text-sm md:text-base"
-              )}>
-                {date}
-              </span>
-              
-              <span className="hidden sm:inline text-white/60">•</span>
-              
-              <span className={cn(
-                "text-blue-200 font-medium",
-                touchMode ? "text-lg" : "text-sm md:text-base"
-              )}>
-                {currentMessage}
-              </span>
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-white/90">
+            <span className={cn(
+              "font-medium",
+              touchMode ? "text-lg" : "text-sm md:text-base"
+            )}>
+              {date}
+            </span>
             
-            {/* Weather Widget */}
-            <WeatherWidget compact className="flex-shrink-0" />
+            <span className="hidden sm:inline text-white/60">•</span>
+            
+            <span className={cn(
+              "text-blue-200 font-medium",
+              touchMode ? "text-lg" : "text-sm md:text-base"
+            )}>
+              {currentMessage}
+            </span>
+            
+
           </div>
         </div>
       </div>
