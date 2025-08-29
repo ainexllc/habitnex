@@ -6,8 +6,9 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview } from '@/components/ui/DiceBearAvatar';
-import { UserPlus, Palette, Users, Crown, Star, Trophy } from 'lucide-react';
+import { UserPlus, Palette, Users, Crown, Star, Trophy, Shuffle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -121,10 +122,12 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
   const [step, setStep] = useState<'profile' | 'preferences' | 'preview'>('profile');
   const [error, setError] = useState<string | null>(null);
+  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
+  const [avatarGenerationKey, setAvatarGenerationKey] = useState(0);
 
-  // Generate professional avatar based on name
+  // Generate avatar previews based on name + style + generation key for randomization
   const avatarPreviews = useAvatarPreview(
-    `${formData.displayName || 'member'}`, 
+    `${formData.displayName || 'member'}-gen${avatarGenerationKey}`, 
     familyAvatarStyle as AvatarStyle
   );
 
@@ -133,15 +136,15 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
     setFormData(prev => ({ ...prev, avatarStyle: familyAvatarStyle as AvatarStyle }));
   }, [familyAvatarStyle]);
 
-  // Automatically use first generated professional avatar
+  // Update avatar seed when selection changes
   React.useEffect(() => {
-    if (avatarPreviews[0]) {
+    if (avatarPreviews[selectedAvatarIndex]) {
       setFormData(prev => ({ 
         ...prev, 
-        avatarSeed: avatarPreviews[0].seed 
+        avatarSeed: avatarPreviews[selectedAvatarIndex].seed 
       }));
     }
-  }, [avatarPreviews]);
+  }, [selectedAvatarIndex, avatarPreviews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,15 +219,16 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               <div key={stepName} className="flex items-center">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
-                  step === stepName ? 'bg-blue-600 text-white' : 
-                  ['profile', 'preferences', 'preview'].indexOf(step) > index ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'
+                  step === stepName ? theme.components.button.primary + ' text-white' : 
+                  ['profile', 'preferences', 'preview'].indexOf(step) > index ? theme.status.success.bg + ' ' + theme.status.success.text : theme.surface.secondary + ' ' + theme.text.muted
                 )}>
                   {index + 1}
                 </div>
                 {index < 2 && (
                   <div className="w-8 h-1 bg-gray-200 mx-2">
                     <div className={cn(
-                      "h-full bg-blue-600 transition-all duration-300",
+                      "h-full transition-all duration-300",
+                      theme.components.button.primary,
                       ['profile', 'preferences', 'preview'].indexOf(step) > index ? 'w-full' : 'w-0'
                     )} />
                   </div>
@@ -238,14 +242,14 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         {step === 'profile' && (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <UserPlus className="w-12 h-12 mx-auto text-blue-600 mb-2" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Member Profile</h3>
-              <p className="text-gray-600 dark:text-gray-300">Basic information about the new family member</p>
+              <UserPlus className={cn("w-12 h-12 mx-auto mb-2", theme.status.info.text)} />
+              <h3 className={cn("text-lg font-semibold", theme.text.primary)}>Member Profile</h3>
+              <p className={theme.text.secondary}>Basic information about the new family member</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
                   Full Name *
                 </label>
                 <Input
@@ -258,7 +262,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
                   Display Name *
                 </label>
                 <Input
@@ -271,12 +275,51 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               </div>
             </div>
 
+            <div>
+              <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+                Avatar Style
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {avatarPreviews.map((preview, index) => (
+                  <button
+                    key={preview.seed}
+                    type="button"
+                    className={cn(
+                      "p-2 rounded-lg border-2 hover:scale-105 transition-transform",
+                      selectedAvatarIndex === index
+                        ? theme.status.info.border + ' ' + theme.status.info.bg + ' border-2'
+                        : theme.border.default + ' ' + theme.surface.hover + ' border-2'
+                    )}
+                    onClick={() => setSelectedAvatarIndex(index)}
+                  >
+                    <DiceBearAvatar
+                      seed={preview.seed}
+                      style={familyAvatarStyle as AvatarStyle}
+                      size={40}
+                      className="mx-auto"
+                    />
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  // Increment generation key to force new avatar generation
+                  setAvatarGenerationKey(prev => prev + 1);
+                  setSelectedAvatarIndex(0); // Reset selection to first avatar
+                }}
+                className={cn("mt-2 text-sm flex items-center gap-1", theme.text.link)}
+              >
+                <Shuffle className="w-3 h-3" />
+                Generate new avatars
+              </button>
+            </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
                 Personal Color
               </label>
-              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-600">
+              <div className={cn("flex flex-wrap gap-2 p-3 border rounded-lg", theme.surface.secondary, theme.border.default)}>
                 {memberColors.map((color) => (
                   <button
                     key={color}
@@ -284,8 +327,8 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                     className={cn(
                       "rounded-full border transition-all relative flex-shrink-0",
                       formData.color === color 
-                        ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110 z-10' 
-                        : 'border-gray-400 hover:scale-110 hover:border-gray-600'
+                        ? 'shadow-sm ring-2 scale-110 z-10 ' + theme.status.info.border + ' ring-blue-400' 
+                        : 'hover:scale-110 ' + theme.border.strong + ' hover:border-gray-600'
                     )}
                     style={{ 
                       backgroundColor: color,
@@ -310,7 +353,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
                 Birth Year (Optional)
               </label>
               <Input
@@ -328,9 +371,9 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         {step === 'preferences' && (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <Star className="w-12 h-12 mx-auto text-purple-600 mb-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Role & Preferences</h3>
-              <p className="text-gray-600">Set permissions and motivation style</p>
+              <Star className={cn("w-12 h-12 mx-auto mb-2", theme.status.info.text)} />
+              <h3 className={cn("text-lg font-semibold", theme.text.primary)}>Role & Preferences</h3>
+              <p className={theme.text.secondary}>Set permissions and motivation style</p>
             </div>
 
             <div>
@@ -351,14 +394,14 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                     <div className={cn(
                       "p-4 border-2 rounded-lg",
                       formData.role === option.value 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? theme.status.info.border + ' ' + theme.status.info.bg + ' border-2' 
+                        : theme.border.default + ' ' + theme.surface.hover + ' border-2'
                     )}>
                       <div className="flex items-center space-x-3 mb-2">
                         {option.icon}
-                        <div className="font-medium text-gray-900">{option.label}</div>
+                        <div className={cn("font-medium", theme.text.primary)}>{option.label}</div>
                       </div>
-                      <div className="text-sm text-gray-600">{option.description}</div>
+                      <div className={cn("text-sm", theme.text.secondary)}>{option.description}</div>
                     </div>
                   </label>
                 ))}
@@ -383,12 +426,12 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                     <div className={cn(
                       "p-3 border-2 rounded-lg flex items-center justify-between",
                       formData.motivationStyle === option.value 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? theme.status.info.border + ' ' + theme.status.info.bg + ' border-2' 
+                        : theme.border.default + ' ' + theme.surface.hover + ' border-2'
                     )}>
                       <div>
-                        <div className="font-medium text-gray-900">{option.label}</div>
-                        <div className="text-sm text-gray-600">{option.description}</div>
+                        <div className={cn("font-medium", theme.text.primary)}>{option.label}</div>
+                        <div className={cn("text-sm", theme.text.secondary)}>{option.description}</div>
                       </div>
                     </div>
                   </label>
@@ -402,12 +445,12 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         {step === 'preview' && (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <Users className="w-12 h-12 mx-auto text-green-600 mb-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Review Member</h3>
-              <p className="text-gray-600">Confirm the details before adding to your family</p>
+              <Users className={cn("w-12 h-12 mx-auto mb-2", theme.status.success.text)} />
+              <h3 className={cn("text-lg font-semibold", theme.text.primary)}>Review Member</h3>
+              <p className={theme.text.secondary}>Confirm the details before adding to your family</p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-6">
+            <div className={cn("rounded-lg p-6", theme.surface.secondary)}>
               <div className="flex items-center space-x-4 mb-4">
                 <div 
                   className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl"
@@ -416,8 +459,8 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                   {formData.avatar}
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">{formData.displayName}</h3>
-                  <p className="text-gray-600">{formData.name}</p>
+                  <h3 className={cn("font-bold", theme.text.primary)}>{formData.displayName}</h3>
+                  <p className={theme.text.secondary}>{formData.name}</p>
                   <div className={cn(
                     "inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border mt-1",
                     roleOptions.find(r => r.value === formData.role)?.color
@@ -430,20 +473,20 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Birth Year:</span>
+                  <span className={theme.text.muted}>Birth Year:</span>
                   <span className="ml-2 font-medium">{formData.birthYear > 1950 ? formData.birthYear : 'Not set'}</span>
                 </div>
                 <div>
-                  <span className="text-gray-600">Motivation:</span>
+                  <span className={theme.text.muted}>Motivation:</span>
                   <span className="ml-2 font-medium capitalize">{formData.motivationStyle}</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className={cn("border rounded-lg p-4", theme.status.info.bg, theme.status.info.border)}>
               <div className="flex items-start space-x-2">
-                <div className="text-blue-600 mt-0.5">ℹ️</div>
-                <div className="text-blue-800 text-sm">
+                <div className={cn("mt-0.5", theme.status.info.text)}>ℹ️</div>
+                <div className={cn("text-sm", theme.status.info.text)}>
                   <div className="font-medium mb-1">Direct Member</div>
                   <div>This family member won't have their own login account. You can manage their habits and track their progress on their behalf.</div>
                 </div>
@@ -454,13 +497,13 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
         {/* Error Message */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="text-red-800">{error}</div>
+          <div className={cn("p-4 border rounded-lg", theme.status.error.bg, theme.status.error.border)}>
+            <div className={theme.status.error.text}>{error}</div>
           </div>
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 border-t border-gray-200">
+        <div className={cn("flex justify-between pt-6 border-t", theme.border.default)}>
           <Button
             type="button"
             variant="outline"

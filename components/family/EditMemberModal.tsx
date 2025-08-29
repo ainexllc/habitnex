@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview } from '@/components/ui/DiceBearAvatar';
 import { FamilyMember } from '@/types/family';
-import { UserPen, Palette } from 'lucide-react';
+import { UserPen, Palette, Shuffle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface EditMemberModalProps {
   isOpen: boolean;
@@ -61,10 +62,12 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
   });
   
   const [error, setError] = useState<string | null>(null);
+  const [avatarGenerationKey, setAvatarGenerationKey] = useState(0);
+  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
   
-  // Generate professional avatar based on display name with family's style
+  // Generate avatar previews based on display name with family's style
   const avatarPreviews = useAvatarPreview(
-    `${formData.displayName || member?.displayName || 'member'}`,
+    `${formData.displayName || member?.displayName || 'member'}-gen${avatarGenerationKey}`,
     familyAvatarStyle as AvatarStyle
   );
   
@@ -78,18 +81,20 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
         color: member.color || '#3B82F6',
         role: member.role || 'child',
       });
+      setSelectedAvatarIndex(0);
+      setAvatarGenerationKey(prev => prev + 1);
     }
   }, [member, familyAvatarStyle]);
   
-  // Automatically use first generated professional avatar
+  // Update avatar seed when selection changes
   useEffect(() => {
-    if (avatarPreviews[0] && formData.displayName) {
+    if (avatarPreviews[selectedAvatarIndex]) {
       setFormData(prev => ({ 
         ...prev, 
-        avatarSeed: avatarPreviews[0].seed 
+        avatarSeed: avatarPreviews[selectedAvatarIndex].seed 
       }));
     }
-  }, [avatarPreviews, formData.displayName]);
+  }, [selectedAvatarIndex, avatarPreviews]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,13 +138,13 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center mb-6">
-          <UserPen className="w-12 h-12 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Member Details</h3>
-          <p className="text-gray-600 dark:text-gray-400">Update {member.name}'s profile</p>
+          <UserPen className="w-12 h-12 mx-auto text-blue-600 mb-2" />
+          <h3 className={`text-lg font-semibold ${theme.text.primary}`}>Edit Member Details</h3>
+          <p className={theme.text.secondary}>Update {member.name}'s profile</p>
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
             Display Name
           </label>
           <Input
@@ -150,71 +155,60 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
             required
           />
         </div>
-
-        {/* Avatar Selection */}
+        
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Avatar
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                // Force re-generation by changing a temporary state
-                setFormData(prev => ({ ...prev, displayName: prev.displayName + ' ' }));
-                setTimeout(() => {
-                  setFormData(prev => ({ ...prev, displayName: prev.displayName.trim() }));
-                }, 100);
-              }}
-              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
-            >
-              Generate New Avatars
-            </button>
+          <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
+            Avatar Style
+          </label>
+          <div className="grid grid-cols-4 gap-2">
+            {avatarPreviews.map((preview, index) => (
+              <button
+                key={preview.seed}
+                type="button"
+                className={cn(
+                  "p-2 rounded-lg border-2 hover:scale-105 transition-transform",
+                  selectedAvatarIndex === index
+                    ? `border-blue-500 ${theme.status.info.bg}`
+                    : `${theme.border.default} hover:border-gray-300`
+                )}
+                onClick={() => setSelectedAvatarIndex(index)}
+              >
+                <DiceBearAvatar
+                  seed={preview.seed}
+                  style={familyAvatarStyle as AvatarStyle}
+                  size={40}
+                  className="mx-auto"
+                />
+              </button>
+            ))}
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Choose from generated avatars based on your name</p>
-          <div className="flex justify-center">
-            <div className="grid grid-cols-6 gap-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 max-w-fit">
-              {avatarPreviews.map((preview) => (
-                <button
-                  key={preview.id}
-                  type="button"
-                  className={cn(
-                    "rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center",
-                    formData.avatarSeed === preview.seed
-                      ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-300 dark:ring-blue-400'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                  )}
-                  onClick={() => setFormData(prev => ({ ...prev, avatarSeed: preview.seed }))}
-                  title={`Avatar ${preview.id + 1}`}
-                >
-                  <div
-                    className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center"
-                    dangerouslySetInnerHTML={{ __html: preview.svg }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Avatars are automatically generated based on your display name
-          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setAvatarGenerationKey(prev => prev + 1);
+              setSelectedAvatarIndex(0);
+            }}
+            className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          >
+            <Shuffle className="w-3 h-3" />
+            Generate new avatars
+          </button>
         </div>
-
-
+        
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
             Personal Color
           </label>
-          <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+          <div className={`flex flex-wrap gap-2 p-3 border rounded-lg ${theme.surface.secondary} ${theme.border.default}`}>
             {memberColors.map((color) => (
               <button
                 key={color}
                 type="button"
                 className={cn(
                   "rounded-full border transition-all relative flex-shrink-0",
-                  formData.color === color
-                    ? 'border-gray-900 dark:border-gray-100 shadow-sm ring-2 ring-blue-400 dark:ring-blue-500 scale-110 z-10'
-                    : 'border-gray-400 dark:border-gray-600 hover:scale-110 hover:border-gray-600 dark:hover:border-gray-400'
+                  formData.color === color 
+                    ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110 z-10' 
+                    : 'border-gray-400 hover:scale-110 hover:border-gray-600'
                 )}
                 style={{ 
                   backgroundColor: color,
@@ -235,7 +229,7 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
             Family Role
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -251,12 +245,12 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
                 />
                 <div className={cn(
                   "p-3 border-2 rounded-lg",
-                  formData.role === option.value
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  formData.role === option.value 
+                    ? `border-blue-500 ${theme.status.info.bg}` 
+                    : `${theme.border.default} hover:border-gray-300`
                 )}>
-                  <div className="font-medium text-gray-900 dark:text-white">{option.label}</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{option.description}</div>
+                  <div className={`font-medium ${theme.text.primary}`}>{option.label}</div>
+                  <div className={`text-xs ${theme.text.secondary} mt-1`}>{option.description}</div>
                 </div>
               </label>
             ))}
@@ -264,7 +258,7 @@ export function EditMemberModal({ isOpen, onClose, member }: EditMemberModalProp
         </div>
         
         {error && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+          <div className={`p-3 ${theme.status.error.bg} border ${theme.status.error.border} rounded-lg ${theme.status.error.text} text-sm`}>
             {error}
           </div>
         )}

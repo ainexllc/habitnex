@@ -1,5 +1,6 @@
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   hover?: boolean;
@@ -11,8 +12,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'card',
-          hover && 'hover:shadow-md cursor-pointer',
+          theme.components.card,
+          hover && `${theme.components.cardHover} cursor-pointer`,
           className
         )}
         {...props}
@@ -42,7 +43,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
     return (
       <h3
         ref={ref}
-        className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+        className={cn(`text-lg font-semibold leading-none tracking-tight ${theme.text.primary}`, className)}
         {...props}
       />
     );

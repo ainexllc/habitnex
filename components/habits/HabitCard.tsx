@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Check, Edit, Trash2, Target, Clock, Calendar } from 'lucide-react';
 import { useHabits } from '@/hooks/useHabits';
 import { calculateStreak, isHabitDueToday, getNextDueDate, getDaysUntilDue, isHabitOverdue, calculateIntervalStreak } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface HabitCardProps {
   habit: Habit;
@@ -73,15 +74,15 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
             />
             <div>
               <CardTitle className={`task-title text-sm font-task-title truncate transition-all duration-300 ${
-                isCompleted ? 'line-through text-text-muted-light dark:text-text-muted-dark' : 'text-gray-900 dark:text-white'
+                isCompleted ? `line-through ${theme.text.muted}` : theme.text.primary
               }`} title={habit.name}>
                 {habit.name}
               </CardTitle>
               {habit.description && (
                 <p className={`task-description text-sm font-task-description mt-1 transition-all duration-300 ${
                   isCompleted 
-                    ? 'line-through text-text-muted-light dark:text-text-muted-dark' 
-                    : 'text-gray-600 dark:text-gray-400'
+                    ? `line-through ${theme.text.muted}` 
+                    : theme.text.muted
                 }`}>
                   {habit.description}
                 </p>
@@ -106,13 +107,13 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
               <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                 {currentStreak}
               </div>
-              <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+              <div className={`text-xs ${theme.text.secondary}`}>
                 {habit.frequency === 'interval' ? 'Streak' : 'Day Streak'}
               </div>
             </div>
             
             <div className="text-center">
-              <div className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+              <div className={`text-sm font-medium ${theme.text.secondary}`}>
                 {habit.frequency === 'interval' 
                   ? `Every ${habit.intervalDays} days`
                   : (habit.tags && habit.tags.length > 0 
@@ -121,7 +122,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
                   )
                 }
               </div>
-              <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
+              <div className={`text-xs ${theme.text.muted}`}>
                 {habit.frequency === 'interval' ? 'Frequency' : 'Tags'}
               </div>
             </div>
@@ -133,7 +134,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
                   <Clock className="w-4 h-4 mr-1" />
                   {daysUntilDue === 0 ? 'Today' : `${daysUntilDue} days`}
                 </div>
-                <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
+                <div className={`text-xs ${theme.text.muted}`}>
                   Next due
                 </div>
               </div>
@@ -145,7 +146,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
                   <Target className="w-4 h-4 mr-1" />
                   {habit.goal.target}
                 </div>
-                <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
+                <div className={`text-xs ${theme.text.muted}`}>
                   {habit.goal.period} goal
                 </div>
               </div>
@@ -170,7 +171,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
             </Button>
           ) : (
             <div className="text-center">
-              <div className="text-sm text-text-muted-light dark:text-text-muted-dark">
+              <div className={`text-sm ${theme.text.muted}`}>
                 {habit.frequency === 'interval' 
                   ? `Next due: ${nextDueDate ? new Date(nextDueDate).toLocaleDateString() : 'Not scheduled'}`
                   : 'Not due today'

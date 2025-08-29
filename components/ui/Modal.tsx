@@ -4,6 +4,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
+import { theme } from '@/lib/theme';
 
 interface ModalProps {
   isOpen: boolean;
@@ -35,28 +36,28 @@ export function Modal({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className={`fixed inset-0 ${theme.components.modal.backdrop} ${theme.animation.transition}`}
         onClick={onClose}
       />
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div className={cn(
-          "relative w-full bg-white rounded-lg shadow-xl transform transition-all",
-          "dark:bg-gray-800",
+          `relative w-full rounded-lg ${theme.shadow.xl} transform ${theme.animation.transitionSlow}`,
+          theme.components.modal.content,
           sizeClasses[size],
           className
         )}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div className={`flex items-center justify-between p-6 border-b ${theme.border.default}`}>
+            <h3 className={`text-lg font-semibold ${theme.text.primary}`}>
               {title}
             </h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className={theme.text.muted}
             >
               <X className="w-5 h-5" />
             </Button>

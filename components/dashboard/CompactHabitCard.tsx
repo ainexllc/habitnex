@@ -23,6 +23,7 @@ import {
   calculateCompletionRate 
 } from '@/lib/utils';
 import { formatTime } from '@/lib/timeUtils';
+import { theme } from '@/lib/theme';
 
 interface CompactHabitCardProps {
   habit: Habit;
@@ -75,15 +76,15 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
   // Get status styling
   const getStatusStyling = () => {
     if (isCompleted) {
-      return 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800';
+      return `${theme.status.success.bg} ${theme.status.success.border}`;
     }
     if (isOverdue) {
-      return 'bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800';
+      return `${theme.status.error.bg} ${theme.status.error.border}`;
     }
     if (isDueToday) {
-      return 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800';
+      return `${theme.status.info.bg} ${theme.status.info.border}`;
     }
-    return 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700';
+    return `${theme.surface.primary} ${theme.border.default}`;
   };
 
   return (
@@ -112,15 +113,15 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
         <div className="flex items-center gap-2">
           <h3 className={`font-medium text-sm truncate ${
             isCompleted 
-              ? 'text-green-800 dark:text-green-200 line-through opacity-75' 
-              : 'text-gray-900 dark:text-gray-100'
+              ? `${theme.status.success.text} line-through opacity-75` 
+              : theme.text.primary
           }`}>
             {habit.name}
           </h3>
           
           {/* Time indicator for interval habits */}
           {habit.frequency === 'interval' && habit.reminderTime && (
-            <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+            <span className={`text-xs ${theme.status.info.bg} ${theme.status.info.text} px-2 py-0.5 rounded-full`}>
               {formatTime(new Date(`1970-01-01T${habit.reminderTime}`), timeFormatPreferences.is24Hour)}
             </span>
           )}
@@ -146,13 +147,13 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
         
         {/* Completion rate */}
         <div className="flex items-center gap-2 mt-1">
-          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+          <div className={`flex-1 ${theme.surface.tertiary} rounded-full h-1.5`}>
             <div 
-              className="h-1.5 rounded-full bg-primary-500 transition-all duration-300"
+              className={`h-1.5 rounded-full bg-blue-500 transition-all duration-300`}
               style={{ width: `${completionRate}%` }}
             />
           </div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className={`text-xs ${theme.text.muted}`}>
             {completionRate}%
           </span>
         </div>
@@ -165,7 +166,7 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
             size="sm"
             variant="ghost"
             onClick={handleEdit}
-            className="w-8 h-8 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className={`w-8 h-8 p-0 ${theme.text.muted} hover:text-gray-700 dark:hover:text-gray-200`}
           >
             <Edit className="w-4 h-4" />
           </Button>
@@ -173,7 +174,7 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
             size="sm"
             variant="ghost"
             onClick={handleDelete}
-            className="w-8 h-8 p-0 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+            className={`w-8 h-8 p-0 ${theme.text.muted} hover:text-red-600 dark:hover:text-red-400`}
           >
             <Trash2 className="w-4 h-4" />
           </Button>

@@ -10,6 +10,7 @@ import {
   calculateStreak,
   calculateCompletionRate 
 } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 import { useHabits } from '@/hooks/useHabits';
 import { 
   ChevronDown, 
@@ -97,11 +98,11 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
   if (habits.length === 0) {
     return (
       <div className="text-center py-12">
-        <List className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+        <List className={`w-12 h-12 ${theme.text.muted} mx-auto mb-4`} />
+        <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
           No habits to display
         </h3>
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className={theme.text.muted}>
           Create your first habit to see it here.
         </p>
       </div>
@@ -113,10 +114,10 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
       {/* Controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="font-medium text-gray-900 dark:text-gray-100">
+          <h3 className={`font-medium ${theme.text.primary}`}>
             All Habits
           </h3>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className={`text-sm ${theme.text.muted}`}>
             ({filteredAndSortedHabits.length} of {habits.length})
           </span>
         </div>
@@ -125,7 +126,7 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
           variant="ghost"
           size="sm"
           onClick={() => setShowControls(!showControls)}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className={`${theme.text.muted} hover:${theme.text.secondary}`}
         >
           <Filter className="w-4 h-4 mr-1" />
           Options
@@ -135,10 +136,10 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
 
       {/* Filter and Sort Controls */}
       {showControls && (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-3">
+        <div className={`${theme.surface.secondary} rounded-lg p-3 space-y-3`}>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-xs font-medium ${theme.text.secondary} mb-1`}>
                 Filter
               </label>
               <select
@@ -154,7 +155,7 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
             </div>
             
             <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-xs font-medium ${theme.text.secondary} mb-1`}>
                 Sort by
               </label>
               <select
@@ -190,7 +191,7 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
             variant="outline"
             size="sm"
             onClick={() => setShowAll(!showAll)}
-            className="text-gray-600 dark:text-gray-400"
+            className={theme.text.muted}
           >
             {showAll ? (
               <>
@@ -209,10 +210,10 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
 
       {/* Summary Info */}
       {filteredAndSortedHabits.length > 0 && (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400">
+        <div className={`${theme.surface.secondary} rounded-lg p-3 text-sm ${theme.text.muted}`}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="font-medium text-gray-900 dark:text-gray-100">
+              <div className={`font-medium ${theme.text.primary}`}>
                 {habits.filter(h => isHabitDueToday(h)).length}
               </div>
               <div className="text-xs">Due Today</div>
@@ -230,7 +231,7 @@ export function CompactView({ habits, onEdit }: CompactViewProps) {
               <div className="text-xs">Completed</div>
             </div>
             <div>
-              <div className="font-medium text-gray-900 dark:text-gray-100">
+              <div className={`font-medium ${theme.text.primary}`}>
                 {Math.round(habits.reduce((sum, h) => 
                   sum + calculateCompletionRate(completions.filter(c => c.habitId === h.id)), 0
                 ) / habits.length) || 0}%

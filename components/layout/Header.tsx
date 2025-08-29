@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
 import { Heart, User, LogOut } from 'lucide-react';
+import { theme } from '@/lib/theme';
 
 export function Header() {
   const { user, userProfile, signOut } = useAuth();
@@ -18,12 +19,12 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-surface-dark border-b border-border-light dark:border-border-dark">
+    <header className={`${theme.surface.primary} border-b ${theme.border.default}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/dashboard">
-              <span className="text-xl font-bold text-primary-700 dark:text-primary-300">
+              <span className={`text-xl font-bold ${theme.text.primary}`}>
                 NextVibe
               </span>
             </Link>
@@ -32,25 +33,25 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-6">
             <Link
               href="/dashboard"
-              className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
+              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
             >
               Dashboard
             </Link>
             <Link
               href="/habits"
-              className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
+              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
             >
               Habits
             </Link>
             <Link
               href="/moods"
-              className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
+              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
             >
               Moods
             </Link>
             <Link
               href="/stats"
-              className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
+              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
             >
               Statistics
             </Link>
@@ -60,10 +61,10 @@ export function Header() {
             <ThemeToggle />
 
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <div className={`w-8 h-8 ${theme.iconContainer.blue} rounded-full flex items-center justify-center`}>
+                <User className={`w-4 h-4 ${theme.status.info.icon}`} />
               </div>
-              <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+              <span className={`text-sm ${theme.text.secondary}`}>
                 {userProfile?.displayName || user?.email?.split('@')[0] || 'User'}
               </span>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>

@@ -59,17 +59,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
           let profile = await getUserProfile(firebaseUser.uid);
           
           if (!profile) {
-            // Create new user profile
+            // Create new user profile with theme from localStorage if available
+            const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            
             await createUserProfile(firebaseUser.uid, {
               email: firebaseUser.email || '',
               displayName: firebaseUser.displayName || '',
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               preferences: {
-                theme: 'light',
+                theme: savedTheme || systemTheme,
                 weekStartsOn: 0,
                 notifications: true,
                 timeFormat: '12h', // Default to 12-hour format
                 locale: navigator.language || 'en-US', // Auto-detect user's locale
+              },
+            });
+            profile = await getUserProfile(firebaseUser.uid);
+          } else if (!profile.preferences?.theme) {
+            // Migrate existing users without theme preference
+            const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            
+            await createUserProfile(firebaseUser.uid, {
+              preferences: {
+                theme: savedTheme || systemTheme,
+                weekStartsOn: profile.preferences?.weekStartsOn || 0,
+                notifications: profile.preferences?.notifications ?? true,
+                timeFormat: profile.preferences?.timeFormat || '12h',
+                locale: profile.preferences?.locale || navigator.language || 'en-US',
               },
             });
             profile = await getUserProfile(firebaseUser.uid);

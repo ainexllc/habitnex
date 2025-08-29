@@ -22,6 +22,7 @@ import { Habit } from '@/types';
 import { HabitViewType } from '@/types/views';
 import { Plus, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
+import { theme } from '@/lib/theme';
 
 export default function HabitsPage() {
   const { habits, completions, loading } = useHabits();
@@ -72,7 +73,7 @@ export default function HabitsPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-surface-light dark:bg-background-dark">
+        <div className={`min-h-screen ${theme.surface.base}`}>
           <Header />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-center h-64">
@@ -86,16 +87,16 @@ export default function HabitsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-surface-light dark:bg-background-dark">
+      <div className={`min-h-screen ${theme.surface.base}`}>
         <Header />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">
+              <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
                 All Habits
               </h1>
-              <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+              <p className={`${theme.text.secondary} mt-1`}>
                 Manage and track all your habits
               </p>
             </div>
@@ -110,7 +111,7 @@ export default function HabitsPage() {
           {habits.length > 0 && (
             <div className="flex flex-col lg:flex-row gap-4 mb-8">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted-light dark:text-text-muted-dark w-4 h-4" />
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme.text.muted} w-4 h-4`} />
                 <input
                   type="text"
                   placeholder="Search habits..."
@@ -122,7 +123,7 @@ export default function HabitsPage() {
               
               <div className="flex items-center gap-4">
                 <div className="flex items-center space-x-2">
-                  <Filter className="w-4 h-4 text-text-muted-light dark:text-text-muted-dark" />
+                  <Filter className={`w-4 h-4 ${theme.text.muted}`} />
                   <select
                     className="input min-w-[150px]"
                     value={selectedTag}
@@ -153,10 +154,10 @@ export default function HabitsPage() {
                 <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
                   No habits yet
                 </h3>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                <p className={`${theme.text.secondary} mb-4`}>
                   Start building better habits by creating your first one.
                 </p>
                 <Button onClick={() => setShowCreateHabitModal(true)}>
@@ -169,17 +170,17 @@ export default function HabitsPage() {
                 <div className="w-16 h-16 bg-secondary-100 dark:bg-secondary-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-8 h-8 text-secondary-600 dark:text-secondary-400" />
                 </div>
-                <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
                   No habits found
                 </h3>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                <p className={theme.text.secondary}>
                   Try adjusting your search or filter criteria.
                 </p>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                  <p className={`text-sm ${theme.text.secondary}`}>
                     Showing {filteredHabits.length} of {habits.length} habits
                   </p>
                 </div>
@@ -236,10 +237,10 @@ export default function HabitsPage() {
                     <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                    <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
                       Coming Soon
                     </h3>
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                    <p className={theme.text.secondary}>
                       This view is coming in a future update.
                     </p>
                   </div>

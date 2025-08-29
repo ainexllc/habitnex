@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { CreateMoodForm } from '@/types';
+import { theme } from '@/lib/theme';
 import { 
   Smile, 
   Frown, 
@@ -137,7 +138,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
       <div className="flex items-center space-x-2">
         <Icon className={`w-${compact ? '4' : '5'} h-${compact ? '4' : '5'} ${color}`} />
         <span className={`text-${compact ? 'xs' : 'sm'} font-medium capitalize`}>{name}</span>
-        <span className={`text-${compact ? 'xs' : 'sm'} text-text-secondary-light dark:text-text-secondary-dark`}>
+        <span className={`text-${compact ? 'xs' : 'sm'} ${theme.text.muted}`}>
           {labels[value as keyof typeof labels]}
         </span>
       </div>
@@ -149,7 +150,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
             className={`w-${compact ? '8' : '10'} h-${compact ? '8' : '10'} rounded-full border-2 text-${compact ? 'xs' : 'sm'} font-medium transition-all ${
               value === rating
                 ? `${color.replace('text-', 'border-')} ${color.replace('text-', 'bg-')} text-white`
-                : 'border-border-light dark:border-border-dark hover:border-primary-300'
+                : `${theme.border.default} hover:border-primary-300`
             }`}
             onClick={() => setValue(name, rating as any)}
           >
@@ -199,7 +200,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-text-primary-light dark:text-text-primary-dark">
+            <label className={`block text-xs font-medium ${theme.text.primary}`}>
               Quick notes (optional)
             </label>
             <textarea
@@ -224,7 +225,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
           <Heart className="w-5 h-5 mr-2 text-primary-600 dark:text-primary-400" />
           Track Your Mood
           {date && (
-            <span className="ml-2 text-sm font-normal text-text-secondary-light dark:text-text-secondary-dark">
+            <span className={`ml-2 text-sm font-normal ${theme.text.secondary}`}>
               {new Date(date).toLocaleDateString()}
             </span>
           )}
@@ -272,7 +273,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
           {/* Tags */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <Tag className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+              <Tag className={`w-5 h-5 ${theme.text.muted}`} />
               <span className="text-sm font-medium">Tags (optional)</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -283,7 +284,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     selectedTags.includes(tag)
                       ? 'bg-primary-500 text-white'
-                      : 'bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-700'
+                      : `${theme.components.badge.default} hover:bg-gray-200 dark:hover:bg-gray-600`
                   }`}
                   onClick={() => handleTagToggle(tag)}
                 >
@@ -295,7 +296,7 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
 
           {/* Notes */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark">
+            <label className={`block text-sm font-medium ${theme.text.primary}`}>
               Notes (optional)
             </label>
             <textarea

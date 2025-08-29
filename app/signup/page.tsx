@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { theme } from '@/lib/theme';
 
 const signUpSchema = z.object({
   displayName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -81,14 +82,14 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 dark:from-primary-950 dark:to-secondary-900 flex items-center justify-center p-4">
+    <div className={`min-h-screen ${theme.gradients.pageBackground} flex items-center justify-center p-4`}>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
       
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center text-primary-700 dark:text-primary-300">
+          <CardTitle className={`text-2xl text-center ${theme.text.primary}`}>
             Create Account
           </CardTitle>
         </CardHeader>
@@ -128,7 +129,7 @@ export default function SignUpPage() {
             />
             
             {(error || authError) && (
-              <div className="text-sm text-error-500 text-center p-3 bg-error-50 dark:bg-error-900/20 rounded-lg">
+              <div className={`text-sm ${theme.status.error.text} text-center p-3 ${theme.status.error.bg} rounded-lg`}>
                 {error || authError}
               </div>
             )}
@@ -141,10 +142,10 @@ export default function SignUpPage() {
           <div className="mt-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border-light dark:border-border-dark" />
+                <div className={`w-full border-t ${theme.border.default}`} />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-surface-dark px-2 text-secondary-500">
+                <span className={`${theme.surface.primary} px-2 ${theme.text.muted}`}>
                   Or continue with
                 </span>
               </div>
@@ -168,11 +169,11 @@ export default function SignUpPage() {
           </div>
           
           <div className="mt-6 text-center">
-            <div className="text-sm text-secondary-600 dark:text-secondary-400">
+            <div className={`text-sm ${theme.text.secondary}`}>
               Already have an account?{' '}
               <Link 
                 href="/login" 
-                className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                className={`${theme.text.link} hover:underline font-medium`}
               >
                 Sign in
               </Link>

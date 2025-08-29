@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import type { MoodBasedStrategy } from '@/lib/aiCoach';
 import { 
   Heart,
@@ -81,11 +82,11 @@ export function MoodStrategyCard({
   const getPriorityColor = () => {
     switch (strategy.priority) {
       case 'high':
-        return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20';
+        return `border ${theme.status.error.border} ${theme.status.error.bg}`;
       case 'medium':
-        return 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/20';
+        return `border ${theme.status.warning.border} ${theme.status.warning.bg}`;
       case 'low':
-        return 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20';
+        return `border ${theme.status.success.border} ${theme.status.success.bg}`;
     }
   };
 
@@ -96,10 +97,10 @@ export function MoodStrategyCard({
           <div className="flex items-center gap-3">
             {getMoodIcon()}
             <div>
-              <CardTitle className="text-lg text-gray-900 dark:text-gray-100">
+              <CardTitle className={`text-lg ${theme.text.primary}`}>
                 {strategy.title}
               </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className={`text-sm ${theme.text.muted} mt-1`}>
                 When experiencing: {getTriggerDescription()}
               </p>
             </div>
@@ -108,10 +109,10 @@ export function MoodStrategyCard({
           <div className="flex items-center gap-2">
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${
               strategy.priority === 'high' 
-                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                ? `${theme.status.error.bg} ${theme.status.error.text}`
                 : strategy.priority === 'medium'
-                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                ? `${theme.status.warning.bg} ${theme.status.warning.text}`
+                : `${theme.status.success.bg} ${theme.status.success.text}`
             }`}>
               {strategy.priority}
             </span>
@@ -133,13 +134,13 @@ export function MoodStrategyCard({
       <CardContent>
         {/* Strategy overview */}
         <div className="mb-4">
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+          <p className={`${theme.text.secondary} leading-relaxed`}>
             {strategy.message}
           </p>
         </div>
 
         {/* Strategy name */}
-        <div className="mb-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className={`mb-4 p-3 ${theme.surface.primary} rounded-lg border ${theme.border.default}`}>
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-purple-600" />
             <span className="font-medium text-purple-800 dark:text-purple-200">
@@ -151,17 +152,17 @@ export function MoodStrategyCard({
         {/* Implementation steps */}
         {expanded && (
           <div className="mb-4">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+            <h4 className={`font-medium ${theme.text.primary} mb-3 flex items-center gap-2`}>
               <CheckCircle className="w-4 h-4 text-green-500" />
               Implementation Steps:
             </h4>
             <div className="space-y-2">
               {strategy.implementation.map((step, index) => (
-                <div key={index} className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
-                  <span className="flex-shrink-0 w-5 h-5 bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 rounded-full flex items-center justify-center text-xs font-medium">
+                <div key={index} className={`flex items-start gap-3 p-2 ${theme.surface.hover} rounded`}>
+                  <span className={`flex-shrink-0 w-5 h-5 ${theme.status.info.bg} ${theme.status.info.text} rounded-full flex items-center justify-center text-xs font-medium`}>
                     {index + 1}
                   </span>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                  <p className={`text-sm ${theme.text.secondary} flex-1`}>
                     {step}
                   </p>
                 </div>
@@ -172,16 +173,16 @@ export function MoodStrategyCard({
 
         {/* Mood trigger ranges */}
         {expanded && (
-          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2 text-sm">
+          <div className={`mb-4 p-3 ${theme.surface.secondary} rounded-lg`}>
+            <h4 className={`font-medium ${theme.text.primary} mb-2 text-sm`}>
               Trigger Conditions:
             </h4>
             <div className="grid grid-cols-2 gap-3 text-xs">
               {Object.entries(strategy.moodTrigger).map(([key, range]) => (
                 range && (
                   <div key={key} className="flex items-center justify-between">
-                    <span className="capitalize text-gray-600 dark:text-gray-400">{key}:</span>
-                    <span className="text-gray-800 dark:text-gray-200 font-medium">
+                    <span className={`capitalize ${theme.text.muted}`}>{key}:</span>
+                    <span className={`${theme.text.primary} font-medium`}>
                       {range[0]}-{range[1]}
                     </span>
                   </div>
@@ -194,15 +195,15 @@ export function MoodStrategyCard({
         {/* Confidence indicator */}
         {expanded && (
           <div className="mb-4 flex items-center justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Confidence:</span>
+            <span className={`${theme.text.muted}`}>Confidence:</span>
             <div className="flex items-center gap-2">
-              <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className={`w-20 h-2 ${theme.surface.tertiary} rounded-full overflow-hidden`}>
                 <div 
                   className="h-full bg-purple-500 rounded-full transition-all duration-300"
                   style={{ width: `${strategy.confidence * 100}%` }}
                 />
               </div>
-              <span className="text-gray-800 dark:text-gray-200 font-medium">
+              <span className={`${theme.text.primary} font-medium`}>
                 {Math.round(strategy.confidence * 100)}%
               </span>
             </div>
@@ -235,7 +236,7 @@ export function MoodStrategyCard({
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            className={`text-xs ${theme.text.muted} hover:${theme.text.secondary}`}
           >
             Not Helpful
           </Button>
@@ -243,14 +244,14 @@ export function MoodStrategyCard({
 
         {/* Usage tip */}
         {expanded && (
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className={`mt-4 p-3 ${theme.status.info.bg} border ${theme.status.info.border} rounded-lg`}>
             <div className="flex items-start gap-2">
               <Lightbulb className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <p className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                <p className={`font-medium ${theme.status.info.text} mb-1`}>
                   Usage Tip
                 </p>
-                <p className="text-blue-700 dark:text-blue-300">
+                <p className={`${theme.status.info.text}`}>
                   This strategy works best when applied consistently during the specified mood conditions. 
                   Start with step 1 and gradually incorporate other steps as they become natural.
                 </p>

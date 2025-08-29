@@ -16,6 +16,7 @@ import { CompactView } from '@/components/dashboard/CompactView';
 import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 import { Target, Plus, Users, Home } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -103,7 +104,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-surface-light dark:bg-background-dark">
+        <div className={`min-h-screen ${theme.surface.base}`}>
           <Header />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-center h-64">
@@ -117,7 +118,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-surface-light dark:bg-background-dark">
+      <div className={`min-h-screen ${theme.surface.base}`}>
         <Header />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -129,7 +130,7 @@ export default function DashboardPage() {
           
           {/* Family Mode Active */}
           {hasFamily && (
-            <Card className="mb-8 border-2 border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+            <Card className="mb-8 border-2 border-green-200 dark:border-green-700 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -137,8 +138,8 @@ export default function DashboardPage() {
                       <Home className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">{familyName}</h3>
-                      <p className="text-gray-600">Your family dashboard is ready!</p>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">{familyName}</h3>
+                      <p className="text-gray-600 dark:text-gray-300">Your family dashboard is ready!</p>
                     </div>
                   </div>
                   <Link href="/dashboard/family">
@@ -154,7 +155,7 @@ export default function DashboardPage() {
           
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">
+              <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
                 Dashboard
               </h1>
             </div>
@@ -182,10 +183,10 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
+                <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
                   {currentView === DashboardViewType.FOCUS ? 'Today\'s Focus' : 'Your Habits'}
                 </h2>
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                <p className={`text-sm ${theme.text.secondary}`}>
                   {new Date().toLocaleDateString('en-US', { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -211,14 +212,14 @@ export default function DashboardPage() {
             </div>
 
             {habits.length === 0 ? (
-              <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <div className={`text-center py-16 ${theme.surface.primary} rounded-xl border ${theme.border.default}`}>
                 <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-blue-100 dark:from-primary-900 dark:to-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Target className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark mb-3">
+                <h3 className={`text-xl font-semibold ${theme.text.primary} mb-3`}>
                   Welcome to NextVibe!
                 </h3>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6 max-w-md mx-auto">
+                <p className={`${theme.text.secondary} mb-6 max-w-md mx-auto`}>
                   Start your journey to better habits. Create your first habit and begin tracking your progress with our intelligent insights.
                 </p>
                 <div className="flex items-center justify-center gap-3">
@@ -263,12 +264,12 @@ export default function DashboardPage() {
                 )}
                 
                 {(currentView === DashboardViewType.PRIORITY || currentView === DashboardViewType.CATEGORIES) && (
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center">
-                    <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <div className={`${theme.surface.secondary} rounded-lg p-8 text-center`}>
+                    <Target className={`w-12 h-12 ${theme.text.muted} mx-auto mb-4`} />
+                    <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
                       Coming Soon
                     </h3>
-                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    <p className={`${theme.text.muted} mb-4`}>
                       {currentView === DashboardViewType.PRIORITY 
                         ? 'Priority Matrix view is coming in the next update.'
                         : 'Category Groups view is coming in the next update.'

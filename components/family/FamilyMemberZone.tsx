@@ -8,10 +8,10 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
-import { Star, Trophy, Check, CheckCircle } from 'lucide-react';
-import { CompactHabitList } from './CompactHabitList';
+import { CheckCircle2, Circle, Star, Trophy, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { theme } from '@/lib/theme';
 
 interface FamilyMemberZoneProps {
   member: FamilyMember;
@@ -27,8 +27,6 @@ interface FamilyMemberZoneProps {
   isExpanded?: boolean;
   onExpand?: () => void;
   className?: string;
-  onToggleHabit?: (habitId: string, memberId: string, currentCompleted: boolean) => Promise<void>;
-  onHabitClick?: (habit: FamilyHabit & { completed: boolean }) => void;
 }
 
 export function FamilyMemberZone({
@@ -38,23 +36,19 @@ export function FamilyMemberZone({
   touchMode = false,
   isExpanded = false,
   onExpand,
-  className,
-  onToggleHabit,
-  onHabitClick
+  className
 }: FamilyMemberZoneProps) {
+  const { toggleCompletion, loading } = useFamilyHabits(member.id);
   const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [previousStats, setPreviousStats] = useState(member.stats);
   
   const handleHabitToggle = useCallback(async (habitId: string, currentCompleted: boolean) => {
-    if (!onToggleHabit) {
-      console.warn('⚠️ No onToggleHabit function provided');
-      return;
-    }
-    
     try {
+      const result = await toggleCompletion(habitId, undefined, !currentCompleted);
+      
       // Trigger celebration animation if completing
-      if (!currentCompleted) {
+      if (!currentCompleted && result) {
         setCelebratingHabitId(habitId);
         setTimeout(() => setCelebratingHabitId(null), 2000);
 
@@ -68,6 +62,9 @@ export function FamilyMemberZone({
             completion: {} // toggleCompletion doesn't return completion data
           });
 
+          // Check for streak milestones - result doesn't contain streakCount, skip for now
+          // TODO: Calculate streak from updated data after loadData() completes
+
           // Check for first habit completion
           if (member.stats.habitsCompleted === 0) {
             celebrateFirstHabit(member, completedHabit);
@@ -80,16 +77,10 @@ export function FamilyMemberZone({
           }
         }
       }
-      
-      // Call toggle function without awaiting to avoid loading states
-      onToggleHabit(habitId, member.id, currentCompleted).catch(error => {
-        console.error('❌ Failed to toggle habit:', error);
-      });
-      
     } catch (error) {
-      console.error('❌ Failed to toggle habit:', error);
+      console.error('Failed to toggle habit:', error);
     }
-  }, [onToggleHabit, habits, member]);
+  }, [toggleCompletion]);
   
   const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
   const level = Math.floor(member.stats.totalPoints / 100) + 1; // Level up every 100 points
@@ -99,8 +90,8 @@ export function FamilyMemberZone({
     <Card 
       className={cn(
         "relative overflow-hidden transition-all duration-300 hover:shadow-lg",
-        "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-        touchMode && "touch-optimized shadow-xl !p-[6px]",
+        theme.surface.primary,
+        touchMode && "touch-optimized shadow-xl",
         isExpanded && touchMode && "scale-105 shadow-2xl z-10",
         "border-2",
         className
@@ -110,11 +101,11 @@ export function FamilyMemberZone({
     >
       {/* Member Header */}
       <CardHeader className={cn(
-        "pb-4",
-        touchMode ? "!p-[2px]" : "p-5"
+        "pb-3",
+        touchMode ? "p-6" : "p-4"
       )}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {member.avatarStyle && member.avatarSeed ? (
               <DiceBearAvatar
                 seed={member.avatarSeed}
@@ -137,15 +128,12 @@ export function FamilyMemberZone({
             )}
             <div>
               <h3 className={cn(
-                "font-bold",
+                `font-bold ${theme.text.primary}`,
                 touchMode ? "text-2xl" : "text-lg"
-              )} style={{
-                fontFamily: '"Flavors", cursive',
-                color: member.color
-              }}>
+              )}>
                 {member.displayName}
               </h3>
-              <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <div className={`flex items-center space-x-2 text-sm ${theme.text.muted}`}>
                 <Star className="w-4 h-4 text-yellow-500" />
                 <span className="font-medium">Level {level}</span>
                 <span>•</span>
@@ -159,12 +147,12 @@ export function FamilyMemberZone({
             <div className={cn(
               "font-bold",
               touchMode ? "text-2xl" : "text-lg",
-              completionRate === 100 ? "text-green-600 dark:text-green-400" : "text-gray-900 dark:text-white"
+              completionRate === 100 ? theme.status.success.text : theme.text.primary
             )}>
               {stats.completed}/{stats.total}
             </div>
             <div className={cn(
-              "text-sm text-gray-500 dark:text-gray-400",
+              `text-sm ${theme.text.muted}`,
               touchMode && "text-base"
             )}>
               {Math.round(completionRate)}% today
@@ -173,29 +161,29 @@ export function FamilyMemberZone({
         </div>
         
         {/* Progress Bar */}
-        <div className="mt-4">
-          <Progress
-            value={completionRate}
+        <div className="mt-3">
+          <Progress 
+            value={completionRate} 
             className={cn(
               "w-full",
               touchMode ? "h-3" : "h-2"
             )}
-            style={{
+            style={{ 
               backgroundColor: `${member.color}20`,
             }}
           />
         </div>
-
+        
         {/* Level Progress */}
-        <div className="mt-4">
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+        <div className="mt-2">
+          <div className={`flex justify-between text-xs ${theme.text.muted}`}>
             <span>Level {level}</span>
             <span>{pointsToNextLevel} pts to next level</span>
           </div>
-          <Progress
-            value={(member.stats.totalPoints % 100)}
+          <Progress 
+            value={(member.stats.totalPoints % 100)} 
             className={cn(
-              "w-full",
+              "w-full mt-1",
               touchMode ? "h-2" : "h-1"
             )}
           />
@@ -204,15 +192,12 @@ export function FamilyMemberZone({
       
       {/* Habits List */}
       <CardContent className={cn(
-        touchMode ? "!p-[2px] !pt-0" : "p-4 pt-0"
+        touchMode ? "p-6 pt-0" : "p-4 pt-0"
       )}>
-        {/* Section Divider */}
-        <div className="border-t border-gray-200 dark:border-gray-700 my-3"></div>
-
         <div className="space-y-2">
           {habits.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Trophy className="w-10 h-10 mx-auto mb-3 opacity-50" />
+            <div className={`text-center py-6 ${theme.text.muted}`}>
+              <Trophy className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className={touchMode ? "text-lg" : "text-sm"}>
                 No habits for today
               </p>
@@ -222,91 +207,95 @@ export function FamilyMemberZone({
               <div
                 key={habit.id}
                 className={cn(
-                  "relative flex items-center justify-between rounded-lg transition-all duration-200",
-                  touchMode ? "px-3 py-2 min-h-[28px]" : "px-3 py-1.5 min-h-[20px]",
-                  habit.completed
-                    ? "bg-gray-600 dark:bg-gray-600 border border-gray-500 dark:border-gray-500"
-                    : "bg-gray-700 dark:bg-gray-700 hover:bg-gray-600 dark:hover:bg-gray-600 border border-gray-600 dark:border-gray-600",
-                  celebratingHabitId === habit.id && "animate-pulse bg-yellow-400/30 border-yellow-400/50"
+                  "relative flex items-center justify-between p-3 rounded-lg transition-all duration-200",
+                  touchMode ? "p-4 min-h-[80px]" : "p-3 min-h-[60px]",
+                  habit.completed 
+                    ? "bg-green-50 border border-green-200" 
+                    : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
+                  celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
+                  loading && "opacity-50 pointer-events-none"
                 )}
               >
-                {/* Habit Info - 2 Row Layout */}
-                <div
-                  className="flex-1 min-w-0 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onHabitClick) {
-                      onHabitClick(habit);
-                    }
-                  }}
-                >
-                  {/* Top Row: Emoji + Title */}
-                  <div className="flex items-center space-x-2">
-                    <span 
-                      className={cn(
-                        "flex-shrink-0",
-                        touchMode ? "text-lg" : "text-base"
-                      )}
-                    >
-                      {habit.emoji}
-                    </span>
+                {/* Habit Info */}
+                <div className="flex items-center space-x-3 flex-1">
+                  <div 
+                    className={cn(
+                      "flex-shrink-0 text-center",
+                      touchMode ? "text-2xl w-8" : "text-xl w-6"
+                    )}
+                  >
+                    {habit.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <h4 className={cn(
-                      "font-medium truncate flex-1",
-                      touchMode ? "text-base" : "text-sm",
-                      habit.completed 
-                        ? "text-green-400 dark:text-green-300 line-through" 
-                        : "text-white dark:text-gray-100"
+                      `font-medium ${theme.text.primary} truncate`,
+                      touchMode ? "text-lg" : "text-sm",
+                      habit.completed && theme.status.success.text
                     )}>
                       {habit.name}
                     </h4>
-                  </div>
-                  
-                  {/* Bottom Row: Points + Frequency */}
-                  <div className="flex items-center justify-between mt-1">
-                    <span className={cn(
-                      "text-xs font-medium px-1.5 py-0.5 rounded",
-                      habit.completed 
-                        ? "text-green-400/80 dark:text-green-300/80 bg-green-400/10" 
-                        : "text-yellow-400 bg-yellow-400/10"
-                    )}>
-                      {habit.basePoints} pts
-                    </span>
-                    <span className={cn(
-                      "text-xs opacity-60",
-                      habit.completed ? "text-green-400/60" : "text-gray-400"
-                    )}>
-                      {habit.frequency || 'Daily'}
-                    </span>
+                    {habit.description && (
+                      <p className={cn(
+                        `${theme.text.muted} truncate`,
+                        touchMode ? "text-base" : "text-xs"
+                      )}>
+                        {habit.description}
+                      </p>
+                    )}
+                    <div className="flex items-center space-x-2 mt-1">
+                      <div className="flex items-center space-x-1">
+                        <Zap className="w-3 h-3 text-yellow-500" />
+                        <span className={cn(
+                          `${theme.status.warning.text} font-medium`,
+                          touchMode ? "text-sm" : "text-xs"
+                        )}>
+                          {habit.basePoints} pts
+                        </span>
+                      </div>
+                      <div className={cn(
+                        "px-2 py-1 rounded-full text-xs font-medium",
+                        habit.difficulty === 'easy' && `${theme.status.success.bg} ${theme.status.success.text}`,
+                        habit.difficulty === 'medium' && `${theme.status.warning.bg} ${theme.status.warning.text}`,
+                        habit.difficulty === 'hard' && `${theme.status.error.bg} ${theme.status.error.text}`
+                      )}>
+                        {habit.difficulty}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
-                {/* Completion Checkmark */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                {/* Completion Button */}
+                <VisualFeedback
+                  feedbackType={habit.completed ? "success" : "info"}
+                  onInteraction={() => {
                     handleHabitToggle(habit.id, habit.completed);
                   }}
-                  disabled={false}
-                  className={cn(
-                    "flex-shrink-0 rounded flex items-center justify-center transition-colors",
-                    touchMode ? "w-[24px] h-[24px] !min-w-[24px] !min-h-[24px]" : "w-[20px] h-[20px] !min-w-[20px] !min-h-[20px]",
-                    habit.completed 
-                      ? "bg-gray-600 hover:bg-gray-700 text-green-400" 
-                      : "bg-green-600 hover:bg-green-700 text-white"
-                  )}
+                  disabled={loading}
                 >
-                  {habit.completed ? (
-                    <CheckCircle className={cn(
-                      touchMode ? "w-[14px] h-[14px]" : "w-[12px] h-[12px]"
-                    )} />
-                  ) : (
-                    <Check className={cn(
-                      touchMode ? "w-[14px] h-[14px]" : "w-[12px] h-[12px]"
-                    )} />
-                  )}
-                </button>
+                  <Button
+                    variant={habit.completed ? "primary" : "ghost"}
+                    size={touchMode ? "lg" : "sm"}
+                    className={cn(
+                      "flex-shrink-0 rounded-full",
+                      touchMode ? "w-16 h-16 p-0" : "w-10 h-10 p-0",
+                      habit.completed 
+                        ? "bg-green-600 hover:bg-green-700 text-white" 
+                        : `${theme.surface.hover} ${theme.text.muted} hover:${theme.text.secondary}`
+                    )}
+                    disabled={loading}
+                  >
+                    {habit.completed ? (
+                      <CheckCircle2 className={cn(
+                        "text-white",
+                        touchMode ? "w-8 h-8" : "w-5 h-5"
+                      )} />
+                    ) : (
+                      <Circle className={cn(
+                        touchMode ? "w-8 h-8" : "w-5 h-5"
+                      )} />
+                    )}
+                  </Button>
+                </VisualFeedback>
                 
                 {/* Celebration Effect */}
                 {celebratingHabitId === habit.id && (
@@ -322,19 +311,19 @@ export function FamilyMemberZone({
         {/* Member Stats Summary */}
         {(isExpanded || !touchMode) && stats.total > 0 && (
           <div className={cn(
-            "mt-6 pt-4 border-t border-gray-200",
+            `mt-6 pt-4 border-t ${theme.border.light}`,
             touchMode && "mt-8 pt-6"
           )}>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className={cn(
-                  "font-bold text-green-600",
+                  `font-bold ${theme.status.success.text}`,
                   touchMode ? "text-2xl" : "text-lg"
                 )}>
                   {member.stats.currentStreak}
                 </div>
                 <div className={cn(
-                  "text-gray-500",
+                  theme.text.muted,
                   touchMode ? "text-base" : "text-xs"
                 )}>
                   Day Streak
@@ -342,13 +331,13 @@ export function FamilyMemberZone({
               </div>
               <div>
                 <div className={cn(
-                  "font-bold text-blue-600",
+                  `font-bold ${theme.status.info.text}`,
                   touchMode ? "text-2xl" : "text-lg"
                 )}>
                   {member.stats.habitsCompleted}
                 </div>
                 <div className={cn(
-                  "text-gray-500",
+                  theme.text.muted,
                   touchMode ? "text-base" : "text-xs"
                 )}>
                   Total Done
@@ -356,13 +345,13 @@ export function FamilyMemberZone({
               </div>
               <div>
                 <div className={cn(
-                  "font-bold text-purple-600",
+                  `font-bold text-purple-600`,
                   touchMode ? "text-2xl" : "text-lg"
                 )}>
                   {member.stats.rewardsEarned}
                 </div>
                 <div className={cn(
-                  "text-gray-500",
+                  theme.text.muted,
                   touchMode ? "text-base" : "text-xs"
                 )}>
                   Rewards
@@ -382,7 +371,7 @@ export function FamilyMemberZone({
               <div
                 key={index}
                 className={cn(
-                  "px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium",
+                  `px-2 py-1 ${theme.status.warning.bg} ${theme.status.warning.text} rounded-full text-xs font-medium`,
                   touchMode && "px-3 py-2 text-sm"
                 )}
               >

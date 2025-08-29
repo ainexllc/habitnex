@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { useHabits } from '@/hooks/useHabits';
 import { isHabitDueToday } from '@/lib/utils';
 import { CheckSquare, Square } from 'lucide-react';
+import { theme } from '@/lib/theme';
 
 export function QuickActions() {
   const { habits, isHabitCompleted, toggleCompletion } = useHabits();
@@ -50,7 +51,7 @@ export function QuickActions() {
             return (
               <div
                 key={habit.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors"
+                className={`flex items-center justify-between p-3 rounded-lg border ${theme.border.default} ${theme.surface.hover} transition-colors`}
               >
                 <div className="flex items-center space-x-3">
                   <div
@@ -59,8 +60,8 @@ export function QuickActions() {
                   />
                   <span className={`text-sm ${
                     isCompleted 
-                      ? 'text-text-secondary-light dark:text-text-secondary-dark line-through' 
-                      : 'text-text-primary-light dark:text-text-primary-dark'
+                      ? `${theme.text.secondary} line-through` 
+                      : theme.text.primary
                   }`}>
                     {habit.name}
                   </span>
@@ -71,7 +72,7 @@ export function QuickActions() {
                   variant="ghost"
                   onClick={() => handleToggle(habit.id)}
                   disabled={isLoading}
-                  className={`p-1 ${isCompleted ? 'text-success-600 dark:text-success-400' : 'text-text-muted-light dark:text-text-muted-dark'}`}
+                  className={`p-1 ${isCompleted ? 'text-success-600 dark:text-success-400' : theme.text.muted}`}
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

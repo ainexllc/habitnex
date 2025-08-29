@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { HabitCompletion } from '@/types';
 import { addDays, getDateString } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface HabitCalendarProps {
   completions: HabitCompletion[];
@@ -34,14 +35,14 @@ export function HabitCalendar({ completions, habitId, className = '' }: HabitCal
   }, [completions, habitId]);
 
   const getIntensity = (completed: boolean) => {
-    if (!completed) return 'bg-secondary-100 dark:bg-secondary-800';
-    return 'bg-success-400 dark:bg-success-600';
+    if (!completed) return theme.surface.tertiary;
+    return theme.status.success.bg;
   };
 
   return (
     <div className={`${className}`}>
       <div className="mb-4">
-        <h3 className="text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+        <h3 className={`text-sm font-medium ${theme.text.primary} mb-2`}>
           Activity Calendar (Last 90 Days)
         </h3>
       </div>
@@ -56,15 +57,15 @@ export function HabitCalendar({ completions, habitId, className = '' }: HabitCal
         ))}
       </div>
       
-      <div className="flex items-center justify-between text-xs text-text-muted-light dark:text-text-muted-dark mt-3">
+      <div className={`flex items-center justify-between text-xs ${theme.text.muted} mt-3`}>
         <span>90 days ago</span>
         <div className="flex items-center space-x-2">
           <span>Less</span>
           <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-secondary-100 dark:bg-secondary-800 rounded-sm"></div>
-            <div className="w-2 h-2 bg-success-200 dark:bg-success-700 rounded-sm"></div>
-            <div className="w-2 h-2 bg-success-400 dark:bg-success-600 rounded-sm"></div>
-            <div className="w-2 h-2 bg-success-600 dark:bg-success-500 rounded-sm"></div>
+            <div className={`w-2 h-2 ${theme.surface.tertiary} rounded-sm`}></div>
+            <div className={`w-2 h-2 ${theme.iconContainer.green} rounded-sm`}></div>
+            <div className={`w-2 h-2 ${theme.status.success.bg} rounded-sm`}></div>
+            <div className="w-2 h-2 bg-green-600 dark:bg-green-500 rounded-sm"></div>
           </div>
           <span>More</span>
         </div>

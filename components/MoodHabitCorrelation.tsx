@@ -6,6 +6,7 @@ import { getMoodHabitCorrelation, getHabitMoodImpact, getUserHabits } from '@/li
 import { MoodHabitCorrelation, HabitMoodImpact, Habit } from '@/types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, BarChart, Bar } from 'recharts';
 import { TrendingUp, Activity, Brain, Zap } from 'lucide-react';
+import { theme } from '@/lib/theme';
 
 interface MoodHabitCorrelationProps {
   days?: number;
@@ -67,8 +68,8 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">{error}</p>
+      <div className={`${theme.status.error.bg} border ${theme.status.error.border} rounded-lg p-4`}>
+        <p className={theme.status.error.text}>{error}</p>
       </div>
     );
   }
@@ -77,8 +78,8 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
     return (
       <div className="text-center py-8">
         <Brain className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Correlation Data</h3>
-        <p className="text-gray-500">
+        <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>No Correlation Data</h3>
+        <p className={theme.text.muted}>
           Start tracking your mood and habits for at least a few days to see correlations.
         </p>
       </div>
@@ -134,49 +135,49 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
     <div className="space-y-6">
       {/* Overall Correlation Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border p-4">
+        <div className={`${theme.surface.primary} rounded-lg border ${theme.border.default} p-4`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Mood-Habit Correlation</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className={`text-sm font-medium ${theme.text.muted}`}>Mood-Habit Correlation</p>
+              <p className={`text-2xl font-bold ${theme.text.primary}`}>
                 {(correlation * 100).toFixed(1)}%
               </p>
             </div>
             <TrendingUp className="h-8 w-8 text-blue-600" />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className={`text-xs ${theme.text.muted} mt-1`}>
             {correlation > 0.3 ? 'Strong positive' : correlation > 0.1 ? 'Moderate positive' : 'Weak'} correlation
           </p>
         </div>
 
-        <div className="bg-white rounded-lg border p-4">
+        <div className={`${theme.surface.primary} rounded-lg border ${theme.border.default} p-4`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Data Points</p>
-              <p className="text-2xl font-bold text-gray-900">{correlationData.length}</p>
+              <p className={`text-sm font-medium ${theme.text.muted}`}>Data Points</p>
+              <p className={`text-2xl font-bold ${theme.text.primary}`}>{correlationData.length}</p>
             </div>
             <Activity className="h-8 w-8 text-green-600" />
           </div>
-          <p className="text-xs text-gray-500 mt-1">Days with mood & habit data</p>
+          <p className={`text-xs ${theme.text.muted} mt-1`}>Days with mood & habit data</p>
         </div>
 
-        <div className="bg-white rounded-lg border p-4">
+        <div className={`${theme.surface.primary} rounded-lg border ${theme.border.default} p-4`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Avg Completion</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className={`text-sm font-medium ${theme.text.muted}`}>Avg Completion</p>
+              <p className={`text-2xl font-bold ${theme.text.primary}`}>
                 {(correlationData.reduce((sum, d) => sum + d.completionRate, 0) / correlationData.length * 100).toFixed(1)}%
               </p>
             </div>
             <Zap className="h-8 w-8 text-yellow-600" />
           </div>
-          <p className="text-xs text-gray-500 mt-1">Over the period</p>
+          <p className={`text-xs ${theme.text.muted} mt-1`}>Over the period</p>
         </div>
       </div>
 
       {/* Correlation Scatter Plot */}
-      <div className="bg-white rounded-lg border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Mood vs Habit Completion</h3>
+      <div className={`${theme.surface.primary} rounded-lg border ${theme.border.default} p-6`}>
+        <h3 className={`text-lg font-semibold ${theme.text.primary} mb-4`}>Mood vs Habit Completion</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart data={correlationData}>
@@ -205,8 +206,8 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
       </div>
 
       {/* Mood and Completion Timeline */}
-      <div className="bg-white rounded-lg border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Mood & Completion Timeline</h3>
+      <div className={`${theme.surface.primary} rounded-lg border ${theme.border.default} p-6`}>
+        <h3 className={`text-lg font-semibold ${theme.text.primary} mb-4`}>Mood & Completion Timeline</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={correlationData.slice().reverse()}>
@@ -230,32 +231,32 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
 
       {/* Top Positive Impact Habits */}
       {topPositiveHabits.length > 0 && (
-        <div className="bg-white rounded-lg border p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Habits with Positive Mood Impact</h3>
+        <div className={`${theme.surface.primary} rounded-lg border ${theme.border.default} p-6`}>
+          <h3 className={`text-lg font-semibold ${theme.text.primary} mb-4`}>Habits with Positive Mood Impact</h3>
           <div className="space-y-3">
             {topPositiveHabits.map((impact) => {
               const habit = habits.find(h => h.id === impact.habitId);
               if (!habit) return null;
 
               return (
-                <div key={impact.habitId} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div key={impact.habitId} className={`flex items-center justify-between p-3 ${theme.status.success.bg} rounded-lg`}>
                   <div className="flex items-center space-x-3">
                     <div 
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: habit.color }}
                     ></div>
                     <div>
-                      <p className="task-title font-task-title text-gray-900">{habit.name}</p>
-                      <p className="task-description text-sm font-task-description text-gray-600">
+                      <p className={`task-title font-task-title ${theme.text.primary}`}>{habit.name}</p>
+                      <p className={`task-description text-sm font-task-description ${theme.text.secondary}`}>
                         {impact.completedDaysCount} completed days tracked
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-green-600">
+                    <p className={`font-semibold ${theme.status.success.text}`}>
                       +{impact.moodDifference.toFixed(1)}
                     </p>
-                    <p className="text-xs text-gray-500">mood boost</p>
+                    <p className={`text-xs ${theme.text.muted}`}>mood boost</p>
                   </div>
                 </div>
               );

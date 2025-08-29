@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import type { ProgressCelebration } from '@/lib/aiCoach';
 import { 
   Sparkles,
@@ -92,10 +93,10 @@ export function ProgressCelebration({
   }, [animated]);
 
   return (
-    <Card className={`relative overflow-hidden border-2 transition-all duration-500 ${
+    <Card className={`relative overflow-hidden border-2 ${theme.animation.transitionSlow} ${
       celebrating 
         ? 'border-yellow-300 shadow-lg transform scale-105' 
-        : 'border-gray-200 dark:border-gray-700 hover:shadow-md'
+        : `${theme.border.default} ${theme.shadow.md}`
     }`}>
       {/* Celebratory background pattern */}
       <div className={`absolute inset-0 bg-gradient-to-br ${getCelebrationGradient()} opacity-5`} />
@@ -123,11 +124,11 @@ export function ProgressCelebration({
             </div>
             
             <div>
-              <CardTitle className="text-xl text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <CardTitle className={`text-xl ${theme.text.primary} flex items-center gap-2`}>
                 <span>{getAchievementEmoji(celebration.achievement)}</span>
                 {celebration.title}
               </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className={`text-sm ${theme.text.muted} mt-1`}>
                 {celebration.milestone}
               </p>
             </div>
@@ -143,13 +144,13 @@ export function ProgressCelebration({
 
       <CardContent>
         {/* Celebration message */}
-        <div className="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-          <p className="text-gray-800 dark:text-gray-200 leading-relaxed mb-2">
+        <div className={`mb-4 p-4 ${theme.gradients.rainbow} rounded-lg border ${theme.status.warning.border}`}>
+          <p className={`${theme.text.primary} leading-relaxed mb-2`}>
             {celebration.message}
           </p>
           <div className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-pink-500" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 italic">
+            <p className={`text-sm font-medium ${theme.text.secondary} italic`}>
               "{celebration.encouragement}"
             </p>
           </div>
@@ -157,10 +158,10 @@ export function ProgressCelebration({
 
         {/* Achievement details */}
         {celebration.habitName && (
-          <div className="mb-4 p-3 bg-primary-50 dark:bg-primary-950/30 rounded border border-primary-200 dark:border-primary-800">
+          <div className={`mb-4 p-3 ${theme.status.info.bg} rounded border ${theme.status.info.border}`}>
             <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-primary-600" />
-              <span className="text-sm font-medium text-primary-800 dark:text-primary-200">
+              <Target className={`w-4 h-4 ${theme.status.info.icon}`} />
+              <span className={`text-sm font-medium ${theme.status.info.text}`}>
                 Habit: {celebration.habitName}
               </span>
             </div>
@@ -169,15 +170,15 @@ export function ProgressCelebration({
 
         {/* Next goal */}
         {celebration.nextGoal && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded border border-blue-200 dark:border-blue-800">
+          <div className={`mb-4 p-3 ${theme.status.info.bg} rounded border ${theme.status.info.border}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-blue-600" />
                 <div>
-                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <p className={`text-sm font-medium ${theme.status.info.text}`}>
                     Next Challenge
                   </p>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <p className={`text-xs ${theme.status.info.text}`}>
                     {celebration.nextGoal}
                   </p>
                 </div>
@@ -200,14 +201,14 @@ export function ProgressCelebration({
         {/* Confidence/Achievement level */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className={`text-sm font-medium ${theme.text.secondary}`}>
               Achievement Level
             </span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className={`text-sm ${theme.text.muted}`}>
               Outstanding
             </span>
           </div>
-          <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className={`w-full h-3 ${theme.surface.tertiary} rounded-full overflow-hidden`}>
             <div className={`h-full bg-gradient-to-r ${getCelebrationGradient()} animate-pulse`} />
           </div>
         </div>
@@ -239,7 +240,7 @@ export function ProgressCelebration({
             <Button
               variant="ghost"
               size="sm"
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 ml-auto"
+              className={`${theme.text.muted} hover:${theme.text.secondary} ml-auto`}
             >
               <Gift className="w-4 h-4 mr-1" />
               Treat Yourself
@@ -248,33 +249,33 @@ export function ProgressCelebration({
         )}
 
         {/* Celebration stats */}
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className={`mt-4 pt-4 border-t ${theme.border.light}`}>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <div className={`text-lg font-bold ${theme.text.primary}`}>
                 {celebration.confidence ? Math.round(celebration.confidence * 100) : 100}%
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Consistency</div>
+              <div className={`text-xs ${theme.text.muted}`}>Consistency</div>
             </div>
             
             <div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <div className={`text-lg font-bold ${theme.text.primary}`}>
                 {celebration.priority === 'high' ? 'Major' : celebration.priority === 'medium' ? 'Good' : 'Great'}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Impact</div>
+              <div className={`text-xs ${theme.text.muted}`}>Impact</div>
             </div>
             
             <div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <div className={`text-lg font-bold ${theme.text.primary}`}>
                 🎯
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Milestone</div>
+              <div className={`text-xs ${theme.text.muted}`}>Milestone</div>
             </div>
           </div>
         </div>
 
         {/* Motivational quote */}
-        <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-lg">
+        <div className={`mt-4 p-3 ${theme.gradients.rainbow} rounded-lg`}>
           <div className="text-center">
             <Sparkles className="w-5 h-5 text-purple-500 mx-auto mb-2" />
             <p className="text-sm text-purple-800 dark:text-purple-200 font-medium italic">

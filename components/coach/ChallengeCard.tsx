@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import type { ChallengeRecommendation } from '@/lib/aiCoach';
 import { 
   Trophy,
@@ -49,11 +50,11 @@ export function ChallengeCard({
   const getDifficultyColor = (difficulty: ChallengeRecommendation['difficulty']) => {
     switch (difficulty) {
       case 'easy':
-        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800';
+        return `${theme.status.success.bg} ${theme.status.success.text} border ${theme.status.success.border}`;
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-800';
+        return `${theme.status.warning.bg} ${theme.status.warning.text} border ${theme.status.warning.border}`;
       case 'hard':
-        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800';
+        return `${theme.status.error.bg} ${theme.status.error.text} border ${theme.status.error.border}`;
     }
   };
 
@@ -83,22 +84,22 @@ export function ChallengeCard({
   };
 
   return (
-    <Card className="border-2 border-transparent hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-200 overflow-hidden">
+    <Card className={`border-2 border-transparent ${theme.border.interactive} ${theme.animation.transition} overflow-hidden`}>
       {/* Gradient header */}
       <div className={`h-1 bg-gradient-to-r ${getPriorityGradient()}`} />
       
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3 flex-1">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+            <div className={`p-2 ${theme.iconContainer.yellow} rounded-lg`}>
               <Trophy className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             
             <div className="flex-1">
-              <CardTitle className="text-lg text-gray-900 dark:text-gray-100 mb-1">
+              <CardTitle className={`text-lg ${theme.text.primary} mb-1`}>
                 {challenge.title}
               </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className={`text-sm ${theme.text.muted}`}>
                 {challenge.challenge}
               </p>
             </div>
@@ -130,34 +131,34 @@ export function ChallengeCard({
 
       <CardContent>
         {/* Challenge overview */}
-        <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+        <p className={`${theme.text.secondary} mb-4 leading-relaxed`}>
           {challenge.message}
         </p>
 
         {/* Challenge metrics */}
         <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className={`text-center p-3 ${theme.surface.secondary} rounded-lg`}>
             <Calendar className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className={`text-sm font-medium ${theme.text.primary}`}>
               {getDurationText(challenge.duration)}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Duration</div>
+            <div className={`text-xs ${theme.text.muted}`}>Duration</div>
           </div>
           
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className={`text-center p-3 ${theme.surface.secondary} rounded-lg`}>
             <Clock className="w-5 h-5 text-green-500 mx-auto mb-1" />
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className={`text-sm font-medium ${theme.text.primary}`}>
               {getEstimatedEffort(challenge.difficulty, challenge.duration)}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Daily effort</div>
+            <div className={`text-xs ${theme.text.muted}`}>Daily effort</div>
           </div>
           
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className={`text-center p-3 ${theme.surface.secondary} rounded-lg`}>
             <TrendingUp className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className={`text-sm font-medium ${theme.text.primary}`}>
               {Math.round(challenge.confidence * 100)}%
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Success rate</div>
+            <div className={`text-xs ${theme.text.muted}`}>Success rate</div>
           </div>
         </div>
 
@@ -165,14 +166,14 @@ export function ChallengeCard({
         {expanded && (
           <>
             {/* Potential benefit */}
-            <div className="mb-4 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <div className={`mb-4 p-3 ${theme.status.success.bg} border ${theme.status.success.border} rounded-lg`}>
               <div className="flex items-start gap-2">
                 <TrendingUp className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-medium text-green-800 dark:text-green-200 mb-1">
+                  <h4 className={`font-medium ${theme.status.success.text} mb-1`}>
                     Expected Benefits
                   </h4>
-                  <p className="text-sm text-green-700 dark:text-green-300">
+                  <p className={`text-sm ${theme.status.success.text}`}>
                     {challenge.potentialBenefit}
                   </p>
                 </div>
@@ -180,14 +181,14 @@ export function ChallengeCard({
             </div>
 
             {/* Success criteria */}
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className={`mb-4 p-3 ${theme.status.info.bg} border ${theme.status.info.border} rounded-lg`}>
               <div className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                  <h4 className={`font-medium ${theme.status.info.text} mb-1`}>
                     Success Criteria
                   </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className={`text-sm ${theme.status.info.text}`}>
                     {challenge.successCriteria}
                   </p>
                 </div>
@@ -197,30 +198,30 @@ export function ChallengeCard({
             {/* Confidence meter */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className={`text-sm font-medium ${theme.text.secondary}`}>
                   Predicted Success Rate
                 </span>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className={`text-sm ${theme.text.muted}`}>
                   {Math.round(challenge.confidence * 100)}%
                 </span>
               </div>
-              <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className={`w-full h-2 ${theme.surface.tertiary} rounded-full overflow-hidden`}>
                 <div 
                   className={`h-full bg-gradient-to-r ${getPriorityGradient()} transition-all duration-500`}
                   style={{ width: `${challenge.confidence * 100}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className={`text-xs ${theme.text.muted} mt-1`}>
                 Based on your current performance and habit patterns
               </p>
             </div>
 
             {/* Habit connection */}
             {challenge.habitName && (
-              <div className="mb-4 p-2 bg-primary-50 dark:bg-primary-950/30 rounded border border-primary-200 dark:border-primary-800">
+              <div className={`mb-4 p-2 ${theme.status.info.bg} rounded border ${theme.status.info.border}`}>
                 <div className="flex items-center gap-2 text-sm">
-                  <Target className="w-3 h-3 text-primary-600" />
-                  <span className="font-medium text-primary-800 dark:text-primary-200">
+                  <Target className={`w-3 h-3 ${theme.status.info.icon}`} />
+                  <span className={`font-medium ${theme.status.info.text}`}>
                     Related habit: {challenge.habitName}
                   </span>
                 </div>
@@ -253,7 +254,7 @@ export function ChallengeCard({
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 ml-auto"
+            className={`${theme.text.muted} hover:${theme.text.secondary} ml-auto`}
           >
             Maybe Later
           </Button>
@@ -261,14 +262,14 @@ export function ChallengeCard({
 
         {/* Challenge tip */}
         {expanded && (
-          <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <div className={`mt-4 p-3 ${theme.status.warning.bg} border ${theme.status.warning.border} rounded-lg`}>
             <div className="flex items-start gap-2">
               <Star className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <p className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                <p className={`font-medium ${theme.status.warning.text} mb-1`}>
                   Challenge Tip
                 </p>
-                <p className="text-yellow-700 dark:text-yellow-300">
+                <p className={`${theme.status.warning.text}`}>
                   {challenge.difficulty === 'easy' 
                     ? 'This challenge is designed to build confidence. Focus on consistency over perfection.'
                     : challenge.difficulty === 'medium'

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { CreateFamilyRequest } from '@/types/family';
 import { Home, ArrowLeft, Users, Settings } from 'lucide-react';
-import { familyBackgrounds, familyText, familyIcons, getFamilyButton, getFamilyInput, familyAnimations } from '@/lib/familyThemes';
+import { theme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -67,14 +67,16 @@ export default function CreateFamilyPage() {
   
   return (
     <ProtectedRoute>
-      <div className={cn(familyBackgrounds.page.normal, "py-8 px-4")}>
+      <div className={cn(theme.gradients.pageBackground, "py-8 px-4")}>
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <div className={cn(
-                "w-20 h-20 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center shadow-lg dark:shadow-blue-500/20",
-                familyAnimations.hover
+                "w-20 h-20 rounded-full flex items-center justify-center shadow-lg",
+                theme.components.button.primary,
+                theme.animation.transition,
+                "hover:scale-105"
               )}>
                 <Home className="w-10 h-10 text-white" />
               </div>

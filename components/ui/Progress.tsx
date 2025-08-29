@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface ProgressProps {
   value: number;
@@ -15,16 +16,20 @@ export function Progress({ value, max = 100, className, style }: ProgressProps) 
   return (
     <div 
       className={cn(
-        "relative w-full bg-gray-200 rounded-full overflow-hidden h-2",
+        "relative w-full rounded-full overflow-hidden h-2",
+        theme.surface.secondary,
         className
       )}
       style={style}
     >
       <div
-        className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
+        className={cn(
+          "h-full rounded-full transition-all duration-300 ease-out",
+          style?.backgroundColor ? '' : 'bg-blue-600'
+        )}
         style={{ 
           width: `${percentage}%`,
-          backgroundColor: style?.backgroundColor ? undefined : '#3B82F6'
+          backgroundColor: style?.backgroundColor
         }}
       />
     </div>

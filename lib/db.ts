@@ -86,6 +86,19 @@ export const clearUserSelectedFamily = async (userId: string) => {
   }
 };
 
+export const updateUserTheme = async (userId: string, theme: 'light' | 'dark') => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      'preferences.theme': theme,
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error updating user theme:', error);
+    throw error;
+  }
+};
+
 // Habit operations
 export const createHabit = async (userId: string, habitData: Omit<Habit, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {

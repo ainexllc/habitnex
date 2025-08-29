@@ -53,6 +53,20 @@
     --toast-bg: #1f2937;
     --toast-color: #f9fafb;
     --toast-border: #374151;
+    color-scheme: dark;
+  }
+  
+  /* Ensure all text is light in dark mode */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-white;
+  }
+  
+  .dark p, .dark span, .dark div {
+    @apply text-gray-100;
+  }
+  
+  .dark label {
+    @apply text-gray-200;
   }
 }
 

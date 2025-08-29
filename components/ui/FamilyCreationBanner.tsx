@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Users, Plus, ArrowRight } from 'lucide-react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { theme } from '@/lib/theme';
 
 interface FamilyCreationBannerProps {
   onCreateFamily?: () => void;
@@ -56,26 +57,26 @@ export function FamilyCreationBanner({ onCreateFamily, onJoinFamily }: FamilyCre
   }
 
   return (
-    <div className="relative bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border border-primary-200 dark:border-primary-700 rounded-lg p-4 mb-6 shadow-sm">
+    <div className={`relative ${theme.gradients.primary} border ${theme.status.info.border} rounded-lg p-4 mb-6 ${theme.shadow.sm}`}>
       {/* Dismiss button */}
       <button
         onClick={handleDismiss}
-        className="absolute top-3 right-3 p-1 rounded-full text-primary-400 hover:text-primary-600 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
+        className={`absolute top-3 right-3 p-1 rounded-full ${theme.text.muted} hover:${theme.status.info.text} ${theme.surface.hover} transition-colors`}
         aria-label="Dismiss banner"
       >
         <X className="w-4 h-4" />
       </button>
 
       <div className="flex items-start gap-3 pr-8">
-        <div className="flex-shrink-0 w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+        <div className={`flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center`}>
           <Users className="w-5 h-5 text-white" />
         </div>
         
         <div className="flex-grow">
-          <h3 className="font-semibold text-primary-900 dark:text-primary-100 text-lg mb-1">
+          <h3 className={`font-semibold ${theme.text.primary} text-lg mb-1`}>
             Ready to get started?
           </h3>
-          <p className="text-primary-700 dark:text-primary-300 text-sm mb-4 leading-relaxed">
+          <p className={`${theme.status.info.text} text-sm mb-4 leading-relaxed`}>
             Create a family to track habits together, or use it as your personal space. 
             You can also join an existing family if you have an invitation code.
           </p>
@@ -83,7 +84,7 @@ export function FamilyCreationBanner({ onCreateFamily, onJoinFamily }: FamilyCre
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleCreateFamily}
-              className="flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+              className={`flex items-center justify-center gap-2 ${theme.components.button.primary} px-4 py-2 rounded-lg font-medium ${theme.animation.transition} text-sm`}
             >
               <Plus className="w-4 h-4" />
               Create New Family
@@ -92,7 +93,7 @@ export function FamilyCreationBanner({ onCreateFamily, onJoinFamily }: FamilyCre
             
             <button
               onClick={handleJoinFamily}
-              className="flex items-center justify-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-primary-600 dark:text-primary-400 border border-primary-300 dark:border-primary-600 px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+              className={`flex items-center justify-center gap-2 ${theme.components.button.outline} px-4 py-2 rounded-lg font-medium ${theme.animation.transition} text-sm`}
             >
               <Users className="w-4 h-4" />
               Join Existing Family
@@ -101,8 +102,8 @@ export function FamilyCreationBanner({ onCreateFamily, onJoinFamily }: FamilyCre
         </div>
       </div>
       
-      <div className="mt-3 pt-3 border-t border-primary-200 dark:border-primary-700">
-        <p className="text-xs text-primary-600 dark:text-primary-400">
+      <div className={`mt-3 pt-3 border-t ${theme.status.info.border}`}>
+        <p className={`text-xs ${theme.status.info.text}`}>
           💡 <strong>Tip:</strong> You can always create or join families later from Settings
         </p>
       </div>

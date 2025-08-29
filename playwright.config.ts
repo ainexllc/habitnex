@@ -31,13 +31,19 @@ export default defineConfig({
     
     /* Record video on failures */
     video: 'retain-on-failure',
+    
+    /* Test credentials - commented out for now */
+    // storageState: 'playwright/.auth/user.json',
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        channel: 'chrome', // Use actual Chrome instead of Chromium
+      },
     },
 
     {

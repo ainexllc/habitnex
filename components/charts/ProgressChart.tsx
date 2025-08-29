@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { HabitCompletion } from '@/types';
 import { addDays, getDateString } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 
 interface ProgressChartProps {
   completions: HabitCompletion[];
@@ -43,7 +44,7 @@ export function ProgressChart({ completions, habitId, className = '' }: Progress
   return (
     <div className={`${className}`}>
       <div className="mb-4">
-        <h3 className="text-sm font-medium text-text-primary-light dark:text-text-primary-dark">
+        <h3 className={`text-sm font-medium ${theme.text.primary}`}>
           {habitId ? 'Completion Trend' : 'Overall Progress'} (Last 30 Days)
         </h3>
       </div>
@@ -65,10 +66,11 @@ export function ProgressChart({ completions, habitId, className = '' }: Progress
               labelFormatter={(label) => `Date: ${label}`}
               formatter={(value) => [value, habitId ? 'Completed' : 'Habits Completed']}
               contentStyle={{
-                backgroundColor: 'rgb(var(--surface-light))',
-                border: '1px solid rgb(var(--border-light))',
+                backgroundColor: 'white',
+                border: '1px solid #e5e7eb',
                 borderRadius: '8px',
               }}
+              wrapperClassName={`${theme.surface.primary} ${theme.border.default} rounded-lg`}
             />
             <Line 
               type="monotone" 

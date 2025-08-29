@@ -6,6 +6,7 @@ import { HabitForm } from '@/components/forms/HabitForm';
 import { useHabits } from '@/hooks/useHabits';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 
 interface EditHabitModalProps {
   habit: Habit | null;
@@ -71,13 +72,13 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 p-6 flex items-center justify-between">
+      <div className={`${theme.surface.primary} rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+        <div className={`sticky top-0 ${theme.surface.primary} border-b ${theme.border.default} p-6 flex items-center justify-between`}>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className={`text-2xl font-bold ${theme.text.primary}`}>
               Edit Habit
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
+            <p className={`${theme.text.secondary} mt-1`}>
               Update "{habit.name}" settings
             </p>
           </div>
@@ -85,7 +86,7 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            className={`${theme.text.muted} ${theme.surface.hover}`}
           >
             <X className="w-5 h-5" />
           </Button>

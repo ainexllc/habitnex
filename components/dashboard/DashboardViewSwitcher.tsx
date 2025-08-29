@@ -13,6 +13,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import { theme } from '@/lib/theme';
 
 const ICON_MAP = {
   'target': Target,
@@ -70,13 +71,13 @@ export function DashboardViewSwitcher({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+        <div className={`absolute top-full right-0 mt-2 w-72 ${theme.components.dropdown.menu} rounded-lg ${theme.shadow.lg} z-50`}>
           <div className="p-3">
             <div className="mb-3">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <h3 className={`text-sm font-medium ${theme.text.primary}`}>
                 Dashboard View
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className={`text-xs ${theme.text.muted}`}>
                 Choose how to display your {habitCount} habits
               </p>
             </div>
@@ -93,8 +94,8 @@ export function DashboardViewSwitcher({
                     onClick={() => handleViewSelect(view.type)}
                     className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors ${
                       isSelected
-                        ? 'bg-primary-100 text-primary-900 dark:bg-primary-900 dark:text-primary-100'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? theme.components.dropdown.itemActive
+                        : theme.components.dropdown.item
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -103,10 +104,10 @@ export function DashboardViewSwitcher({
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">{view.label}</span>
                         {isSelected && (
-                          <CheckCircle className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                          <CheckCircle className={`w-4 h-4 ${theme.status.info.icon}`} />
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <p className={`text-xs ${theme.text.muted} mt-0.5`}>
                         {view.description}
                       </p>
                       
@@ -114,8 +115,8 @@ export function DashboardViewSwitcher({
                       {recommendation && (
                         <div className={`flex items-center gap-1 mt-1 text-xs ${
                           recommendation.type === 'warning' 
-                            ? 'text-amber-600 dark:text-amber-400' 
-                            : 'text-green-600 dark:text-green-400'
+                            ? theme.status.warning.text 
+                            : theme.status.success.text
                         }`}>
                           {recommendation.type === 'warning' ? (
                             <AlertCircle className="w-4 h-4" />
@@ -132,8 +133,8 @@ export function DashboardViewSwitcher({
             </div>
             
             {/* Helpful tip */}
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+            <div className={`mt-3 pt-3 border-t ${theme.border.default}`}>
+              <p className={`text-xs ${theme.text.muted}`}>
                 💡 Tip: Focus view is best for daily use, Cards for details, Compact for overview
               </p>
             </div>

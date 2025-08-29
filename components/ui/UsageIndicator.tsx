@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useUsageTracking } from '@/hooks/useUsageTracking';
+import { theme } from '@/lib/theme';
 
 interface UsageIndicatorProps {
   showCost?: boolean;
@@ -22,11 +23,11 @@ export default function UsageIndicator({
     return (
       <div className={`animate-pulse ${className}`}>
         {compact ? (
-          <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className={`h-4 w-16 ${theme.surface.secondary} rounded`}></div>
         ) : (
           <div className="space-y-2">
-            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className={`h-4 w-32 ${theme.surface.secondary} rounded`}></div>
+            <div className={`h-2 w-full ${theme.surface.secondary} rounded`}></div>
           </div>
         )}
       </div>
@@ -46,10 +47,10 @@ export default function UsageIndicator({
   };
 
   const textColors: Record<string, string> = {
-    good: 'text-green-600 dark:text-green-400',
-    moderate: 'text-yellow-600 dark:text-yellow-400',
+    good: theme.status.success.text,
+    moderate: theme.status.warning.text,
     warning: 'text-orange-600 dark:text-orange-400', 
-    critical: 'text-red-600 dark:text-red-400'
+    critical: theme.status.error.text
   };
 
   if (compact) {
@@ -62,7 +63,7 @@ export default function UsageIndicator({
           </span>
         </div>
         {showCost && dailyUsage.cost > 0 && (
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className={`text-xs ${theme.text.muted}`}>
             ${dailyUsage.cost.toFixed(4)}
           </span>
         )}
@@ -73,7 +74,7 @@ export default function UsageIndicator({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className={`text-sm font-medium ${theme.text.secondary}`}>
           AI Usage Today
         </span>
         {showRemaining && (
@@ -85,7 +86,7 @@ export default function UsageIndicator({
       
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className={`${theme.text.muted}`}>
             {dailyUsage.requests} of {dailyUsage.limit} requests
           </span>
           <span className={`${textColors[status.status]}`}>
@@ -93,7 +94,7 @@ export default function UsageIndicator({
           </span>
         </div>
         
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+        <div className={`w-full ${theme.surface.secondary} rounded-full h-2`}>
           <div 
             className={`h-2 rounded-full transition-all duration-300 ${statusColors[status.status]}`}
             style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -102,19 +103,19 @@ export default function UsageIndicator({
       </div>
 
       {showCost && dailyUsage.cost > 0 && (
-        <div className="text-xs text-gray-500 dark:text-gray-400">
+        <div className={`text-xs ${theme.text.muted}`}>
           Cost today: ${dailyUsage.cost.toFixed(4)}
         </div>
       )}
 
       {isLimitExceeded && (
-        <div className="text-xs text-red-600 dark:text-red-400 font-medium">
+        <div className={`text-xs ${theme.status.error.text} font-medium`}>
           Daily limit reached. Resets at midnight.
         </div>
       )}
 
       {status.status === 'warning' && !isLimitExceeded && (
-        <div className="text-xs text-orange-600 dark:text-orange-400">
+        <div className={`text-xs ${theme.status.warning.text}`}>
           Approaching daily limit
         </div>
       )}
@@ -132,7 +133,7 @@ export function UsageBadge({ className = '' }: UsageBadgeProps) {
   if (loading || !usageSummary) {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+        <div className={`h-6 w-12 ${theme.surface.secondary} rounded-full`}></div>
       </div>
     );
   }
@@ -141,10 +142,10 @@ export function UsageBadge({ className = '' }: UsageBadgeProps) {
   const { status } = usageStatus;
 
   const badgeColors: Record<string, string> = {
-    good: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    moderate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    good: `${theme.status.success.bg} ${theme.status.success.text}`,
+    moderate: `${theme.status.warning.bg} ${theme.status.warning.text}`,
     warning: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-    critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    critical: `${theme.status.error.bg} ${theme.status.error.text}`
   };
 
   return (
@@ -171,18 +172,18 @@ export function UsageTooltip({ children, className = '' }: UsageTooltipProps) {
   return (
     <div className={`group relative ${className}`}>
       {children}
-      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+      <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 ${theme.components.tooltip} rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50`}>
         <div className="space-y-1">
           <div>Today: {dailyUsage.requests}/{dailyUsage.limit} requests</div>
           <div>This week: {weeklyUsage.requests} requests</div>
           <div>This month: {monthlyUsage.requests} requests</div>
           {dailyUsage.cost > 0 && (
-            <div className="border-t border-gray-700 pt-1 mt-1">
+            <div className={`border-t ${theme.border.strong} pt-1 mt-1`}>
               <div>Today's cost: ${dailyUsage.cost.toFixed(4)}</div>
             </div>
           )}
         </div>
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
       </div>
     </div>
   );

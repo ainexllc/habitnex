@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { MoodEntry, CreateMoodForm } from '@/types';
 import { MoodForm } from './MoodForm';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import { X } from 'lucide-react';
 
 interface MoodEditModalProps {
@@ -62,10 +63,10 @@ export function MoodEditModal({ mood, isOpen, onClose, onSave, loading = false }
         />
         
         {/* Modal */}
-        <div className="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+        <div className={`relative w-full max-w-3xl ${theme.surface.primary} rounded-lg shadow-xl`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border-light dark:border-border-dark">
-            <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
+          <div className={`flex items-center justify-between p-6 border-b ${theme.border.default}`}>
+            <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
               Edit Mood Entry
             </h2>
             <Button variant="ghost" size="sm" onClick={onClose}>

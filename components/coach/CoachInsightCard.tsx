@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import type { CoachingInsight } from '@/lib/aiCoach';
 import { 
   Bot, 
@@ -50,30 +51,30 @@ export function CoachInsightCard({
   const getPriorityColor = (priority: CoachingInsight['priority']) => {
     switch (priority) {
       case 'high':
-        return 'border-l-red-500 bg-red-50 dark:bg-red-950/20';
+        return `border-l-red-500 ${theme.status.error.bg}`;
       case 'medium':
-        return 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20';
+        return `border-l-yellow-500 ${theme.status.warning.bg}`;
       case 'low':
-        return 'border-l-green-500 bg-green-50 dark:bg-green-950/20';
+        return `border-l-green-500 ${theme.status.success.bg}`;
       default:
-        return 'border-l-gray-500 bg-gray-50 dark:bg-gray-950/20';
+        return `border-l-gray-500 ${theme.surface.secondary}`;
     }
   };
 
   const getCategoryBadgeColor = (category: CoachingInsight['category']) => {
     switch (category) {
       case 'mood':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        return `${theme.iconContainer.purple} text-purple-800 dark:text-purple-200`;
       case 'performance':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return `${theme.components.badge.primary}`;
       case 'streak':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+        return `${theme.iconContainer.yellow} text-orange-800 dark:text-orange-200`;
       case 'challenge':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return `${theme.components.badge.success}`;
       case 'general':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return `${theme.components.badge.default}`;
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return `${theme.components.badge.default}`;
     }
   };
 
@@ -100,7 +101,7 @@ export function CoachInsightCard({
           <div className="flex items-center gap-3 flex-1">
             {getIcon(insight.type, insight.category)}
             <div className="flex-1 min-w-0">
-              <CardTitle className={`${compact ? 'text-base' : 'text-lg'} text-gray-900 dark:text-gray-100`}>
+              <CardTitle className={`${compact ? 'text-base' : 'text-lg'} ${theme.text.primary}`}>
                 {insight.title}
               </CardTitle>
               {showCategory && (
@@ -109,7 +110,7 @@ export function CoachInsightCard({
                     {insight.category}
                   </span>
                   {insight.priority === 'high' && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${theme.status.error.bg} ${theme.status.error.text}`}>
                       Priority
                     </span>
                   )}
@@ -120,10 +121,10 @@ export function CoachInsightCard({
           <div className="flex flex-col items-end gap-1">
             <span className={`text-xs px-2 py-1 rounded-full ${
               insight.priority === 'high' 
-                ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' 
+                ? `${theme.status.error.bg} ${theme.status.error.text}` 
                 : insight.priority === 'medium'
-                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-                : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                ? `${theme.status.warning.bg} ${theme.status.warning.text}`
+                : `${theme.status.success.bg} ${theme.status.success.text}`
             }`}>
               {insight.priority}
             </span>
@@ -132,14 +133,14 @@ export function CoachInsightCard({
       </CardHeader>
 
       <CardContent>
-        <p className="text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
+        <p className={`${theme.text.secondary} mb-3 leading-relaxed`}>
           {insight.message}
         </p>
 
         {/* Additional metadata for specific types */}
         {insight.type === 'challenge' && insight.metadata && (
-          <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className={`mb-3 p-3 ${theme.surface.secondary} rounded-lg`}>
+            <div className={`flex items-center gap-4 text-sm ${theme.text.muted}`}>
               {insight.metadata.timeframe && (
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
@@ -158,10 +159,10 @@ export function CoachInsightCard({
 
         {/* Habit-specific information */}
         {insight.habitName && (
-          <div className="mb-3 p-2 bg-primary-50 dark:bg-primary-950/30 rounded-lg border border-primary-200 dark:border-primary-800">
+          <div className={`mb-3 p-2 ${theme.status.info.bg} rounded-lg border ${theme.status.info.border}`}>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-primary-600" />
-              <span className="text-sm font-medium text-primary-800 dark:text-primary-200">
+              <CheckCircle className={`w-4 h-4 ${theme.status.info.icon}`} />
+              <span className={`text-sm font-medium ${theme.status.info.text}`}>
                 Related to: {insight.habitName}
               </span>
             </div>
@@ -170,12 +171,12 @@ export function CoachInsightCard({
 
         {/* Confidence indicator (for advanced users) */}
         {!compact && (
-          <div className="mb-3 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+          <div className={`mb-3 flex items-center justify-between text-sm ${theme.text.muted}`}>
             <span>{getConfidenceText(insight.confidence)}</span>
             <div className="flex items-center gap-1">
-              <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className={`w-20 h-1 ${theme.surface.tertiary} rounded-full overflow-hidden`}>
                 <div 
-                  className="h-full bg-primary-500 rounded-full transition-all duration-300"
+                  className="h-full bg-blue-500 rounded-full transition-all duration-300"
                   style={{ width: `${insight.confidence * 100}%` }}
                 />
               </div>
@@ -229,7 +230,7 @@ export function CoachInsightCard({
               variant="ghost"
               size="sm"
               onClick={() => handleAction('dismiss')}
-              className="text-xs text-gray-500 hover:text-gray-700"
+              className={`text-xs ${theme.text.muted} hover:${theme.text.secondary}`}
             >
               Dismiss
             </Button>

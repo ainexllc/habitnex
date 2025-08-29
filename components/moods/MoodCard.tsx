@@ -3,6 +3,7 @@
 import { MoodEntry } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import { 
   Smile, 
   Battery,
@@ -91,13 +92,13 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
     type: 'mood' | 'energy' | 'stress' | 'sleep' 
   }) => (
     <div className="flex items-center space-x-3">
-      <Icon className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
+      <Icon className={`w-4 h-4 ${theme.text.muted}`} />
       <div className="flex-1">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-text-secondary-light dark:text-text-secondary-dark">{label}</span>
+          <span className={theme.text.muted}>{label}</span>
           <span className="font-medium">{value}/5</span>
         </div>
-        <div className="w-full bg-secondary-200 dark:bg-secondary-800 rounded-full h-2">
+        <div className={`w-full ${theme.surface.tertiary} rounded-full h-2`}>
           <div 
             className={`h-2 rounded-full transition-all ${getMeterColor(value, type)}`}
             style={{ width: `${(value / 5) * 100}%` }}
@@ -120,7 +121,7 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
                 <Heart className="w-4 h-4 mr-1 text-primary-600 dark:text-primary-400" />
                 {formatDate(mood.date)}
               </CardTitle>
-              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+              <p className={`text-sm ${theme.text.secondary}`}>
                 Overall mood: {mood.mood}/5
               </p>
             </div>
@@ -153,8 +154,8 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
         {mood.tags && mood.tags.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center space-x-1">
-              <Tag className="w-3 h-3 text-text-secondary-light dark:text-text-secondary-dark" />
-              <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+              <Tag className={`w-3 h-3 ${theme.text.muted}`} />
+              <span className={`text-xs ${theme.text.muted}`}>
                 Tags
               </span>
             </div>
@@ -174,10 +175,10 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
         {/* Notes */}
         {mood.notes && (
           <div className="space-y-2">
-            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+            <p className={`text-xs ${theme.text.muted}`}>
               Notes
             </p>
-            <p className="text-sm text-text-primary-light dark:text-text-primary-dark bg-secondary-50 dark:bg-secondary-900 p-3 rounded-lg">
+            <p className={`text-sm ${theme.text.primary} ${theme.surface.secondary} p-3 rounded-lg`}>
               {mood.notes}
             </p>
           </div>

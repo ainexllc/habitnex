@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { theme } from '@/lib/theme';
 import type { DailyRecommendation } from '@/lib/aiCoach';
 import { 
   ArrowRight,
@@ -78,11 +79,11 @@ export function RecommendationsList({
   const getPriorityColor = (priority: DailyRecommendation['priority']) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800';
+        return `${theme.status.error.bg} border ${theme.status.error.border}`;
       case 'medium':
-        return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800';
+        return `${theme.status.warning.bg} border ${theme.status.warning.border}`;
       case 'low':
-        return 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800';
+        return `${theme.status.success.bg} border ${theme.status.success.border}`;
     }
   };
 
@@ -98,10 +99,10 @@ export function RecommendationsList({
         <CardContent>
           <div className="text-center py-8">
             <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
+            <p className={`${theme.text.muted} mb-2`}>
               All caught up!
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
+            <p className={`text-sm ${theme.text.muted}`}>
               You're doing great. Keep up the momentum!
             </p>
           </div>
@@ -115,10 +116,10 @@ export function RecommendationsList({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Brain className="w-5 h-5 text-primary-600" />
+            <Brain className="w-5 h-5 text-blue-600" />
             {title}
           </CardTitle>
-          <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+          <span className={`text-xs ${theme.text.muted} ${theme.surface.tertiary} px-2 py-1 rounded-full`}>
             {displayRecommendations.length} recommendation{displayRecommendations.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -129,8 +130,8 @@ export function RecommendationsList({
           {displayRecommendations.map((recommendation, index) => (
             <div
               key={recommendation.id}
-              className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-sm ${
-                showPriority ? getPriorityColor(recommendation.priority) : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+              className={`p-4 rounded-lg transition-all duration-200 hover:shadow-sm ${
+                showPriority ? getPriorityColor(recommendation.priority) : `${theme.surface.secondary} border ${theme.border.default}`
               }`}
             >
               {/* Header */}
@@ -138,14 +139,14 @@ export function RecommendationsList({
                 <div className="flex items-center gap-2 flex-1">
                   <span className={`text-sm font-medium px-2 py-1 rounded-full ${
                     recommendation.priority === 'high' 
-                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      ? `${theme.status.error.bg} ${theme.status.error.text}`
                       : recommendation.priority === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      ? `${theme.status.warning.bg} ${theme.status.warning.text}`
+                      : `${theme.status.success.bg} ${theme.status.success.text}`
                   }`}>
                     #{index + 1}
                   </span>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100 flex-1">
+                  <h3 className={`font-medium ${theme.text.primary} flex-1`}>
                     {recommendation.title}
                   </h3>
                   {getImpactIcon(recommendation.estimatedImpact)}
@@ -153,13 +154,13 @@ export function RecommendationsList({
               </div>
 
               {/* Message */}
-              <p className="text-gray-700 dark:text-gray-300 mb-3 ml-10">
+              <p className={`${theme.text.secondary} mb-3 ml-10`}>
                 {recommendation.message}
               </p>
 
               {/* Metadata */}
               <div className="flex items-center justify-between ml-10">
-                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                <div className={`flex items-center gap-4 text-xs ${theme.text.muted}`}>
                   {recommendation.suggestedTime && (
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -203,10 +204,10 @@ export function RecommendationsList({
 
               {/* Habit-specific information */}
               {recommendation.habitName && (
-                <div className="mt-3 ml-10 p-2 bg-primary-50 dark:bg-primary-950/30 rounded border border-primary-200 dark:border-primary-800">
+                <div className={`mt-3 ml-10 p-2 ${theme.status.info.bg} rounded border ${theme.status.info.border}`}>
                   <div className="flex items-center gap-2 text-sm">
-                    <Target className="w-3 h-3 text-primary-600" />
-                    <span className="font-medium text-primary-800 dark:text-primary-200">
+                    <Target className={`w-3 h-3 ${theme.status.info.icon}`} />
+                    <span className={`font-medium ${theme.status.info.text}`}>
                       Habit: {recommendation.habitName}
                     </span>
                   </div>
@@ -219,7 +220,7 @@ export function RecommendationsList({
         {/* Show more indicator */}
         {maxItems && recommendations.length > maxItems && (
           <div className="mt-4 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className={`text-sm ${theme.text.muted}`}>
               Showing {maxItems} of {recommendations.length} recommendations
             </p>
           </div>
@@ -227,14 +228,14 @@ export function RecommendationsList({
 
         {/* Quick tips */}
         {displayRecommendations.some(r => r.priority === 'high') && (
-          <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+          <div className={`mt-4 p-3 ${theme.status.warning.bg} border ${theme.status.warning.border} rounded-lg`}>
             <div className="flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <p className="font-medium text-orange-800 dark:text-orange-200 mb-1">
+                <p className={`font-medium ${theme.status.warning.text} mb-1`}>
                   High Priority Items
                 </p>
-                <p className="text-orange-700 dark:text-orange-300">
+                <p className={`${theme.status.warning.text}`}>
                   Focus on high-priority recommendations first for maximum impact today.
                 </p>
               </div>

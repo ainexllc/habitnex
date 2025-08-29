@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { theme } from '@/lib/theme';
 import { LucideIcon } from 'lucide-react';
 
 interface StatsCardProps {
@@ -27,14 +28,14 @@ export function StatsCard({
     <Card className={`${className}`}>
       <div className="flex items-center justify-between p-2">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark truncate">
+          <p className={`text-xs font-medium ${theme.text.secondary} truncate`}>
             {title}
           </p>
-          <div className="text-sm font-bold text-text-primary-light dark:text-text-primary-dark">
+          <div className={`text-sm font-bold ${theme.text.primary}`}>
             {value}
           </div>
         </div>
-        <Icon className="h-3 w-3 text-text-muted-light dark:text-text-muted-dark flex-shrink-0 ml-1" />
+        <Icon className={`h-3 w-3 ${theme.text.muted} flex-shrink-0 ml-1`} />
       </div>
     </Card>
   );

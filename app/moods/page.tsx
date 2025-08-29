@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useMoods } from '@/hooks/useMoods';
 import { getTodayDateString } from '@/lib/utils';
+import { theme } from '@/lib/theme';
 import { MoodEntry } from '@/types';
 import { 
   Heart, 
@@ -131,7 +132,7 @@ export default function MoodsPage() {
   if (moodsLoading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-surface-light dark:bg-background-dark">
+        <div className={`min-h-screen ${theme.surface.base}`}>
           <Header />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-center h-64">
@@ -145,18 +146,18 @@ export default function MoodsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-surface-light dark:bg-background-dark">
+      <div className={`min-h-screen ${theme.surface.base}`}>
         <Header />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark flex items-center">
+              <h1 className={`text-3xl font-bold ${theme.text.primary} flex items-center`}>
                 <Heart className="w-8 h-8 mr-3 text-primary-600 dark:text-primary-400" />
                 Mood Tracking
               </h1>
-              <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+              <p className={`${theme.text.secondary} mt-1`}>
                 Monitor your emotional well-being and identify patterns
               </p>
             </div>
@@ -179,7 +180,7 @@ export default function MoodsPage() {
           {/* Today's Mood Display */}
           {todayMood && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark mb-4">
+              <h2 className={`text-xl font-semibold ${theme.text.primary} mb-4`}>
                 Today's Mood
               </h2>
               <MoodCard 
@@ -193,7 +194,7 @@ export default function MoodsPage() {
           {/* Analytics */}
           {moodAnalytics && (
             <div className="mb-8 space-y-6">
-              <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
+              <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
                 Mood Analytics
               </h2>
               
@@ -204,7 +205,7 @@ export default function MoodsPage() {
                     <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                       {moodAnalytics.averages.mood.toFixed(1)}
                     </div>
-                    <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <div className={`text-sm ${theme.text.secondary}`}>
                       Avg Mood
                     </div>
                   </CardContent>
@@ -214,7 +215,7 @@ export default function MoodsPage() {
                     <div className="text-2xl font-bold text-success-600 dark:text-success-400">
                       {moodAnalytics.averages.energy.toFixed(1)}
                     </div>
-                    <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <div className={`text-sm ${theme.text.secondary}`}>
                       Avg Energy
                     </div>
                   </CardContent>
@@ -224,7 +225,7 @@ export default function MoodsPage() {
                     <div className="text-2xl font-bold text-warning-600 dark:text-warning-400">
                       {moodAnalytics.averages.stress.toFixed(1)}
                     </div>
-                    <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <div className={`text-sm ${theme.text.secondary}`}>
                       Avg Stress
                     </div>
                   </CardContent>
@@ -234,7 +235,7 @@ export default function MoodsPage() {
                     <div className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">
                       {moodAnalytics.averages.sleep.toFixed(1)}
                     </div>
-                    <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <div className={`text-sm ${theme.text.secondary}`}>
                       Avg Sleep
                     </div>
                   </CardContent>
@@ -296,13 +297,13 @@ export default function MoodsPage() {
           {/* Mood History */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">
+              <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
                 Mood History
               </h2>
               
               {/* Sort Controls */}
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                <span className={`text-sm ${theme.text.secondary}`}>
                   Sort by:
                 </span>
                 <Button
@@ -346,10 +347,10 @@ export default function MoodsPage() {
               <Card>
                 <CardContent className="text-center py-12">
                   <Heart className="w-16 h-16 text-primary-600 dark:text-primary-400 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                  <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
                     No mood entries yet
                   </h3>
-                  <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                  <p className={`${theme.text.secondary} mb-4`}>
                     Start tracking your mood to gain insights into your emotional well-being.
                   </p>
                   {todayMood ? (
