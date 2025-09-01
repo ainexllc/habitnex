@@ -129,7 +129,7 @@ export function ModernFamilyHeader({
               }}
             >
               {familyName.split('').map((letter, index) => {
-                const colors = [
+                const rainbowColors = [
                   'text-red-400',
                   'text-orange-400',
                   'text-yellow-400',
@@ -139,12 +139,16 @@ export function ModernFamilyHeader({
                   'text-purple-400',
                   'text-pink-400'
                 ];
-                const colorIndex = index % colors.length;
+
+                // Every other letter gets rainbow color
+                const isRainbowLetter = index % 2 === 0;
+                const colorIndex = Math.floor(index / 2) % rainbowColors.length;
+
                 return (
                   <span
                     key={index}
                     className={cn(
-                      colors[colorIndex],
+                      isRainbowLetter ? rainbowColors[colorIndex] : 'text-white',
                       letter === ' ' && "text-white"
                     )}
                   >

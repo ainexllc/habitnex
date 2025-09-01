@@ -108,7 +108,7 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
 
       {/* Member Zones Grid */}
       <div className={cn(
-        "grid gap-6 md:gap-8 lg:gap-10",
+        "grid gap-3 md:gap-4 lg:gap-5",
         touchMode ? "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
         members.length === 2 && "md:grid-cols-2",
         members.length === 3 && "lg:grid-cols-3",

@@ -139,7 +139,7 @@ export default function DashboardPage() {
                       <Home className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">{familyName}</h3>
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent animate-pulse">{familyName}</h3>
                       <p className="text-gray-600 dark:text-gray-300">Your family dashboard is ready!</p>
                     </div>
                   </div>

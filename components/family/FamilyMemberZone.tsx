@@ -128,9 +128,12 @@ export function FamilyMemberZone({
             )}
             <div>
               <h3 className={cn(
-                `font-bold ${theme.text.primary}`,
-                touchMode ? "text-2xl" : "text-lg"
-              )}>
+                "font-bold",
+                touchMode ? "text-3xl" : "text-xl"
+              )} style={{
+                fontFamily: '"Flavors", cursive',
+                color: member.color
+              }}>
                 {member.displayName}
               </h3>
               <div className={`flex items-center space-x-2 text-sm ${theme.text.muted}`}>
