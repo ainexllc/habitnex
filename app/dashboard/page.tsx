@@ -18,7 +18,7 @@ import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { theme } from '@/lib/theme';
-import { Target, Plus, Users, Home, Flame, RefreshCw } from 'lucide-react';
+import { Target, Plus, Flame, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Habit } from '@/types';
@@ -138,43 +138,7 @@ export default function DashboardPage() {
             onJoinFamily={handleJoinFamily}
           />
           
-          {/* Family Indicator */}
-          {hasFamily && (
-            <div className="mb-6">
-              <Link href="/dashboard/family">
-                <div className="group relative inline-flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-purple-500/10 hover:from-emerald-500/20 hover:via-blue-500/20 hover:to-purple-500/20 border border-emerald-200/60 dark:border-emerald-700/60 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-105">
-                  {/* Animated border gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
-
-                  {/* Family icon with pulsing effect */}
-                  <div className="relative w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full flex items-center justify-center shadow-md">
-                    <Home className="w-4 h-4 text-white" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full animate-ping opacity-20"></div>
-                  </div>
-
-                  {/* Family name with gradient text */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 dark:from-emerald-400 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                      {familyName}
-                    </span>
-                    <div className="flex gap-1">
-                      <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>
-                      <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-1 h-1 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
-                  </div>
-
-                  {/* Family users icon */}
-                  <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-300" />
-
-                  {/* Hover tooltip */}
-                  <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                    Go to Family Dashboard
-                  </div>
-                </div>
-              </Link>
-            </div>
-          )}
+          
 
                     {/* Dashboard Title and Actions */}
           <div className="flex items-start justify-between mb-6">

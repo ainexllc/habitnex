@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
-import { Heart, User, LogOut } from 'lucide-react';
+import { Heart, User, LogOut, Users, Home } from 'lucide-react';
 import { theme } from '@/lib/theme';
 
 export function Header() {
   const { user, userProfile, signOut } = useAuth();
+  const { hasFamily, familyName } = useFamilyStatus();
 
   const handleSignOut = async () => {
     try {
@@ -59,6 +61,25 @@ export function Header() {
 
           <div className="flex items-center space-x-3">
             <ThemeToggle />
+
+            {/* Family Dashboard Icon */}
+            {hasFamily && (
+              <Link
+                href="/dashboard/family"
+                className={`group relative p-2 rounded-lg ${theme.surface.hover} transition-all duration-200 hover:scale-105`}
+                title={`Go to ${familyName} Family Dashboard`}
+              >
+                <div className="relative">
+                  <Home className={`w-5 h-5 ${theme.text.secondary} group-hover:${theme.text.primary} transition-colors duration-200`} />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                </div>
+
+                {/* Tooltip */}
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                  {familyName}
+                </div>
+              </Link>
+            )}
 
             <div className="flex items-center space-x-2">
               <div className={`w-8 h-8 ${theme.iconContainer.blue} rounded-full flex items-center justify-center`}>
