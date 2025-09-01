@@ -285,15 +285,6 @@ export function FocusView({ habits, onEdit }: FocusViewProps) {
                   </div>
 
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1.5 rounded-full text-sm font-bold ${
-                        section.title === 'Overdue' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
-                        section.title === 'Due Today' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' :
-                        'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
-                      } shadow-sm`}>
-                        {section.habits.length}
-                      </span>
-                    </div>
                     <div className={`p-2 rounded-lg ${theme.surface.secondary} transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
                       <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                     </div>
@@ -318,16 +309,7 @@ export function FocusView({ habits, onEdit }: FocusViewProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1.5 rounded-full text-sm font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm`}>
-                        {section.habits.length}
-                      </span>
-                    </div>
-                    <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
-                    </div>
-                  </div>
+
                 </div>
               )}
             </div>
