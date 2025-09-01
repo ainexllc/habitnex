@@ -7,19 +7,15 @@ import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { CreateHabitModal } from '@/components/habits/CreateHabitModal';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { useHabits } from '@/hooks/useHabits';
 import { useMoods } from '@/hooks/useMoods';
 import { Habit } from '@/types';
 import {
   Plus,
-  Search,
-  Filter,
   Clock,
   AlertTriangle,
   Calendar,
   ChevronDown,
-  ChevronUp,
   Target,
   Star,
   Sparkles
@@ -37,8 +33,7 @@ import {
 export default function HabitsPage() {
   const { habits, completions, loading } = useHabits();
   const { moods } = useMoods();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
+
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -53,44 +48,17 @@ export default function HabitsPage() {
   };
 
 
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    habits.forEach(habit => {
-      // Handle both new tags array and legacy category
-      if (habit.tags && habit.tags.length > 0) {
-        habit.tags.forEach(tag => tags.add(tag));
-      } else if ((habit as any).category) {
-        tags.add((habit as any).category.toLowerCase().replace(/\s+/g, '-'));
-      }
-    });
-    return Array.from(tags).filter(Boolean).sort();
-  }, [habits]);
-
-  const filteredHabits = useMemo(() => {
-    return habits.filter(habit => {
-      const matchesSearch = habit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           habit.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-      if (!selectedTag) return matchesSearch;
-
-      // Check both new tags array and legacy category
-      const habitTags = habit.tags || [];
-      const legacyCategory = (habit as any).category?.toLowerCase().replace(/\s+/g, '-');
-      const matchesTag = habitTags.includes(selectedTag) || legacyCategory === selectedTag;
-
-      return matchesSearch && matchesTag;
-    });
-  }, [habits, searchTerm, selectedTag]);
+  
 
   // Categorize habits into sections (inspired by dashboard FocusView)
   const habitSections = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    // First apply search/filter to get filtered habits
-    const baseHabits = filteredHabits;
+    // Use all habits directly
+    const baseHabits = habits;
 
-    // Categorize filtered habits
+    // Categorize habits into sections
     const overdueHabits = baseHabits.filter(habit => isHabitOverdue(habit, completions));
     const todayHabits = baseHabits.filter(habit =>
       isHabitDueToday(habit) && !isHabitOverdue(habit, completions)
@@ -148,7 +116,7 @@ export default function HabitsPage() {
         description: 'Future scheduled habits'
       }
     ].filter(section => section.habits.length > 0);
-  }, [filteredHabits, completions]);
+  }, [habits, completions]);
 
   const toggleSection = (sectionTitle: string) => {
     setExpandedSections(prev => ({
@@ -203,22 +171,7 @@ export default function HabitsPage() {
               </div>
             </div>
 
-            {/* Motivational Section */}
-            {habits.length > 0 && (
-              <div className={`${theme.surface.primary} rounded-lg p-4 border ${theme.border.default} shadow-sm mb-6`}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md">
-                    <span className="text-white font-bold text-lg">💪</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`text-lg font-semibold ${theme.text.primary}`}>Your Habit Journey</h3>
-                    <p className={`text-sm ${theme.text.secondary}`}>
-                      You're tracking {habits.length} habit{habits.length !== 1 ? 's' : ''} - every small step counts toward your goals!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </div>
 
           {/* Weekly Summary - Desktop Only */}
@@ -443,82 +396,7 @@ export default function HabitsPage() {
             </div>
           )}
 
-          {/* Controls Section */}
-          {habits.length > 0 && (
-            <div className={`${theme.surface.primary} rounded-xl p-6 border ${theme.border.default} shadow-sm mb-8`}>
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Search Section */}
-                <div className="flex-1">
-                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-2`}>
-                    Search Habits
-                  </label>
-                  <div className="relative">
-                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme.text.muted} w-4 h-4`} />
-                    <input
-                      type="text"
-                      placeholder="Search by name or description..."
-                      className={`w-full pl-10 pr-4 py-2 border ${theme.border.default} rounded-lg bg-white dark:bg-gray-800 ${theme.text.primary} placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                </div>
 
-                {/* Filter Section */}
-                <div className="lg:w-48">
-                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-2`}>
-                    Filter by Tag
-                  </label>
-                  <div className="relative">
-                    <Filter className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme.text.muted} w-4 h-4`} />
-                    <select
-                      className={`w-full pl-10 pr-4 py-2 border ${theme.border.default} rounded-lg bg-white dark:bg-gray-800 ${theme.text.primary} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none`}
-                      value={selectedTag}
-                      onChange={(e) => setSelectedTag(e.target.value)}
-                    >
-                      <option value="">All Tags</option>
-                      {allTags.map(tag => (
-                        <option key={tag} value={tag}>
-                          #{tag}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Quick Actions Section */}
-                <div className="lg:w-64">
-                  <label className={`block text-sm font-medium ${theme.text.secondary} mb-2`}>
-                    Quick Actions
-                  </label>
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowCreateHabitModal(true)}
-                      className="w-full justify-start"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      New Habit
-                    </Button>
-                    {filteredHabits.length !== habits.length && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSearchTerm('');
-                          setSelectedTag('');
-                        }}
-                        className="w-full justify-start"
-                      >
-                        Clear Filters
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Habits Display */}
           <div className="space-y-6">
@@ -580,26 +458,7 @@ export default function HabitsPage() {
                   </div>
                 </div>
               </div>
-            ) : filteredHabits.length === 0 ? (
-              <div className={`text-center py-16 ${theme.surface.primary} rounded-2xl border ${theme.border.default} shadow-lg`}>
-                <div className="w-16 h-16 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-orange-600 dark:text-orange-400" />
-                </div>
-                <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
-                  No habits found
-                </h3>
-                <p className={`${theme.text.secondary} mb-4 max-w-md mx-auto`}>
-                  We couldn't find any habits matching your search criteria. Try adjusting your filters or search terms.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <Button variant="outline" onClick={() => setSearchTerm('')}>
-                    Clear Search
-                  </Button>
-                  <Button variant="outline" onClick={() => setSelectedTag('')}>
-                    Clear Filter
-                  </Button>
-                </div>
-              </div>
+
             ) : (
               <>
                 {/* Sectioned Habits Display (Inspired by Dashboard FocusView) */}
