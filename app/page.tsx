@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { 
-  Sparkles, Target, TrendingUp, Shield, Users, Zap, 
+  Target, TrendingUp, Shield, Users, Zap, 
   ArrowRight, CheckCircle, Heart, Trophy, Star, 
   BarChart3, Calendar, Brain, Smartphone, Clock,
   ChevronRight, Play, Menu, X
 } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,14 +39,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-2 group">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                  NextVibe
-                </span>
-              </Link>
+              <Logo />
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-8 ml-10">
@@ -455,11 +449,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">NextVibe</span>
+              <div className="mb-4">
+                <Logo linkToHome={false} />
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
                 Transform your daily habits with AI-powered tracking and insights.

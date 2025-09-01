@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
+import { Logo } from '@/components/ui/Logo';
 import { Heart, User, LogOut, Users, Home } from 'lucide-react';
 import { theme } from '@/lib/theme';
 
@@ -25,11 +26,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/dashboard">
-              <span className={`text-xl font-bold ${theme.text.primary}`}>
-                NextVibe
-              </span>
-            </Link>
+            <Logo linkToHome={false} />
           </div>
 
           <nav className="hidden md:flex items-center space-x-6">

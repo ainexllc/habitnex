@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { theme } from '@/lib/theme';
-import { UserPlus, Target, Heart, Sparkles, Users, Mail, Lock, Eye, EyeOff, User, ArrowRight, Rocket, Trophy, Star, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Target, Heart, Users, Mail, Lock, Eye, EyeOff, User, ArrowRight, Rocket, Trophy, Star, CheckCircle2 } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 const signUpSchema = z.object({
   displayName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -97,14 +98,7 @@ export default function SignUpPage() {
       <header className="relative backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
-                NextVibe
-              </span>
-            </Link>
+            <Logo />
 
             <div className="flex items-center space-x-4">
               <Link 
