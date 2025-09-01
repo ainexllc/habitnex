@@ -301,7 +301,7 @@ export function FocusView({ habits, onEdit }: FocusViewProps) {
                       <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} flex items-center gap-2`}>
                         {section.title}
                         {getMotivationalIcon(section.title)}
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+
                       </h3>
                       <p className={`text-sm ${theme.text.secondary} hidden sm:block`}>
                         {section.title === 'Due Today' && 'Your daily focus - always visible!'}
