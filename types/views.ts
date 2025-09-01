@@ -1,5 +1,6 @@
 // View types for habit display
 export enum HabitViewType {
+  COMPACT = 'compact',
   GRID = 'grid',
   LIST = 'list',
   CALENDAR = 'calendar',
@@ -20,6 +21,14 @@ export interface ViewOption {
 }
 
 export const VIEW_OPTIONS: ViewOption[] = [
+  {
+    type: HabitViewType.COMPACT,
+    label: 'Compact',
+    description: 'Mobile-optimized with expand/collapse',
+    icon: 'smartphone',
+    enabled: true,
+    phase: 1
+  },
   {
     type: HabitViewType.GRID,
     label: 'Cards',

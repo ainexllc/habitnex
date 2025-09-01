@@ -14,10 +14,12 @@ import {
   Clock,
   ChevronDown,
   Sparkles,
-  Waves
+  Waves,
+  Smartphone
 } from 'lucide-react';
 
 const ICON_MAP = {
+  'smartphone': Smartphone,
   'grid-3x3': Grid3X3,
   'list': List,
   'calendar': Calendar,

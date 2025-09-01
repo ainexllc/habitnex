@@ -3,15 +3,16 @@
 import { useState } from 'react';
 import { DashboardViewType, DASHBOARD_VIEW_OPTIONS, DashboardViewSwitcherProps } from '@/types/dashboard';
 import { Button } from '@/components/ui/Button';
-import { 
+import {
   Target,
-  Grid3X3, 
-  List, 
+  Grid3X3,
+  List,
   Layers,
   Folder,
   ChevronDown,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  BarChart3
 } from 'lucide-react';
 import { theme } from '@/lib/theme';
 
@@ -21,6 +22,7 @@ const ICON_MAP = {
   'list': List,
   'layers': Layers,
   'folder': Folder,
+  'bar-chart-3': BarChart3,
 };
 
 export function DashboardViewSwitcher({ 

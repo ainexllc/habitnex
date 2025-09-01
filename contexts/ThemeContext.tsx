@@ -37,10 +37,18 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Load theme on mount and when user changes
   useEffect(() => {
     setMounted(true);
-    loadTheme();
+    // Only load theme after mounting (client-side only)
+    if (typeof window !== 'undefined') {
+      loadTheme();
+    }
   }, [userId]);
 
   const loadTheme = async () => {
+    // Check if we're in the browser
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     let initialTheme: Theme = 'light';
     
     // First priority: Firebase (if user is logged in)
@@ -81,6 +89,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   };
 
   const applyTheme = (newTheme: Theme) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(newTheme);
@@ -88,7 +99,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const setTheme = async (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('theme', newTheme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme);
+    }
     applyTheme(newTheme);
     
     // Sync with Firebase if user is logged in
@@ -112,9 +125,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
   };
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch - render children but without context during SSR
   if (!mounted) {
-    return null;
+    return <>{children}</>;
   }
 
   return (
@@ -126,8 +139,16 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
 export function useTheme() {
   const context = useContext(ThemeContext);
+
+  // During SSR or before ThemeProvider mounts, return a fallback
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    return {
+      theme: 'light' as Theme,
+      toggleTheme: () => {},
+      setTheme: () => {},
+      syncWithFirebase: async () => {}
+    };
   }
+
   return context;
 }

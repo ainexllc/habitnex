@@ -10,6 +10,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { CreateFamilyRequest } from '@/types/family';
 import { Home, ArrowLeft, Users, Settings } from 'lucide-react';
 import { theme } from '@/lib/theme';
+import { familyText, familyAnimations, familyIcons } from '@/lib/familyThemes';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useFamily } from '@/contexts/FamilyContext';
 import { Button } from '@/components/ui/Button';
@@ -35,7 +35,7 @@ const FAMILY_TABS = [
 
 
 
-export default function FamilyDashboard() {
+function FamilyDashboardContent() {
   const { currentFamily, currentMember, loading, isParent } = useFamily();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<FamilyTab>('overview');
@@ -147,5 +147,20 @@ export default function FamilyDashboard() {
       {/* Feedback System */}
       <FeedbackSystem />
     </div>
+  );
+}
+
+export default function FamilyDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+          <p className="text-blue-600 dark:text-blue-400 font-medium">Loading family dashboard...</p>
+        </div>
+      </div>
+    }>
+      <FamilyDashboardContent />
+    </Suspense>
   );
 }

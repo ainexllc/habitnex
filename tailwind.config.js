@@ -121,6 +121,9 @@ module.exports = {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
+        'expand': 'expand 0.3s ease-out',
+        'collapse': 'collapse 0.3s ease-out',
+        'check-bounce': 'checkBounce 0.4s ease-out',
         'wave-flow': 'waveFlow 3s ease-in-out infinite',
         'particle-float': 'particleFloat 2s ease-out forwards',
         'momentum-pulse': 'momentumPulse 2s ease-in-out infinite',
@@ -137,6 +140,20 @@ module.exports = {
         slideDown: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        expand: {
+          '0%': { maxHeight: '0', opacity: '0' },
+          '100%': { maxHeight: '500px', opacity: '1' },
+        },
+        collapse: {
+          '0%': { maxHeight: '500px', opacity: '1' },
+          '100%': { maxHeight: '0', opacity: '0' },
+        },
+        checkBounce: {
+          '0%': { transform: 'scale(1)' },
+          '40%': { transform: 'scale(1.3)' },
+          '60%': { transform: 'scale(0.9)' },
+          '100%': { transform: 'scale(1)' },
         },
         waveFlow: {
           '0%': { transform: 'translateX(-10px)' },

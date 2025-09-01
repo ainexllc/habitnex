@@ -13,6 +13,7 @@ import { FamilyCreationBanner } from '@/components/ui/FamilyCreationBanner';
 import { DashboardViewSwitcher } from '@/components/dashboard/DashboardViewSwitcher';
 import { FocusView } from '@/components/dashboard/FocusView';
 import { CompactView } from '@/components/dashboard/CompactView';
+import { SummaryView } from '@/components/dashboard/SummaryView';
 import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
@@ -238,14 +239,21 @@ export default function DashboardPage() {
               <div className="space-y-8">
                 {/* Dynamic View Rendering */}
                 {currentView === DashboardViewType.FOCUS && (
-                  <FocusView 
+                  <FocusView
                     habits={habits}
                     onEdit={(habit) => setEditingHabit(habit)}
                   />
                 )}
-                
+
+                {currentView === DashboardViewType.SUMMARY && (
+                  <SummaryView
+                    habits={habits}
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                )}
+
                 {currentView === DashboardViewType.COMPACT && (
-                  <CompactView 
+                  <CompactView
                     habits={habits}
                     onEdit={(habit) => setEditingHabit(habit)}
                   />

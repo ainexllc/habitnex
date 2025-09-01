@@ -45,7 +45,7 @@ This file contains important configuration and setup information for this projec
 - `firebase deploy --only firestore:indexes` - Deploy indexes directly
 
 ### Build & Deploy
-- `npm run dev` - Development server (runs on port 3001)
+- `npm run dev` - Development server
 - `npm run dev:safe` - Safe development with scripts
 - `npm run dev:clean` - Clean cache and start dev server
 - `npm run build` - Production build (static export)
@@ -79,8 +79,8 @@ This file contains important configuration and setup information for this projec
 - **Local Method**: Popup (works immediately, no CORS issues)
 - **Production Method**: Redirect (better for mobile, SEO-friendly)
 - **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app
-- **Redirect URIs**: 
-  - http://localhost:3001/__/auth/handler (updated port)
+- **Redirect URIs**:
+  - http://localhost:3000/__/auth/handler (default Next.js port)
   - https://habittracker-eb6bd.firebaseapp.com/__/auth/handler
   - https://nextvibe.app/__/auth/handler
 
@@ -762,7 +762,7 @@ vercel rollback <url>    # Rollback deployment
 - Progressive Web App (PWA) capabilities
 
 ### Development Environment ⚙️
-- **Port**: Development server runs on 3001 (to avoid conflicts)
+- **Port**: Development server runs on default Next.js port (usually 3000)
 - **Build**: Static export disabled, API routes enabled
 - **Testing**: Playwright integrated with comprehensive test suite
 - **AI**: Claude Haiku integration with cost tracking and rate limiting

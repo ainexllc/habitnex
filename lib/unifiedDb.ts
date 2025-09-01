@@ -144,16 +144,34 @@ export const createHabit = async (userId: string, habitData: Omit<Habit, 'id' | 
     const familyHabitsRef = collection(db, 'families', context.familyId, 'habits');
     
     const familyHabitData: Omit<FamilyHabit, 'id'> = {
-      ...habitData,
       familyId: context.familyId,
-      createdBy: context.memberId,
+      name: habitData.name, // Explicitly map name field
+      description: habitData.description,
+      emoji: '✅', // Default emoji since Habit doesn't have this field
+      color: habitData.color,
+      tags: habitData.tags || [],
       assignedMembers: [context.memberId],
+      isShared: false, // Default to individual habit
+      createdBy: context.memberId,
+      frequency: habitData.frequency,
+      targetDays: habitData.targetDays,
+      intervalDays: habitData.intervalDays,
+      startDate: habitData.startDate,
+      difficulty: 'medium', // Default difficulty
+      basePoints: 10, // Default points
+      linkedRewards: [],
+      milestoneRewards: [],
       isActive: true,
-      isArchived: false,
+      isArchived: habitData.isArchived,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-      milestoneRewards: [],
-      linkedRewards: []
+      // AI enhancement fields
+      aiEnhanced: habitData.aiEnhanced,
+      tip: habitData.tip,
+      healthBenefits: habitData.healthBenefits,
+      mentalBenefits: habitData.mentalBenefits,
+      longTermBenefits: habitData.longTermBenefits,
+      complementary: habitData.complementary
     };
     
     const docRef = await addDoc(familyHabitsRef, familyHabitData);
@@ -184,14 +202,17 @@ export const getUserHabits = async (userId: string): Promise<Habit[]> => {
       // Convert family habit to individual habit format for compatibility
       return {
         id: doc.id,
-        title: data.title,
+        name: data.name, // Both FamilyHabit and Habit use 'name' field
         description: data.description,
-        category: data.category,
+        tags: data.tags || [], // Use tags directly if available
         frequency: data.frequency,
         targetDays: data.targetDays,
-        completionGoal: data.completionGoal,
+        intervalDays: data.intervalDays,
+        startDate: data.startDate,
+        reminderTime: undefined, // FamilyHabit doesn't have reminderTime for habits
+        reminderType: undefined, // FamilyHabit doesn't have reminderType
+        goal: undefined, // FamilyHabit doesn't have completionGoal field
         color: data.color,
-        icon: data.icon,
         isArchived: data.isArchived,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,

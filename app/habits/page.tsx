@@ -7,6 +7,7 @@ import { HabitCard } from '@/components/habits/HabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { CreateHabitModal } from '@/components/habits/CreateHabitModal';
 import { ViewSwitcher } from '@/components/habits/ViewSwitcher';
+import { HabitListOptimized } from '@/components/habits/HabitListOptimized';
 import { ListView } from '@/components/habits/views/ListView';
 import { CalendarView } from '@/components/habits/views/CalendarView';
 import { TableView } from '@/components/habits/views/TableView';
@@ -31,7 +32,7 @@ export default function HabitsPage() {
   const [selectedTag, setSelectedTag] = useState('');
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
-  const [currentView, setCurrentView] = useState<HabitViewType>(HabitViewType.GRID);
+  const [currentView, setCurrentView] = useState<HabitViewType>(HabitViewType.COMPACT);
 
   // Load preferred view from localStorage
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function HabitsPage() {
                 <ViewSwitcher
                   currentView={currentView}
                   onViewChange={setCurrentView}
-                  enabledViews={[HabitViewType.GRID, HabitViewType.LIST, HabitViewType.CALENDAR, HabitViewType.TABLE, HabitViewType.HEATMAP, HabitViewType.AI_COACH, HabitViewType.MOMENTUM, HabitViewType.TIMELINE]}
+                  enabledViews={[HabitViewType.COMPACT, HabitViewType.GRID, HabitViewType.LIST, HabitViewType.CALENDAR, HabitViewType.TABLE, HabitViewType.HEATMAP, HabitViewType.AI_COACH, HabitViewType.MOMENTUM, HabitViewType.TIMELINE]}
                 />
               </div>
             </div>
@@ -186,7 +187,12 @@ export default function HabitsPage() {
                 </div>
                 
 {/* Conditional View Rendering */}
-                {currentView === HabitViewType.GRID ? (
+                {currentView === HabitViewType.COMPACT ? (
+                  <HabitListOptimized 
+                    habits={filteredHabits} 
+                    onEdit={(habit) => setEditingHabit(habit)}
+                  />
+                ) : currentView === HabitViewType.GRID ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredHabits.map((habit) => (
                       <HabitCard 
