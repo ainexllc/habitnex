@@ -164,10 +164,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Motivational Card and Mood Bar Side-by-Side */}
+                              {/* Motivational Card and Mood Bar Side-by-Side - Desktop Only */}
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            {/* Compact Motivational Card */}
-            <div className={`${theme.surface.primary} rounded-lg p-4 border ${theme.border.default} shadow-md hover:shadow-lg transition-all duration-300 flex-1`}>
+            {/* Compact Motivational Card - Hidden on Mobile */}
+            <div className={`hidden md:flex ${theme.surface.primary} rounded-lg p-4 border ${theme.border.default} shadow-md hover:shadow-lg transition-all duration-300 flex-1`}>
               <div className="flex items-center justify-between gap-4">
                 {/* Left side - Flame icon and motivation */}
                 <div className="flex items-center gap-3">
@@ -210,7 +210,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Mood Bar */}
+            {/* Mood Bar - Always visible */}
             <div className="flex-shrink-0 lg:w-80">
               <MoodBar />
             </div>
