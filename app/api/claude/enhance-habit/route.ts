@@ -166,7 +166,10 @@ export async function POST(req: NextRequest) {
       // Clean up the response in case there's any extra text
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       let jsonText = jsonMatch ? jsonMatch[0] : responseText;
-      
+
+      console.log('Raw AI response text:', responseText);
+      console.log('Extracted JSON text:', jsonText);
+
       // Clean up common JSON issues
       jsonText = jsonText
         .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
@@ -174,6 +177,15 @@ export async function POST(req: NextRequest) {
         .replace(/\r/g, '\\r') // Escape carriage returns
         .replace(/\t/g, '\\t') // Escape tabs
         .trim();
+
+      // Fix specific Claude response formatting issues
+      // Handle malformed enhancedDescription with embedded quotes
+      jsonText = jsonText
+        .replace(/"enhancedDescription":\s*"[^"]*"description":\s*"([^"]*)"[^"]*",/g, '"enhancedDescription": "$1",')
+        .replace(/"enhancedDescription":\s*""description":\s*"([^"]*)"[^"]*",/g, '"enhancedDescription": "$1",')
+        .replace(/"enhancedDescription":\s*"[^"]*:\s*"([^"]*)"[^"]*",/g, '"enhancedDescription": "$1",');
+
+      console.log('Cleaned JSON text:', jsonText);
 
       // Check if JSON appears to be truncated
       if (!jsonText.endsWith('}')) {
@@ -188,7 +200,7 @@ export async function POST(req: NextRequest) {
       if (jsonText.includes(',\n  }')) {
         jsonText = jsonText.replace(/,\n  }/g, '\n}');
       }
-      
+
       enhancement = JSON.parse(jsonText);
       
       // Validate required fields
@@ -200,26 +212,49 @@ export async function POST(req: NextRequest) {
     } catch (parseError) {
       console.error('Failed to parse Claude response:', responseText);
       console.error('Parse error:', parseError);
-      
-      // Try to extract a simpler response if JSON parsing fails
+
+      // Try alternative parsing approaches
       try {
+        // Try to parse with a more lenient approach
+        let fixedJsonText = jsonText;
+
+        // Remove any trailing commas before closing braces
+        fixedJsonText = fixedJsonText.replace(/,(\s*[}\]])/g, '$1');
+
+        // Fix unescaped quotes in strings
+        fixedJsonText = fixedJsonText.replace(/([^\\])"([^"]*)"([^,}\]]*[^\\])"([^"]*)"([^,}\]]*)/g, '$1"$2$3\\"$4\\"$5"');
+
+        // Try parsing again
+        try {
+          enhancement = JSON.parse(fixedJsonText);
+          console.log('Successfully parsed with alternative method');
+        } catch (secondParseError) {
+          console.error('Alternative parsing also failed:', secondParseError);
+          throw secondParseError;
+        }
+
+      } catch (alternativeParseError) {
+        console.error('All parsing methods failed, using fallback');
+
         // Fallback: create a basic enhancement from the response text
-        const lines = responseText.split('\n').filter(line => line.trim());
-        enhancement = {
-          title: habitName,
-          description: `Build the habit of ${habitName.toLowerCase()}`,
-          enhancedDescription: lines.find(line => line.length > 50)?.substring(0, 200) || `Develop a consistent ${habitName.toLowerCase()} routine`,
-          healthBenefits: 'Contributes to overall wellness and health improvement',
-          mentalBenefits: 'Helps build discipline and positive mindset',
-          longTermBenefits: 'Creates lasting positive changes in your lifestyle',
-          difficulty: 'medium' as const,
-          tip: `Start small and be consistent with your ${habitName.toLowerCase()} practice`,
-          complementary: ['Stay consistent', 'Track your progress', 'Celebrate small wins']
-        };
-        
-        console.log('Using fallback enhancement due to JSON parse error');
-      } catch (fallbackError) {
-        throw new Error('Invalid response format from AI. Please try again.');
+        try {
+          const lines = responseText.split('\n').filter(line => line.trim());
+          enhancement = {
+            title: habitName,
+            description: `Build the habit of ${habitName.toLowerCase()}`,
+            enhancedDescription: lines.find(line => line.length > 50)?.substring(0, 200) || `Develop a consistent ${habitName.toLowerCase()} routine`,
+            healthBenefits: 'Contributes to overall wellness and health improvement',
+            mentalBenefits: 'Helps build discipline and positive mindset',
+            longTermBenefits: 'Creates lasting positive changes in your lifestyle',
+            difficulty: 'medium' as const,
+            tip: `Start small and be consistent with your ${habitName.toLowerCase()} practice`,
+            complementary: ['Stay consistent', 'Track your progress', 'Celebrate small wins']
+          };
+
+          console.log('Using fallback enhancement due to JSON parse error');
+        } catch (fallbackError) {
+          throw new Error('Invalid response format from AI. Please try again.');
+        }
       }
     }
     
