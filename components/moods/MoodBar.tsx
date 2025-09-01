@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { MoodForm } from '@/components/moods/MoodForm';
+import { MoodModal } from '@/components/moods/MoodModal';
 import { MoodEditModal } from '@/components/moods/MoodEditModal';
 import { useMoods } from '@/hooks/useMoods';
 import { getTodayDateString } from '@/lib/utils';
@@ -15,7 +15,7 @@ interface MoodBarProps {
 
 export function MoodBar({ className = '' }: MoodBarProps) {
   const { moods, addMood, editMood, getTodayMood, loading } = useMoods();
-  const [showMoodForm, setShowMoodForm] = useState(false);
+  const [showMoodModal, setShowMoodModal] = useState(false);
   const [editingMood, setEditingMood] = useState<MoodEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
@@ -48,9 +48,10 @@ export function MoodBar({ className = '' }: MoodBarProps) {
   const handleMoodSubmit = async (moodData: any) => {
     try {
       await addMood(moodData);
-      setShowMoodForm(false);
+      console.log('Mood saved successfully');
     } catch (error) {
       console.error('Failed to save mood:', error);
+      throw error; // Let the modal handle the error
     }
   };
 
@@ -71,31 +72,6 @@ export function MoodBar({ className = '' }: MoodBarProps) {
       throw error;
     }
   };
-
-  if (showMoodForm) {
-    return (
-      <div className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-text-primary-light dark:text-text-primary-dark">
-            How are you feeling today?
-          </h3>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowMoodForm(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-        <MoodForm 
-          onSubmit={handleMoodSubmit}
-          loading={loading}
-          date={getTodayDateString()}
-          compact={true}
-        />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -153,7 +129,7 @@ export function MoodBar({ className = '' }: MoodBarProps) {
             ) : (
               <Button 
                 size="sm" 
-                onClick={() => setShowMoodForm(true)}
+                onClick={() => setShowMoodModal(true)}
                 className="bg-primary-600 hover:bg-primary-700 text-white"
               >
                 <Plus className="w-4 h-4 mr-1" />
@@ -163,6 +139,15 @@ export function MoodBar({ className = '' }: MoodBarProps) {
           </div>
         </div>
       </div>
+
+      {/* Mood Creation Modal */}
+      <MoodModal
+        isOpen={showMoodModal}
+        onClose={() => setShowMoodModal(false)}
+        onSubmit={handleMoodSubmit}
+        loading={loading}
+        date={getTodayDateString()}
+      />
 
       {/* Edit Modal */}
       <MoodEditModal

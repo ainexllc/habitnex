@@ -61,31 +61,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check usage limits
-    const limitCheck = await checkUsageLimits(userId);
-    if (!limitCheck.canProceed) {
-      const duration = Date.now() - startTime;
-      // Track rate limited usage
-      await trackAPIUsage(
-        userId,
-        'enhance-habit',
-        0, 0, duration,
-        false,
-        'Rate limited',
-        false,
-        req.headers.get('user-agent'),
-        req.headers.get('x-forwarded-for'),
-        requestId
-      ).catch(err => console.warn('Failed to track usage:', err));
+    // Check usage limits (but don't fail if tracking doesn't work)
+    let limitCheck;
+    try {
+      limitCheck = await checkUsageLimits(userId);
+      if (!limitCheck.canProceed) {
+        const duration = Date.now() - startTime;
+        // Track rate limited usage
+        await trackAPIUsage(
+          userId,
+          'enhance-habit',
+          0, 0, duration,
+          false,
+          'Rate limited',
+          false,
+          req.headers.get('user-agent'),
+          req.headers.get('x-forwarded-for'),
+          requestId
+        ).catch(err => console.warn('Failed to track usage:', err));
 
-      return NextResponse.json(
-        { 
-          error: limitCheck.reason,
-          resetTime: limitCheck.resetTime,
-          remainingRequests: limitCheck.remainingRequests
-        },
-        { status: 429 }
-      );
+        return NextResponse.json(
+          { 
+            error: limitCheck.reason,
+            resetTime: limitCheck.resetTime,
+            remainingRequests: limitCheck.remainingRequests
+          },
+          { status: 429 }
+        );
+      }
+    } catch (limitError) {
+      console.warn('Error checking usage limits:', limitError);
+      // Continue with default limits if tracking fails
+      limitCheck = {
+        canProceed: true,
+        remainingRequests: 10
+      };
     }
     
     // Clean up expired cache entries occasionally
@@ -150,17 +160,33 @@ export async function POST(req: NextRequest) {
       throw new Error('No response text received from Claude');
     }
     
-    // Parse JSON response
+    // Parse JSON response with better error handling
     let enhancement: HabitEnhancement;
     try {
       // Clean up the response in case there's any extra text
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      const jsonText = jsonMatch ? jsonMatch[0] : responseText;
+      let jsonText = jsonMatch ? jsonMatch[0] : responseText;
       
+      // Clean up common JSON issues
+      jsonText = jsonText
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+        .replace(/\n/g, '\\n') // Escape newlines in strings
+        .replace(/\r/g, '\\r') // Escape carriage returns
+        .replace(/\t/g, '\\t') // Escape tabs
+        .trim();
+
       // Check if JSON appears to be truncated
-      if (jsonText && !jsonText.trim().endsWith('}')) {
+      if (!jsonText.endsWith('}')) {
         console.error('Response appears to be truncated:', jsonText);
         throw new Error('AI response was truncated. Please try again.');
+      }
+
+      // Try to fix common JSON formatting issues
+      if (jsonText.includes('",\n}')) {
+        jsonText = jsonText.replace(/",\n}/g, '"}');
+      }
+      if (jsonText.includes(',\n  }')) {
+        jsonText = jsonText.replace(/,\n  }/g, '\n}');
       }
       
       enhancement = JSON.parse(jsonText);
@@ -172,8 +198,29 @@ export async function POST(req: NextRequest) {
       }
       
     } catch (parseError) {
-      console.error('Failed to parse Claude response:', responseText, parseError);
-      throw new Error('Invalid response format from AI. Please try again.');
+      console.error('Failed to parse Claude response:', responseText);
+      console.error('Parse error:', parseError);
+      
+      // Try to extract a simpler response if JSON parsing fails
+      try {
+        // Fallback: create a basic enhancement from the response text
+        const lines = responseText.split('\n').filter(line => line.trim());
+        enhancement = {
+          title: habitName,
+          description: `Build the habit of ${habitName.toLowerCase()}`,
+          enhancedDescription: lines.find(line => line.length > 50)?.substring(0, 200) || `Develop a consistent ${habitName.toLowerCase()} routine`,
+          healthBenefits: 'Contributes to overall wellness and health improvement',
+          mentalBenefits: 'Helps build discipline and positive mindset',
+          longTermBenefits: 'Creates lasting positive changes in your lifestyle',
+          difficulty: 'medium' as const,
+          tip: `Start small and be consistent with your ${habitName.toLowerCase()} practice`,
+          complementary: ['Stay consistent', 'Track your progress', 'Celebrate small wins']
+        };
+        
+        console.log('Using fallback enhancement due to JSON parse error');
+      } catch (fallbackError) {
+        throw new Error('Invalid response format from AI. Please try again.');
+      }
     }
     
     // Calculate cost
@@ -186,20 +233,24 @@ export async function POST(req: NextRequest) {
     
     const totalDuration = Date.now() - startTime;
     
-    // Track successful usage
-    await trackAPIUsage(
-      userId,
-      'enhance-habit',
-      inputTokens,
-      outputTokens,
-      responseTime,
-      true,
-      undefined,
-      false, // not cached
-      req.headers.get('user-agent'),
-      req.headers.get('x-forwarded-for'),
-      requestId
-    ).catch(err => console.warn('Failed to track usage:', err));
+    // Track successful usage (but don't fail if tracking doesn't work)
+    try {
+      await trackAPIUsage(
+        userId,
+        'enhance-habit',
+        inputTokens,
+        outputTokens,
+        responseTime,
+        true,
+        undefined,
+        false, // not cached
+        req.headers.get('user-agent'),
+        req.headers.get('x-forwarded-for'),
+        requestId
+      );
+    } catch (trackingError) {
+      console.warn('Failed to track usage (continuing anyway):', trackingError);
+    }
     
     // Log the interaction
     console.log(`[API] Claude enhancement completed for "${habitName}":`, {

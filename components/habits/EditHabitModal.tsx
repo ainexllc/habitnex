@@ -50,6 +50,8 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
       setLoading(true);
       await editHabit(habit.id, data);
       console.log('Edit submitted successfully');
+      
+      // Close modal immediately since the UI is already updated optimistically
       onClose();
     } catch (error) {
       console.error('Failed to update habit:', error);

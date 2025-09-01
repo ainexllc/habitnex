@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { Habit } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { 
-  Check, 
-  Edit, 
-  Trash2, 
-  Target, 
-  Clock, 
+import {
+  Check,
+  Edit,
+  Trash2,
+  Target,
+  Clock,
   Calendar,
   Heart,
   Brain,
@@ -19,7 +19,9 @@ import {
   ChevronUp,
   Zap,
   Award,
-  Timer
+  Timer,
+  Sparkles,
+  Flame
 } from 'lucide-react';
 import { useHabits } from '@/hooks/useHabits';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
@@ -42,7 +44,11 @@ interface BenefitsHabitCardProps {
 
 export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHabitCardProps) {
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  
+  // Check if habit has AI enhancement data for showing expand button
+  const hasAIBenefits = !!(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.tip);
+  const [expanded, setExpanded] = useState(false); // Always start collapsed
+  
   const { isHabitCompleted, toggleCompletion, completions, removeHabit } = useHabits();
   const { timeFormatPreferences } = useUserPreferences();
   
@@ -78,9 +84,15 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this habit?')) {
       try {
+        setLoading(true);
         await removeHabit(habit.id);
+        // The habit will be removed from the list automatically
+        // when the habits state is updated in the useHabits hook
       } catch (error) {
         console.error('Failed to delete habit:', error);
+        // You could add a toast notification here for better UX
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -107,81 +119,162 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   };
 
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 ${getStatusColor()}`}>
-      <CardHeader className="pb-2">
+          <Card className={`group hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 ${getStatusColor()} border-2 relative`}>
+      {/* Permanent gradient overlay - always visible */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/30 to-transparent opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+      {/* Enhanced gradient overlay for hover effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-50/20 via-purple-50/20 to-pink-50/20 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+      {/* Top motivational badge */}
+      {!isCompleted && currentStreak > 0 && (
+        <div className="absolute -top-2 left-4 z-20">
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+            <Flame className="w-3 h-3" />
+            {currentStreak} Day Streak!
+          </div>
+        </div>
+      )}
+
+      {/* Completion celebration overlay */}
+      {isCompleted && (
+        <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-blue-500/10 rounded-xl pointer-events-none">
+          <div className="absolute top-2 right-2">
+            <div className="bg-green-500 text-white rounded-full p-1 shadow-lg">
+              <Check className="w-3 h-3" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CardHeader className="pb-3 relative">
         {/* Top Row: Title, Status, Actions */}
         <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-3 flex-1 min-w-0">
-            <div
-              className="w-5 h-5 rounded-full flex-shrink-0 mt-0.5 border-2 border-white shadow-sm"
-              style={{ backgroundColor: habit.color }}
-            />
-            <div className="flex-1 min-w-0">
-              <h3 className={`task-title text-base font-task-title truncate transition-all duration-300 ${
-                isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'
+          <div className="flex items-start flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pl-4 pt-2">
+              <h3 className={`task-title text-lg font-bold truncate transition-all duration-300 mt-2 ${
+                isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300'
               }`} title={habit.name}>
                 {habit.name}
               </h3>
               {habit.description && (
-                <p className={`task-description text-sm font-task-description mt-1 transition-all duration-300 ${
-                  isCompleted 
-                    ? 'line-through text-gray-500 dark:text-gray-400' 
-                    : 'text-gray-600 dark:text-gray-300'
+                <p className={`task-description text-sm mt-2 transition-all duration-300 ${
+                  isCompleted
+                    ? 'line-through text-gray-500 dark:text-gray-400'
+                    : 'text-gray-600 dark:text-gray-300 group-hover:text-gray-700 dark:group-hover:text-gray-200'
                 }`}>
                   {habit.description}
                 </p>
               )}
             </div>
           </div>
-          
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-1 flex-shrink-0">
-            <Button variant="ghost" size="sm" onClick={handleEdit}>
+
+          {/* Enhanced Action Buttons */}
+          <div className="flex items-center space-x-3 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleEdit}
+              className="p-3 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg"
+            >
               <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleDelete}>
-              <Trash2 className="w-4 h-4 text-error-500" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              disabled={loading}
+              className="p-3 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50 rounded-lg"
+            >
+              {loading ? (
+                <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
             </Button>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-4 mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-          <div className="text-center">
-            <div className={`text-xl font-bold ${getStreakColor()}`}>
-              {currentStreak}
+        {/* Enhanced Stats Row */}
+        <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-r from-gray-50/50 to-blue-50/30 dark:from-gray-800/50 dark:to-blue-900/20 rounded-lg p-4 -mx-2 relative overflow-hidden">
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-16 h-16 bg-purple-500 rounded-full blur-xl"></div>
+          </div>
+
+          <div className="text-center group/stat relative z-10">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <div className={`text-2xl font-bold transition-all duration-300 ${getStreakColor()} group-hover/stat:scale-110`}>
+                {currentStreak}
+              </div>
+              {currentStreak > 0 && (
+                <div className="flex gap-0.5">
+                  {[...Array(Math.min(currentStreak, 5))].map((_, i) => (
+                    <div key={i} className={`w-1.5 h-1.5 rounded-full ${getStreakColor().includes('purple') ? 'bg-purple-400' : getStreakColor().includes('green') ? 'bg-green-400' : getStreakColor().includes('blue') ? 'bg-blue-400' : 'bg-orange-400'} animate-pulse`} style={{ animationDelay: `${i * 100}ms` }}></div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Day Streak
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center justify-center gap-1">
+              🔥 <span>Day Streak</span>
             </div>
           </div>
-          
-          <div className="text-center">
-            <div className={`text-xl font-bold ${getCompletionColor()}`}>
-              {completionRate}%
+
+          <div className="text-center group/stat relative z-10">
+            <div className="relative mb-1">
+              <div className={`text-2xl font-bold transition-all duration-300 ${getCompletionColor()} group-hover/stat:scale-110`}>
+                {completionRate}%
+              </div>
+              {/* Mini progress ring */}
+              <div className="absolute -top-1 -right-2 w-6 h-6">
+                <svg className="w-6 h-6 transform -rotate-90" viewBox="0 0 24 24">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="transparent"
+                    className="text-gray-200 dark:text-gray-700"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="transparent"
+                    strokeDasharray={`${2 * Math.PI * 10}`}
+                    strokeDashoffset={`${2 * Math.PI * 10 * (1 - completionRate / 100)}`}
+                    className={`${getCompletionColor()} transition-all duration-1000`}
+                  />
+                </svg>
+              </div>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Success Rate
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center justify-center gap-1">
+              📊 <span>Success Rate</span>
             </div>
           </div>
-          
-          <div className="text-center">
+
+          <div className="text-center group/stat relative z-10">
             {habit.goal ? (
               <>
-                <div className="text-xl font-bold text-primary-600 dark:text-primary-400">
+                <div className="text-2xl font-bold mb-1 text-primary-600 dark:text-primary-400 transition-all duration-300 group-hover/stat:scale-110 flex items-center justify-center gap-1">
+                  <Target className="w-4 h-4" />
                   {habit.goal.target}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {habit.goal.period} goal
+                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  {habit.goal.period} Goal
                 </div>
               </>
             ) : (
               <>
-                <div className="text-xl font-bold text-gray-400 dark:text-gray-500">
-                  —
+                <div className="text-2xl font-bold mb-1 text-gray-400 dark:text-gray-500 transition-all duration-300 group-hover/stat:scale-110 flex items-center justify-center gap-1">
+                  <Sparkles className="w-4 h-4" />
+                  ∞
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  No goal
+                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Ongoing Journey
                 </div>
               </>
             )}
@@ -190,72 +283,120 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
       </CardHeader>
 
       <CardContent className="pt-0">
-        {/* Benefits Preview */}
-        <div className="space-y-2 mb-4">
-          {habit.healthBenefits && (
-            <div className="flex items-start space-x-2">
-              <Heart className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">
-                <span className="font-medium text-red-600 dark:text-red-400">Health:</span> {habit.healthBenefits}
-              </p>
-            </div>
-          )}
-          
-          {habit.mentalBenefits && (
-            <div className="flex items-start space-x-2">
-              <Brain className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">
-                <span className="font-medium text-blue-600 dark:text-blue-400">Mental:</span> {habit.mentalBenefits}
-              </p>
-            </div>
-          )}
-          
-          {expanded && habit.longTermBenefits && (
-            <div className="flex items-start space-x-2">
-              <TrendingUp className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-700 dark:text-gray-200">
-                <span className="font-medium text-green-600 dark:text-green-400">Long-term:</span> {habit.longTermBenefits}
-              </p>
-            </div>
-          )}
-          
-          {expanded && habit.tip && (
-            <div className="flex items-start space-x-2">
-              <Lightbulb className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-700 dark:text-gray-200">
-                <span className="font-medium text-yellow-600 dark:text-yellow-400">Tip:</span> {habit.tip}
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Enhanced Benefits Preview - Only show when expanded */}
+        {expanded && (
+          <div className="space-y-3 mb-4 animate-in slide-in-from-top duration-300">
+            {habit.healthBenefits && (
+              <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-red-50/90 to-pink-50/90 dark:from-red-950/40 dark:to-pink-950/40 rounded-xl border border-red-200/60 dark:border-red-800/60 hover:shadow-md transition-all duration-300 group/benefit">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/60 dark:to-pink-900/60 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover/benefit:scale-110 transition-transform duration-300">
+                  <Heart className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-bold text-red-700 dark:text-red-300">💪 Health Benefits</p>
+                    <div className="h-1 flex-1 bg-gradient-to-r from-red-200 to-pink-200 dark:from-red-800 dark:to-pink-800 rounded-full">
+                      <div className="h-1 bg-gradient-to-r from-red-500 to-pink-500 rounded-full w-3/4"></div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                    {habit.healthBenefits}
+                  </p>
+                </div>
+              </div>
+            )}
 
-        {/* Expand/Collapse Button */}
-        {(habit.longTermBenefits || habit.tip) && (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="w-full flex items-center justify-center space-x-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 py-2 border-t border-gray-200 dark:border-gray-600"
-          >
-            <span>{expanded ? 'Show Less' : 'Show More Benefits'}</span>
-            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+            {habit.mentalBenefits && (
+              <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-blue-50/90 to-cyan-50/90 dark:from-blue-950/40 dark:to-cyan-950/40 rounded-xl border border-blue-200/60 dark:border-blue-800/60 hover:shadow-md transition-all duration-300 group/benefit">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/60 dark:to-cyan-900/60 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover/benefit:scale-110 transition-transform duration-300">
+                  <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-bold text-blue-700 dark:text-blue-300">🧠 Mental Benefits</p>
+                    <div className="h-1 flex-1 bg-gradient-to-r from-blue-200 to-cyan-200 dark:from-blue-800 dark:to-cyan-800 rounded-full">
+                      <div className="h-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full w-4/5"></div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                    {habit.mentalBenefits}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {habit.longTermBenefits && (
+              <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-green-50/90 to-emerald-50/90 dark:from-green-950/40 dark:to-emerald-950/40 rounded-xl border border-green-200/60 dark:border-green-800/60 hover:shadow-md transition-all duration-300 group/benefit">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/60 dark:to-emerald-900/60 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover/benefit:scale-110 transition-transform duration-300">
+                  <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-bold text-green-700 dark:text-green-300">🚀 Long-term Impact</p>
+                    <div className="h-1 flex-1 bg-gradient-to-r from-green-200 to-emerald-200 dark:from-green-800 dark:to-emerald-800 rounded-full">
+                      <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full w-2/3"></div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                    {habit.longTermBenefits}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {habit.tip && (
+              <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-yellow-50/90 to-orange-50/90 dark:from-yellow-950/40 dark:to-orange-950/40 rounded-xl border border-yellow-200/60 dark:border-yellow-800/60 hover:shadow-md transition-all duration-300 group/benefit">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/60 dark:to-orange-900/60 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover/benefit:scale-110 transition-transform duration-300">
+                  <Lightbulb className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">💡 Pro Tip</p>
+                    <div className="h-1 flex-1 bg-gradient-to-r from-yellow-200 to-orange-200 dark:from-yellow-800 dark:to-orange-800 rounded-full">
+                      <div className="h-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full w-5/6"></div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                    {habit.tip}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
-        {/* Bottom Action Area */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-          {/* Schedule Info */}
+        {/* Enhanced Expand/Collapse Button - Always show if there are benefits */}
+        {(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.tip) && (
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center justify-center space-x-2 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 px-4 py-2 border border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-r from-primary-50/80 to-blue-50/80 dark:from-primary-950/30 dark:to-blue-950/30 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105"
+            >
+              <span className="font-medium">{expanded ? 'Hide Benefits' : 'View Benefits'}</span>
+              <div className={`transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
+                {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Enhanced Bottom Action Area */}
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-r from-gray-50/30 to-transparent dark:from-gray-800/30 rounded-lg p-4 -mx-2 -mb-2">
+          {/* Schedule Info with enhanced styling */}
           <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
             {isDueToday || isOverdue ? (
-              <div className="flex items-center space-x-1">
-                <Clock className="w-4 h-4" />
-                <span>{isOverdue ? 'Overdue' : 'Due Today'}</span>
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-full">
+                <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="font-medium text-blue-700 dark:text-blue-300">
+                  {isOverdue ? 'Overdue' : 'Due Today'}
+                </span>
               </div>
             ) : (
-              <div className="flex items-center space-x-1">
-                <Calendar className="w-4 h-4" />
-                <span>
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-full">
+                <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <span className="text-gray-700 dark:text-gray-300">
                   {habit.frequency === 'interval' && nextDueDate
                     ? `Next: ${daysUntilDue === 0 ? 'Today' : `${daysUntilDue}d`}${
-                        habit.reminderTime 
+                        habit.reminderTime
                           ? ` (${formatTime(new Date(`1970-01-01T${habit.reminderTime}`), timeFormatPreferences.is24Hour)})`
                           : ''
                       }`
@@ -264,10 +405,10 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
                 </span>
               </div>
             )}
-            
+
             {habit.tags && habit.tags.length > 0 && (
               <div className="flex items-center space-x-1">
-                <span className="text-xs">
+                <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full font-medium">
                   #{habit.tags[0]}
                   {habit.tags.length > 1 && ` +${habit.tags.length - 1}`}
                 </span>
@@ -275,26 +416,29 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
             )}
           </div>
 
-          {/* Completion Button */}
+          {/* Enhanced Completion Button */}
           {isDueToday || isOverdue ? (
             <Button
               onClick={handleToggleCompletion}
               loading={loading}
               size="sm"
               variant={isCompleted ? "secondary" : "primary"}
-              className={`${
-                isCompleted 
-                  ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800' 
-                  : isOverdue 
-                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
-                  : ''
+              className={`group/btn relative overflow-hidden transition-all duration-300 hover:scale-105 ${
+                isCompleted
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg shadow-green-500/25'
+                  : isOverdue
+                  ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg shadow-red-500/25'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/25'
               }`}
             >
-              <Check className={`w-4 h-4 mr-2 ${isCompleted ? 'text-success-600 dark:text-success-400' : ''}`} />
-              {isCompleted ? 'Completed' : 'Mark Done'}
+              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+              <Check className={`w-4 h-4 mr-2 relative z-10 ${isCompleted ? 'text-white' : 'text-white'}`} />
+              <span className="relative z-10 font-medium">
+                {isCompleted ? 'Completed! 🎉' : 'Mark Done'}
+              </span>
             </Button>
           ) : (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500 dark:text-gray-400 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
               Not scheduled
             </div>
           )}

@@ -78,12 +78,24 @@ export function useHabits() {
 
     console.log('Editing habit:', habitId, 'with updates:', updates);
 
+    // Optimistic update - update UI immediately
+    const originalHabits = habits;
+    setHabits(prevHabits => 
+      prevHabits.map(habit => 
+        habit.id === habitId 
+          ? { ...habit, ...updates, updatedAt: new Date().toISOString() }
+          : habit
+      )
+    );
+
     try {
       await updateHabit(user.uid, habitId, updates);
-      await fetchHabits(); // Refresh the list
       console.log('Habit updated successfully');
+      // The UI is already updated, no need to refetch
     } catch (err) {
       console.error('Error updating habit:', err);
+      // Revert on error
+      setHabits(originalHabits);
       throw new Error('Failed to update habit');
     }
   };
@@ -91,11 +103,20 @@ export function useHabits() {
   const removeHabit = async (habitId: string) => {
     if (!user) return;
 
+    // Optimistic update - remove from UI immediately
+    const originalHabits = habits;
+    setHabits(prevHabits => prevHabits.filter(habit => habit.id !== habitId));
+
     try {
       await deleteHabit(user.uid, habitId);
-      await fetchHabits(); // Refresh the list
+      // Also remove related completions for cleaner state
+      setCompletions(prevCompletions => 
+        prevCompletions.filter(completion => completion.habitId !== habitId)
+      );
     } catch (err) {
       console.error('Error deleting habit:', err);
+      // Revert on error
+      setHabits(originalHabits);
       throw new Error('Failed to delete habit');
     }
   };
@@ -103,11 +124,41 @@ export function useHabits() {
   const toggleCompletion = async (habitId: string, date: string = getTodayDateString(), completed: boolean, notes?: string) => {
     if (!user) return;
 
+    // Optimistic update - update completions immediately
+    const originalCompletions = completions;
+    const existingCompletion = completions.find(c => c.habitId === habitId && c.date === date);
+    
+    if (existingCompletion) {
+      // Update existing completion
+      setCompletions(prevCompletions =>
+        prevCompletions.map(c =>
+          c.habitId === habitId && c.date === date
+            ? { ...c, completed, notes: notes || c.notes, updatedAt: new Date().toISOString() }
+            : c
+        )
+      );
+    } else {
+      // Create new completion
+      const newCompletion = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        habitId,
+        date,
+        completed,
+        notes: notes || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      setCompletions(prevCompletions => [...prevCompletions, newCompletion]);
+    }
+
     try {
       await toggleHabitCompletion(user.uid, habitId, date, completed, notes);
-      await fetchHabits(); // Refresh completions
+      // Refresh to get the actual completion data with real ID
+      await fetchHabits();
     } catch (err) {
       console.error('Error toggling completion:', err);
+      // Revert on error
+      setCompletions(originalCompletions);
       throw new Error('Failed to update completion');
     }
   };

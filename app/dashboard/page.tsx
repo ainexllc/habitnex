@@ -13,12 +13,12 @@ import { FamilyCreationBanner } from '@/components/ui/FamilyCreationBanner';
 import { DashboardViewSwitcher } from '@/components/dashboard/DashboardViewSwitcher';
 import { FocusView } from '@/components/dashboard/FocusView';
 import { CompactView } from '@/components/dashboard/CompactView';
-import { SummaryView } from '@/components/dashboard/SummaryView';
+
 import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { theme } from '@/lib/theme';
-import { Target, Plus, Users, Home } from 'lucide-react';
+import { Target, Plus, Users, Home, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Habit } from '@/types';
@@ -129,32 +129,45 @@ export default function DashboardPage() {
             onJoinFamily={handleJoinFamily}
           />
           
-          {/* Family Mode Active */}
+          {/* Compact Family Indicator */}
           {hasFamily && (
-            <Card className="mb-8 border-2 border-green-200 dark:border-green-700 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                      <Home className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent animate-pulse">{familyName}</h3>
-                      <p className="text-gray-600 dark:text-gray-300">Your family dashboard is ready!</p>
+            <div className="mb-6">
+              <Link href="/dashboard/family">
+                <div className="group relative inline-flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-purple-500/10 hover:from-emerald-500/20 hover:via-blue-500/20 hover:to-purple-500/20 border border-emerald-200/60 dark:border-emerald-700/60 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-105">
+                  {/* Animated border gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
+                  
+                  {/* Family icon with pulsing effect */}
+                  <div className="relative w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full flex items-center justify-center shadow-md">
+                    <Home className="w-4 h-4 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full animate-ping opacity-20"></div>
+                  </div>
+                  
+                  {/* Family name with gradient text */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 dark:from-emerald-400 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                      {familyName}
+                    </span>
+                    <div className="flex gap-1">
+                      <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>
+                      <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1 h-1 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                     </div>
                   </div>
-                  <Link href="/dashboard/family">
-                    <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
-                      <Users className="w-4 h-4 mr-2" />
-                      Family Dashboard
-                    </Button>
-                  </Link>
+                  
+                  {/* Family users icon */}
+                  <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-300" />
+                  
+                  {/* Hover tooltip */}
+                  <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                    Go to Family Dashboard
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </Link>
+            </div>
           )}
           
-          <div className="flex items-start justify-between mb-8">
+          <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
                 Dashboard
@@ -173,6 +186,43 @@ export default function DashboardPage() {
                     View All Habits
                   </Button>
                 </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Motivational Card */}
+          <div className={`${theme.surface.primary} rounded-xl p-6 border ${theme.border.default} shadow-lg hover:shadow-xl transition-all duration-300 mb-8`}>
+            <div className="text-center">
+              {/* Keep the Momentum Going Section */}
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <Flame className="w-7 h-7 text-white" />
+                </div>
+                <div className="text-center">
+                  <h4 className={`text-xl font-bold ${theme.text.primary} mb-1`}>Keep the Momentum Going!</h4>
+                  <div className="flex items-center justify-center gap-2 text-sm text-indigo-600 dark:text-indigo-400">
+                    <div className="flex gap-1">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 200}ms` }}></div>
+                      ))}
+                    </div>
+                    <span className="font-medium">You're on fire!</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className={`text-base ${theme.text.secondary} max-w-2xl mx-auto leading-relaxed mb-6`}>
+                Every habit completed is a victory. Stay consistent, celebrate your progress, and watch how these small actions transform your life.
+              </p>
+
+              {/* Inspirational quote */}
+              <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 backdrop-blur-sm border border-white/20 dark:border-gray-700/20 max-w-md mx-auto">
+                <p className={`text-sm italic ${theme.text.secondary} mb-2`}>
+                  "The journey of a thousand miles begins with a single step."
+                </p>
+                <p className={`text-xs ${theme.text.muted} text-right`}>
+                  - Lao Tzu
+                </p>
               </div>
             </div>
           </div>
@@ -245,12 +295,7 @@ export default function DashboardPage() {
                   />
                 )}
 
-                {currentView === DashboardViewType.SUMMARY && (
-                  <SummaryView
-                    habits={habits}
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                )}
+
 
                 {currentView === DashboardViewType.COMPACT && (
                   <CompactView

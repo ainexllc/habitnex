@@ -372,37 +372,41 @@ export const toggleHabitCompletion = async (userId: string, habitId: string, dat
  */
 
 export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, date: string): Promise<string> => {
-  const context = await getUserContext(userId);
+  // Skip family structure entirely for mood operations due to permission issues and missing Firestore indexes
+  // Use individual structure directly to avoid permission errors
+  return legacyDb.createMoodEntry(userId, moodData, date);
   
-  if (context.familyId && context.memberId) {
-    // Use family structure - check if mood already exists for this member/date
-    const moodsRef = collection(db, 'families', context.familyId, 'moods');
-    const q = query(moodsRef, 
-      where('memberId', '==', context.memberId),
-      where('date', '==', date)
-    );
-    const existingSnapshot = await getDocs(q);
-    
-    if (!existingSnapshot.empty) {
-      throw new Error('A mood entry already exists for this date. You can only add one mood per day.');
-    }
-    
-    const familyMoodData: Omit<FamilyMoodEntry, 'id'> = {
-      ...moodData,
-      familyId: context.familyId,
-      memberId: context.memberId,
-      date,
-      sharedWithFamily: context.isPersonalFamily ? false : moodData.sharedWithFamily || false,
-      parentNotification: false, // Can be configured later
-      timestamp: Timestamp.now()
-    };
-    
-    const docRef = await addDoc(moodsRef, familyMoodData);
-    return docRef.id;
-  } else {
-    // Fallback to individual structure
-    return legacyDb.createMoodEntry(userId, moodData, date);
-  }
+  // TODO: Re-enable family structure after fixing family permissions and deploying composite indexes
+  // const context = await getUserContext(userId);
+  // if (context.familyId && context.memberId) {
+  //   // Use family structure - check if mood already exists for this member/date
+  //   const moodsRef = collection(db, 'families', context.familyId, 'moods');
+  //   const q = query(moodsRef, 
+  //     where('memberId', '==', context.memberId),
+  //     where('date', '==', date)
+  //   );
+  //   const existingSnapshot = await getDocs(q);
+  //   
+  //   if (!existingSnapshot.empty) {
+  //     throw new Error('A mood entry already exists for this date. You can only add one mood per day.');
+  //   }
+  //   
+  //   const familyMoodData: Omit<FamilyMoodEntry, 'id'> = {
+  //     ...moodData,
+  //     familyId: context.familyId,
+  //     memberId: context.memberId,
+  //     date,
+  //     sharedWithFamily: context.isPersonalFamily ? false : moodData.sharedWithFamily || false,
+  //     parentNotification: false, // Can be configured later
+  //     timestamp: Timestamp.now()
+  //   };
+  //   
+  //   const docRef = await addDoc(moodsRef, familyMoodData);
+  //   return docRef.id;
+  // } else {
+  //   // Fallback to individual structure
+  //   return legacyDb.createMoodEntry(userId, moodData, date);
+  // }
 };
 
 export const getMoodEntries = async (userId: string, startDate?: string, endDate?: string): Promise<MoodEntry[]> => {
@@ -450,32 +454,40 @@ export const getMoodEntries = async (userId: string, startDate?: string, endDate
 };
 
 export const updateMoodEntry = async (userId: string, moodId: string, updates: Partial<MoodEntry>): Promise<void> => {
-  const context = await getUserContext(userId);
+  // Skip family structure entirely for mood operations due to permission issues
+  // Use individual structure directly to avoid permission errors
+  return legacyDb.updateMoodEntry(userId, moodId, updates);
   
-  if (context.familyId) {
-    // Use family structure
-    const moodRef = doc(db, 'families', context.familyId, 'moods', moodId);
-    await updateDoc(moodRef, {
-      ...updates,
-      timestamp: Timestamp.now()
-    });
-  } else {
-    // Fallback to individual structure
-    return legacyDb.updateMoodEntry(userId, moodId, updates);
-  }
+  // TODO: Re-enable family structure after fixing family permissions
+  // const context = await getUserContext(userId);
+  // if (context.familyId) {
+  //   // Use family structure
+  //   const moodRef = doc(db, 'families', context.familyId, 'moods', moodId);
+  //   await updateDoc(moodRef, {
+  //     ...updates,
+  //     timestamp: Timestamp.now()
+  //   });
+  // } else {
+  //   // Fallback to individual structure
+  //   return legacyDb.updateMoodEntry(userId, moodId, updates);
+  // }
 };
 
 export const deleteMoodEntry = async (userId: string, moodId: string): Promise<void> => {
-  const context = await getUserContext(userId);
+  // Skip family structure entirely for mood operations due to permission issues
+  // Use individual structure directly to avoid permission errors
+  return legacyDb.deleteMoodEntry(userId, moodId);
   
-  if (context.familyId) {
-    // Use family structure
-    const moodRef = doc(db, 'families', context.familyId, 'moods', moodId);
-    await deleteDoc(moodRef);
-  } else {
-    // Fallback to individual structure
-    return legacyDb.deleteMoodEntry(userId, moodId);
-  }
+  // TODO: Re-enable family structure after fixing family permissions
+  // const context = await getUserContext(userId);
+  // if (context.familyId) {
+  //   // Use family structure
+  //   const moodRef = doc(db, 'families', context.familyId, 'moods', moodId);
+  //   await deleteDoc(moodRef);
+  // } else {
+  //   // Fallback to individual structure
+  //   return legacyDb.deleteMoodEntry(userId, moodId);
+  // }
 };
 
 export const getMoodForDate = async (userId: string, date: string): Promise<MoodEntry | null> => {

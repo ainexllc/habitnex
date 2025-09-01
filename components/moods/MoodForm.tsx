@@ -111,9 +111,17 @@ export function MoodForm({ onSubmit, loading = false, initialData, date, compact
   const handleFormSubmit = (data: CreateMoodForm) => {
     const cleanedData = {
       ...data,
-      tags: selectedTags.length > 0 ? selectedTags : undefined,
     };
     
+    // Only include tags if there are any selected
+    if (selectedTags.length > 0) {
+      cleanedData.tags = selectedTags;
+    } else {
+      // Remove tags field entirely if no tags are selected
+      delete cleanedData.tags;
+    }
+    
+    // Remove notes field if empty
     if (!cleanedData.notes || cleanedData.notes.trim() === '') {
       delete cleanedData.notes;
     }

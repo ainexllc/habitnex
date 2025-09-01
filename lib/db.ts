@@ -276,8 +276,20 @@ export const createMoodEntry = async (userId: string, moodData: CreateMoodForm, 
 
     const moodRef = collection(db, 'users', userId, 'moods');
     
+    // Clean the data to remove undefined values that Firebase doesn't allow
+    const cleanedMoodData = Object.fromEntries(
+      Object.entries(moodData).filter(([key, value]) => {
+        // Keep false values and zeros but remove undefined, null, and empty strings
+        if (value === false || value === 0) return true;
+        if (value === undefined || value === null) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        return true;
+      })
+    );
+    
     const dataToWrite = {
-      ...moodData,
+      ...cleanedMoodData,
       date,
       timestamp: Timestamp.now()
     };
