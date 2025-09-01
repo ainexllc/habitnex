@@ -52,3 +52,7 @@ test-update-*.js
 
 # development temporary files  
 components/debug/
+# Investigation and debug scripts
+investigate_*.js
+check_user*.js
+.env.test
