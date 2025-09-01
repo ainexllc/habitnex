@@ -194,91 +194,54 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
           </div>
         </div>
 
-        {/* Enhanced Stats Row */}
-        <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-r from-gray-50/50 to-blue-50/30 dark:from-gray-800/50 dark:to-blue-900/20 rounded-lg p-4 -mx-2 relative overflow-hidden">
+        {/* Compact Stats Row */}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200/50 dark:border-gray-600/50 bg-gradient-to-r from-gray-50/40 to-blue-50/20 dark:from-gray-800/40 dark:to-blue-900/10 rounded-lg px-3 py-2 -mx-1 relative overflow-hidden">
           {/* Subtle background pattern */}
           <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 w-16 h-16 bg-purple-500 rounded-full blur-xl"></div>
+            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500 rounded-full blur-xl"></div>
+            <div className="absolute bottom-0 left-0 w-12 h-12 bg-purple-500 rounded-full blur-lg"></div>
           </div>
 
-          <div className="text-center group/stat relative z-10">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <div className={`text-2xl font-bold transition-all duration-300 ${getStreakColor()} group-hover/stat:scale-110`}>
-                {currentStreak}
-              </div>
-              {currentStreak > 0 && (
-                <div className="flex gap-0.5">
-                  {[...Array(Math.min(currentStreak, 5))].map((_, i) => (
-                    <div key={i} className={`w-1.5 h-1.5 rounded-full ${getStreakColor().includes('purple') ? 'bg-purple-400' : getStreakColor().includes('green') ? 'bg-green-400' : getStreakColor().includes('blue') ? 'bg-blue-400' : 'bg-orange-400'} animate-pulse`} style={{ animationDelay: `${i * 100}ms` }}></div>
-                  ))}
+          {/* Left side: Day Streak and Success Rate */}
+          <div className="flex items-center gap-4 relative z-10">
+            {/* Day Streak */}
+            <div className="flex items-center gap-2 group/stat">
+              <div className="flex items-center gap-1">
+                <span className="text-lg">🔥</span>
+                <div className={`text-xl font-bold transition-all duration-300 ${getStreakColor()} group-hover/stat:scale-110`}>
+                  {currentStreak}
                 </div>
-              )}
+              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Day Streak</span>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center justify-center gap-1">
-              🔥 <span>Day Streak</span>
-            </div>
-          </div>
 
-          <div className="text-center group/stat relative z-10">
-            <div className="relative mb-1">
-              <div className={`text-2xl font-bold transition-all duration-300 ${getCompletionColor()} group-hover/stat:scale-110`}>
-                {completionRate}%
+            {/* Divider */}
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+
+            {/* Success Rate */}
+            <div className="flex items-center gap-2 group/stat">
+              <div className="flex items-center gap-1">
+                <span className="text-lg">📊</span>
+                <div className={`text-xl font-bold transition-all duration-300 ${getCompletionColor()} group-hover/stat:scale-110`}>
+                  {completionRate}%
+                </div>
               </div>
-              {/* Mini progress ring */}
-              <div className="absolute -top-1 -right-2 w-6 h-6">
-                <svg className="w-6 h-6 transform -rotate-90" viewBox="0 0 24 24">
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    fill="transparent"
-                    className="text-gray-200 dark:text-gray-700"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    fill="transparent"
-                    strokeDasharray={`${2 * Math.PI * 10}`}
-                    strokeDashoffset={`${2 * Math.PI * 10 * (1 - completionRate / 100)}`}
-                    className={`${getCompletionColor()} transition-all duration-1000`}
-                  />
-                </svg>
-              </div>
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center justify-center gap-1">
-              📊 <span>Success Rate</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Success Rate</span>
             </div>
           </div>
 
-          <div className="text-center group/stat relative z-10">
-            {habit.goal ? (
-              <>
-                <div className="text-2xl font-bold mb-1 text-primary-600 dark:text-primary-400 transition-all duration-300 group-hover/stat:scale-110 flex items-center justify-center gap-1">
-                  <Target className="w-4 h-4" />
-                  {habit.goal.target}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  {habit.goal.period} Goal
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="text-2xl font-bold mb-1 text-gray-400 dark:text-gray-500 transition-all duration-300 group-hover/stat:scale-110 flex items-center justify-center gap-1">
-                  <Sparkles className="w-4 h-4" />
-                  ∞
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  Ongoing Journey
-                </div>
-              </>
-            )}
-          </div>
+          {/* Right side: View Benefits button */}
+          {(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.tip) && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center space-x-1.5 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 px-3 py-1.5 border border-gray-200/50 dark:border-gray-600/50 bg-gradient-to-r from-primary-50/60 to-blue-50/60 dark:from-primary-950/20 dark:to-blue-950/20 rounded-full transition-all duration-300 hover:shadow-sm hover:scale-105 relative z-10"
+            >
+              <span className="font-medium">{expanded ? 'Hide' : 'View'} Benefits</span>
+              <div className={`transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
+            </button>
+          )}
         </div>
       </CardHeader>
 
@@ -364,20 +327,6 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
           </div>
         )}
 
-        {/* Enhanced Expand/Collapse Button - Always show if there are benefits */}
-        {(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.tip) && (
-          <div className="flex justify-center mt-2">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="flex items-center justify-center space-x-2 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 px-4 py-2 border border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-r from-primary-50/80 to-blue-50/80 dark:from-primary-950/30 dark:to-blue-950/30 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105"
-            >
-              <span className="font-medium">{expanded ? 'Hide Benefits' : 'View Benefits'}</span>
-              <div className={`transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
-                {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-            </button>
-          </div>
-        )}
 
         {/* Enhanced Bottom Action Area */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-r from-gray-50/30 to-transparent dark:from-gray-800/30 rounded-lg p-4 -mx-2 -mb-2">
