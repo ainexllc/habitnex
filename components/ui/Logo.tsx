@@ -12,15 +12,18 @@ export function Logo({
   textSize = 'lg'
 }: LogoProps) {
   const textSizes = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl',
-    xl: 'text-3xl'
+    sm: 'text-2xl',
+    md: 'text-3xl',
+    lg: 'text-4xl',
+    xl: 'text-5xl'
   };
 
   const content = (
-    <span className={`${textSizes[textSize]} font-bold ${className}`}>
-      <span className="text-blue-600 dark:text-blue-500">Next</span>
+    <span 
+      className={`${textSizes[textSize]} ${className}`}
+      style={{ fontFamily: '"Climate Crisis", cursive' }}
+    >
+      <span className="text-red-600 dark:text-red-500">Next</span>
       <span className="text-gray-900 dark:text-white">Vibe</span>
     </span>
   );

@@ -39,7 +39,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Logo />
+              <Logo textSize="md" />
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-8 ml-10">
@@ -450,7 +450,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="mb-4">
-                <Logo linkToHome={false} />
+                <Logo linkToHome={false} textSize="md" />
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
                 Transform your daily habits with AI-powered tracking and insights.
