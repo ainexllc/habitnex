@@ -211,63 +211,44 @@ export function FamilyMemberZone({
                 key={habit.id}
                 className={cn(
                   "relative flex items-center justify-between p-3 rounded-lg transition-all duration-200",
-                  touchMode ? "p-4 min-h-[80px]" : "p-3 min-h-[60px]",
+                  touchMode ? "p-4" : "p-3",
                   habit.completed 
-                    ? "bg-green-50 border border-green-200" 
+                    ? "bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800" 
                     : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
                   celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
                   loading && "opacity-50 pointer-events-none"
                 )}
               >
-                {/* Habit Info */}
-                <div className="flex items-center space-x-3 flex-1">
-                  <div 
-                    className={cn(
-                      "flex-shrink-0 text-center",
-                      touchMode ? "text-2xl w-8" : "text-xl w-6"
-                    )}
-                  >
-                    {habit.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className={cn(
-                      `font-medium ${theme.text.primary} truncate`,
-                      touchMode ? "text-lg" : "text-sm",
-                      habit.completed && theme.status.success.text
+                {/* Habit Info - Simplified */}
+                <div className="flex-1 min-w-0 pr-3">
+                  <h4 className={cn(
+                    `font-semibold ${theme.text.primary}`,
+                    touchMode ? "text-lg" : "text-base",
+                    habit.completed && "text-green-700 dark:text-green-400"
+                  )}>
+                    {habit.name}
+                  </h4>
+                  {habit.description && (
+                    <p className={cn(
+                      `${theme.text.muted} mt-0.5`,
+                      touchMode ? "text-base" : "text-sm",
+                      habit.completed && "line-through"
                     )}>
-                      {habit.name}
-                    </h4>
-                    {habit.description && (
-                      <p className={cn(
-                        `${theme.text.muted} truncate`,
-                        touchMode ? "text-base" : "text-xs"
-                      )}>
-                        {habit.description}
-                      </p>
-                    )}
-                    <div className="flex items-center space-x-2 mt-1">
-                      <div className="flex items-center space-x-1">
-                        <Zap className="w-3 h-3 text-yellow-500" />
-                        <span className={cn(
-                          `${theme.status.warning.text} font-medium`,
-                          touchMode ? "text-sm" : "text-xs"
-                        )}>
-                          {habit.basePoints} pts
-                        </span>
-                      </div>
-                      <div className={cn(
-                        "px-2 py-1 rounded-full text-xs font-medium",
-                        habit.difficulty === 'easy' && `${theme.status.success.bg} ${theme.status.success.text}`,
-                        habit.difficulty === 'medium' && `${theme.status.warning.bg} ${theme.status.warning.text}`,
-                        habit.difficulty === 'hard' && `${theme.status.error.bg} ${theme.status.error.text}`
-                      )}>
-                        {habit.difficulty}
-                      </div>
-                    </div>
+                      {habit.description}
+                    </p>
+                  )}
+                  <div className="flex items-center space-x-1 mt-1">
+                    <Zap className="w-3.5 h-3.5 text-yellow-500" />
+                    <span className={cn(
+                      `text-yellow-600 dark:text-yellow-400 font-semibold`,
+                      touchMode ? "text-base" : "text-sm"
+                    )}>
+                      {habit.basePoints} pts
+                    </span>
                   </div>
                 </div>
                 
-                {/* Completion Button */}
+                {/* Improved Completion Button */}
                 <VisualFeedback
                   feedbackType={habit.completed ? "success" : "info"}
                   onInteraction={() => {
@@ -276,31 +257,31 @@ export function FamilyMemberZone({
                   disabled={loading}
                 >
                   <Button
-                    variant={habit.completed ? "primary" : "ghost"}
+                    variant="ghost"
                     size={touchMode ? "lg" : "sm"}
                     className={cn(
-                      "flex-shrink-0 rounded-full",
-                      touchMode ? "w-16 h-16 p-0" : "w-10 h-10 p-0",
+                      "flex-shrink-0 rounded-lg font-semibold transition-all duration-200",
+                      touchMode ? "px-4 py-2 text-base min-w-[100px]" : "px-3 py-1.5 text-sm min-w-[80px]",
                       habit.completed 
-                        ? "bg-green-600 hover:bg-green-700 text-white" 
-                        : `${theme.surface.hover} ${theme.text.muted} hover:${theme.text.secondary}`
+                        ? "bg-green-600 hover:bg-green-700 text-white border-2 border-green-600" 
+                        : "bg-green-500 hover:bg-green-600 text-white border-2 border-green-500"
                     )}
                     disabled={loading}
                   >
                     {habit.completed ? (
-                      <CheckCircle2 className={cn(
-                        "text-white",
-                        touchMode ? "w-8 h-8" : "w-5 h-5"
-                      )} />
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 className={cn(
+                          touchMode ? "w-5 h-5" : "w-4 h-4"
+                        )} />
+                        Done
+                      </span>
                     ) : (
-                      <Circle className={cn(
-                        touchMode ? "w-8 h-8" : "w-5 h-5"
-                      )} />
+                      <span>Done</span>
                     )}
                   </Button>
                 </VisualFeedback>
                 
-                {/* Celebration Effect */}
+                {/* Celebration Effect - Keep this unchanged */}
                 {celebratingHabitId === habit.id && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="text-4xl animate-bounce">🎉</div>

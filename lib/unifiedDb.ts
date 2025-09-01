@@ -233,18 +233,50 @@ export const getUserHabits = async (userId: string): Promise<Habit[]> => {
 
 export const updateHabit = async (userId: string, habitId: string, updates: Partial<Habit>): Promise<void> => {
   const context = await getUserContext(userId);
-  
+
   if (context.familyId && context.memberId) {
     // Use family structure
     const habitRef = doc(db, 'families', context.familyId, 'habits', habitId);
-    
+
+    // Clean the updates object to remove undefined values and empty strings
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key, value]) => {
+        // Keep false values but remove undefined, null, and empty strings
+        if (value === false || value === 0) return true;
+        if (value === undefined || value === null) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        return true;
+      })
+    );
+
+    // Special handling for AI enhancement fields - preserve them even if empty
+    // but ensure they don't get set to undefined
+    const aiFields = ['aiEnhanced', 'tip', 'healthBenefits', 'mentalBenefits', 'longTermBenefits', 'complementary'];
+    aiFields.forEach(field => {
+      if (field in updates) {
+        if (field === 'aiEnhanced') {
+          // Ensure aiEnhanced is a boolean
+          cleanUpdates[field] = !!updates[field];
+        } else if (field === 'complementary') {
+          // Ensure complementary is an array
+          cleanUpdates[field] = Array.isArray(updates[field]) ? updates[field] : [];
+        } else if (typeof updates[field] === 'string') {
+          // Keep string fields even if empty for AI data
+          cleanUpdates[field] = updates[field] || '';
+        }
+      }
+    });
+
     // Convert individual habit updates to family habit format
     const familyUpdates = {
-      ...updates,
+      ...cleanUpdates,
       updatedAt: Timestamp.now()
     };
-    
+
+    console.log('Updating family habit in database:', habitId, familyUpdates);
     await updateDoc(habitRef, familyUpdates);
+    console.log('Family habit updated in database successfully');
   } else {
     // Fallback to individual structure
     return legacyDb.updateHabit(userId, habitId, updates);
