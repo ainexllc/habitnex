@@ -190,207 +190,187 @@ export default function HabitsPage() {
 
                 <div className="grid grid-cols-7 gap-4">
                   {(() => {
-                    const today = new Date();
-                    const monday = new Date(today);
-                    monday.setDate(today.getDate() - today.getDay() + 1); // Get Monday of current week
+                    const weeklyData = useMemo(() => {
+                      const today = new Date();
+                      const monday = new Date(today);
+                      monday.setDate(today.getDate() - today.getDay() + 1); // Get Monday of current week
 
-                    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                      const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-                    return weekDays.map((day, index) => {
-                      const currentDate = new Date(monday);
-                      currentDate.setDate(monday.getDate() + index);
-                      const dateString = getDateString(currentDate);
+                      return weekDays.map((day, index) => {
+                        const currentDate = new Date(monday);
+                        currentDate.setDate(monday.getDate() + index);
+                        const dateString = getDateString(currentDate);
 
-                      // Get habits due on this day
-                      const dayHabits = habits.filter(habit => {
-                        const nextDue = getNextDueDate(habit);
-                        return nextDue === dateString;
+                        // Get habits due on this day
+                        const dayHabits = habits.filter(habit => {
+                          const nextDue = getNextDueDate(habit);
+                          return nextDue === dateString;
+                        });
+
+                        // Get completions for this day
+                        const dayCompletions = completions.filter(c =>
+                          c.date === dateString && c.completed
+                        );
+
+                        const completedCount = dayCompletions.length;
+                        const totalCount = dayHabits.length;
+                        const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+                        const isToday = dateString === getDateString(today);
+                        const isPast = currentDate < today;
+
+                        return {
+                          day,
+                          dateString,
+                          currentDate,
+                          completedCount,
+                          totalCount,
+                          completionRate,
+                          isToday,
+                          isPast
+                        };
                       });
+                    }, [habits, completions]); // Reactive to both habits and completions changes
 
-                      // Get completions for this day
-                      const dayCompletions = completions.filter(c =>
-                        c.date === dateString && c.completed
-                      );
-
-                      const completedCount = dayCompletions.length;
-                      const totalCount = dayHabits.length;
-                      const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
-                      const isToday = dateString === getDateString(today);
-                      const isPast = currentDate < today;
-
-                      return (
-                        <div
-                          key={day}
-                          className={`p-4 rounded-lg border transition-all duration-200 ${
-                            isToday
-                              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 ring-2 ring-blue-200 dark:ring-blue-600'
-                              : isPast
-                              ? 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
-                              : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
-                          }`}
-                        >
-                          <div className="text-center">
-                            <div className={`text-sm font-medium ${theme.text.primary} mb-1`}>
-                              {day}
-                            </div>
-                            <div className={`text-xs ${theme.text.secondary} mb-2`}>
-                              {currentDate.getDate()}
-                            </div>
-
-                            {totalCount > 0 ? (
-                              <>
-                                <div className={`text-lg font-bold mb-1 ${
-                                  completionRate >= 80 ? 'text-green-600 dark:text-green-400' :
-                                  completionRate >= 50 ? 'text-blue-600 dark:text-blue-400' :
-                                  'text-orange-600 dark:text-orange-400'
-                                }`}>
-                                  {completionRate}%
-                                </div>
-                                <div className={`text-xs ${theme.text.secondary} mb-3`}>
-                                  {completedCount}/{totalCount}
-                                </div>
-
-                                {/* Mini progress bar */}
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
-                                  <div
-                                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                                      completionRate >= 80 ? 'bg-green-500' :
-                                      completionRate >= 50 ? 'bg-blue-500' :
-                                      'bg-orange-500'
-                                    }`}
-                                    style={{ width: `${completionRate}%` }}
-                                  />
-                                </div>
-
-                                {/* Status indicator */}
-                                <div className={`text-xs font-medium ${
-                                  isToday ? 'text-blue-600 dark:text-blue-400' :
-                                  completionRate === 100 ? 'text-green-600 dark:text-green-400' :
-                                  completionRate > 0 ? 'text-blue-600 dark:text-blue-400' :
-                                  'text-gray-500'
-                                }`}>
-                                  {isToday ? 'Today' :
-                                   completionRate === 100 ? 'Complete' :
-                                   completionRate > 0 ? 'Partial' :
-                                   'Pending'}
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className={`text-lg font-bold mb-1 text-gray-400`}>
-                                  -
-                                </div>
-                                <div className={`text-xs ${theme.text.secondary} mb-3`}>
-                                  No habits
-                                </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2 opacity-30">
-                                  <div className="h-1.5 rounded-full bg-gray-400 w-0" />
-                                </div>
-                                <div className={`text-xs font-medium text-gray-500`}>
-                                  Rest Day
-                                </div>
-                              </>
-                            )}
+                    return weeklyData.map((data) => (
+                      <div
+                        key={data.day}
+                        className={`p-4 rounded-lg border transition-all duration-200 ${
+                          data.isToday
+                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 ring-2 ring-blue-200 dark:ring-blue-600'
+                            : data.isPast
+                            ? 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
+                            : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
+                        }`}
+                      >
+                        <div className="text-center">
+                          <div className={`text-sm font-medium ${theme.text.primary} mb-1`}>
+                            {data.day}
                           </div>
+                          <div className={`text-xs ${theme.text.secondary} mb-2`}>
+                            {data.currentDate.getDate()}
+                          </div>
+
+                          {data.totalCount > 0 ? (
+                            <>
+                              <div className={`text-lg font-bold mb-1 ${
+                                data.completionRate >= 80 ? 'text-green-600 dark:text-green-400' :
+                                data.completionRate >= 50 ? 'text-blue-600 dark:text-blue-400' :
+                                'text-orange-600 dark:text-orange-400'
+                              }`}>
+                                {data.completionRate}%
+                              </div>
+                              <div className={`text-xs ${theme.text.secondary} mb-3`}>
+                                {data.completedCount}/{data.totalCount}
+                              </div>
+
+                              {/* Mini progress bar */}
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
+                                <div
+                                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                                    data.completionRate >= 80 ? 'bg-green-500' :
+                                    data.completionRate >= 50 ? 'bg-blue-500' :
+                                    'bg-orange-500'
+                                  }`}
+                                  style={{ width: `${data.completionRate}%` }}
+                                />
+                              </div>
+
+                              {/* Status indicator */}
+                              <div className={`text-xs font-medium ${
+                                data.isToday ? 'text-blue-600 dark:text-blue-400' :
+                                data.completionRate === 100 ? 'text-green-600 dark:text-green-400' :
+                                data.completionRate > 0 ? 'text-blue-600 dark:text-blue-400' :
+                                'text-gray-500'
+                              }`}>
+                                {data.isToday ? 'Today' :
+                                 data.completionRate === 100 ? 'Complete' :
+                                 data.completionRate > 0 ? 'Partial' :
+                                 'Pending'}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className={`text-lg font-bold mb-1 text-gray-400`}>
+                                -
+                              </div>
+                              <div className={`text-xs ${theme.text.secondary} mb-3`}>
+                                No habits
+                              </div>
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2 opacity-30">
+                                <div className="h-1.5 rounded-full bg-gray-400 w-0" />
+                              </div>
+                              <div className={`text-xs font-medium text-gray-500`}>
+                                Rest Day
+                              </div>
+                            </>
+                          )}
                         </div>
-                      );
-                    });
+                      </div>
+                    ));
                   })()}
                 </div>
 
                 {/* Weekly stats summary */}
                 <div className={`mt-6 pt-4 border-t ${theme.border.default}`}>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className={`text-2xl font-bold ${theme.text.primary}`}>
-                        {(() => {
-                          const thisWeek = completions.filter(c => {
-                            const completionDate = new Date(c.date);
-                            const today = new Date();
-                            const monday = new Date(today);
-                            monday.setDate(today.getDate() - today.getDay() + 1);
-                            const sunday = new Date(monday);
-                            sunday.setDate(monday.getDate() + 6);
-                            return completionDate >= monday && completionDate <= sunday && c.completed;
-                          }).length;
-                          return thisWeek;
-                        })()}
-                      </div>
-                      <div className={`text-sm ${theme.text.secondary}`}>Completed This Week</div>
-                    </div>
-                    <div>
-                      <div className={`text-2xl font-bold ${theme.text.primary}`}>
-                        {(() => {
-                          const today = new Date();
-                          const monday = new Date(today);
-                          monday.setDate(today.getDate() - today.getDay() + 1);
-                          const sunday = new Date(monday);
-                          sunday.setDate(monday.getDate() + 6);
+                  {(() => {
+                    const weeklyStats = useMemo(() => {
+                      const today = new Date();
+                      const monday = new Date(today);
+                      monday.setDate(today.getDate() - today.getDay() + 1);
+                      const sunday = new Date(monday);
+                      sunday.setDate(monday.getDate() + 6);
 
-                          let totalHabitsThisWeek = 0;
-                          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
-                            const dateString = getDateString(d);
-                            totalHabitsThisWeek += habits.filter(habit => {
-                              const nextDue = getNextDueDate(habit);
-                              return nextDue === dateString;
-                            }).length;
-                          }
-                          return totalHabitsThisWeek;
-                        })()}
-                      </div>
-                      <div className={`text-sm ${theme.text.secondary}`}>Total Habits This Week</div>
-                    </div>
-                    <div>
-                      <div className={`text-2xl font-bold ${
-                        (() => {
-                          const today = new Date();
-                          const monday = new Date(today);
-                          monday.setDate(today.getDate() - today.getDay() + 1);
-                          const sunday = new Date(monday);
-                          sunday.setDate(monday.getDate() + 6);
+                      let completedThisWeek = 0;
+                      let totalHabitsThisWeek = 0;
 
-                          let completed = 0;
-                          let total = 0;
-                          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
-                            const dateString = getDateString(d);
-                            const dayHabits = habits.filter(habit => {
-                              const nextDue = getNextDueDate(habit);
-                              return nextDue === dateString;
-                            });
-                            total += dayHabits.length;
-                            completed += completions.filter(c => c.date === dateString && c.completed).length;
-                          }
-                          const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-                          return rate >= 80 ? 'text-green-600 dark:text-green-400' :
-                                 rate >= 50 ? 'text-blue-600 dark:text-blue-400' :
-                                 'text-orange-600 dark:text-orange-400';
-                        })()
-                      }`}>
-                        {(() => {
-                          const today = new Date();
-                          const monday = new Date(today);
-                          monday.setDate(today.getDate() - today.getDay() + 1);
-                          const sunday = new Date(monday);
-                          sunday.setDate(monday.getDate() + 6);
+                      for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
+                        const dateString = getDateString(d);
+                        const dayHabits = habits.filter(habit => {
+                          const nextDue = getNextDueDate(habit);
+                          return nextDue === dateString;
+                        });
+                        totalHabitsThisWeek += dayHabits.length;
+                        completedThisWeek += completions.filter(c => c.date === dateString && c.completed).length;
+                      }
 
-                          let completed = 0;
-                          let total = 0;
-                          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
-                            const dateString = getDateString(d);
-                            const dayHabits = habits.filter(habit => {
-                              const nextDue = getNextDueDate(habit);
-                              return nextDue === dateString;
-                            });
-                            total += dayHabits.length;
-                            completed += completions.filter(c => c.date === dateString && c.completed).length;
-                          }
-                          return total > 0 ? Math.round((completed / total) * 100) : 0;
-                        })()}%
+                      const weeklyAverage = totalHabitsThisWeek > 0 ? Math.round((completedThisWeek / totalHabitsThisWeek) * 100) : 0;
+
+                      return {
+                        completedThisWeek,
+                        totalHabitsThisWeek,
+                        weeklyAverage
+                      };
+                    }, [habits, completions]);
+
+                    return (
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className={`text-2xl font-bold ${theme.text.primary}`}>
+                            {weeklyStats.completedThisWeek}
+                          </div>
+                          <div className={`text-sm ${theme.text.secondary}`}>Completed This Week</div>
+                        </div>
+                        <div>
+                          <div className={`text-2xl font-bold ${theme.text.primary}`}>
+                            {weeklyStats.totalHabitsThisWeek}
+                          </div>
+                          <div className={`text-sm ${theme.text.secondary}`}>Total Habits This Week</div>
+                        </div>
+                        <div>
+                          <div className={`text-2xl font-bold ${
+                            weeklyStats.weeklyAverage >= 80 ? 'text-green-600 dark:text-green-400' :
+                            weeklyStats.weeklyAverage >= 50 ? 'text-blue-600 dark:text-blue-400' :
+                            'text-orange-600 dark:text-orange-400'
+                          }`}>
+                            {weeklyStats.weeklyAverage}%
+                          </div>
+                          <div className={`text-sm ${theme.text.secondary}`}>Weekly Average</div>
+                        </div>
                       </div>
-                      <div className={`text-sm ${theme.text.secondary}`}>Weekly Average</div>
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
