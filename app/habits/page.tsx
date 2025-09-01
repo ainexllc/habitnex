@@ -3,27 +3,34 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
-import { HabitCard } from '@/components/habits/HabitCard';
+import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { CreateHabitModal } from '@/components/habits/CreateHabitModal';
-import { ViewSwitcher } from '@/components/habits/ViewSwitcher';
-import { HabitListOptimized } from '@/components/habits/HabitListOptimized';
-import { ListView } from '@/components/habits/views/ListView';
-import { CalendarView } from '@/components/habits/views/CalendarView';
-import { TableView } from '@/components/habits/views/TableView';
-import { HeatmapView } from '@/components/habits/views/HeatmapView';
-import { AICoachView } from '@/components/habits/views/AICoachView';
-import { MomentumWaveView } from '@/components/habits/views/MomentumWaveView';
-import { PredictiveTimelineView } from '@/components/habits/views/PredictiveTimelineView';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useHabits } from '@/hooks/useHabits';
 import { useMoods } from '@/hooks/useMoods';
 import { Habit } from '@/types';
-import { HabitViewType } from '@/types/views';
-import { Plus, Search, Filter } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  Filter,
+  Clock,
+  AlertTriangle,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Target,
+  Star,
+  Sparkles
+} from 'lucide-react';
 import Link from 'next/link';
 import { theme } from '@/lib/theme';
+import {
+  isHabitDueToday,
+  isHabitOverdue,
+  getNextDueDate
+} from '@/lib/utils';
 
 export default function HabitsPage() {
   const { habits, completions, loading } = useHabits();
@@ -32,15 +39,14 @@ export default function HabitsPage() {
   const [selectedTag, setSelectedTag] = useState('');
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
-  const [currentView, setCurrentView] = useState<HabitViewType>(HabitViewType.COMPACT);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    overdue: true,
+    today: true,
+    upcoming: false,
+    all: false
+  });
 
-  // Load preferred view from localStorage
-  useEffect(() => {
-    const savedView = localStorage.getItem('preferredHabitView') as HabitViewType;
-    if (savedView && Object.values(HabitViewType).includes(savedView)) {
-      setCurrentView(savedView);
-    }
-  }, []);
+
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -59,17 +65,92 @@ export default function HabitsPage() {
     return habits.filter(habit => {
       const matchesSearch = habit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            habit.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       if (!selectedTag) return matchesSearch;
-      
+
       // Check both new tags array and legacy category
       const habitTags = habit.tags || [];
       const legacyCategory = (habit as any).category?.toLowerCase().replace(/\s+/g, '-');
       const matchesTag = habitTags.includes(selectedTag) || legacyCategory === selectedTag;
-      
+
       return matchesSearch && matchesTag;
     });
   }, [habits, searchTerm, selectedTag]);
+
+  // Categorize habits into sections (inspired by dashboard FocusView)
+  const habitSections = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    // First apply search/filter to get filtered habits
+    const baseHabits = filteredHabits;
+
+    // Categorize filtered habits
+    const overdueHabits = baseHabits.filter(habit => isHabitOverdue(habit, completions));
+    const todayHabits = baseHabits.filter(habit =>
+      isHabitDueToday(habit) && !isHabitOverdue(habit, completions)
+    );
+    const upcomingHabits = baseHabits.filter(habit => {
+      const nextDue = getNextDueDate(habit);
+      return nextDue && nextDue === tomorrow && !isHabitDueToday(habit);
+    });
+
+    // All other habits (not overdue, not today, not tomorrow)
+    const otherHabits = baseHabits.filter(habit => {
+      return !isHabitOverdue(habit, completions) &&
+             !isHabitDueToday(habit) &&
+             (() => {
+               const nextDue = getNextDueDate(habit);
+               return !(nextDue && nextDue === tomorrow);
+             })();
+    });
+
+    return [
+      {
+        title: 'Overdue',
+        habits: overdueHabits,
+        priority: 'high' as const,
+        collapsible: true,
+        icon: AlertTriangle,
+        color: 'red',
+        description: 'Needs immediate attention'
+      },
+      {
+        title: 'Due Today',
+        habits: todayHabits,
+        priority: 'high' as const,
+        collapsible: false, // Always expanded
+        icon: Clock,
+        color: 'blue',
+        description: 'Your daily focus'
+      },
+      {
+        title: 'Up Next',
+        habits: upcomingHabits,
+        priority: 'medium' as const,
+        collapsible: true,
+        icon: Calendar,
+        color: 'purple',
+        description: 'Coming up tomorrow'
+      },
+      {
+        title: 'All Other Habits',
+        habits: otherHabits,
+        priority: 'low' as const,
+        collapsible: true,
+        icon: Target,
+        color: 'gray',
+        description: 'Future scheduled habits'
+      }
+    ].filter(section => section.habits.length > 0);
+  }, [filteredHabits, completions]);
+
+  const toggleSection = (sectionTitle: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionTitle.toLowerCase().replace(/\s+/g, '')]: !prev[sectionTitle.toLowerCase().replace(/\s+/g, '')]
+    }));
+  };
 
   if (loading) {
     return (
@@ -178,16 +259,35 @@ export default function HabitsPage() {
                   </div>
                 </div>
 
-                {/* View Switcher Section */}
+                {/* Quick Actions Section */}
                 <div className="lg:w-64">
                   <label className={`block text-sm font-medium ${theme.text.secondary} mb-2`}>
-                    View Style
+                    Quick Actions
                   </label>
-                  <ViewSwitcher
-                    currentView={currentView}
-                    onViewChange={setCurrentView}
-                    enabledViews={[HabitViewType.COMPACT, HabitViewType.GRID, HabitViewType.LIST, HabitViewType.CALENDAR, HabitViewType.TABLE, HabitViewType.HEATMAP, HabitViewType.AI_COACH, HabitViewType.MOMENTUM, HabitViewType.TIMELINE]}
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowCreateHabitModal(true)}
+                      className="w-full justify-start"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Habit
+                    </Button>
+                    {filteredHabits.length !== habits.length && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSearchTerm('');
+                          setSelectedTag('');
+                        }}
+                        className="w-full justify-start"
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,73 +375,150 @@ export default function HabitsPage() {
               </div>
             ) : (
               <>
+                {/* Sectioned Habits Display (Inspired by Dashboard FocusView) */}
+                <div className="space-y-6">
+                  {habitSections.map((section) => {
+                    const isExpanded = expandedSections[section.title.toLowerCase().replace(/\s+/g, '')];
+                    const IconComponent = section.icon;
 
-                
-{/* Conditional View Rendering */}
-                {currentView === HabitViewType.COMPACT ? (
-                  <HabitListOptimized 
-                    habits={filteredHabits} 
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                ) : currentView === HabitViewType.GRID ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredHabits.map((habit) => (
-                      <HabitCard 
-                        key={habit.id} 
-                        habit={habit} 
-                        onEdit={(habit) => setEditingHabit(habit)}
-                      />
-                    ))}
-                  </div>
-                ) : currentView === HabitViewType.LIST ? (
-                  <ListView 
-                    habits={filteredHabits} 
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                ) : currentView === HabitViewType.CALENDAR ? (
-                  <CalendarView 
-                    habits={filteredHabits} 
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                ) : currentView === HabitViewType.TABLE ? (
-                  <TableView 
-                    habits={filteredHabits} 
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                ) : currentView === HabitViewType.HEATMAP ? (
-                  <HeatmapView habits={filteredHabits} />
-                ) : currentView === HabitViewType.AI_COACH ? (
-                  <AICoachView 
-                    habits={filteredHabits}
-                    completions={completions}
-                    moods={moods}
-                  />
-                ) : currentView === HabitViewType.MOMENTUM ? (
-                  <MomentumWaveView
-                    habits={filteredHabits}
-                    completions={completions}
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                ) : currentView === HabitViewType.TIMELINE ? (
-                  <PredictiveTimelineView
-                    habits={filteredHabits}
-                    completions={completions}
-                    moods={moods}
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-                    </div>
-                    <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
-                      Coming Soon
-                    </h3>
-                    <p className={theme.text.secondary}>
-                      This view is coming in a future update.
-                    </p>
-                  </div>
-                )}
+                    return (
+                      <div key={section.title} className={`group ${theme.surface.primary} rounded-2xl border-2 ${theme.border.default} shadow-lg hover:shadow-xl transition-all duration-300`}>
+                        {/* Section Header */}
+                        <div className="bg-gradient-to-r from-blue-50/60 via-purple-50/60 to-pink-50/60 dark:from-blue-950/30 dark:via-purple-950/30 dark:to-pink-950/30 px-4 sm:px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/60">
+                          {section.collapsible ? (
+                            <button
+                              onClick={() => toggleSection(section.title)}
+                              className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between text-left group-hover:scale-[1.02] transition-transform duration-200 gap-3 sm:gap-0"
+                            >
+                              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                                <div className="w-10 h-10 bg-white/80 dark:bg-gray-800/80 rounded-xl flex items-center justify-center shadow-md backdrop-blur-sm flex-shrink-0">
+                                  <IconComponent className={`w-5 h-5 ${
+                                    section.color === 'red' ? 'text-red-500' :
+                                    section.color === 'blue' ? 'text-blue-500' :
+                                    section.color === 'purple' ? 'text-purple-500' :
+                                    'text-gray-500'
+                                  } drop-shadow-sm`} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} flex items-center gap-2`}>
+                                    {section.title}
+                                    {section.priority === 'high' && <Star className="w-4 h-4 text-yellow-500" />}
+                                    {section.priority === 'medium' && <Sparkles className="w-4 h-4 text-purple-500" />}
+                                  </h3>
+                                  <p className={`text-sm ${theme.text.secondary} hidden sm:block`}>
+                                    {section.description}
+                                  </p>
+                                  <p className={`text-xs ${theme.text.muted} sm:hidden`}>
+                                    {section.habits.length} habit{section.habits.length !== 1 ? 's' : ''}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3 flex-shrink-0">
+                                <div className="hidden sm:flex items-center gap-2">
+                                  <span className={`px-3 py-1.5 rounded-full text-sm font-bold ${
+                                    section.color === 'red' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
+                                    section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' :
+                                    section.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300' :
+                                    'bg-gray-100 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300'
+                                  } shadow-sm`}>
+                                    {section.habits.length}
+                                  </span>
+                                </div>
+                                <div className={`p-2 rounded-lg ${theme.surface.secondary} transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                                  <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                </div>
+                              </div>
+                            </button>
+                          ) : (
+                            // Non-collapsible header for "Due Today"
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                                <div className="w-10 h-10 bg-white/80 dark:bg-gray-800/80 rounded-xl flex items-center justify-center shadow-md backdrop-blur-sm flex-shrink-0">
+                                  <IconComponent className="w-5 h-5 text-blue-500 drop-shadow-sm" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} flex items-center gap-2`}>
+                                    {section.title}
+                                    <Star className="w-4 h-4 text-yellow-500" />
+                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                  </h3>
+                                  <p className={`text-sm ${theme.text.secondary} hidden sm:block`}>
+                                    {section.description} - always visible!
+                                  </p>
+                                  <p className={`text-xs ${theme.text.muted} sm:hidden`}>
+                                    {section.habits.length} habit{section.habits.length !== 1 ? 's' : ''}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3 flex-shrink-0">
+                                <div className="hidden sm:flex items-center gap-2">
+                                  <span className={`px-3 py-1.5 rounded-full text-sm font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm`}>
+                                    {section.habits.length}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Section Content */}
+                        <div className={`transition-all duration-500 ease-in-out ${
+                          (section.collapsible && isExpanded) || (!section.collapsible && section.title === 'Due Today')
+                            ? 'max-h-none opacity-100 overflow-visible'
+                            : section.collapsible ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-none opacity-100 overflow-visible'
+                        }`}>
+                          <div className="p-4 sm:p-6">
+                            <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-1">
+                              {section.habits.map((habit, index) => (
+                                <div
+                                  key={habit.id}
+                                  className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg fade-in-up"
+                                  style={{
+                                    animationDelay: `${index * 100}ms`
+                                  }}
+                                >
+                                  <BenefitsHabitCard
+                                    habit={habit}
+                                    onEdit={onEdit}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Section completion message */}
+                            {section.habits.length > 3 && (
+                              <div className={`mt-6 p-4 rounded-xl ${
+                                section.color === 'red' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                                section.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
+                                section.color === 'purple' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' :
+                                'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
+                              } border`}>
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-white/80 dark:bg-gray-800/80 rounded-full flex items-center justify-center">
+                                    <IconComponent className={`w-4 h-4 ${
+                                      section.color === 'red' ? 'text-red-600 dark:text-red-400' :
+                                      section.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                                      section.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                                      'text-gray-600 dark:text-gray-400'
+                                    }`} />
+                                  </div>
+                                  <p className={`text-sm ${theme.status.info.text}`}>
+                                    {section.title === 'Overdue' && 'Focus on completing these first - every step counts!'}
+                                    {section.title === 'Due Today' && 'You\'ve got this! Complete these habits to maintain your streak.'}
+                                    {section.title === 'Up Next' && 'These are scheduled for tomorrow. Review and prepare if needed.'}
+                                    {section.title === 'All Other Habits' && 'These habits are scheduled for future dates. Keep building momentum!'}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </>
             )}
           </div>
