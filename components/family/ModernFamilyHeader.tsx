@@ -194,22 +194,11 @@ export function ModernFamilyHeader({
           {/* Info Row */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-white/90">
             <span className={cn(
-              "font-medium",
-              touchMode ? "text-lg" : "text-sm md:text-base"
-            )}>
-              {date}
-            </span>
-            
-            <span className="hidden sm:inline text-white/60">•</span>
-            
-            <span className={cn(
               "text-blue-200 font-medium",
               touchMode ? "text-lg" : "text-sm md:text-base"
             )}>
               {currentMessage}
             </span>
-            
-
           </div>
         </div>
       </div>
