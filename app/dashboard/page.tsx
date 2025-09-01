@@ -18,11 +18,12 @@ import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { theme } from '@/lib/theme';
-import { Target, Plus, Users, Home, Flame } from 'lucide-react';
+import { Target, Plus, Users, Home, Flame, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Habit } from '@/types';
 import { DashboardViewType } from '@/types/dashboard';
+import { getRandomQuote, Quote } from '@/lib/quotes';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = useHabits();
@@ -35,6 +36,9 @@ export default function DashboardPage() {
   
   // Dashboard view state
   const [currentView, setCurrentView] = useState<DashboardViewType>(DashboardViewType.FOCUS);
+  
+  // Quote state
+  const [currentQuote, setCurrentQuote] = useState<Quote>(() => getRandomQuote());
 
   // Load preferred view from localStorage
   useEffect(() => {
@@ -51,6 +55,11 @@ export default function DashboardPage() {
   
   const handleJoinFamily = () => {
     router.push('/family/join');
+  };
+
+  // Quote refresh handler
+  const handleRefreshQuote = () => {
+    setCurrentQuote(getRandomQuote());
   };
   
   // Filter habits that are due today or overdue
@@ -129,20 +138,20 @@ export default function DashboardPage() {
             onJoinFamily={handleJoinFamily}
           />
           
-          {/* Compact Family Indicator */}
+          {/* Family Indicator */}
           {hasFamily && (
             <div className="mb-6">
               <Link href="/dashboard/family">
                 <div className="group relative inline-flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-purple-500/10 hover:from-emerald-500/20 hover:via-blue-500/20 hover:to-purple-500/20 border border-emerald-200/60 dark:border-emerald-700/60 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-105">
                   {/* Animated border gradient */}
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
-                  
+
                   {/* Family icon with pulsing effect */}
                   <div className="relative w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full flex items-center justify-center shadow-md">
                     <Home className="w-4 h-4 text-white" />
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full animate-ping opacity-20"></div>
                   </div>
-                  
+
                   {/* Family name with gradient text */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 dark:from-emerald-400 dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
@@ -154,10 +163,10 @@ export default function DashboardPage() {
                       <div className="w-1 h-1 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                     </div>
                   </div>
-                  
+
                   {/* Family users icon */}
                   <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-300" />
-                  
+
                   {/* Hover tooltip */}
                   <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                     Go to Family Dashboard
@@ -166,7 +175,8 @@ export default function DashboardPage() {
               </Link>
             </div>
           )}
-          
+
+                    {/* Dashboard Title and Actions */}
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className={`text-3xl font-bold ${theme.text.primary}`}>
@@ -190,45 +200,57 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Motivational Card */}
-          <div className={`${theme.surface.primary} rounded-xl p-6 border ${theme.border.default} shadow-lg hover:shadow-xl transition-all duration-300 mb-8`}>
-            <div className="text-center">
-              {/* Keep the Momentum Going Section */}
-              <div className="flex items-center justify-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <Flame className="w-7 h-7 text-white" />
-                </div>
-                <div className="text-center">
-                  <h4 className={`text-xl font-bold ${theme.text.primary} mb-1`}>Keep the Momentum Going!</h4>
-                  <div className="flex items-center justify-center gap-2 text-sm text-indigo-600 dark:text-indigo-400">
-                    <div className="flex gap-1">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 200}ms` }}></div>
-                      ))}
+          {/* Motivational Card and Mood Bar Side-by-Side */}
+          <div className="flex flex-col lg:flex-row gap-4 mb-6">
+            {/* Compact Motivational Card */}
+            <div className={`${theme.surface.primary} rounded-lg p-4 border ${theme.border.default} shadow-md hover:shadow-lg transition-all duration-300 flex-1`}>
+              <div className="flex items-center justify-between gap-4">
+                {/* Left side - Flame icon and motivation */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md animate-pulse">
+                    <Flame className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className={`text-lg font-bold ${theme.text.primary}`}>Keep the Momentum Going!</h4>
+                    <div className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400">
+                      <div className="flex gap-1">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 200}ms` }}></div>
+                        ))}
+                      </div>
+                      <span className="font-medium">You're on fire!</span>
                     </div>
-                    <span className="font-medium">You're on fire!</span>
                   </div>
                 </div>
-              </div>
 
-              <p className={`text-base ${theme.text.secondary} max-w-2xl mx-auto leading-relaxed mb-6`}>
-                Every habit completed is a victory. Stay consistent, celebrate your progress, and watch how these small actions transform your life.
-              </p>
+                {/* Right side - Quote with refresh button */}
+                <div className="flex items-center gap-3 flex-1 max-w-md">
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 backdrop-blur-sm border border-white/20 dark:border-gray-700/20 flex-1">
+                    <p className={`text-sm italic ${theme.text.secondary} mb-1 leading-snug`}>
+                      "{currentQuote.text}"
+                    </p>
+                    <p className={`text-xs ${theme.text.muted} text-right`}>
+                      - {currentQuote.author}
+                    </p>
+                  </div>
 
-              {/* Inspirational quote */}
-              <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 backdrop-blur-sm border border-white/20 dark:border-gray-700/20 max-w-md mx-auto">
-                <p className={`text-sm italic ${theme.text.secondary} mb-2`}>
-                  "The journey of a thousand miles begins with a single step."
-                </p>
-                <p className={`text-xs ${theme.text.muted} text-right`}>
-                  - Lao Tzu
-                </p>
+                  {/* Refresh quote button */}
+                  <button
+                    onClick={handleRefreshQuote}
+                    className={`p-2 rounded-lg ${theme.surface.secondary} hover:${theme.surface.hover} transition-all duration-200 hover:scale-105 group`}
+                    title="Get new quote"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${theme.text.muted} group-hover:${theme.text.primary} transition-all duration-200 group-hover:rotate-180`} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Mood Bar */}
-          <MoodBar className="mb-8" />
+            {/* Mood Bar */}
+            <div className="flex-shrink-0 lg:w-80">
+              <MoodBar />
+            </div>
+          </div>
 
           {/* Habits Section */}
           <div className="space-y-6">
