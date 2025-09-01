@@ -275,37 +275,7 @@ export default function HabitsPage() {
               </div>
             ) : (
               <>
-                {/* Results Summary Card */}
-                <div className={`${theme.surface.primary} rounded-xl p-4 border ${theme.border.default} shadow-sm`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center shadow-sm">
-                        <span className="text-white font-bold text-sm">{filteredHabits.length}</span>
-                      </div>
-                      <div>
-                        <p className={`text-sm font-medium ${theme.text.primary}`}>
-                          {filteredHabits.length === habits.length ? 'All Habits' : 'Filtered Results'}
-                        </p>
-                        <p className={`text-xs ${theme.text.secondary}`}>
-                          {filteredHabits.length} of {habits.length} habit{habits.length !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
 
-                    {filteredHabits.length !== habits.length && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSearchTerm('');
-                          setSelectedTag('');
-                        }}
-                      >
-                        Clear Filters
-                      </Button>
-                    )}
-                  </div>
-                </div>
                 
 {/* Conditional View Rendering */}
                 {currentView === HabitViewType.COMPACT ? (
