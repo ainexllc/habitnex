@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
 import { FeedbackDisplay } from '@/components/feedback/FeedbackDisplay';
 import { detectSystemTimeFormat } from '@/lib/timeUtils';
-import { Settings, Clock, Globe, Bell, Palette, Users, Moon, Sun, Monitor, Edit2, Save } from 'lucide-react';
+import { Settings, Clock, Globe, Bell, Palette, Users, Moon, Sun, Monitor, Edit2, Save, Shield, Mail, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function FamilySettingsTab() {
@@ -17,6 +17,7 @@ export function FamilySettingsTab() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [familyName, setFamilyName] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
 
   // Local state for family settings
   const [touchScreenMode, setTouchScreenMode] = useState(false);
@@ -67,11 +68,15 @@ export function FamilySettingsTab() {
     if (!familyName.trim()) return;
 
     try {
+      setSaving(true);
       await updateFamilyName(familyName.trim());
+      setIsEditingName(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error('Failed to update family name:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -80,177 +85,264 @@ export function FamilySettingsTab() {
   }
 
   return (
-    <div>
+    <div className="px-6">
       {/* Tab Header with Actions */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Family Settings</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Customize your family's experience</p>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
+            Customize your family's experience and preferences
+          </p>
         </div>
 
-        <Button
-          onClick={handleSaveSettings}
-          disabled={saving}
-        >
-          <Save className="w-5 h-5 mr-2" />
-          {saving ? 'Saving...' : 'Save Changes'}
-        </Button>
+        {isParent && (
+          <Button
+            onClick={handleSaveSettings}
+            disabled={saving}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        )}
       </div>
 
+      {/* Success Message */}
       {success && (
-        <div className="mb-8 p-3 bg-green-100 border border-green-300 text-green-800 rounded-lg">
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-400 rounded-lg flex items-center">
+          <Activity className="w-5 h-5 mr-2" />
           Settings saved successfully!
         </div>
       )}
 
-      <div className="space-y-6">
-        {/* Family Name Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Family Name
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Family Information */}
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              Family Information
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={familyName}
-                onChange={(e) => setFamilyName(e.target.value)}
-                placeholder="Enter family name"
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSaveFamilyName}
-                className="text-gray-600 dark:text-gray-300"
-                title="Save family name"
-              >
-                <Edit2 className="w-4 h-4" />
-              </Button>
-            </div>
-            {currentFamily?.isPersonal && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                This is your personal dashboard name
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Family Invite Code */}
-        {isParent && (
-          <div>
-            <InviteCodeDisplay variant="card" showTitle={true} />
-          </div>
-        )}
-
-        {/* Appearance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="w-5 h-5" />
-              Appearance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Theme
+                Family Name
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="light"
-                    checked={theme === 'light'}
-                    onChange={(e) => setTheme(e.target.value as 'light')}
-                    className="mr-2"
-                  />
-                  Light
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="dark"
-                    checked={theme === 'dark'}
-                    onChange={(e) => setTheme(e.target.value as 'dark')}
-                    className="mr-2"
-                  />
-                  Dark
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="system"
-                    checked={theme === 'system'}
-                    onChange={(e) => setTheme(e.target.value as 'system')}
-                    className="mr-2"
-                  />
-                  System
-                </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={familyName}
+                  onChange={(e) => setFamilyName(e.target.value)}
+                  disabled={!isEditingName && !isParent}
+                  placeholder="Enter family name"
+                  className={cn(
+                    "flex-1 px-4 py-2 border rounded-lg bg-white dark:bg-gray-700",
+                    "text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400",
+                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                    "border-gray-300 dark:border-gray-600",
+                    !isEditingName && !isParent && "opacity-60 cursor-not-allowed"
+                  )}
+                />
+                {isParent && (
+                  <Button
+                    variant={isEditingName ? "primary" : "ghost"}
+                    size="sm"
+                    onClick={() => {
+                      if (isEditingName) {
+                        handleSaveFamilyName();
+                      } else {
+                        setIsEditingName(true);
+                      }
+                    }}
+                    disabled={saving}
+                  >
+                    {isEditingName ? <Save className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+                  </Button>
+                )}
+              </div>
+              {currentFamily?.isPersonal && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  This is your personal dashboard name
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Family ID
+              </label>
+              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <code className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                  {currentFamily.id}
+                </code>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Created
+              </label>
+              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {new Date(currentFamily.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Touch Screen Settings */}
+        {/* Appearance Settings */}
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Palette className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              Appearance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Theme Mode
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                    theme === 'light'
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  )}
+                >
+                  <Sun className={cn(
+                    "w-6 h-6 mb-1",
+                    theme === 'light' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )} />
+                  <span className={cn(
+                    "text-sm font-medium",
+                    theme === 'light' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )}>
+                    Light
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                    theme === 'dark'
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  )}
+                >
+                  <Moon className={cn(
+                    "w-6 h-6 mb-1",
+                    theme === 'dark' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )} />
+                  <span className={cn(
+                    "text-sm font-medium",
+                    theme === 'dark' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )}>
+                    Dark
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setTheme('system')}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                    theme === 'system'
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  )}
+                >
+                  <Monitor className={cn(
+                    "w-6 h-6 mb-1",
+                    theme === 'system' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )} />
+                  <span className={cn(
+                    "text-sm font-medium",
+                    theme === 'system' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )}>
+                    System
+                  </span>
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                Choose how NextVibe appears on your device
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Touch Screen Settings - Only visible to parents */}
         {isParent && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Monitor className="w-5 h-5" />
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Monitor className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 Touch Screen Mode
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={touchScreenMode}
                   onChange={(e) => setTouchScreenMode(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 rounded"
+                  className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                 />
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-white">Enable Touch Screen Mode</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    Optimized interface for tablets and touch screens
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    Enable Touch Screen Mode
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Optimizes the interface for tablets and touch screens with larger buttons and improved touch targets
                   </div>
                 </div>
               </label>
 
               {touchScreenMode && (
-                <div>
+                <div className="pl-8">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Auto Timeout (minutes)
+                    Auto Timeout
                   </label>
                   <select
                     value={autoTimeout}
                     onChange={(e) => setAutoTimeout(parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="1">1 minute</option>
                     <option value="5">5 minutes</option>
                     <option value="10">10 minutes</option>
                     <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="0">Never</option>
                   </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Automatically return to overview after inactivity
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notifications
+        {/* Notification Preferences */}
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Bell className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              Notification Preferences
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={notifications.dailyReminders}
@@ -258,17 +350,23 @@ export function FamilySettingsTab() {
                   ...prev,
                   dailyReminders: e.target.checked
                 }))}
-                className="w-5 h-5 text-blue-600 rounded"
+                disabled={!isParent}
+                className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 disabled:opacity-50"
               />
-              <div>
-                <div className="font-medium text-gray-900 dark:text-white">Daily Reminders</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Get reminded about your daily habits
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    Daily Reminders
+                  </span>
+                  <Clock className="w-4 h-4 text-gray-400" />
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Get reminded about your daily habits at your preferred time
                 </div>
               </div>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={notifications.weeklyReports}
@@ -276,17 +374,23 @@ export function FamilySettingsTab() {
                   ...prev,
                   weeklyReports: e.target.checked
                 }))}
-                className="w-5 h-5 text-blue-600 rounded"
+                disabled={!isParent}
+                className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 disabled:opacity-50"
               />
-              <div>
-                <div className="font-medium text-gray-900 dark:text-white">Weekly Reports</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Receive weekly progress summaries
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    Weekly Reports
+                  </span>
+                  <Mail className="w-4 h-4 text-gray-400" />
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Receive comprehensive weekly progress summaries every Sunday
                 </div>
               </div>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={notifications.rewardAlerts}
@@ -294,20 +398,42 @@ export function FamilySettingsTab() {
                   ...prev,
                   rewardAlerts: e.target.checked
                 }))}
-                className="w-5 h-5 text-blue-600 rounded"
+                disabled={!isParent}
+                className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 disabled:opacity-50"
               />
-              <div>
-                <div className="font-medium text-gray-900 dark:text-white">Reward Alerts</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Get notified when rewards are available
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    Reward Alerts
+                  </span>
+                  <Bell className="w-4 h-4 text-gray-400" />
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Get notified when family members earn rewards and achievements
                 </div>
               </div>
             </label>
+
+            {!isParent && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <Shield className="w-4 h-4 inline mr-1" />
+                Only parents can modify notification settings
+              </p>
+            )}
           </CardContent>
         </Card>
 
+        {/* Family Invite Code - Only for parents */}
+        {isParent && (
+          <div className="lg:col-span-2">
+            <InviteCodeDisplay variant="card" showTitle={false} />
+          </div>
+        )}
+
         {/* Family Feedback Management */}
-        <FeedbackDisplay />
+        <div className="lg:col-span-2">
+          <FeedbackDisplay />
+        </div>
       </div>
     </div>
   );
