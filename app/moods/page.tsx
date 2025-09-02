@@ -107,7 +107,6 @@ export default function MoodsPage() {
     try {
       await editMood(editingMood.id, moodData);
     } catch (error) {
-      console.error('Failed to edit mood:', error);
       throw error;
     }
   };
@@ -116,7 +115,7 @@ export default function MoodsPage() {
     try {
       await removeMood(moodId);
     } catch (error) {
-      console.error('Failed to delete mood:', error);
+      // Failed to delete mood - handle silently
     }
   };
 

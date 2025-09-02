@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
     // Check cache first  
     const cached = getHabitEnhancement(habitName);
     if (cached) {
-      console.log(`[API] Returning cached enhancement for: ${habitName}`);
+      // Returning cached enhancement
       const duration = Date.now() - startTime;
       
       // Track cache hit
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Call Claude API
-    console.log(`[API] Calling Claude for habit enhancement: ${habitName}`);
+    // Calling Claude for habit enhancement
     
     const prompt = HABIT_ENHANCE_PROMPT(habitName, category, existingHabits);
     const aiStartTime = Date.now();
@@ -167,8 +167,7 @@ export async function POST(req: NextRequest) {
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       let jsonText = jsonMatch ? jsonMatch[0] : responseText;
 
-      console.log('Raw AI response text:', responseText);
-      console.log('Extracted JSON text:', jsonText);
+      // Processing AI response text
 
       // Clean up common JSON issues
       jsonText = jsonText
@@ -185,7 +184,7 @@ export async function POST(req: NextRequest) {
         .replace(/"enhancedDescription":\s*""description":\s*"([^"]*)"[^"]*",/g, '"enhancedDescription": "$1",')
         .replace(/"enhancedDescription":\s*"[^"]*:\s*"([^"]*)"[^"]*",/g, '"enhancedDescription": "$1",');
 
-      console.log('Cleaned JSON text:', jsonText);
+      // JSON text cleaned
 
       // Check if JSON appears to be truncated
       if (!jsonText.endsWith('}')) {
@@ -227,7 +226,7 @@ export async function POST(req: NextRequest) {
         // Try parsing again
         try {
           enhancement = JSON.parse(fixedJsonText);
-          console.log('Successfully parsed with alternative method');
+          // Successfully parsed with alternative method
         } catch (secondParseError) {
           console.error('Alternative parsing also failed:', secondParseError);
           throw secondParseError;
@@ -251,7 +250,7 @@ export async function POST(req: NextRequest) {
             complementary: ['Stay consistent', 'Track your progress', 'Celebrate small wins']
           };
 
-          console.log('Using fallback enhancement due to JSON parse error');
+          // Using fallback enhancement due to JSON parse error
         } catch (fallbackError) {
           throw new Error('Invalid response format from AI. Please try again.');
         }
@@ -287,16 +286,7 @@ export async function POST(req: NextRequest) {
       console.warn('Failed to track usage (continuing anyway):', trackingError);
     }
     
-    // Log the interaction
-    console.log(`[API] Claude enhancement completed for "${habitName}":`, {
-      responseTime: `${responseTime}ms`,
-      inputTokens,
-      outputTokens,
-      cost: `$${cost.toFixed(4)}`,
-      cached: false,
-      userId,
-      requestId
-    });
+    // API interaction completed successfully
     
     return NextResponse.json({
       success: true,

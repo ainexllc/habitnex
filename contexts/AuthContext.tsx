@@ -145,7 +145,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUserProfile(null);
       await logOut();
     } catch (error) {
-      console.error('Sign out error:', error);
       throw error;
     }
   };

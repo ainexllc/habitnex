@@ -40,21 +40,17 @@ export function EditHabitModal({ habit, isOpen, onClose }: EditHabitModalProps) 
 
   const handleSubmit = async (data: CreateHabitForm) => {
     if (!habit) {
-      console.error('No habit available for editing');
+      // No habit available for editing
       return;
     }
-    
-    console.log('Submitting edit for habit:', habit.id, 'with data:', data);
-    
+
     try {
       setLoading(true);
       await editHabit(habit.id, data);
-      console.log('Edit submitted successfully');
-      
+
       // Close modal immediately since the UI is already updated optimistically
       onClose();
     } catch (error) {
-      console.error('Failed to update habit:', error);
       alert(`Failed to update habit: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);

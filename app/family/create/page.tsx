@@ -62,7 +62,7 @@ export default function CreateFamilyPage() {
       router.push('/dashboard/family');
       
     } catch (err) {
-      console.error('Failed to create family:', err);
+      // Failed to create family - handle silently
     }
   };
   

@@ -78,7 +78,7 @@ export function FamilyMemberZone({
         }
       }
     } catch (error) {
-      console.error('Failed to toggle habit:', error);
+      // Failed to toggle habit - handle silently
     }
   }, [toggleCompletion]);
   
@@ -210,17 +210,17 @@ export function FamilyMemberZone({
               <div
                 key={habit.id}
                 className={cn(
-                  "relative flex items-center justify-between p-3 rounded-lg transition-all duration-200",
+                  "relative flex flex-col p-3 rounded-lg transition-all duration-200",
                   touchMode ? "p-4" : "p-3",
                   habit.completed 
-                    ? "bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800" 
+                    ? "bg-green-50/50 dark:bg-green-950/10 border border-green-200/50 dark:border-green-800/30" 
                     : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
                   celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
                   loading && "opacity-50 pointer-events-none"
                 )}
               >
-                {/* Habit Info - Simplified */}
-                <div className="flex-1 min-w-0 pr-3">
+                {/* Habit Info - Vertical Layout */}
+                <div className="flex-1 min-w-0 mb-2">
                   <h4 className={cn(
                     `font-semibold ${theme.text.primary}`,
                     touchMode ? "text-lg" : "text-base",
@@ -230,56 +230,75 @@ export function FamilyMemberZone({
                   </h4>
                   {habit.description && (
                     <p className={cn(
-                      `${theme.text.muted} mt-0.5`,
+                      `${theme.text.muted} mt-1`,
                       touchMode ? "text-base" : "text-sm",
-                      habit.completed && "line-through"
+                      habit.completed && "line-through opacity-60"
                     )}>
                       {habit.description}
                     </p>
                   )}
-                  <div className="flex items-center space-x-1 mt-1">
-                    <Zap className="w-3.5 h-3.5 text-yellow-500" />
-                    <span className={cn(
-                      `text-yellow-600 dark:text-yellow-400 font-semibold`,
-                      touchMode ? "text-base" : "text-sm"
-                    )}>
-                      {habit.basePoints} pts
-                    </span>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center space-x-1">
+                      <Zap className="w-3 h-3 text-yellow-500" />
+                      <span className={cn(
+                        `text-yellow-600 dark:text-yellow-400 font-medium`,
+                        touchMode ? "text-sm" : "text-xs"
+                      )}>
+                        {habit.basePoints} pts
+                      </span>
+                    </div>
+                    {habit.streak && habit.streak > 0 && (
+                      <div className="flex items-center space-x-1">
+                        <Trophy className="w-3 h-3 text-orange-500" />
+                        <span className={cn(
+                          `text-orange-600 dark:text-orange-400 font-medium`,
+                          touchMode ? "text-sm" : "text-xs"
+                        )}>
+                          {habit.streak} day streak
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
-                {/* Improved Completion Button */}
-                <VisualFeedback
-                  feedbackType={habit.completed ? "success" : "info"}
-                  onInteraction={() => {
-                    handleHabitToggle(habit.id, habit.completed);
-                  }}
-                  disabled={loading}
-                >
-                  <Button
-                    variant="ghost"
-                    size={touchMode ? "lg" : "sm"}
-                    className={cn(
-                      "flex-shrink-0 rounded-lg font-semibold transition-all duration-200",
-                      touchMode ? "px-4 py-2 text-base min-w-[100px]" : "px-3 py-1.5 text-sm min-w-[80px]",
-                      habit.completed 
-                        ? "bg-green-600 hover:bg-green-700 text-white border-2 border-green-600" 
-                        : "bg-green-500 hover:bg-green-600 text-white border-2 border-green-500"
-                    )}
+                {/* Minimal Completion Button at Bottom */}
+                <div className="flex justify-end">
+                  <VisualFeedback
+                    feedbackType={habit.completed ? "success" : "info"}
+                    onInteraction={() => {
+                      handleHabitToggle(habit.id, habit.completed);
+                    }}
                     disabled={loading}
                   >
-                    {habit.completed ? (
-                      <span className="flex items-center gap-2">
-                        <CheckCircle2 className={cn(
-                          touchMode ? "w-5 h-5" : "w-4 h-4"
-                        )} />
-                        Done
-                      </span>
-                    ) : (
-                      <span>Done</span>
-                    )}
-                  </Button>
-                </VisualFeedback>
+                    <button
+                      className={cn(
+                        "rounded transition-all duration-200 font-medium",
+                        touchMode ? "px-2 py-1 text-xs" : "px-1.5 py-0.5 text-[10px]",
+                        habit.completed 
+                          ? "bg-green-100/70 hover:bg-green-200/70 text-green-700 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400" 
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400"
+                      )}
+                      onClick={() => handleHabitToggle(habit.id, habit.completed)}
+                      disabled={loading}
+                    >
+                      {habit.completed ? (
+                        <span className="flex items-center gap-0.5">
+                          <CheckCircle2 className={cn(
+                            touchMode ? "w-3 h-3" : "w-2.5 h-2.5"
+                          )} />
+                          <span>Done</span>
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-0.5">
+                          <Circle className={cn(
+                            touchMode ? "w-3 h-3" : "w-2.5 h-2.5"
+                          )} />
+                          <span>Mark</span>
+                        </span>
+                      )}
+                    </button>
+                  </VisualFeedback>
+                </div>
                 
                 {/* Celebration Effect - Keep this unchanged */}
                 {celebratingHabitId === habit.id && (

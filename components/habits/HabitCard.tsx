@@ -35,7 +35,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
       setLoading(true);
       await toggleCompletion(habit.id, undefined, !isCompleted);
     } catch (error) {
-      console.error('Failed to toggle completion:', error);
+      // Failed to toggle completion - handle silently
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
       try {
         await removeHabit(habit.id);
       } catch (error) {
-        console.error('Failed to delete habit:', error);
+        // Failed to delete habit - handle silently
       }
     }
   };

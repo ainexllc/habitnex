@@ -38,7 +38,7 @@ export function HabitListOptimized({
         const parsed = JSON.parse(savedExpanded);
         setExpandedHabits(new Set(parsed));
       } catch (e) {
-        console.error('Failed to parse expanded habits:', e);
+        // Failed to parse expanded habits from localStorage
       }
     }
   }, []);

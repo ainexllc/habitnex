@@ -52,7 +52,6 @@ export const updateUserSelectedFamily = async (userId: string, familyId: string)
       updatedAt: Timestamp.now()
     });
   } catch (error) {
-    console.error('Error updating user selected family:', error);
     throw error;
   }
 };
@@ -67,7 +66,6 @@ export const getUserSelectedFamily = async (userId: string): Promise<string | nu
     }
     return null;
   } catch (error) {
-    console.error('Error getting user selected family:', error);
     return null;
   }
 };
@@ -81,7 +79,6 @@ export const clearUserSelectedFamily = async (userId: string) => {
       updatedAt: Timestamp.now()
     });
   } catch (error) {
-    console.error('Error clearing user selected family:', error);
     throw error;
   }
 };
@@ -94,7 +91,6 @@ export const updateUserTheme = async (userId: string, theme: 'light' | 'dark') =
       updatedAt: Timestamp.now()
     });
   } catch (error) {
-    console.error('Error updating user theme:', error);
     throw error;
   }
 };
@@ -138,7 +134,6 @@ export const getUserHabits = async (userId: string) => {
 
 export const updateHabit = async (userId: string, habitId: string, updates: Partial<Habit> | any) => {
   try {
-    console.log('Updating habit in database:', habitId, updates);
     const habitRef = doc(db, 'users', userId, 'habits', habitId);
     
     // Clean the updates object to remove undefined values and empty strings
@@ -170,16 +165,12 @@ export const updateHabit = async (userId: string, habitId: string, updates: Part
         }
       }
     });
-    
-    console.log('Cleaned updates for database:', cleanUpdates);
-    
+
     await updateDoc(habitRef, {
       ...cleanUpdates,
       updatedAt: Timestamp.now()
     });
-    console.log('Habit updated in database successfully');
   } catch (error) {
-    console.error('Database update error:', error);
     throw error;
   }
 };

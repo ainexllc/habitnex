@@ -72,8 +72,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           }
         }
       } catch (error) {
-        console.error('Error loading theme from Firebase:', error);
-        // Fall back to localStorage if Firebase fails
+        // Error loading theme from Firebase - fall back to localStorage
         const savedTheme = localStorage.getItem('theme') as Theme | null;
         initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       }
@@ -109,7 +108,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       try {
         await updateUserTheme(userId, newTheme);
       } catch (error) {
-        console.error('Error syncing theme to Firebase:', error);
+        // Error syncing theme to Firebase - handle silently
       }
     }
   };

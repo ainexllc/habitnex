@@ -97,7 +97,7 @@ export function ModernFamilyHeader({
         }
       }
     } catch (error) {
-      console.error('Error toggling fullscreen:', error);
+      // Error toggling fullscreen - handle silently
     }
   };
 

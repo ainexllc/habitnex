@@ -38,7 +38,7 @@ export function MoodEditModal({ mood, isOpen, onClose, onSave, loading = false }
       await onSave(moodData);
       onClose();
     } catch (error) {
-      console.error('Error saving mood:', error);
+      // Error saving mood - let the parent component handle it
     } finally {
       setSaving(false);
     }

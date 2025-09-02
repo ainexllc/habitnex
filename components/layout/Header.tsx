@@ -17,7 +17,7 @@ export function Header() {
     try {
       await signOut();
     } catch (error) {
-      console.error('Failed to sign out:', error);
+      // Handle sign out error silently - user will see auth context error
     }
   };
 

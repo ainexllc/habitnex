@@ -22,28 +22,22 @@ export function useHabits() {
 
   const fetchHabits = async () => {
     if (!user) {
-      console.log('No user available for fetching habits');
+      // No user available for fetching habits
       return;
     }
-
-    console.log('Fetching habits for user:', user.uid);
 
     try {
       setLoading(true);
       setError(null);
-      
+
       const [habitsData, completionsData] = await Promise.all([
         getUserHabits(user.uid),
         getCompletions(user.uid)
       ]);
-      
-      console.log('Fetched habits:', habitsData);
-      console.log('Fetched completions:', completionsData);
-      
+
       setHabits(habitsData);
       setCompletions(completionsData);
     } catch (err) {
-      console.error('Error fetching habits:', err);
       setError('Failed to load habits');
     } finally {
       setLoading(false);
@@ -52,23 +46,17 @@ export function useHabits() {
 
   const addHabit = async (habitData: CreateHabitForm) => {
     if (!user) {
-      console.error('No user found when trying to create habit');
+      // No user found when trying to create habit
       return;
     }
 
-    console.log('Creating habit for user:', user.uid);
-    console.log('Habit data:', habitData);
-
     try {
       const habitId = await createHabit(user.uid, { ...habitData, isArchived: false });
-      console.log('Habit created with ID:', habitId);
-      
+
       await fetchHabits(); // Refresh the list
-      console.log('Habits refetched after creation');
-      
+
       return habitId;
     } catch (err) {
-      console.error('Error creating habit:', err);
       throw new Error('Failed to create habit');
     }
   };
@@ -76,13 +64,11 @@ export function useHabits() {
   const editHabit = async (habitId: string, updates: Partial<Habit> | CreateHabitForm) => {
     if (!user) return;
 
-    console.log('Editing habit:', habitId, 'with updates:', updates);
-
     // Optimistic update - update UI immediately
     const originalHabits = habits;
-    setHabits(prevHabits => 
-      prevHabits.map(habit => 
-        habit.id === habitId 
+    setHabits(prevHabits =>
+      prevHabits.map(habit =>
+        habit.id === habitId
           ? { ...habit, ...updates, updatedAt: new Date().toISOString() }
           : habit
       )
@@ -90,10 +76,8 @@ export function useHabits() {
 
     try {
       await updateHabit(user.uid, habitId, updates);
-      console.log('Habit updated successfully');
       // The UI is already updated, no need to refetch
     } catch (err) {
-      console.error('Error updating habit:', err);
       // Revert on error
       setHabits(originalHabits);
       throw new Error('Failed to update habit');
@@ -114,7 +98,6 @@ export function useHabits() {
         prevCompletions.filter(completion => completion.habitId !== habitId)
       );
     } catch (err) {
-      console.error('Error deleting habit:', err);
       // Revert on error
       setHabits(originalHabits);
       throw new Error('Failed to delete habit');
@@ -156,7 +139,6 @@ export function useHabits() {
       // Refresh to get the actual completion data with real ID
       await fetchHabits();
     } catch (err) {
-      console.error('Error toggling completion:', err);
       // Revert on error
       setCompletions(originalCompletions);
       throw new Error('Failed to update completion');

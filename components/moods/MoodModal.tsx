@@ -52,14 +52,12 @@ export function MoodModal({ isOpen, onClose, onSubmit, loading = false, date }: 
       setError(null);
       setIsSubmitting(true);
       await onSubmit(moodData);
-      console.log('Mood submitted successfully');
       setSuccess(true);
       // Close modal after brief success message
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (error: any) {
-      console.error('Failed to submit mood:', error);
       setError(error.message || 'Failed to save mood. Please try again.');
     } finally {
       setIsSubmitting(false);

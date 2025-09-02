@@ -45,7 +45,6 @@ export default function MoodHabitCorrelationComponent({ days = 30 }: MoodHabitCo
         setHabitImpacts(impacts.filter(impact => impact.totalDaysWithData > 0));
         setHabits(userHabits);
       } catch (err) {
-        console.error('Error fetching correlation data:', err);
         setError('Failed to load correlation data');
       } finally {
         setLoading(false);

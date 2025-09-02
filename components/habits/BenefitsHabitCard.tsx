@@ -69,7 +69,7 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
       setLoading(true);
       await toggleCompletion(habit.id, undefined, !isCompleted);
     } catch (error) {
-      console.error('Failed to toggle completion:', error);
+      // Failed to toggle completion - handle silently
     } finally {
       setLoading(false);
     }
@@ -89,8 +89,7 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
         // The habit will be removed from the list automatically
         // when the habits state is updated in the useHabits hook
       } catch (error) {
-        console.error('Failed to delete habit:', error);
-        // You could add a toast notification here for better UX
+        // Failed to delete habit - you could add a toast notification here for better UX
       } finally {
         setLoading(false);
       }

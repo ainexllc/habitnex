@@ -22,7 +22,7 @@ export function CreateHabitModal({ isOpen, onClose }: CreateHabitModalProps) {
       await addHabit(data);
       onClose();
     } catch (error) {
-      console.error('Failed to create habit:', error);
+      // Failed to create habit - handle silently
     } finally {
       setLoading(false);
     }

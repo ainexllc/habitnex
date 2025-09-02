@@ -274,9 +274,7 @@ export const updateHabit = async (userId: string, habitId: string, updates: Part
       updatedAt: Timestamp.now()
     };
 
-    console.log('Updating family habit in database:', habitId, familyUpdates);
     await updateDoc(habitRef, familyUpdates);
-    console.log('Family habit updated in database successfully');
   } else {
     // Fallback to individual structure
     return legacyDb.updateHabit(userId, habitId, updates);

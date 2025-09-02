@@ -51,7 +51,7 @@ export function CompactHabitCard({ habit, onEdit, showActions = true }: CompactH
       setLoading(true);
       await toggleCompletion(habit.id, undefined, !isCompleted);
     } catch (error) {
-      console.error('Failed to toggle completion:', error);
+      // Failed to toggle completion - handle silently
     } finally {
       setLoading(false);
     }

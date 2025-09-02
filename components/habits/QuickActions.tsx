@@ -25,7 +25,7 @@ export function QuickActions() {
     try {
       await toggleCompletion(habitId, undefined, !isCompleted);
     } catch (error) {
-      console.error('Failed to toggle habit:', error);
+      // Failed to toggle habit - handle silently
     } finally {
       setLoadingHabits(prev => {
         const next = new Set(prev);

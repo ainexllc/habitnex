@@ -123,11 +123,9 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
             touchMode={touchMode}
             isExpanded={selectedMember === member.id}
             onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
-            onToggleHabit={toggleMemberCompletion}
-            onHabitClick={handleHabitClick}
             className={cn(
               "transition-all duration-300",
-              touchMode && "min-h-[400px]",
+              touchMode && "min-h-[350px]",
               selectedMember && selectedMember !== member.id && touchMode && "opacity-50 scale-95"
             )}
           />

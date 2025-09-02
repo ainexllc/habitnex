@@ -48,10 +48,10 @@ export function MoodBar({ className = '' }: MoodBarProps) {
   const handleMoodSubmit = async (moodData: any) => {
     try {
       await addMood(moodData);
-      console.log('Mood saved successfully');
+      // Mood saved successfully - no need to log
     } catch (error) {
-      console.error('Failed to save mood:', error);
-      throw error; // Let the modal handle the error
+      // Failed to save mood - let the modal handle the error
+      throw error;
     }
   };
 
@@ -62,13 +62,13 @@ export function MoodBar({ className = '' }: MoodBarProps) {
 
   const handleMoodEditSave = async (moodData: any) => {
     if (!editingMood) return;
-    
+
     try {
       await editMood(editingMood.id, moodData);
       setIsEditModalOpen(false);
       setEditingMood(null);
     } catch (error) {
-      console.error('Failed to edit mood:', error);
+      // Failed to edit mood - let the modal handle the error
       throw error;
     }
   };
