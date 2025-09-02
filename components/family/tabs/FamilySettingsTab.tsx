@@ -109,24 +109,24 @@ export function FamilySettingsTab() {
 
       {/* Success Message */}
       {success && (
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-400 rounded-lg flex items-center">
+        <div className="mb-8 p-5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-400 rounded-lg flex items-center">
           <Activity className="w-5 h-5 mr-2" />
           Settings saved successfully!
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-2">
         {/* Family Information */}
         <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader className="pb-4">
+          <CardHeader className="p-6">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Family Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6 pt-0 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Family Name
               </label>
               <div className="flex gap-2">
@@ -169,10 +169,10 @@ export function FamilySettingsTab() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Family ID
               </label>
-              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <code className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                   {currentFamily.id}
                 </code>
@@ -180,10 +180,10 @@ export function FamilySettingsTab() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Created
               </label>
-              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   {new Date(currentFamily.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -198,29 +198,29 @@ export function FamilySettingsTab() {
 
         {/* Appearance Settings */}
         <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader className="pb-4">
+          <CardHeader className="p-6">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Palette className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               Appearance
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 pt-0">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
                 Theme Mode
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 <button
                   onClick={() => setTheme('light')}
                   className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                    "flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all",
                     theme === 'light'
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                       : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
                   )}
                 >
                   <Sun className={cn(
-                    "w-6 h-6 mb-1",
+                    "w-6 h-6 mb-2",
                     theme === 'light' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
                   )} />
                   <span className={cn(
@@ -234,14 +234,14 @@ export function FamilySettingsTab() {
                 <button
                   onClick={() => setTheme('dark')}
                   className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                    "flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all",
                     theme === 'dark'
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                       : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
                   )}
                 >
                   <Moon className={cn(
-                    "w-6 h-6 mb-1",
+                    "w-6 h-6 mb-2",
                     theme === 'dark' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
                   )} />
                   <span className={cn(
@@ -255,14 +255,14 @@ export function FamilySettingsTab() {
                 <button
                   onClick={() => setTheme('system')}
                   className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                    "flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all",
                     theme === 'system'
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                       : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
                   )}
                 >
                   <Monitor className={cn(
-                    "w-6 h-6 mb-1",
+                    "w-6 h-6 mb-2",
                     theme === 'system' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
                   )} />
                   <span className={cn(
@@ -273,7 +273,7 @@ export function FamilySettingsTab() {
                   </span>
                 </button>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
                 Choose how NextVibe appears on your device
               </p>
             </div>
@@ -283,13 +283,13 @@ export function FamilySettingsTab() {
         {/* Touch Screen Settings - Only visible to parents */}
         {isParent && (
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <CardHeader className="pb-4">
+            <CardHeader className="p-6">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Monitor className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 Touch Screen Mode
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 pt-0 space-y-5">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -308,8 +308,8 @@ export function FamilySettingsTab() {
               </label>
 
               {touchScreenMode && (
-                <div className="pl-8">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="mt-4 pl-8">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Auto Timeout
                   </label>
                   <select
@@ -335,13 +335,13 @@ export function FamilySettingsTab() {
 
         {/* Notification Preferences */}
         <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader className="pb-4">
+          <CardHeader className="p-6">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Bell className="w-5 h-5 text-orange-600 dark:text-orange-400" />
               Notification Preferences
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6 pt-0 space-y-5">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -415,7 +415,7 @@ export function FamilySettingsTab() {
             </label>
 
             {!isParent && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <Shield className="w-4 h-4 inline mr-1" />
                 Only parents can modify notification settings
               </p>
