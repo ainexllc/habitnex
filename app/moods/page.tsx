@@ -148,7 +148,7 @@ export default function MoodsPage() {
       <div className={`min-h-screen ${theme.surface.base}`}>
         <Header />
         
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -178,7 +178,7 @@ export default function MoodsPage() {
 
           {/* Today's Mood Display */}
           {todayMood && (
-            <div className="mb-8">
+            <div className="mb-10">
               <h2 className={`text-xl font-semibold ${theme.text.primary} mb-4`}>
                 Today's Mood
               </h2>
@@ -192,16 +192,16 @@ export default function MoodsPage() {
 
           {/* Analytics */}
           {moodAnalytics && (
-            <div className="mb-8 space-y-6">
+            <div className="mb-10 space-y-8">
               <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
                 Mood Analytics
               </h2>
               
               {/* Average Scores */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">
                       {moodAnalytics.averages.mood.toFixed(1)}
                     </div>
                     <div className={`text-sm ${theme.text.secondary}`}>
@@ -210,8 +210,8 @@ export default function MoodsPage() {
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-success-600 dark:text-success-400">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-success-600 dark:text-success-400 mb-1">
                       {moodAnalytics.averages.energy.toFixed(1)}
                     </div>
                     <div className={`text-sm ${theme.text.secondary}`}>
@@ -220,8 +220,8 @@ export default function MoodsPage() {
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-warning-600 dark:text-warning-400">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-warning-600 dark:text-warning-400 mb-1">
                       {moodAnalytics.averages.stress.toFixed(1)}
                     </div>
                     <div className={`text-sm ${theme.text.secondary}`}>
@@ -230,8 +230,8 @@ export default function MoodsPage() {
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-secondary-600 dark:text-secondary-400 mb-1">
                       {moodAnalytics.averages.sleep.toFixed(1)}
                     </div>
                     <div className={`text-sm ${theme.text.secondary}`}>
@@ -243,14 +243,14 @@ export default function MoodsPage() {
 
               {/* Mood Trends Chart */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
+                <CardHeader className="p-6">
+                  <CardTitle className="flex items-center text-lg">
                     <TrendingUp className="w-5 h-5 mr-2" />
                     Mood Trends (Last 30 Days)
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-64">
+                <CardContent className="p-6 pt-0">
+                  <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={moodAnalytics.chartData}>
                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -294,7 +294,7 @@ export default function MoodsPage() {
           )}
 
           {/* Mood History */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="flex items-center justify-between">
               <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
                 Mood History
@@ -344,7 +344,7 @@ export default function MoodsPage() {
 
             {moods.length === 0 ? (
               <Card>
-                <CardContent className="text-center py-12">
+                <CardContent className="text-center p-12">
                   <Heart className="w-16 h-16 text-primary-600 dark:text-primary-400 mx-auto mb-4 opacity-50" />
                   <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
                     No mood entries yet
@@ -368,7 +368,7 @@ export default function MoodsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {sortedMoods.map((mood) => (
                   <MoodCard
                     key={mood.id}

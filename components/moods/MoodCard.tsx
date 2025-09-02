@@ -91,10 +91,10 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
     icon: any, 
     type: 'mood' | 'energy' | 'stress' | 'sleep' 
   }) => (
-    <div className="flex items-center space-x-3">
+    <div className="flex items-center space-x-4">
       <Icon className={`w-4 h-4 ${theme.text.muted}`} />
       <div className="flex-1">
-        <div className="flex items-center justify-between text-xs mb-1">
+        <div className="flex items-center justify-between text-xs mb-2">
           <span className={theme.text.muted}>{label}</span>
           <span className="font-medium">{value}/5</span>
         </div>
@@ -109,16 +109,16 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
   );
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardHeader className="p-6 pb-4">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">
+          <div className="flex items-center space-x-4">
+            <div className="text-3xl">
               {MOOD_EMOJIS[mood.mood as keyof typeof MOOD_EMOJIS]}
             </div>
             <div>
               <CardTitle className="text-lg flex items-center">
-                <Heart className="w-4 h-4 mr-1 text-primary-600 dark:text-primary-400" />
+                <Heart className="w-4 h-4 mr-2 text-primary-600 dark:text-primary-400" />
                 {formatDate(mood.date)}
               </CardTitle>
               <p className={`text-sm ${theme.text.secondary}`}>
@@ -126,7 +126,7 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             {onEdit && (
               <Button variant="ghost" size="sm" onClick={() => onEdit(mood)}>
                 <Edit className="w-4 h-4" />
@@ -141,9 +141,9 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="p-6 pt-0 space-y-5">
         {/* Mood Meters */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <MoodMeter label="Mood" value={mood.mood} icon={Smile} type="mood" />
           <MoodMeter label="Energy" value={mood.energy} icon={Battery} type="energy" />
           <MoodMeter label="Stress" value={mood.stress} icon={Zap} type="stress" />
@@ -153,17 +153,17 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
         {/* Tags */}
         {mood.tags && mood.tags.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <Tag className={`w-3 h-3 ${theme.text.muted}`} />
               <span className={`text-xs ${theme.text.muted}`}>
                 Tags
               </span>
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2">
               {mood.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs rounded-full"
+                  className="px-3 py-1.5 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs rounded-full"
                 >
                   {tag.replace('-', ' ')}
                 </span>
@@ -178,7 +178,7 @@ export function MoodCard({ mood, onEdit, onDelete }: MoodCardProps) {
             <p className={`text-xs ${theme.text.muted}`}>
               Notes
             </p>
-            <p className={`text-sm ${theme.text.primary} ${theme.surface.secondary} p-3 rounded-lg`}>
+            <p className={`text-sm ${theme.text.primary} ${theme.surface.secondary} p-4 rounded-lg`}>
               {mood.notes}
             </p>
           </div>
