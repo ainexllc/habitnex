@@ -231,6 +231,88 @@
   }
 }
 
+/* Smooth expand/collapse animations for habit cards */
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes collapseOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+.animate-expand {
+  animation: expandIn 0.3s ease-out forwards;
+}
+
+.animate-collapse {
+  animation: collapseOut 0.3s ease-out forwards;
+}
+
+/* Button merge animation for habit completion */
+@keyframes buttonMerge {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(5px);
+  }
+  50% {
+    transform: scale(1.05) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes celebrateSuccess {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.animate-button-merge {
+  animation: buttonMerge 0.4s ease-out forwards;
+}
+
+.animate-celebrate {
+  animation: celebrateSuccess 0.6s ease-in-out;
+}
+
+/* Undo button pulse animation */
+@keyframes undoPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.animate-undo-pulse {
+  animation: undoPulse 2s ease-in-out infinite;
+}
+
 /* Responsive enhancements */
 @media (max-width: 640px) {
   .mobile-stack {

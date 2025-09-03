@@ -75,65 +75,57 @@ export function MoodBar({ className = '' }: MoodBarProps) {
 
   return (
     <>
-      <div className={`bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 ${className}`}>
+      <div className={`bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200/50 dark:border-gray-600/50 p-3 ${className}`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Heart className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-              <span className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                Today's Mood:
+              <Heart className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <span className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                Today's Mood
               </span>
             </div>
-            
+
             {todayMood ? (
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{getMoodEmoji(todayMood.mood)}</span>
-                  <div>
-                    <span className={`text-lg font-semibold ${getMoodColor(todayMood.mood)}`}>
-                      {getMoodLabel(todayMood.mood)}
-                    </span>
-                    <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
-                      {todayMood.mood}/5 mood
-                    </div>
-                  </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-lg">{getMoodEmoji(todayMood.mood)}</span>
+                <div className="flex flex-col">
+                  <span className={`text-sm font-semibold ${getMoodColor(todayMood.mood)}`}>
+                    {getMoodLabel(todayMood.mood)}
+                  </span>
+                  <span className="text-xs text-text-muted-light dark:text-text-muted-dark">
+                    {todayMood.mood}/5
+                  </span>
                 </div>
-                
-                {todayMood.notes && (
-                  <div className="hidden sm:block text-sm text-text-secondary-light dark:text-text-secondary-dark max-w-xs truncate">
-                    "{todayMood.notes}"
-                  </div>
-                )}
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Meh className="w-6 h-6 text-gray-400" />
-                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                  Not logged yet
+                <Meh className="w-5 h-5 text-gray-400" />
+                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                  Not logged
                 </span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center">
             {todayMood ? (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => handleMoodEdit(todayMood)}
-                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 px-2 py-1 h-7 text-xs"
               >
-                <Edit3 className="w-4 h-4 mr-1" />
+                <Edit3 className="w-3 h-3 mr-1" />
                 Edit
               </Button>
             ) : (
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 onClick={() => setShowMoodModal(true)}
-                className="bg-primary-600 hover:bg-primary-700 text-white"
+                className="bg-primary-600 hover:bg-primary-700 text-white px-2 py-1 h-7 text-xs"
               >
-                <Plus className="w-4 h-4 mr-1" />
-                Log Mood
+                <Plus className="w-3 h-3 mr-1" />
+                Log
               </Button>
             )}
           </div>

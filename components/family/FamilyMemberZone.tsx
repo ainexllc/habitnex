@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
-import { CheckCircle2, Circle, Star, Trophy, Zap } from 'lucide-react';
+import { CheckCircle2, Circle, Star, Trophy, Zap, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { theme } from '@/lib/theme';
@@ -221,13 +221,20 @@ export function FamilyMemberZone({
               >
                 {/* Habit Info - Vertical Layout */}
                 <div className="flex-1 min-w-0 mb-2">
-                  <h4 className={cn(
-                    `font-semibold ${theme.text.primary}`,
-                    touchMode ? "text-lg" : "text-base",
-                    habit.completed && "text-green-700 dark:text-green-400"
-                  )}>
-                    {habit.name}
-                  </h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className={cn(
+                      `font-semibold ${theme.text.primary}`,
+                      touchMode ? "text-lg" : "text-base",
+                      habit.completed && "text-green-700 dark:text-green-400"
+                    )}>
+                      {habit.name}
+                    </h4>
+                    {/* Family habit badge */}
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-medium">
+                      <Users className="w-3 h-3" />
+                      <span>Family</span>
+                    </div>
+                  </div>
                   {habit.description && (
                     <p className={cn(
                       `${theme.text.muted} mt-1`,

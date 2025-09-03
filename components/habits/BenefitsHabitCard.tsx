@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Habit } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -21,7 +21,11 @@ import {
   Award,
   Timer,
   Sparkles,
-  Flame
+  Flame,
+  X,
+  ThumbsUp,
+  ThumbsDown,
+  Undo2
 } from 'lucide-react';
 import { useHabits } from '@/hooks/useHabits';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
@@ -48,11 +52,27 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   // Check if habit has AI enhancement data for showing expand button
   const hasAIBenefits = !!(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.tip);
   const [expanded, setExpanded] = useState(false); // Always start collapsed
+  const [showDetails, setShowDetails] = useState(false); // Controls showing all extra details
+  const [completionStatus, setCompletionStatus] = useState<'success' | 'failure' | null>(null); // Track completion state
   
-  const { isHabitCompleted, toggleCompletion, completions, removeHabit } = useHabits();
+  const { isHabitCompleted, toggleCompletion, completions, removeHabit, getHabitCompletion } = useHabits();
   const { timeFormatPreferences } = useUserPreferences();
   
   const isCompleted = isHabitCompleted(habit.id);
+  
+  // Load completion status from notes when component mounts or completion changes
+  useEffect(() => {
+    const todayCompletion = getHabitCompletion(habit.id);
+    if (todayCompletion && todayCompletion.completed) {
+      if (todayCompletion.notes === 'Marked as failed') {
+        setCompletionStatus('failure');
+      } else if (todayCompletion.notes === 'Completed successfully') {
+        setCompletionStatus('success');
+      }
+    } else {
+      setCompletionStatus(null);
+    }
+  }, [habit.id, completions, getHabitCompletion]);
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
   const currentStreak = habit.frequency === 'interval' 
     ? calculateIntervalStreak(habit, completions)
@@ -64,12 +84,27 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   const nextDueDate = getNextDueDate(habit);
   const daysUntilDue = getDaysUntilDue(habit);
 
-  const handleToggleCompletion = async () => {
+  const handleCompletion = async (success: boolean) => {
     try {
       setLoading(true);
-      await toggleCompletion(habit.id, undefined, !isCompleted);
+      // Always mark as completed (true), but track success/failure separately
+      await toggleCompletion(habit.id, undefined, true, success ? 'Completed successfully' : 'Marked as failed');
+      setCompletionStatus(success ? 'success' : 'failure');
     } catch (error) {
       // Failed to toggle completion - handle silently
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUndo = async () => {
+    try {
+      setLoading(true);
+      // Toggle back to uncompleted
+      await toggleCompletion(habit.id, undefined, false);
+      setCompletionStatus(null);
+    } catch (error) {
+      // Failed to undo - handle silently
     } finally {
       setLoading(false);
     }
@@ -110,13 +145,103 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
     return 'text-gray-500 dark:text-gray-400';
   };
 
-  const getCompletionColor = () => {
-    if (completionRate >= 80) return 'text-green-600 dark:text-green-400';
-    if (completionRate >= 60) return 'text-blue-600 dark:text-blue-400';
-    if (completionRate >= 40) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  };
+  // Removed completion rate color function as percentage is no longer displayed
 
+  // Collapsed view for simpler presentation
+  if (!showDetails) {
+    return (
+      <Card className={`group hover:shadow-lg transition-all duration-300 ${getStatusColor()} border-2 relative overflow-hidden`}>
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            {/* Left: Habit Name and Expand Arrow */}
+            <div className="flex items-center flex-1 min-w-0 gap-3">
+              <button
+                onClick={() => setShowDetails(true)}
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:scale-110"
+                aria-label="Expand details"
+              >
+                <ChevronDown className="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200" />
+              </button>
+              
+              <h3 className={`text-lg font-semibold truncate transition-all duration-300 ${
+                isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'
+              }`} title={habit.name}>
+                {habit.name}
+              </h3>
+
+              {/* Quick stats in collapsed view */}
+              <div className="flex items-center gap-3 ml-auto mr-4 text-sm">
+                {currentStreak > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Flame className={`w-4 h-4 ${getStreakColor()}`} />
+                    <span className={`font-semibold ${getStreakColor()}`}>{currentStreak}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Completion Buttons */}
+            <div className="flex items-center gap-2">
+              {isDueToday || isOverdue ? (
+                isCompleted ? (
+                  <div className="flex items-center gap-2">
+                    <div className={`px-4 py-2 rounded-lg font-medium text-white ${
+                      completionStatus === 'success' ? 'animate-button-merge animate-celebrate' : 
+                      completionStatus === 'failure' ? 'animate-button-merge' : ''
+                    } transition-all duration-300 ${
+                      completionStatus === 'failure' 
+                        ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
+                        : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                    }`}>
+                      {completionStatus === 'success' ? '🎉 Done!' : 
+                       completionStatus === 'failure' ? '😔 Failed' : 
+                       '✅ Completed'}
+                    </div>
+                    <Button
+                      onClick={handleUndo}
+                      size="sm"
+                      variant="outline"
+                      className="hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="Undo"
+                    >
+                      <Undo2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleCompletion(true)}
+                      loading={loading}
+                      size="sm"
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      Completed
+                    </Button>
+                    <Button
+                      onClick={() => handleCompletion(false)}
+                      loading={loading}
+                      size="sm"
+                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Failed
+                    </Button>
+                  </div>
+                )
+              ) : (
+                <div className="text-sm text-gray-500 dark:text-gray-400 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  Not due
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // Full expanded view (original design)
   return (
           <Card className={`group hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 ${getStatusColor()} border-2 relative`}>
       {/* Permanent gradient overlay - always visible */}
@@ -134,22 +259,20 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
         </div>
       )}
 
-      {/* Completion celebration overlay */}
-      {isCompleted && (
-        <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-blue-500/10 rounded-xl pointer-events-none">
-          <div className="absolute top-2 right-2">
-            <div className="bg-green-500 text-white rounded-full p-1 shadow-lg">
-              <Check className="w-3 h-3" />
-            </div>
-          </div>
-        </div>
-      )}
-
       <CardHeader className="pb-3 relative">
+        {/* Collapse button at the top */}
+        <button
+          onClick={() => setShowDetails(false)}
+          className="absolute top-3 left-3 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 z-10"
+          aria-label="Collapse details"
+        >
+          <ChevronUp className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        </button>
+        
         {/* Top Row: Title, Status, Actions */}
         <div className="flex items-start justify-between">
           <div className="flex items-start flex-1 min-w-0">
-            <div className="flex-1 min-w-0 pl-4 pt-2">
+            <div className="flex-1 min-w-0 pl-12 pt-2">
               <h3 className={`task-title text-lg font-bold truncate transition-all duration-300 mt-2 ${
                 isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300'
               }`} title={habit.name}>
@@ -201,7 +324,7 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
             <div className="absolute bottom-0 left-0 w-12 h-12 bg-purple-500 rounded-full blur-lg"></div>
           </div>
 
-          {/* Left side: Day Streak and Success Rate */}
+          {/* Left side: Day Streak */}
           <div className="flex items-center gap-4 relative z-10">
             {/* Day Streak */}
             <div className="flex items-center gap-2 group/stat">
@@ -212,20 +335,6 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
                 </div>
               </div>
               <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Day Streak</span>
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-
-            {/* Success Rate */}
-            <div className="flex items-center gap-2 group/stat">
-              <div className="flex items-center gap-1">
-                <span className="text-lg">📊</span>
-                <div className={`text-xl font-bold transition-all duration-300 ${getCompletionColor()} group-hover/stat:scale-110`}>
-                  {completionRate}%
-                </div>
-              </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Success Rate</span>
             </div>
           </div>
 
@@ -364,27 +473,58 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
             )}
           </div>
 
-          {/* Enhanced Completion Button */}
+          {/* Enhanced Completion Buttons */}
           {isDueToday || isOverdue ? (
-            <Button
-              onClick={handleToggleCompletion}
-              loading={loading}
-              size="sm"
-              variant={isCompleted ? "secondary" : "primary"}
-              className={`group/btn relative overflow-hidden transition-all duration-300 hover:scale-105 ${
-                isCompleted
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg shadow-green-500/25'
-                  : isOverdue
-                  ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg shadow-red-500/25'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/25'
-              }`}
-            >
-              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-              <Check className={`w-4 h-4 mr-2 relative z-10 ${isCompleted ? 'text-white' : 'text-white'}`} />
-              <span className="relative z-10 font-medium">
-                {isCompleted ? 'Completed! 🎉' : 'Mark Done'}
-              </span>
-            </Button>
+            isCompleted ? (
+              <div className="flex items-center gap-3">
+                <div className={`px-6 py-2.5 rounded-full font-bold text-white ${
+                  completionStatus === 'success' ? 'animate-button-merge animate-celebrate' : 
+                  completionStatus === 'failure' ? 'animate-button-merge' : ''
+                } transition-all duration-500 transform shadow-lg ${
+                  completionStatus === 'failure'
+                    ? 'bg-gradient-to-r from-gray-500 to-gray-600 shadow-gray-500/25'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/25'
+                }`}>
+                  {completionStatus === 'success' ? '🎉 Congratulations!' : 
+                   completionStatus === 'failure' ? '😔 Bummer!' : 
+                   '✅ Completed Today'}
+                </div>
+                <Button
+                  onClick={handleUndo}
+                  size="sm"
+                  variant="outline"
+                  className="group/btn relative overflow-hidden bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 hover:scale-105 shadow-md"
+                  title="Undo completion"
+                >
+                  <div className="absolute inset-0 bg-red-100/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                  <Undo2 className="w-4 h-4 mr-1.5 relative z-10" />
+                  <span className="relative z-10 font-medium">Undo</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => handleCompletion(true)}
+                  loading={loading}
+                  size="sm"
+                  className="group/btn relative overflow-hidden bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg shadow-green-500/25 transition-all duration-300 hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                  <ThumbsUp className="w-4 h-4 mr-2 relative z-10" />
+                  <span className="relative z-10 font-medium">Completed</span>
+                </Button>
+                <Button
+                  onClick={() => handleCompletion(false)}
+                  loading={loading}
+                  size="sm"
+                  className="group/btn relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                  <ThumbsDown className="w-4 h-4 mr-2 relative z-10" />
+                  <span className="relative z-10 font-medium">Failed</span>
+                </Button>
+              </div>
+            )
           ) : (
             <div className="text-sm text-gray-500 dark:text-gray-400 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
               Not scheduled

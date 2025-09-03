@@ -10,9 +10,7 @@ import { MoodBar } from '@/components/moods/MoodBar';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { FamilyCreationBanner } from '@/components/ui/FamilyCreationBanner';
-import { DashboardViewSwitcher } from '@/components/dashboard/DashboardViewSwitcher';
-import { FocusView } from '@/components/dashboard/FocusView';
-import { CompactView } from '@/components/dashboard/CompactView';
+import { UnifiedView } from '@/components/dashboard/UnifiedView';
 
 import { useHabits } from '@/hooks/useHabits';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
@@ -22,7 +20,6 @@ import { Target, Plus, Flame, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Habit } from '@/types';
-import { DashboardViewType } from '@/types/dashboard';
 import { getRandomQuote, Quote } from '@/lib/quotes';
 
 export default function DashboardPage() {
@@ -34,19 +31,8 @@ export default function DashboardPage() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
   
-  // Dashboard view state
-  const [currentView, setCurrentView] = useState<DashboardViewType>(DashboardViewType.FOCUS);
-  
   // Quote state
   const [currentQuote, setCurrentQuote] = useState<Quote>(() => getRandomQuote());
-
-  // Load preferred view from localStorage
-  useEffect(() => {
-    const savedView = localStorage.getItem('preferredDashboardView') as DashboardViewType;
-    if (savedView && Object.values(DashboardViewType).includes(savedView)) {
-      setCurrentView(savedView);
-    }
-  }, []);
   
   // Navigation handlers for family creation banner
   const handleCreateFamily = () => {
@@ -221,7 +207,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className={`text-xl font-semibold ${theme.text.primary}`}>
-                  {currentView === DashboardViewType.FOCUS ? 'Today\'s Focus' : 'Your Habits'}
+                  Your Habits
                 </h2>
                 <p className={`text-sm ${theme.text.secondary}`}>
                   {new Date().toLocaleDateString('en-US', { 
@@ -234,13 +220,6 @@ export default function DashboardPage() {
               </div>
               
               <div className="flex items-center gap-3">
-                {habits.length > 0 && (
-                  <DashboardViewSwitcher
-                    currentView={currentView}
-                    onViewChange={setCurrentView}
-                    habitCount={habits.length}
-                  />
-                )}
                 <Button size="sm" variant="outline" onClick={() => setShowCreateHabitModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Habit
@@ -272,57 +251,10 @@ export default function DashboardPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-8">
-                {/* Dynamic View Rendering */}
-                {currentView === DashboardViewType.FOCUS && (
-                  <FocusView
-                    habits={habits}
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                )}
-
-
-
-                {currentView === DashboardViewType.COMPACT && (
-                  <CompactView
-                    habits={habits}
-                    onEdit={(habit) => setEditingHabit(habit)}
-                  />
-                )}
-                
-                {currentView === DashboardViewType.CARDS && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {habits.map((habit) => (
-                      <BenefitsHabitCard 
-                        key={habit.id} 
-                        habit={habit} 
-                        onEdit={(habit) => setEditingHabit(habit)}
-                      />
-                    ))}
-                  </div>
-                )}
-                
-                {(currentView === DashboardViewType.PRIORITY || currentView === DashboardViewType.CATEGORIES) && (
-                  <div className={`${theme.surface.secondary} rounded-lg p-8 text-center`}>
-                    <Target className={`w-12 h-12 ${theme.text.muted} mx-auto mb-4`} />
-                    <h3 className={`text-lg font-medium ${theme.text.primary} mb-2`}>
-                      Coming Soon
-                    </h3>
-                    <p className={`${theme.text.muted} mb-4`}>
-                      {currentView === DashboardViewType.PRIORITY 
-                        ? 'Priority Matrix view is coming in the next update.'
-                        : 'Category Groups view is coming in the next update.'
-                      }
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setCurrentView(DashboardViewType.FOCUS)}
-                    >
-                      Switch to Focus View
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <UnifiedView
+                habits={habits}
+                onEdit={(habit) => setEditingHabit(habit)}
+              />
             )}
           </div>
         </main>

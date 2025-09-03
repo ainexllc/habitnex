@@ -769,5 +769,25 @@ vercel rollback <url>    # Rollback deployment
 - **Authentication**: Google OAuth fully operational
 - **Deployment**: Dual deployment (Firebase + Vercel) with auto-deployment
 
+## Custom NextVibe Subagents 🤖
+
+We have specialized AI subagents designed specifically for NextVibe development. See `CUSTOM_AGENTS.md` for full details. Quick reference:
+
+### Available Agents:
+1. **🎯 Habit Analytics Agent** - `"analyze habits"` - Deep habit pattern analysis
+2. **🎨 UI/UX Enhancement Agent** - `"improve UI"` - Interface improvements  
+3. **🔥 Firebase Optimization Agent** - `"optimize firebase"` - Database performance
+4. **🧪 Testing Automation Agent** - `"write tests"` - Playwright test creation
+5. **🤖 AI Enhancement Agent** - `"enhance AI"` - Claude integration improvements
+6. **🚀 Performance Optimization Agent** - `"optimize performance"` - Speed improvements
+7. **👨‍👩‍👧‍👦 Family Features Agent** - `"family features"` - Shared habit tracking
+8. **🎮 Gamification Agent** - `"add gamification"` - Achievement systems
+9. **📊 Data Migration Agent** - `"migrate data"` - Database migrations
+10. **🔐 Security Enhancement Agent** - `"security audit"` - Security improvements
+11. **📱 Mobile Optimization Agent** - `"mobile optimize"` - PWA features
+12. **🛠️ DevOps Automation Agent** - `"setup CI/CD"` - Deployment automation
+
+**Usage**: Just mention the trigger words to activate a specialized agent for your task!
+
 ---
-*Last updated: August 2025 - Post AI Enhancement & UX Improvements*
+*Last updated: September 2025 - Added Custom Subagents & Unified Dashboard*
