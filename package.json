@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "dev:safe": "./scripts/dev-safe.sh",
     "dev:clean": "rm -rf .next node_modules/.cache && npm run dev",
     "fix-white-screen": "./scripts/fix-white-screen.sh",
@@ -32,6 +32,7 @@
   "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.60.0",
+    "@dicebear/adventurer": "^9.2.4",
     "@dicebear/collection": "^9.2.4",
     "@dicebear/core": "^9.2.4",
     "@hookform/resolvers": "^5.2.1",

@@ -212,9 +212,12 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
             ...doc.data()
           })) as FamilyHabit[];
           
-          // Ensure these are definitively family habits, not individual habits
-          const validatedFamilyHabits = familyHabitsData.filter(habit => 
-            habit.familyId === currentFamily.id && habit.assignedMembers
+          // Ensure these are definitively family habits, not individual habits, and are active
+          const validatedFamilyHabits = familyHabitsData.filter(habit =>
+            habit.familyId === currentFamily.id &&
+            habit.assignedMembers &&
+            habit.isActive !== false &&
+            habit.isArchived !== true
           );
           
           setFamilyHabits(validatedFamilyHabits);

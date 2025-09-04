@@ -98,21 +98,40 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
 
   return (
     <div className="px-6">
-      {/* Tab Header with Actions */}
+      {/* Tab Header - Enhanced */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Family Overview</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Welcome to your family dashboard - {today}</p>
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3" style={{
+            fontFamily: '"Henny Penny", cursive',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Family Overview
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
+            🏠 Welcome to your family dashboard - {today}
+          </p>
+          <div className="flex items-center gap-4">
+            <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+              {members.length} Family {members.length === 1 ? 'Member' : 'Members'}
+            </span>
+            <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+              {members.reduce((total, member) => total + (getMemberStats(member.id).completed || 0), 0)} Habits Completed Today
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Member Zones Grid */}
+      {/* Member Zones Grid - Enhanced spacing for larger cards */}
       <div className={cn(
-        "grid gap-3 md:gap-4 lg:gap-5",
-        touchMode ? "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-        members.length === 2 && "md:grid-cols-2",
+        "grid gap-6 md:gap-8",
+        touchMode ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+        members.length === 1 && "grid-cols-1 max-w-md mx-auto",
+        members.length === 2 && "md:grid-cols-2 max-w-4xl mx-auto",
         members.length === 3 && "lg:grid-cols-3",
-        members.length >= 4 && "xl:grid-cols-4"
+        members.length >= 4 && "xl:grid-cols-3 2xl:grid-cols-4"
       )}>
         {members.map((member) => (
           <FamilyMemberZone

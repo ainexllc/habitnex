@@ -80,7 +80,7 @@ This file contains important configuration and setup information for this projec
 - **Production Method**: Redirect (better for mobile, SEO-friendly)
 - **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app
 - **Redirect URIs**:
-  - http://localhost:3000/__/auth/handler (default Next.js port)
+  - http://localhost:3001/__/auth/handler (configured dev port)
   - https://habittracker-eb6bd.firebaseapp.com/__/auth/handler
   - https://nextvibe.app/__/auth/handler
 
@@ -749,6 +749,10 @@ vercel rollback <url>    # Rollback deployment
 - Resolved white screen issues with optimized build configuration
 - Removed problematic OpenTelemetry dependencies from API routes
 - Updated to latest dependencies and improved error handling
+- **OpenMoji Integration**: Replaced system emojis with 4,294 high-quality OpenMoji SVGs
+- **Unified Wizard Form**: Created 5-step wizard for family habit creation/editing
+- **Habit Benefits Modal**: Added "View Benefits" feature to family dashboard
+- **Smart Emoji Suggestions**: Context-aware emoji recommendations based on habit names
 
 ### Known Issues 🔧
 - ESLint configuration needs updating (unknown options errors)
@@ -768,6 +772,61 @@ vercel rollback <url>    # Rollback deployment
 - **AI**: Claude Haiku integration with cost tracking and rate limiting
 - **Authentication**: Google OAuth fully operational
 - **Deployment**: Dual deployment (Firebase + Vercel) with auto-deployment
+
+## OpenMoji Integration 🎨
+
+**Status**: ✅ Fully Integrated (September 2025)
+
+### Overview
+NextVibe now uses OpenMoji SVGs for all emoji displays, providing consistent, high-quality emoji rendering across all platforms and devices. This replaces system emojis with beautiful, open-source SVG icons.
+
+### Resources
+- **OpenMoji SVGs**: 4,294 SVG files in `/public/openmoji/`
+- **Test Page**: Visit `/test-openmoji` to see all components in action
+- **Emoji Source**: Downloaded from https://openmoji.org/
+
+### Key Components
+```tsx
+// Display Component
+import { OpenMoji } from '@/components/ui/OpenMoji';
+<OpenMoji emoji="💪" size={32} />
+
+// Picker Component for Forms
+import { OpenMojiTrigger } from '@/components/ui/OpenMojiPicker';
+<OpenMojiTrigger
+  value={selectedEmoji}
+  onSelect={setSelectedEmoji}
+  placeholder="🎯"
+  size={48}
+/>
+```
+
+### File Structure
+- `/public/openmoji/` - All 4,294 OpenMoji SVG files
+- `/components/ui/OpenMoji.tsx` - Display component with size variants
+- `/components/ui/OpenMojiPicker.tsx` - Emoji picker with search & categories
+- `/lib/openmoji/emojiMap.ts` - Mapping of habit-specific emojis
+- `/app/test-openmoji/page.tsx` - Test page demonstrating all features
+
+### Features
+- **Smart Suggestions**: Context-aware emoji recommendations based on habit names
+- **Categories**: Health & Fitness, Learning, Nutrition, Emotions, Nature, Activities  
+- **Fallback Support**: Gracefully falls back to system emojis if SVG unavailable
+- **Mobile Friendly**: Responsive design for all screen sizes
+- **Performance Optimized**: Lazy loading and efficient search
+- **Size Options**: 16, 20, 24, 32, 48, 64 pixels
+
+### Usage in Forms
+The OpenMoji picker is integrated into:
+- Family habit creation wizard (`/components/family/FamilyHabitForm.tsx`)
+- Individual habit forms
+- Challenge creation modals
+
+### AI Integration
+The emoji suggestion system uses AI to recommend relevant emojis based on:
+- Habit title (e.g., "morning run" → 🏃)
+- Activity type (e.g., "meditation" → 🧘)
+- Category context (e.g., "health" → 💪)
 
 ## Custom NextVibe Subagents 🤖
 

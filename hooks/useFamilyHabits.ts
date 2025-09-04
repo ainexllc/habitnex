@@ -216,7 +216,7 @@ export function useFamilyHabits(memberId?: string) {
 
 // Hook for managing all family members' habits (for parents/dashboard view)
 export function useAllFamilyHabits() {
-  const { currentFamily, isParent } = useFamily();
+  const { currentFamily, currentMember, isParent } = useFamily();
   const {
     familyHabits: allHabits,
     familyCompletions: allCompletions,
@@ -225,6 +225,31 @@ export function useAllFamilyHabits() {
     refreshData
   } = useGlobalData();
   
+  // Create new habit
+  const createHabit = useCallback(async (habitData: Omit<CreateFamilyHabitRequest['habit'], 'familyId'>) => {
+    if (!currentFamily?.id || !currentMember?.id) {
+      throw new Error('Must be in a family to create habits');
+    }
+    
+    try {
+      const request: CreateFamilyHabitRequest = {
+        familyId: currentFamily.id,
+        habit: {
+          ...habitData,
+          createdBy: currentMember.id,
+          familyId: currentFamily.id,
+          points: habitData.points || getDefaultPoints(habitData.difficulty || 'medium'),
+          bonusPoints: habitData.bonusPoints || 0
+        }
+      };
+      
+      await createFamilyHabit(request);
+      // Real-time listener will update the habits automatically
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create habit';
+      throw new Error(errorMessage);
+    }
+  }, [currentFamily?.id, currentMember?.id]);
   
   // Get habits by member
   const getHabitsByMember = useCallback((memberId: string) => {
@@ -341,6 +366,7 @@ export function useAllFamilyHabits() {
     error,
     
     // Actions
+    createHabit,
     updateHabit,
     deleteHabit,
     toggleMemberCompletion,

@@ -2,10 +2,10 @@
 
 import React, { useMemo } from 'react';
 import { createAvatar } from '@dicebear/core';
-import { funEmoji, avataaars, bottts, personas } from '@dicebear/collection';
+import { funEmoji, avataaars, bottts, personas, adventurer } from '@dicebear/collection';
 import { cn } from '@/lib/utils';
 
-export type AvatarStyle = 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+export type AvatarStyle = 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
 
 interface DiceBearAvatarProps {
   seed: string;
@@ -22,7 +22,9 @@ const styleCollections = {
   'avataaars': avataaars,
   'bottts': bottts,
   'personas': personas,
+  'adventurer': adventurer,
 };
+
 
 // Default style based on role (will be used externally)
 export const getDefaultAvatarStyle = (role: string): AvatarStyle => {
@@ -55,12 +57,20 @@ export function DiceBearAvatar({
         return createAvatar(personas as any, { seed }).toString();
       }
 
-      return createAvatar(collection as any, {
+      // Special handling for adventurer style which needs a background
+      const options: any = {
         seed,
-        // Common options for better consistency
         size,
-        backgroundColor: backgroundColor ? [backgroundColor] : undefined,
-      }).toString();
+      };
+      
+      // Add background for adventurer style to make it visible
+      if (style === 'adventurer') {
+        options.backgroundColor = backgroundColor ? [backgroundColor] : ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
+      } else if (backgroundColor) {
+        options.backgroundColor = [backgroundColor];
+      }
+      
+      return createAvatar(collection as any, options).toString();
     } catch (error) {
       console.error('Failed to generate DiceBear avatar:', error);
       return null;
@@ -89,8 +99,8 @@ export function DiceBearAvatar({
 
   return (
     <div
-      className={cn("flex items-center justify-center rounded-full overflow-hidden", className)}
-      style={{ width: size, height: size }}
+      className={cn("flex items-center justify-center rounded-full overflow-hidden relative", className)}
+      style={{ width: size, height: size, isolation: 'isolate' }}
       dangerouslySetInnerHTML={{ __html: avatarSvg }}
     />
   );
@@ -101,14 +111,34 @@ export function useAvatarPreview(baseSeed: string, style: AvatarStyle) {
   return useMemo(() => {
     const variants = [];
     for (let i = 0; i < 12; i++) {
-      // Add randomness to seed generation for more variety
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
-      const seed = `${baseSeed}-${i}-${randomSuffix}`;
-      variants.push({
-        id: i,
-        seed,
-        svg: createAvatar(styleCollections[style] as any, { seed, size: 64 }).toString()
-      });
+      try {
+        // Add randomness to seed generation for more variety
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const seed = `${baseSeed}-${i}-${randomSuffix}`;
+        
+        const collection = styleCollections[style];
+        if (!collection) {
+          console.error(`Style "${style}" not found in styleCollections`);
+          continue;
+        }
+        
+        // Add background for adventurer style
+        const options: any = { seed, size: 64 };
+        if (style === 'adventurer') {
+          options.backgroundColor = ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
+        }
+        
+        const svg = createAvatar(collection as any, options).toString();
+        
+        
+        variants.push({
+          id: i,
+          seed,
+          svg
+        });
+      } catch (error) {
+        console.error(`Failed to generate avatar for style "${style}":`, error);
+      }
     }
     return variants;
   }, [baseSeed, style]);

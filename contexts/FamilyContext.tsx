@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import { 
   Family, 
@@ -73,6 +74,7 @@ const FamilyContext = createContext<FamilyContextType | undefined>(undefined);
 
 export function FamilyProvider({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
+  const pathname = usePathname();
   
   // State
   const [currentFamily, setCurrentFamily] = useState<Family | null>(null);
@@ -94,17 +96,32 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user || authLoading) return;
     
+    const isFamilyRoute = pathname.startsWith('/family') || pathname.startsWith('/dashboard/family');
+    
     const loadUserFamily = async () => {
       try {
         setLoading(true);
         
-        // Check Firestore user profile for last family
+        // Always check for basic family status first
         const lastFamilyId = await getUserSelectedFamily(user.uid);
         
         if (lastFamilyId) {
           try {
-            await switchFamily(lastFamilyId);
-            return; // Successfully loaded from user profile
+            if (isFamilyRoute) {
+              // On family routes, load full family data
+              await switchFamily(lastFamilyId);
+            } else {
+              // On non-family routes, just set basic family info without full data loading
+              const familyData = await getFamily(lastFamilyId);
+              if (familyData) {
+                const member = familyData.members.find(m => m.userId === user.uid);
+                setCurrentFamily(familyData);
+                setCurrentMember(member || null);
+                // Don't load dashboard data on non-family routes
+                setDashboardData(null);
+              }
+            }
+            return; // Successfully loaded family info
           } catch (err) {
             console.warn('Failed to load family from user profile, searching for user families:', err);
             // Clear invalid family ID from user profile
@@ -112,25 +129,33 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
           }
         }
         
-        // If localStorage failed or is empty, discover user's families
-        let userFamilies = await getUserFamilies(user.uid);
-        
-        // If no families found, try to recover orphaned families
-        if (userFamilies.length === 0 && user.email) {
-          const recovered = await recoverOrphanedFamilies(user.uid, user.email);
+        // If no saved family or failed to load, discover user's families
+        // But only do the full search on family routes to avoid unnecessary database calls
+        if (isFamilyRoute) {
+          let userFamilies = await getUserFamilies(user.uid);
           
-          if (recovered) {
-            // Re-fetch families after recovery
-            userFamilies = await getUserFamilies(user.uid);
+          // If no families found, try to recover orphaned families
+          if (userFamilies.length === 0 && user.email) {
+            const recovered = await recoverOrphanedFamilies(user.uid, user.email);
+            
+            if (recovered) {
+              // Re-fetch families after recovery
+              userFamilies = await getUserFamilies(user.uid);
+            }
           }
-        }
-        
-        if (userFamilies.length > 0) {
-          // Auto-select the first family (or most recently used)
-          const selectedFamily = userFamilies[0];
-          await switchFamily(selectedFamily.familyId);
+          
+          if (userFamilies.length > 0) {
+            // Auto-select the first family (or most recently used)
+            const selectedFamily = userFamilies[0];
+            await switchFamily(selectedFamily.familyId);
+          } else {
+            // Clear any existing family state
+            setCurrentFamily(null);
+            setCurrentMember(null);
+            setDashboardData(null);
+          }
         } else {
-          // Clear any existing family state
+          // On non-family routes, just clear state if no saved family found
           setCurrentFamily(null);
           setCurrentMember(null);
           setDashboardData(null);
@@ -144,7 +169,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     };
     
     loadUserFamily();
-  }, [user, authLoading]);
+  }, [user, authLoading, pathname]);
   
   // Real-time subscription to family data
   useEffect(() => {

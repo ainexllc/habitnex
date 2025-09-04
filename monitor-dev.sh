@@ -3,7 +3,7 @@ while true; do
   echo "=== Dev Server Health Check $(date) ==="
   
   # Check if server is responsive
-  if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 | grep -q "200"; then
+  if curl -s -o /dev/null -w "%{http_code}" http://localhost:3001 | grep -q "200"; then
     echo "✅ Server responding (200 OK)"
   else
     echo "❌ Server not responding, attempting restart..."

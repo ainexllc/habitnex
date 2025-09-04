@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
-import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { HabitBenefitsModal } from './HabitBenefitsModal';
+import { OpenMoji } from '@/components/ui/OpenMoji';
 import { theme } from '@/lib/theme';
 
 interface FamilyMemberZoneProps {
@@ -41,16 +43,30 @@ export function FamilyMemberZone({
   className
 }: FamilyMemberZoneProps) {
   // We still need loading state from the hook, but toggleCompletion comes from props
-  const { loading } = useFamilyHabits(member.id);
+  const { loading, getHabitCompletion } = useFamilyHabits(member.id);
   const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [previousStats, setPreviousStats] = useState(member.stats);
-  // Initialize completion statuses - start empty for family dashboard
-  // Family dashboard should show fresh state each day, not carry over from database
-  const [completionStatuses, setCompletionStatuses] = useState<Record<string, 'success' | 'failure' | null>>({});
-  
+
   // Track which habits are expanded to show details
   const [expandedHabits, setExpandedHabits] = useState<Set<string>>(new Set());
+  const [benefitsModalHabit, setBenefitsModalHabit] = useState<FamilyHabit | null>(null);
+
+  // Get today's date for completion checking
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check actual database completion status for today
+  const getTodaysCompletionStatus = useCallback((habitId: string) => {
+    const todaysCompletion = getHabitCompletion(habitId, today);
+    if (todaysCompletion && todaysCompletion.completed) {
+      // Return success/failure based on notes, default to success
+      if (todaysCompletion.notes === 'Marked as failed') {
+        return 'failure';
+      }
+      return 'success';
+    }
+    return null;
+  }, [getHabitCompletion, today]);
   
   const toggleHabitExpanded = useCallback((habitId: string) => {
     setExpandedHabits(prev => {
@@ -106,15 +122,15 @@ export function FamilyMemberZone({
   // New handlers for dual completion buttons
   const handleHabitCompletion = useCallback(async (habitId: string, success: boolean) => {
     try {
-      // Always mark as completed (true) but track success/failure
-      await toggleCompletion(habitId, member.id, false); // false means we want to mark as completed (toggle from uncompleted state)
-      
-      // Update completion status
-      setCompletionStatuses(prev => ({
-        ...prev,
-        [habitId]: success ? 'success' : 'failure'
-      }));
-      
+      // Check current completion status
+      const currentCompletion = getTodaysCompletionStatus(habitId);
+      const isCurrentlyCompleted = currentCompletion !== null;
+
+      // If not completed, mark as completed. If already completed, toggle it off first, then back on.
+      if (!isCurrentlyCompleted) {
+        await toggleCompletion(habitId, member.id, false); // Mark as completed
+      }
+
       // Trigger celebration animation only for success
       if (success) {
         setCelebratingHabitId(habitId);
@@ -132,142 +148,208 @@ export function FamilyMemberZone({
             celebrateFirstHabit(member, completedHabit);
           }
 
-          const completedToday = habits.filter(h => h.completed).length + 1;
+          const completedToday = habits.filter(h => getTodaysCompletionStatus(h.id) !== null).length + 1;
           if (completedToday === habits.length) {
             celebratePerfectDay(member, habits.length);
           }
         }
       }
     } catch (error) {
-      // Error toggling completion - handle silently
+      console.error('Error toggling completion:', error);
     }
-  }, [toggleCompletion, habits, member, celebrateHabitCompletion, celebrateFirstHabit, celebratePerfectDay]);
+  }, [toggleCompletion, habits, member, celebrateHabitCompletion, celebrateFirstHabit, celebratePerfectDay, getTodaysCompletionStatus]);
 
   const handleUndo = useCallback(async (habitId: string) => {
-    console.log('🔄 Undo clicked for habit:', habitId, 'member:', member.id);
     try {
-      // Toggle back to uncompleted (true means current state is completed, so we want to undo it)
-      console.log('📤 Calling toggleCompletion with member.id and true (current completed state)...');
-      await toggleCompletion(habitId, member.id, true);
-      console.log('✅ Toggle completion successful');
-      setCompletionStatuses(prev => ({
-        ...prev,
-        [habitId]: null
-      }));
-      console.log('🔄 Local completion status cleared');
+      // Check if currently completed
+      const currentCompletion = getTodaysCompletionStatus(habitId);
+      const isCurrentlyCompleted = currentCompletion !== null;
+
+      // If completed, toggle to uncompleted
+      if (isCurrentlyCompleted) {
+        await toggleCompletion(habitId, member.id, true); // Mark as uncompleted
+      }
     } catch (error) {
-      console.error('❌ Undo failed:', error);
+      console.error('Failed to undo habit:', error);
     }
-  }, [toggleCompletion]);
+  }, [toggleCompletion, member.id, getTodaysCompletionStatus]);
   
   const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
   const level = Math.floor(member.stats.totalPoints / 100) + 1; // Level up every 100 points
   const pointsToNextLevel = 100 - (member.stats.totalPoints % 100);
   
   return (
-    <Card 
+    <>
+      <Card 
       className={cn(
-        "relative overflow-hidden transition-all duration-300 hover:shadow-lg",
+        "relative overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:scale-[1.02]",
         theme.surface.primary,
-        touchMode && "touch-optimized shadow-xl",
+        touchMode && "touch-optimized shadow-2xl",
         isExpanded && touchMode && "scale-105 shadow-2xl z-10",
-        "border-2",
+        "border-2 rounded-3xl",
         className
       )}
-      style={{ borderColor: member.color }}
+      style={{ 
+        borderColor: member.color,
+        background: `linear-gradient(145deg, ${theme.surface.primary}, ${member.color}05)`
+      }}
       onClick={touchMode && onExpand ? onExpand : undefined}
     >
-      {/* Member Header */}
+      {/* Member Header - Enhanced with larger avatars and names */}
       <CardHeader className={cn(
-        "pb-3",
-        touchMode ? "p-6" : "p-4"
+        "pb-4",
+        touchMode ? "p-8" : "p-6"
       )}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        {/* Centered Avatar and Name Layout */}
+        <div className="flex flex-col items-center text-center mb-6">
+          {/* Large Avatar */}
+          <div className="relative mb-4">
             {member.avatarStyle && member.avatarSeed ? (
-              <DiceBearAvatar
-                seed={member.avatarSeed}
-                style={member.avatarStyle}
-                size={touchMode ? 64 : 48}
-                className="border-2 border-white shadow-sm"
-                backgroundColor={member.color}
-                fallbackEmoji={member.avatar}
-              />
+              <div 
+                className="rounded-full border-4 shadow-lg ring-4 ring-opacity-20 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
+                style={{ borderColor: member.color }}
+              >
+                <DiceBearAvatar
+                  seed={member.avatarSeed}
+                  style={member.avatarStyle}
+                  size={touchMode ? 120 : 96}
+                  backgroundColor={member.color}
+                  fallbackEmoji={member.avatar}
+                />
+              </div>
             ) : (
               <div 
                 className={cn(
-                  "rounded-full flex items-center justify-center text-white font-bold",
-                  touchMode ? "w-16 h-16 text-2xl" : "w-12 h-12 text-lg"
+                  "rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-4 ring-opacity-20 transition-all hover:shadow-xl hover:scale-105 border-4",
+                  touchMode ? "w-30 h-30 text-5xl" : "w-24 h-24 text-4xl"
                 )}
-                style={{ backgroundColor: member.color }}
+                style={{ 
+                  backgroundColor: member.color,
+                  borderColor: member.color 
+                }}
               >
                 {member.avatar}
               </div>
             )}
-            <div>
-              <h3 className={cn(
-                "font-bold",
-                touchMode ? "text-3xl" : "text-xl"
-              )} style={{
-                fontFamily: '"Flavors", cursive',
-                color: member.color
-              }}>
-                {member.displayName}
-              </h3>
-              <div className={`flex items-center space-x-2 text-sm ${theme.text.muted}`}>
-                <Star className="w-4 h-4 text-yellow-500" />
-                <span className="font-medium">Level {level}</span>
-                <span>•</span>
-                <span>{member.stats.totalPoints} pts</span>
+            
+            {/* Completion Badge on Avatar */}
+            {completionRate === 100 && (
+              <div className="absolute -top-2 -right-2">
+                <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <Star className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Large Name and Level Info */}
+          <div>
+            <h3 className={cn(
+              "font-bold mb-2 leading-tight",
+              touchMode ? "text-4xl" : "text-3xl"
+            )} style={{
+              fontFamily: '"Henny Penny", cursive',
+              color: member.color,
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              {member.displayName}
+            </h3>
+            
+            {/* Level and Points Info */}
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 px-4 py-2 rounded-full">
+                <Star className="w-5 h-5 text-yellow-500" />
+                <span className={cn(
+                  "font-bold text-yellow-800 dark:text-yellow-200",
+                  touchMode ? "text-lg" : "text-base"
+                )}>
+                  Level {level}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 px-4 py-2 rounded-full">
+                <Trophy className="w-5 h-5 text-purple-500" />
+                <span className={cn(
+                  "font-bold text-purple-800 dark:text-purple-200",
+                  touchMode ? "text-lg" : "text-base"
+                )}>
+                  {member.stats.totalPoints} pts
+                </span>
+              </div>
+            </div>
+            
+            {/* Daily Completion Status */}
+            <div className="flex items-center justify-center">
+              <div className={cn(
+                "px-6 py-3 rounded-full font-bold shadow-md",
+                touchMode ? "text-xl" : "text-lg",
+                completionRate === 100 
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white" 
+                  : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
+              )}>
+                {stats.completed}/{stats.total} Today ({Math.round(completionRate)}%)
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Enhanced Progress Bars */}
+        <div className="space-y-4 mt-6">
+          {/* Daily Progress */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className={cn(
+                "font-semibold text-gray-700 dark:text-gray-300",
+                touchMode ? "text-lg" : "text-base"
+              )}>
+                Today's Progress
+              </span>
+              <span className={cn(
+                "font-bold",
+                touchMode ? "text-lg" : "text-base",
+                completionRate === 100 ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"
+              )}>
+                {Math.round(completionRate)}%
+              </span>
+            </div>
+            <Progress 
+              value={completionRate} 
+              className={cn(
+                "w-full",
+                touchMode ? "h-4" : "h-3"
+              )}
+              style={{ 
+                backgroundColor: `${member.color}20`,
+              }}
+            />
+          </div>
           
-          {/* Quick Stats */}
-          <div className="text-right">
-            <div className={cn(
-              "font-bold",
-              touchMode ? "text-2xl" : "text-lg",
-              completionRate === 100 ? theme.status.success.text : theme.text.primary
-            )}>
-              {stats.completed}/{stats.total}
+          {/* Level Progress */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className={cn(
+                "font-semibold text-gray-700 dark:text-gray-300",
+                touchMode ? "text-lg" : "text-base"
+              )}>
+                Level Progress
+              </span>
+              <span className={cn(
+                "font-bold text-purple-600 dark:text-purple-400",
+                touchMode ? "text-lg" : "text-base"
+              )}>
+                {pointsToNextLevel} pts to Level {level + 1}
+              </span>
             </div>
-            <div className={cn(
-              `text-sm ${theme.text.muted}`,
-              touchMode && "text-base"
-            )}>
-              {Math.round(completionRate)}% today
-            </div>
+            <Progress 
+              value={(member.stats.totalPoints % 100)} 
+              className={cn(
+                "w-full",
+                touchMode ? "h-4" : "h-3"
+              )}
+              style={{ 
+                backgroundColor: '#e0e7ff',
+              }}
+            />
           </div>
-        </div>
-        
-        {/* Progress Bar */}
-        <div className="mt-3">
-          <Progress 
-            value={completionRate} 
-            className={cn(
-              "w-full",
-              touchMode ? "h-3" : "h-2"
-            )}
-            style={{ 
-              backgroundColor: `${member.color}20`,
-            }}
-          />
-        </div>
-        
-        {/* Level Progress */}
-        <div className="mt-2">
-          <div className={`flex justify-between text-xs ${theme.text.muted}`}>
-            <span>Level {level}</span>
-            <span>{pointsToNextLevel} pts to next level</span>
-          </div>
-          <Progress 
-            value={(member.stats.totalPoints % 100)} 
-            className={cn(
-              "w-full mt-1",
-              touchMode ? "h-2" : "h-1"
-            )}
-          />
         </div>
       </CardHeader>
       
@@ -285,9 +367,8 @@ export function FamilyMemberZone({
             </div>
           ) : (
             habits.map((habit) => {
-              const status = completionStatuses[habit.id];
-              // For family dashboard, only show as completed if user explicitly marked it today
-              // Don't use database completion state as that persists across days
+              // Check actual database completion for today
+              const status = getTodaysCompletionStatus(habit.id);
               const isCompleted = status !== null;
               const isExpanded = expandedHabits.has(habit.id);
               
@@ -304,7 +385,7 @@ export function FamilyMemberZone({
                     loading && "opacity-50 pointer-events-none"
                   )}
                 >
-                  {/* First Line: Expand arrow and habit name */}
+                  {/* First Line: Expand arrow, emoji and habit name */}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleHabitExpanded(habit.id)}
@@ -317,6 +398,16 @@ export function FamilyMemberZone({
                         <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       )}
                     </button>
+                    
+                    {habit.emoji && (
+                      <div className="flex-shrink-0">
+                        <OpenMoji 
+                          emoji={habit.emoji} 
+                          size={touchMode ? 32 : 24}
+                          alt={habit.name}
+                        />
+                      </div>
+                    )}
                     
                     <h4 className={cn(
                       `font-semibold flex-1 ${theme.text.primary}`,
@@ -332,12 +423,17 @@ export function FamilyMemberZone({
                     {isCompleted ? (
                       <>
                         <div className={cn(
-                          "px-3 py-1 rounded-lg font-medium text-white text-sm",
+                          "px-3 py-1 rounded-lg font-medium text-white text-sm flex items-center gap-1",
                           status === 'failure' 
                             ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
                             : 'bg-gradient-to-r from-green-500 to-emerald-500'
                         )}>
-                          {status === 'success' ? '🎉 Done!' : status === 'failure' ? '😔 Failed' : '✅ Completed'}
+                          <OpenMoji 
+                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😔' : '✅'} 
+                            size={16}
+                            alt={status === 'success' ? 'Party' : status === 'failure' ? 'Sad' : 'Check'}
+                          />
+                          <span>{status === 'success' ? 'Completed!' : status === 'failure' ? 'Failed' : 'Completed'}</span>
                         </div>
                         <Button
                           onClick={() => handleUndo(habit.id)}
@@ -351,25 +447,34 @@ export function FamilyMemberZone({
                       </>
                     ) : (
                       <>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleHabitCompletion(habit.id, true)}
-                            loading={loading}
-                            size="sm"
-                            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            Done
-                          </Button>
-                          <Button
-                            onClick={() => handleHabitCompletion(habit.id, false)}
-                            loading={loading}
-                            size="sm"
-                            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Skip
-                          </Button>
+                        <div className="flex items-center gap-3">
+                          {/* Points Display */}
+                          <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs font-bold rounded">
+                            <span>{habit.basePoints || 10}</span>
+                            <span>pts</span>
+                          </div>
+
+                          {/* Completion Buttons */}
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleHabitCompletion(habit.id, true)}
+                              loading={loading}
+                              size="sm"
+                              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                            >
+                              <Check className="w-4 h-4 mr-1" />
+                              Completed
+                            </Button>
+                            <Button
+                              onClick={() => handleHabitCompletion(habit.id, false)}
+                              loading={loading}
+                              size="sm"
+                              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Failed
+                            </Button>
+                          </div>
                         </div>
                       </>
                     )}
@@ -390,8 +495,21 @@ export function FamilyMemberZone({
                         </p>
                       )}
                       <div className="flex items-center gap-4 text-sm">
+                        {/* View Benefits Link */}
+                        {(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.successTips || habit.description) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBenefitsModalHabit(habit);
+                            }}
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          >
+                            <Info className="w-4 h-4" />
+                            <span className="underline">View Benefits</span>
+                          </button>
+                        )}
                         <span className={theme.text.muted}>
-                          Points: {habit.points || 10}
+                          {habit.points || 10} pts
                         </span>
                         {habit.tags && habit.tags.length > 0 && (
                           <span className={theme.text.muted}>
@@ -407,51 +525,60 @@ export function FamilyMemberZone({
           )}
         </div>
         
-        {/* Member Stats Summary */}
+        {/* Enhanced Member Stats Summary */}
         {(isExpanded || !touchMode) && stats.total > 0 && (
           <div className={cn(
-            `mt-6 pt-4 border-t ${theme.border.light}`,
-            touchMode && "mt-8 pt-6"
+            `mt-8 pt-6 border-t-2 ${theme.border.light}`,
+            touchMode && "mt-10 pt-8"
           )}>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div className="flex flex-col items-center">
+                <div className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl p-4 mb-3 shadow-lg">
+                  <Zap className="w-8 h-8 text-white mx-auto" />
+                </div>
                 <div className={cn(
-                  `font-bold ${theme.status.success.text}`,
-                  touchMode ? "text-2xl" : "text-lg"
+                  `font-bold text-green-600 dark:text-green-400`,
+                  touchMode ? "text-3xl" : "text-2xl"
                 )}>
                   {member.stats.currentStreak}
                 </div>
                 <div className={cn(
-                  theme.text.muted,
-                  touchMode ? "text-base" : "text-xs"
+                  "text-gray-600 dark:text-gray-400 font-medium",
+                  touchMode ? "text-lg" : "text-base"
                 )}>
                   Day Streak
                 </div>
               </div>
-              <div>
+              <div className="flex flex-col items-center">
+                <div className="bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl p-4 mb-3 shadow-lg">
+                  <Trophy className="w-8 h-8 text-white mx-auto" />
+                </div>
                 <div className={cn(
-                  `font-bold ${theme.status.info.text}`,
-                  touchMode ? "text-2xl" : "text-lg"
+                  `font-bold text-blue-600 dark:text-blue-400`,
+                  touchMode ? "text-3xl" : "text-2xl"
                 )}>
                   {member.stats.habitsCompleted}
                 </div>
                 <div className={cn(
-                  theme.text.muted,
-                  touchMode ? "text-base" : "text-xs"
+                  "text-gray-600 dark:text-gray-400 font-medium",
+                  touchMode ? "text-lg" : "text-base"
                 )}>
                   Total Done
                 </div>
               </div>
-              <div>
+              <div className="flex flex-col items-center">
+                <div className="bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl p-4 mb-3 shadow-lg">
+                  <Star className="w-8 h-8 text-white mx-auto" />
+                </div>
                 <div className={cn(
-                  `font-bold text-purple-600`,
-                  touchMode ? "text-2xl" : "text-lg"
+                  `font-bold text-purple-600 dark:text-purple-400`,
+                  touchMode ? "text-3xl" : "text-2xl"
                 )}>
                   {member.stats.rewardsEarned}
                 </div>
                 <div className={cn(
-                  theme.text.muted,
-                  touchMode ? "text-base" : "text-xs"
+                  "text-gray-600 dark:text-gray-400 font-medium",
+                  touchMode ? "text-lg" : "text-base"
                 )}>
                   Rewards
                 </div>
@@ -489,6 +616,14 @@ export function FamilyMemberZone({
           </div>
         </div>
       )}
-    </Card>
+      </Card>
+
+      {/* Benefits Modal */}
+      <HabitBenefitsModal
+        isOpen={!!benefitsModalHabit}
+        onClose={() => setBenefitsModalHabit(null)}
+        habit={benefitsModalHabit}
+      />
+    </>
   );
 }

@@ -110,7 +110,9 @@ export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChal
     duration: 7,
     bonusPoints: 25,
     startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    winnerReward: '',
+    participationReward: ''
   });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -130,7 +132,9 @@ export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChal
         duration: 7,
         bonusPoints: 25,
         startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        winnerReward: '',
+        participationReward: ''
       });
       setCurrentStep(1);
     }
@@ -225,7 +229,8 @@ export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChal
 
     try {
       setLoading(true);
-      const challengeId = await createChallenge({
+      // Build challenge data without undefined values
+      const challengeData: any = {
         name: formData.name,
         description: formData.description,
         emoji: formData.emoji,
@@ -237,10 +242,18 @@ export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChal
         bonusPoints: formData.bonusPoints,
         startDate: formData.startDate,
         endDate: formData.endDate,
-        winnerReward: formData.winnerReward || undefined,
-        participationReward: formData.participationReward || undefined,
         createdBy: currentFamily.members.find(m => m.userId === currentFamily.createdBy)?.id || ''
-      });
+      };
+      
+      // Only add optional fields if they have values
+      if (formData.winnerReward && formData.winnerReward.trim()) {
+        challengeData.winnerReward = formData.winnerReward;
+      }
+      if (formData.participationReward && formData.participationReward.trim()) {
+        challengeData.participationReward = formData.participationReward;
+      }
+      
+      const challengeId = await createChallenge(challengeData);
 
       if (challengeId) {
         onClose();
@@ -514,7 +527,16 @@ export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChal
                           ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       )}>
-                        <div className="text-2xl">{habit.emoji}</div>
+                        <div
+                          className="text-2xl"
+                          style={{
+                            fontFamily: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
+                            fontSize: '24px',
+                            fontWeight: '400'
+                          }}
+                        >
+                          {habit.emoji}
+                        </div>
                         <div className="flex-1">
                           <div className="font-medium text-gray-900 dark:text-white">{habit.name}</div>
                           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -680,7 +702,15 @@ export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChal
                             key={habit.id}
                             className="flex items-center space-x-2 px-3 py-1 rounded-full text-sm bg-purple-100 dark:bg-purple-900/20"
                           >
-                            <span>{habit.emoji}</span>
+                            <span
+                              style={{
+                                fontFamily: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
+                                fontSize: '16px',
+                                fontWeight: '400'
+                              }}
+                            >
+                              {habit.emoji}
+                            </span>
                             <span className="text-purple-700 dark:text-purple-300">{habit.name}</span>
                           </div>
                         ) : null;

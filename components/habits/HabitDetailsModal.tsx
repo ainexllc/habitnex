@@ -80,7 +80,16 @@ export function HabitDetailsModal({
         {/* Header Section */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-4xl">{habit.emoji}</span>
+            <span
+              className="text-4xl"
+              style={{
+                fontFamily: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
+                fontSize: '48px',
+                fontWeight: '400'
+              }}
+            >
+              {habit.emoji}
+            </span>
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{habit.name}</h2>
               {memberName && (

@@ -12,7 +12,7 @@ import { FamilyRewardsTab } from '@/components/family/tabs/FamilyRewardsTab';
 import { FamilyAnalyticsTab } from '@/components/family/tabs/FamilyAnalyticsTab';
 import { FamilyOverviewTab } from '@/components/family/tabs/FamilyOverviewTab';
 import { FamilySettingsTab } from '@/components/family/tabs/FamilySettingsTab';
-import { AddMemberModal } from '@/components/family/AddMemberModal';
+import { MemberModal } from '@/components/family/MemberModal';
 import { CreateFamilyHabitModal } from '@/components/family/CreateFamilyHabitModal';
 import { CreateFamilyChallengeModal } from '@/components/family/CreateFamilyChallengeModal';
 import { ModernFamilyHeader } from '@/components/family/ModernFamilyHeader';
@@ -129,7 +129,7 @@ function FamilyDashboardContent() {
       </div>
 
       {/* Modals */}
-      <AddMemberModal
+      <MemberModal
         isOpen={showAddMemberModal}
         onClose={() => setShowAddMemberModal(false)}
       />

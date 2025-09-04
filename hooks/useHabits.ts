@@ -3,13 +3,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalData } from '@/contexts/GlobalDataContext';
-import {
-  getUserHabits,
-  updateHabit,
-  getCompletions,
-  toggleHabitCompletion
-} from '@/lib/unifiedDb';
-import { createHabit, deleteHabit } from '@/lib/db';
+import { createHabit, deleteHabit, updateHabit as updateHabitDirect, toggleHabitCompletion as toggleHabitCompletionDirect } from '@/lib/db';
 import { Habit, HabitCompletion, CreateHabitForm } from '@/types';
 import { getTodayDateString } from '@/lib/utils';
 
@@ -49,7 +43,8 @@ export function useHabits() {
     updateHabitOptimistic(habitId, updates);
 
     try {
-      await updateHabit(user.uid, habitId, updates);
+      // Use direct individual database function to avoid family detection
+      await updateHabitDirect(user.uid, habitId, updates);
       // Success - real-time listener will sync the final state
     } catch (err) {
       // Rollback optimistic update on error
@@ -102,7 +97,8 @@ export function useHabits() {
     }
 
     try {
-      await toggleHabitCompletion(user.uid, habitId, date, completed, notes);
+      // Use direct individual database function to avoid family detection
+      await toggleHabitCompletionDirect(user.uid, habitId, date, completed, notes);
       // Success - real-time listener will sync the actual data
     } catch (err) {
       // Rollback optimistic update on error

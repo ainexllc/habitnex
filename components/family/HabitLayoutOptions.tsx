@@ -29,7 +29,14 @@ export function Layout1_CleanBadges({ habit, touchMode = false, onToggle }: Habi
         {/* Top Row: Emoji + Title */}
         <div className="flex items-center space-x-2">
           <span className={touchMode ? "text-lg" : "text-base"}>
-            {habit.emoji}
+            <span
+              style={{
+                fontFamily: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
+                fontWeight: '400'
+              }}
+            >
+              {habit.emoji}
+            </span>
           </span>
           <h4 className={cn(
             "font-medium truncate flex-1",
@@ -90,7 +97,14 @@ export function Layout2_VerticalStack({ habit, touchMode = false, onToggle }: Ha
         {/* Row 1: Title */}
         <div className="flex items-center space-x-2">
           <span className={touchMode ? "text-lg" : "text-base"}>
-            {habit.emoji}
+            <span
+              style={{
+                fontFamily: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
+                fontWeight: '400'
+              }}
+            >
+              {habit.emoji}
+            </span>
           </span>
           <h4 className={cn(
             "font-medium truncate",

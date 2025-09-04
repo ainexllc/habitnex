@@ -43,6 +43,10 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Flavors&display=swap"
           rel="stylesheet"
         />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="antialiased">
         <ThemeProvider>

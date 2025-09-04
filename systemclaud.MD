@@ -357,11 +357,11 @@ firebase deploy --only firestore
    - **Client ID**: {project-id}-{hash}.apps.googleusercontent.com
    - **Authorized JavaScript Origins**:
      - http://localhost
-     - http://localhost:3000 (or your dev port)
+     - http://localhost:3001 (configured dev port)
      - https://{project-id}.firebaseapp.com
      - https://{custom-domain}.com
    - **Authorized Redirect URIs**:
-     - http://localhost:3000/__/auth/handler
+     - http://localhost:3001/__/auth/handler
      - https://{project-id}.firebaseapp.com/__/auth/handler
      - https://{custom-domain}.com/__/auth/handler
 
@@ -454,7 +454,7 @@ These agents provide specialized expertise across all projects, based on proven 
 
 **OAuth Configuration Template:**
 - Client ID format: `{project-id}-{hash}.apps.googleusercontent.com`
-- Authorized Origins: `http://localhost`, `http://localhost:3000`, production domains
+- Authorized Origins: `http://localhost`, `http://localhost:3001`, production domains
 - Redirect URIs: `{domain}/__/auth/handler` for each environment
 
 ### 🚀 Firebase Deployment Agent

@@ -13,6 +13,9 @@
 /* Google Font for Member Names */
 @import url('https://fonts.googleapis.com/css2?family=Flavors&display=swap');
 
+/* Noto Color Emoji Font for Emoji Input */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
+
 /* Ensure font loads properly */
 @layer utilities {
   .font-kablammo {

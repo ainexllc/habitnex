@@ -76,7 +76,7 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open [http://localhost:3001](http://localhost:3001) to view the app.
 
 ## Firebase Setup
 

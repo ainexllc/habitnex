@@ -86,13 +86,29 @@ export function FamilySettingsTab() {
 
   return (
     <div className="px-6">
-      {/* Tab Header with Actions */}
+      {/* Tab Header - Enhanced */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Family Settings</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
-            Customize your family's experience and preferences
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3" style={{
+            fontFamily: '"Henny Penny", cursive',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Family Settings
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
+            ⚙️ Customize your family's experience and preferences
           </p>
+          <div className="flex items-center gap-4">
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+              {currentFamily.members.filter(m => m.isActive).length} Active Members
+            </span>
+            <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+              {theme === 'system' ? 'System' : theme === 'dark' ? 'Dark' : 'Light'} Theme
+            </span>
+          </div>
         </div>
 
         {isParent && (

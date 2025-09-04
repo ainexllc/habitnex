@@ -13,10 +13,9 @@ import { FamilyCreationBanner } from '@/components/ui/FamilyCreationBanner';
 import { UnifiedView } from '@/components/dashboard/UnifiedView';
 
 import { usePersonalData } from '@/hooks/usePersonalData';
-import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { theme } from '@/lib/theme';
-import { Target, Plus, Flame, RefreshCw } from 'lucide-react';
+import { Target, Plus, Flame, RefreshCw, TrendingUp, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Habit } from '@/types';
@@ -24,7 +23,6 @@ import { getRandomQuote, Quote } from '@/lib/quotes';
 
 export default function DashboardPage() {
   const { habits, completions, loading } = usePersonalData();
-  const { hasFamily, familyName, loading: familyLoading } = useFamilyStatus();
   const router = useRouter();
   
   // State for habit editing
@@ -157,55 +155,113 @@ export default function DashboardPage() {
             </div>
           </div>
 
-                              {/* Motivational Card and Mood Bar Side-by-Side - Desktop Only */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            {/* Compact Motivational Card - Hidden on Mobile */}
-            <div className={`hidden md:flex ${theme.surface.primary} rounded-lg p-4 border ${theme.border.default} shadow-md hover:shadow-lg transition-all duration-300 flex-1`}>
-              <div className="flex items-center justify-between gap-4">
-                {/* Left side - Flame icon and motivation */}
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md animate-pulse">
-                    <Flame className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h4 className={`text-lg font-bold ${theme.text.primary}`}>Keep the Momentum Going!</h4>
-                    <div className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400">
-                      <div className="flex gap-1">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 200}ms` }}></div>
-                        ))}
+          {/* Modern Dashboard Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Momentum Card - Redesigned */}
+            <div className="lg:col-span-2 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 rounded-2xl opacity-90"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl backdrop-blur-sm"></div>
+              <div className="relative p-6 text-white">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+                        <Flame className="w-7 h-7 text-white animate-pulse" />
                       </div>
-                      <span className="font-medium">You're on fire!</span>
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-xs font-bold text-white animate-bounce">
+                        🔥
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold mb-1">Keep the Momentum Going!</h3>
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="w-2 h-2 bg-white/80 rounded-full animate-pulse" style={{ animationDelay: `${i * 150}ms` }}></div>
+                          ))}
+                        </div>
+                        <span className="text-white/90 font-medium">You're crushing it today!</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Stats badges */}
+                  <div className="flex flex-col gap-2">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 border border-white/30">
+                      <div className="text-xs text-white/70">Streak</div>
+                      <div className="text-lg font-bold">{stats.overallStreak}d</div>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 border border-white/30">
+                      <div className="text-xs text-white/70">Today</div>
+                      <div className="text-lg font-bold">{stats.completedToday}/{stats.todayDueHabits}</div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right side - Quote with refresh button */}
-                <div className="flex items-center gap-3 flex-1 max-w-md">
-                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 backdrop-blur-sm border border-white/20 dark:border-gray-700/20 flex-1">
-                    <p className={`text-sm italic ${theme.text.secondary} mb-1 leading-snug`}>
-                      "{currentQuote.text}"
-                    </p>
-                    <p className={`text-xs ${theme.text.muted} text-right`}>
-                      - {currentQuote.author}
-                    </p>
+                {/* Quote Section - Redesigned */}
+                <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1">
+                      <blockquote className="text-white/95 italic text-sm leading-relaxed mb-2">
+                        "{currentQuote.text}"
+                      </blockquote>
+                      <cite className="text-white/70 text-xs font-medium not-italic">
+                        — {currentQuote.author}
+                      </cite>
+                    </div>
+                    <button
+                      onClick={handleRefreshQuote}
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 hover:scale-110 group border border-white/20"
+                      title="Get new inspiration"
+                    >
+                      <RefreshCw className="w-4 h-4 text-white/80 group-hover:text-white transition-all duration-200 group-hover:rotate-180" />
+                    </button>
                   </div>
-
-                  {/* Refresh quote button */}
-                  <button
-                    onClick={handleRefreshQuote}
-                    className={`p-2 rounded-lg ${theme.surface.secondary} hover:${theme.surface.hover} transition-all duration-200 hover:scale-105 group`}
-                    title="Get new quote"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${theme.text.muted} group-hover:${theme.text.primary} transition-all duration-200 group-hover:rotate-180`} />
-                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Mood Bar - Always visible */}
-            <div className="flex-shrink-0 lg:w-80">
-              <MoodBar />
+            {/* Mood Tracking Card - Enhanced */}
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 rounded-2xl"></div>
+              <div className="absolute inset-0 bg-white/10 rounded-2xl backdrop-blur-sm"></div>
+              <div className="relative p-6">
+                <div className="mb-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+                      <span className="text-2xl">🧘</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Today's Vibe</h3>
+                      <p className="text-white/70 text-sm">How are you feeling?</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/30">
+                  <MoodBar className="mood-bar-enhanced" />
+                </div>
+                
+                {/* Quick mood indicators */}
+                <div className="flex justify-between mt-4 text-white/80">
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">😊</div>
+                    <div className="text-xs">Happy</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">⚡</div>
+                    <div className="text-xs">Energy</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🧘</div>
+                    <div className="text-xs">Calm</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🌙</div>
+                    <div className="text-xs">Rest</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

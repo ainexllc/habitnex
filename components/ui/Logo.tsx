@@ -23,7 +23,7 @@ export function Logo({
       className={`${textSizes[textSize]} ${className}`}
       style={{ fontFamily: '"Climate Crisis", cursive' }}
     >
-      <span className="text-red-600 dark:text-red-500">Next</span>
+      <span className="text-green-600 dark:text-green-500">Next</span>
       <span className="text-gray-900 dark:text-white">Vibe</span>
     </span>
   );

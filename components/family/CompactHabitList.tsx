@@ -51,7 +51,14 @@ export function CompactHabitList({
               "flex-shrink-0",
               touchMode ? "text-lg" : "text-base"
             )}>
-              {habit.emoji}
+              <span
+                style={{
+                  fontFamily: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
+                  fontWeight: '400'
+                }}
+              >
+                {habit.emoji}
+              </span>
             </span>
             
             {/* Title */}

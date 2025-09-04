@@ -110,8 +110,8 @@ export function usePersonalData() {
     }
 
     try {
-      // Use the unified database function for toggling completion
-      const { toggleHabitCompletion } = await import('@/lib/unifiedDb');
+      // Use direct individual database function to avoid family detection
+      const { toggleHabitCompletion } = await import('@/lib/db');
       await toggleHabitCompletion(user.uid, habitId, date, completed, notes);
       // Success - real-time listener will sync the actual data
     } catch (err) {
