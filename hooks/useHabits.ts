@@ -3,14 +3,13 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalData } from '@/contexts/GlobalDataContext';
-import { 
-  getUserHabits, 
-  createHabit, 
-  updateHabit, 
-  deleteHabit,
+import {
+  getUserHabits,
+  updateHabit,
   getCompletions,
-  toggleHabitCompletion 
+  toggleHabitCompletion
 } from '@/lib/unifiedDb';
+import { createHabit, deleteHabit } from '@/lib/db';
 import { Habit, HabitCompletion, CreateHabitForm } from '@/types';
 import { getTodayDateString } from '@/lib/utils';
 

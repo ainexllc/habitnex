@@ -27,7 +27,7 @@ import {
   ThumbsDown,
   Undo2
 } from 'lucide-react';
-import { useHabits } from '@/hooks/useHabits';
+import { usePersonalData } from '@/hooks/usePersonalData';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { 
   calculateStreak, 
@@ -57,7 +57,7 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   const [isCompletingAnimation, setIsCompletingAnimation] = useState(false); // Track completion animation
   const [justCompleted, setJustCompleted] = useState(false); // Track if habit was just completed
   
-  const { isHabitCompleted, toggleCompletion, completions, removeHabit, getHabitCompletion } = useHabits();
+  const { isHabitCompleted, completions, removeHabit, getHabitCompletion, toggleCompletion } = usePersonalData();
   const { timeFormatPreferences } = useUserPreferences();
   
   const isCompleted = isHabitCompleted(habit.id);
