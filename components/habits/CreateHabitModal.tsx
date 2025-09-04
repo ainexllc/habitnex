@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useHabits } from '@/hooks/useHabits';
+import { usePersonalData } from '@/hooks/usePersonalData';
 import { Modal } from '@/components/ui/Modal';
 import { HabitForm } from '@/components/forms/HabitForm';
 import { CreateHabitForm } from '@/types';
@@ -14,7 +14,7 @@ interface CreateHabitModalProps {
 
 export function CreateHabitModal({ isOpen, onClose }: CreateHabitModalProps) {
   const [loading, setLoading] = useState(false);
-  const { addHabit } = useHabits();
+  const { addHabit } = usePersonalData();
 
   const handleSubmit = async (data: CreateHabitForm) => {
     try {

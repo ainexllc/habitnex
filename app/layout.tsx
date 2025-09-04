@@ -3,6 +3,7 @@ import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { FamilyProvider } from '@/contexts/FamilyContext'
+import { GlobalDataProvider } from '@/contexts/GlobalDataContext'
 import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay'
 import { SoundFeedback } from '@/components/celebration/SoundFeedback'
@@ -47,36 +48,38 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <FamilyProvider>
-              <CelebrationProvider>
-                {children}
-                <CelebrationOverlay />
-                <SoundFeedback />
-                <Toaster 
-                  position="top-center"
-                  reverseOrder={false}
-                  gutter={8}
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: 'var(--toast-bg)',
-                      color: 'var(--toast-color)',
-                      border: '1px solid var(--toast-border)',
-                    },
-                    success: {
-                      iconTheme: {
-                        primary: '#10B981',
-                        secondary: '#ffffff',
+              <GlobalDataProvider>
+                <CelebrationProvider>
+                  {children}
+                  <CelebrationOverlay />
+                  <SoundFeedback />
+                  <Toaster 
+                    position="top-center"
+                    reverseOrder={false}
+                    gutter={8}
+                    toastOptions={{
+                      duration: 4000,
+                      style: {
+                        background: 'var(--toast-bg)',
+                        color: 'var(--toast-color)',
+                        border: '1px solid var(--toast-border)',
                       },
-                    },
-                    error: {
-                      iconTheme: {
-                        primary: '#EF4444',
-                        secondary: '#ffffff',
+                      success: {
+                        iconTheme: {
+                          primary: '#10B981',
+                          secondary: '#ffffff',
+                        },
                       },
-                    },
-                  }}
-                />
-              </CelebrationProvider>
+                      error: {
+                        iconTheme: {
+                          primary: '#EF4444',
+                          secondary: '#ffffff',
+                        },
+                      },
+                    }}
+                  />
+                </CelebrationProvider>
+              </GlobalDataProvider>
             </FamilyProvider>
           </AuthProvider>
         </ThemeProvider>

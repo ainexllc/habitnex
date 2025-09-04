@@ -120,6 +120,7 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
             member={member}
             habits={getHabitsByMember(member.id)}
             stats={getMemberStats(member.id)}
+            toggleCompletion={toggleMemberCompletion}
             touchMode={touchMode}
             isExpanded={selectedMember === member.id}
             onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}

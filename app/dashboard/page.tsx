@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { FamilyCreationBanner } from '@/components/ui/FamilyCreationBanner';
 import { UnifiedView } from '@/components/dashboard/UnifiedView';
 
-import { useHabits } from '@/hooks/useHabits';
+import { usePersonalData } from '@/hooks/usePersonalData';
 import { useFamilyStatus } from '@/contexts/FamilyContext';
 import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { theme } from '@/lib/theme';
@@ -23,7 +23,7 @@ import { Habit } from '@/types';
 import { getRandomQuote, Quote } from '@/lib/quotes';
 
 export default function DashboardPage() {
-  const { habits, completions, loading } = useHabits();
+  const { habits, completions, loading } = usePersonalData();
   const { hasFamily, familyName, loading: familyLoading } = useFamilyStatus();
   const router = useRouter();
   
@@ -259,18 +259,6 @@ export default function DashboardPage() {
           </div>
         </main>
 
-        {/* Floating Action Button */}
-        {habits.length > 0 && (
-          <button
-            onClick={() => setShowCreateHabitModal(true)}
-            className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-50 group"
-          >
-            <Plus className="w-6 h-6" />
-            <span className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-              Quick Add Habit
-            </span>
-          </button>
-        )}
 
         <EditHabitModal
           habit={editingHabit}

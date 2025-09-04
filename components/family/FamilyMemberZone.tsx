@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
-import { CheckCircle2, Circle, Star, Trophy, Zap, Users } from 'lucide-react';
+import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { theme } from '@/lib/theme';
@@ -23,6 +23,7 @@ interface FamilyMemberZoneProps {
     totalPoints: number;
     pending: number;
   };
+  toggleCompletion: (habitId: string, memberId: string, currentCompleted: boolean) => Promise<void>;
   touchMode?: boolean;
   isExpanded?: boolean;
   onExpand?: () => void;
@@ -33,22 +34,53 @@ export function FamilyMemberZone({
   member,
   habits,
   stats,
+  toggleCompletion,
   touchMode = false,
   isExpanded = false,
   onExpand,
   className
 }: FamilyMemberZoneProps) {
-  const { toggleCompletion, loading } = useFamilyHabits(member.id);
+  // We still need loading state from the hook, but toggleCompletion comes from props
+  const { loading } = useFamilyHabits(member.id);
   const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [previousStats, setPreviousStats] = useState(member.stats);
+  // Initialize completion statuses from habit data
+  // This matches individual dashboard behavior - read from database completion state
+  const [completionStatuses, setCompletionStatuses] = useState<Record<string, 'success' | 'failure' | null>>(() => {
+    const initialStatuses: Record<string, 'success' | 'failure' | null> = {};
+    // Initialize from database completion status like individual dashboard does
+    habits.forEach(habit => {
+      if (habit.completed) {
+        // For now, default to success for completed habits
+        // In the future, this could read from completion notes like individual dashboard
+        initialStatuses[habit.id] = 'success';
+      }
+    });
+    return initialStatuses;
+  });
+  
+  // Track which habits are expanded to show details
+  const [expandedHabits, setExpandedHabits] = useState<Set<string>>(new Set());
+  
+  const toggleHabitExpanded = useCallback((habitId: string) => {
+    setExpandedHabits(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(habitId)) {
+        newSet.delete(habitId);
+      } else {
+        newSet.add(habitId);
+      }
+      return newSet;
+    });
+  }, []);
   
   const handleHabitToggle = useCallback(async (habitId: string, currentCompleted: boolean) => {
     try {
-      const result = await toggleCompletion(habitId, undefined, !currentCompleted);
+      await toggleCompletion(habitId, member.id, currentCompleted);
       
       // Trigger celebration animation if completing
-      if (!currentCompleted && result) {
+      if (!currentCompleted) {
         setCelebratingHabitId(habitId);
         setTimeout(() => setCelebratingHabitId(null), 2000);
 
@@ -79,6 +111,63 @@ export function FamilyMemberZone({
       }
     } catch (error) {
       // Failed to toggle habit - handle silently
+    }
+  }, [toggleCompletion]);
+
+  // New handlers for dual completion buttons
+  const handleHabitCompletion = useCallback(async (habitId: string, success: boolean) => {
+    try {
+      // Always mark as completed (true) but track success/failure
+      await toggleCompletion(habitId, member.id, false); // false means we want to mark as completed (toggle from uncompleted state)
+      
+      // Update completion status
+      setCompletionStatuses(prev => ({
+        ...prev,
+        [habitId]: success ? 'success' : 'failure'
+      }));
+      
+      // Trigger celebration animation only for success
+      if (success) {
+        setCelebratingHabitId(habitId);
+        setTimeout(() => setCelebratingHabitId(null), 2000);
+
+        const completedHabit = habits.find(h => h.id === habitId);
+        if (completedHabit) {
+          celebrateHabitCompletion({
+            member,
+            habit: completedHabit,
+            completion: {}
+          });
+
+          if (member.stats.habitsCompleted === 0) {
+            celebrateFirstHabit(member, completedHabit);
+          }
+
+          const completedToday = habits.filter(h => h.completed).length + 1;
+          if (completedToday === habits.length) {
+            celebratePerfectDay(member, habits.length);
+          }
+        }
+      }
+    } catch (error) {
+      // Error toggling completion - handle silently
+    }
+  }, [toggleCompletion, habits, member, celebrateHabitCompletion, celebrateFirstHabit, celebratePerfectDay]);
+
+  const handleUndo = useCallback(async (habitId: string) => {
+    console.log('🔄 Undo clicked for habit:', habitId, 'member:', member.id);
+    try {
+      // Toggle back to uncompleted (true means current state is completed, so we want to undo it)
+      console.log('📤 Calling toggleCompletion with member.id and true (current completed state)...');
+      await toggleCompletion(habitId, member.id, true);
+      console.log('✅ Toggle completion successful');
+      setCompletionStatuses(prev => ({
+        ...prev,
+        [habitId]: null
+      }));
+      console.log('🔄 Local completion status cleared');
+    } catch (error) {
+      console.error('❌ Undo failed:', error);
     }
   }, [toggleCompletion]);
   
@@ -206,115 +295,124 @@ export function FamilyMemberZone({
               </p>
             </div>
           ) : (
-            habits.map((habit) => (
-              <div
-                key={habit.id}
-                className={cn(
-                  "relative flex flex-col p-3 rounded-lg transition-all duration-200",
-                  touchMode ? "p-4" : "p-3",
-                  habit.completed 
-                    ? "bg-green-50/50 dark:bg-green-950/10 border border-green-200/50 dark:border-green-800/30" 
-                    : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
-                  celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
-                  loading && "opacity-50 pointer-events-none"
-                )}
-              >
-                {/* Habit Info - Vertical Layout */}
-                <div className="flex-1 min-w-0 mb-2">
+            habits.map((habit) => {
+              const status = completionStatuses[habit.id];
+              // Show status message when habit is completed in database OR user explicitly set success/failure
+              // This matches the individual dashboard behavior exactly
+              const isCompleted = habit.completed || status !== null;
+              const isExpanded = expandedHabits.has(habit.id);
+              
+              return (
+                <div
+                  key={habit.id}
+                  className={cn(
+                    "relative p-3 rounded-lg transition-all duration-200 space-y-3",
+                    touchMode ? "p-4" : "p-3",
+                    isCompleted 
+                      ? "bg-green-50/50 dark:bg-green-950/10 border border-green-200/50 dark:border-green-800/30" 
+                      : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
+                    celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
+                    loading && "opacity-50 pointer-events-none"
+                  )}
+                >
+                  {/* First Line: Expand arrow and habit name */}
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleHabitExpanded(habit.id)}
+                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-all duration-200 hover:scale-110"
+                      aria-label={isExpanded ? "Collapse details" : "Expand details"}
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      )}
+                    </button>
+                    
                     <h4 className={cn(
-                      `font-semibold ${theme.text.primary}`,
+                      `font-semibold flex-1 ${theme.text.primary}`,
                       touchMode ? "text-lg" : "text-base",
-                      habit.completed && "text-green-700 dark:text-green-400"
+                      isCompleted && (status === 'failure' ? "line-through text-gray-500 dark:text-gray-400" : "line-through text-green-700 dark:text-green-400")
                     )}>
                       {habit.name}
                     </h4>
-                    {/* Family habit badge */}
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-medium">
-                      <Users className="w-3 h-3" />
-                      <span>Family</span>
-                    </div>
                   </div>
-                  {habit.description && (
-                    <p className={cn(
-                      `${theme.text.muted} mt-1`,
-                      touchMode ? "text-base" : "text-sm",
-                      habit.completed && "line-through opacity-60"
-                    )}>
-                      {habit.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center space-x-1">
-                      <Zap className="w-3 h-3 text-yellow-500" />
-                      <span className={cn(
-                        `text-yellow-600 dark:text-yellow-400 font-medium`,
-                        touchMode ? "text-sm" : "text-xs"
-                      )}>
-                        {habit.basePoints} pts
-                      </span>
-                    </div>
-                    {habit.streak && habit.streak > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <Trophy className="w-3 h-3 text-orange-500" />
-                        <span className={cn(
-                          `text-orange-600 dark:text-orange-400 font-medium`,
-                          touchMode ? "text-sm" : "text-xs"
+                  
+                  {/* Second Line: Dual Completion Buttons or Undo */}
+                  <div className="flex justify-end items-center gap-2">
+                    {isCompleted ? (
+                      <>
+                        <div className={cn(
+                          "px-3 py-1 rounded-lg font-medium text-white text-sm",
+                          status === 'failure' 
+                            ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
+                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
                         )}>
-                          {habit.streak} day streak
-                        </span>
-                      </div>
+                          {status === 'success' ? '🎉 Done!' : status === 'failure' ? '😔 Failed' : '✅ Completed'}
+                        </div>
+                        <Button
+                          onClick={() => handleUndo(habit.id)}
+                          size="sm"
+                          variant="outline"
+                          className="hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          title="Undo"
+                        >
+                          <Undo2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={() => handleHabitCompletion(habit.id, true)}
+                          loading={loading}
+                          size="sm"
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          Completed
+                        </Button>
+                        <Button
+                          onClick={() => handleHabitCompletion(habit.id, false)}
+                          loading={loading}
+                          size="sm"
+                          className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Failed
+                        </Button>
+                      </>
                     )}
                   </div>
-                </div>
-                
-                {/* Minimal Completion Button at Bottom */}
-                <div className="flex justify-end">
-                  <VisualFeedback
-                    feedbackType={habit.completed ? "success" : "info"}
-                    onInteraction={() => {
-                      handleHabitToggle(habit.id, habit.completed);
-                    }}
-                    disabled={loading}
-                  >
-                    <button
-                      className={cn(
-                        "rounded transition-all duration-200 font-medium",
-                        touchMode ? "px-2 py-1 text-xs" : "px-1.5 py-0.5 text-[10px]",
-                        habit.completed 
-                          ? "bg-green-100/70 hover:bg-green-200/70 text-green-700 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400" 
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400"
+                  
+                  {/* Expanded Details Section */}
+                  {isExpanded && (
+                    <div className={cn(
+                      "mt-3 pt-3 border-t space-y-2",
+                      theme.border.light
+                    )}>
+                      {habit.description && (
+                        <p className={cn(
+                          "text-sm",
+                          theme.text.secondary
+                        )}>
+                          {habit.description}
+                        </p>
                       )}
-                      onClick={() => handleHabitToggle(habit.id, habit.completed)}
-                      disabled={loading}
-                    >
-                      {habit.completed ? (
-                        <span className="flex items-center gap-0.5">
-                          <CheckCircle2 className={cn(
-                            touchMode ? "w-3 h-3" : "w-2.5 h-2.5"
-                          )} />
-                          <span>Done</span>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className={theme.text.muted}>
+                          Points: {habit.points || 10}
                         </span>
-                      ) : (
-                        <span className="flex items-center gap-0.5">
-                          <Circle className={cn(
-                            touchMode ? "w-3 h-3" : "w-2.5 h-2.5"
-                          )} />
-                          <span>Mark</span>
-                        </span>
-                      )}
-                    </button>
-                  </VisualFeedback>
+                        {habit.tags && habit.tags.length > 0 && (
+                          <span className={theme.text.muted}>
+                            Tags: {habit.tags.join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
-                {/* Celebration Effect - Keep this unchanged */}
-                {celebratingHabitId === habit.id && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-4xl animate-bounce">🎉</div>
-                  </div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
         

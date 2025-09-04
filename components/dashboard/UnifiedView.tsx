@@ -8,7 +8,7 @@ import {
   isHabitOverdue,
   getNextDueDate,
 } from '@/lib/utils';
-import { useHabits } from '@/hooks/useHabits';
+import { usePersonalData } from '@/hooks/usePersonalData';
 import {
   Clock,
   AlertTriangle,
@@ -27,7 +27,8 @@ interface UnifiedViewProps {
 }
 
 export function UnifiedView({ habits, onEdit }: UnifiedViewProps) {
-  const { completions, isHabitCompleted } = useHabits();
+  const { completions, isHabitCompleted } = usePersonalData();
+  const [animatingHabits, setAnimatingHabits] = useState<Set<string>>(new Set());
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     overdue: true,
     today: true,

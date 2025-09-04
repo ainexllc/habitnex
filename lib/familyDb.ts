@@ -627,29 +627,39 @@ export const toggleFamilyHabitCompletion = async (
     const habit = habitSnap.data() as FamilyHabit;
     
     if (querySnapshot.empty) {
-      // Create new completion
-      await addFamilyCompletion(familyId, {
-        familyId,
-        habitId,
-        memberId,
-        date,
-        completed,
-        notes: notes || '',
-        pointsEarned: completed ? calculatePoints(habit) : 0,
-        streakCount: completed ? await calculateStreak(familyId, habitId, memberId, date) : 0
-      });
+      // Create new completion only if marking as completed
+      if (completed) {
+        await addFamilyCompletion(familyId, {
+          familyId,
+          habitId,
+          memberId,
+          date,
+          completed,
+          notes: notes || '',
+          pointsEarned: calculatePoints(habit),
+          streakCount: await calculateStreak(familyId, habitId, memberId, date)
+        });
+      }
+      // If not completed and no existing record, nothing to do (already uncompleted)
     } else {
-      // Update existing completion
+      // Existing completion found
       const existingDoc = querySnapshot.docs[0];
-      const currentData = existingDoc.data() as FamilyHabitCompletion;
       
-      await updateDoc(existingDoc.ref, {
-        completed,
-        notes: notes || currentData.notes,
-        pointsEarned: completed ? calculatePoints(habit) : 0,
-        streakCount: completed ? await calculateStreak(familyId, habitId, memberId, date) : 0,
-        timestamp: Timestamp.now()
-      });
+      if (!completed) {
+        // If marking as uncompleted (undo), delete the record
+        await deleteDoc(existingDoc.ref);
+      } else {
+        // Update existing completion
+        const currentData = existingDoc.data() as FamilyHabitCompletion;
+        
+        await updateDoc(existingDoc.ref, {
+          completed,
+          notes: notes || currentData.notes,
+          pointsEarned: calculatePoints(habit),
+          streakCount: await calculateStreak(familyId, habitId, memberId, date),
+          timestamp: Timestamp.now()
+        });
+      }
     }
   } catch (error) {
     throw error;

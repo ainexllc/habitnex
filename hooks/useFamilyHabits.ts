@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
+import { useGlobalData } from '@/contexts/GlobalDataContext';
 import { 
   FamilyHabit, 
   FamilyHabitCompletion,
@@ -14,49 +15,36 @@ import {
   getFamilyCompletions
 } from '@/lib/familyDb';
 
+// Helper function for default points
+const getDefaultPoints = (difficulty: 'easy' | 'medium' | 'hard'): number => {
+  switch (difficulty) {
+    case 'easy': return 10;
+    case 'medium': return 20;
+    case 'hard': return 30;
+    default: return 20;
+  }
+};
+
 export function useFamilyHabits(memberId?: string) {
   const { currentFamily, currentMember } = useFamily();
-  
-  const [habits, setHabits] = useState<FamilyHabit[]>([]);
-  const [completions, setCompletions] = useState<FamilyHabitCompletion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    familyHabits: habits,
+    familyCompletions: completions,
+    loading,
+    error,
+    refreshData
+  } = useGlobalData();
   
   const targetMemberId = memberId || currentMember?.id;
   
-  // Load habits and completions
-  const loadData = useCallback(async () => {
-    if (!currentFamily?.id) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [habitsData, completionsData] = await Promise.all([
-        getFamilyHabits(currentFamily.id, targetMemberId),
-        getFamilyCompletions(currentFamily.id, {
-          memberId: targetMemberId,
-          startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Last 7 days
-          endDate: new Date().toISOString().split('T')[0]
-        })
-      ]);
-      
-      setHabits(habitsData);
-      setCompletions(completionsData);
-      
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load habits';
-      setError(errorMessage);
-      console.error('Failed to load family habits:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentFamily?.id, targetMemberId]);
+  // Filter habits and completions for the target member
+  const memberHabits = habits.filter(habit => 
+    !targetMemberId || habit.assignedMembers?.includes(targetMemberId)
+  );
   
-  // Load data when family or member changes
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const memberCompletions = completions.filter(completion => 
+    !targetMemberId || completion.memberId === targetMemberId
+  );
   
   // Create new habit
   const createHabit = useCallback(async (habitData: Omit<CreateFamilyHabitRequest['habit'], 'familyId'>) => {
@@ -65,9 +53,6 @@ export function useFamilyHabits(memberId?: string) {
     }
     
     try {
-      setLoading(true);
-      setError(null);
-      
       const request: CreateFamilyHabitRequest = {
         familyId: currentFamily.id,
         habit: {
@@ -81,16 +66,13 @@ export function useFamilyHabits(memberId?: string) {
       };
       
       await createFamilyHabit(request);
-      await loadData(); // Refresh data
+      // Real-time listener will update the habits automatically
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create habit';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
+      throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, currentMember?.id, loadData]);
+  }, [currentFamily?.id, currentMember?.id]);
   
   // Update habit
   const updateHabit = useCallback(async (habitId: string, updates: Partial<FamilyHabit>) => {
@@ -99,20 +81,13 @@ export function useFamilyHabits(memberId?: string) {
     }
     
     try {
-      setLoading(true);
-      setError(null);
-      
       await updateFamilyHabit(currentFamily.id, habitId, updates);
-      await loadData(); // Refresh data
-      
+      // Real-time listener will update the habits automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update habit';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
+      throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, loadData]);
+  }, [currentFamily?.id]);
   
   // Toggle habit completion
   const toggleCompletion = useCallback(async (
@@ -126,12 +101,9 @@ export function useFamilyHabits(memberId?: string) {
     }
     
     try {
-      setLoading(true);
-      setError(null);
-      
       // If completed is not specified, toggle current state
       if (completed === undefined) {
-        const existingCompletion = completions.find(c => 
+        const existingCompletion = memberCompletions.find(c => 
           c.habitId === habitId && 
           c.memberId === targetMemberId && 
           c.date === date
@@ -147,17 +119,13 @@ export function useFamilyHabits(memberId?: string) {
         completed,
         notes
       );
-      
-      await loadData(); // Refresh data
+      // Real-time listener will update the completions automatically
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
+      throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, targetMemberId, completions, loadData]);
+  }, [currentFamily?.id, targetMemberId, memberCompletions]);
   
   // Get today's habits for a member
   const getTodayHabits = useCallback(() => {
@@ -222,14 +190,10 @@ export function useFamilyHabits(memberId?: string) {
     return streak;
   }, [completions, targetMemberId]);
   
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-  
   return {
     // Data
-    habits,
-    completions,
+    habits: memberHabits,
+    completions: memberCompletions,
     todayHabits: getTodayHabits(),
     
     // State
@@ -240,66 +204,27 @@ export function useFamilyHabits(memberId?: string) {
     createHabit,
     updateHabit,
     toggleCompletion,
-    refresh: loadData,
+    refresh: refreshData, // Use global refresh function
     
     // Utilities
     getHabitCompletion,
     getHabitStreak,
-    clearError
+    clearError: () => {} // No-op since error is managed globally
   };
 }
 
-// Helper function to get default points based on difficulty
-function getDefaultPoints(difficulty: 'easy' | 'medium' | 'hard'): number {
-  switch (difficulty) {
-    case 'easy': return 1;
-    case 'medium': return 3;
-    case 'hard': return 5;
-    default: return 3;
-  }
-}
 
 // Hook for managing all family members' habits (for parents/dashboard view)
 export function useAllFamilyHabits() {
   const { currentFamily, isParent } = useFamily();
+  const {
+    familyHabits: allHabits,
+    familyCompletions: allCompletions,
+    loading,
+    error,
+    refreshData
+  } = useGlobalData();
   
-  const [allHabits, setAllHabits] = useState<FamilyHabit[]>([]);
-  const [allCompletions, setAllCompletions] = useState<FamilyHabitCompletion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const loadAllData = useCallback(async () => {
-    if (!currentFamily?.id || !isParent) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const today = new Date().toISOString().split('T')[0];
-      
-      const [habitsData, completionsData] = await Promise.all([
-        getFamilyHabits(currentFamily.id), // All habits
-        getFamilyCompletions(currentFamily.id, {
-          startDate: today,
-          endDate: today
-        }) // Today's completions
-      ]);
-      
-      setAllHabits(habitsData);
-      setAllCompletions(completionsData);
-      
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load family data';
-      setError(errorMessage);
-      console.error('Failed to load all family habits:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentFamily?.id, isParent]);
-  
-  useEffect(() => {
-    loadAllData();
-  }, [loadAllData]);
   
   // Get habits by member
   const getHabitsByMember = useCallback((memberId: string) => {
@@ -355,20 +280,13 @@ export function useAllFamilyHabits() {
     }
     
     try {
-      setLoading(true);
-      setError(null);
-      
       await updateFamilyHabit(currentFamily.id, habitId, updates);
-      await loadAllData(); // Refresh data
-      
+      // Real-time listener will update the habits automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update habit';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
+      throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, loadAllData]);
+  }, [currentFamily?.id]);
 
   // Delete habit
   const deleteHabit = useCallback(async (habitId: string) => {
@@ -377,20 +295,13 @@ export function useAllFamilyHabits() {
     }
     
     try {
-      setLoading(true);
-      setError(null);
-      
       await deleteFamilyHabit(currentFamily.id, habitId);
-      await loadAllData(); // Refresh data
-      
+      // Real-time listener will handle removal from UI
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete habit';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
+      throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, loadAllData]);
+  }, [currentFamily?.id]);
 
   // Toggle completion for any family member
   const toggleMemberCompletion = useCallback(async (
@@ -404,68 +315,19 @@ export function useAllFamilyHabits() {
       throw new Error('Must be in a family to toggle completions');
     }
     
-    const todayString = new Date().toISOString().split('T')[0];
-    
-    // Optimistic update - immediately update the UI
-    const optimisticCompletion = {
-      id: `temp-${Date.now()}`,
-      familyId: currentFamily.id,
-      habitId,
-      memberId,
-      date: todayString,
-      completed: !currentCompleted,
-      pointsEarned: 0,
-      streakCount: 0,
-      notes: notes || '',
-      timestamp: new Date(),
-      encouragements: []
-    };
-    
-    // Update completions state immediately for instant UI feedback
-    setAllCompletions(prev => {
-      const filtered = prev.filter(c => !(c.habitId === habitId && c.memberId === memberId && c.date === todayString));
-      return !currentCompleted ? [...filtered, optimisticCompletion] : filtered;
-    });
-    
     try {
-      setError(null);
-      
-      // Save to database in background without loading state
-      toggleFamilyHabitCompletion(
+      await toggleFamilyHabitCompletion(
         currentFamily.id,
         habitId,
         memberId,
         date,
         !currentCompleted, // Toggle the current state
         notes
-      ).then(() => {
-        console.log('✅ Habit completion saved to database');
-      }).catch((err) => {
-        // Revert optimistic update on error
-        console.error('❌ Toggle failed, reverting optimistic update');
-        setAllCompletions(prev => {
-          const filtered = prev.filter(c => !(c.habitId === habitId && c.memberId === memberId && c.date === todayString));
-          // Restore original state
-          if (currentCompleted) {
-            const revertCompletion = {
-              ...optimisticCompletion,
-              completed: true,
-              id: `revert-${Date.now()}`
-            };
-            return [...filtered, revertCompletion];
-          }
-          return filtered;
-        });
-        
-        const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
-        setError(errorMessage);
-      });
-      
+      );
+      // Real-time listener will update the completions automatically
     } catch (err) {
-      // Immediate error (non-async)
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
-      setError(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     }
   }, [currentFamily?.id]);
 
@@ -482,11 +344,11 @@ export function useAllFamilyHabits() {
     updateHabit,
     deleteHabit,
     toggleMemberCompletion,
-    refresh: loadAllData,
+    refresh: refreshData,
     
     // Utilities
     getHabitsByMember,
     getMemberStats,
-    clearError: () => setError(null)
+    clearError: () => {} // No-op since error is managed globally
   };
 }
