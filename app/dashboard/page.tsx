@@ -47,6 +47,13 @@ export default function DashboardPage() {
   const handleRefreshQuote = () => {
     setCurrentQuote(getRandomQuote());
   };
+
+  // Delete habit handler
+  const handleDeleteHabit = (habit: Habit) => {
+    // The delete confirmation is handled by UnifiedView
+    // This callback can be used for any additional logic if needed
+    console.log('Habit deletion initiated for:', habit.name);
+  };
   
   // Filter habits that are due today or overdue
   const todayHabits = useMemo(() => {
@@ -254,6 +261,7 @@ export default function DashboardPage() {
               <UnifiedView
                 habits={habits}
                 onEdit={(habit) => setEditingHabit(habit)}
+                onDelete={handleDeleteHabit}
               />
             )}
           </div>

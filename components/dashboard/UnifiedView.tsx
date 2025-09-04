@@ -3,12 +3,13 @@
 import { useMemo, useState } from 'react';
 import { Habit } from '@/types';
 import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
+import { usePersonalData } from '@/hooks/usePersonalData';
 import {
   isHabitDueToday,
   isHabitOverdue,
   getNextDueDate,
 } from '@/lib/utils';
-import { usePersonalData } from '@/hooks/usePersonalData';
 import {
   Clock,
   AlertTriangle,
@@ -24,16 +25,28 @@ import { theme } from '@/lib/theme';
 interface UnifiedViewProps {
   habits: Habit[];
   onEdit: (habit: Habit) => void;
+  onDelete?: (habit: Habit) => void;
 }
 
-export function UnifiedView({ habits, onEdit }: UnifiedViewProps) {
-  const { completions, isHabitCompleted } = usePersonalData();
+export function UnifiedView({ habits, onEdit, onDelete }: UnifiedViewProps) {
+  const { completions, isHabitCompleted, removeHabit } = usePersonalData();
   const [animatingHabits, setAnimatingHabits] = useState<Set<string>>(new Set());
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     overdue: true,
     today: true,
     upcoming: false,
     completed: false
+  });
+
+  // Delete modal state
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    habit: Habit | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    habit: null,
+    loading: false
   });
 
   const sections = useMemo(() => {
@@ -112,6 +125,46 @@ export function UnifiedView({ habits, onEdit }: UnifiedViewProps) {
       ...prev,
       [sectionTitle.toLowerCase().replace(/\s+/g, '')]: !prev[sectionTitle.toLowerCase().replace(/\s+/g, '')]
     }));
+  };
+
+  // Delete modal handlers
+  const handleDeleteClick = (habit: Habit) => {
+    setDeleteModalState({
+      isOpen: true,
+      habit,
+      loading: false
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModalState.habit) return;
+
+    try {
+      setDeleteModalState(prev => ({ ...prev, loading: true }));
+      await removeHabit(deleteModalState.habit!.id);
+
+      // Call the parent's onDelete if provided
+      if (onDelete) {
+        onDelete(deleteModalState.habit!);
+      }
+
+      setDeleteModalState({
+        isOpen: false,
+        habit: null,
+        loading: false
+      });
+    } catch (error) {
+      console.error('Failed to delete habit:', error);
+      setDeleteModalState(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalState({
+      isOpen: false,
+      habit: null,
+      loading: false
+    });
   };
 
   // Calculate today's progress - recalculate when sections or completions change
@@ -267,6 +320,7 @@ export function UnifiedView({ habits, onEdit }: UnifiedViewProps) {
                         <BenefitsHabitCard
                           habit={habit}
                           onEdit={onEdit}
+                          onDelete={handleDeleteClick}
                         />
                       </div>
                     ))}
@@ -277,6 +331,17 @@ export function UnifiedView({ habits, onEdit }: UnifiedViewProps) {
           );
         })}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalState.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Habit"
+        description={deleteModalState.habit ? `Are you sure you want to delete "${deleteModalState.habit.name}"?` : ''}
+        confirmText="Delete Habit"
+        isLoading={deleteModalState.loading}
+      />
     </div>
   );
 }

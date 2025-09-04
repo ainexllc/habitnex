@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Habit } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import {
   Check,
   Edit,
@@ -44,10 +43,11 @@ import { formatTime } from '@/lib/timeUtils';
 interface BenefitsHabitCardProps {
   habit: Habit;
   onEdit?: (habit: Habit) => void;
+  onDelete?: (habit: Habit) => void;
   compact?: boolean;
 }
 
-export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHabitCardProps) {
+export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: BenefitsHabitCardProps) {
   const [loading, setLoading] = useState(false);
   
   // Check if habit has AI enhancement data for showing expand button
@@ -57,7 +57,6 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   const [completionStatus, setCompletionStatus] = useState<'success' | 'failure' | null>(null); // Track completion state
   const [isCompletingAnimation, setIsCompletingAnimation] = useState(false); // Track completion animation
   const [justCompleted, setJustCompleted] = useState(false); // Track if habit was just completed
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // Controls delete confirmation modal
   
   const { isHabitCompleted, completions, removeHabit, getHabitCompletion, toggleCompletion } = usePersonalData();
   const { timeFormatPreferences } = useUserPreferences();
@@ -133,26 +132,9 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
   };
 
   const handleDeleteClick = () => {
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      setLoading(true);
-      setShowDeleteModal(false);
-      await removeHabit(habit.id);
-      // The habit will be removed from the list automatically
-      // when the habits state is updated
-    } catch (error) {
-      // Failed to delete habit - you could add a toast notification here for better UX
-      console.error('Failed to delete habit:', error);
-    } finally {
-      setLoading(false);
+    if (onDelete) {
+      onDelete(habit);
     }
-  };
-
-  const handleDeleteCancel = () => {
-    setShowDeleteModal(false);
   };
 
   const getStatusColor = () => {
@@ -574,16 +556,6 @@ export function BenefitsHabitCard({ habit, onEdit, compact = false }: BenefitsHa
         </div>
       </CardContent>
 
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Habit"
-        description={`Are you sure you want to delete "${habit.name}"?`}
-        confirmText="Delete Habit"
-        isLoading={loading}
-      />
     </Card>
   );
 }
