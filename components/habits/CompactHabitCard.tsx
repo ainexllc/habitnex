@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Habit } from '@/types';
-import { useHabits } from '@/hooks/useHabits';
+import { usePersonalData } from '@/hooks/usePersonalData';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import { calculateStreak, isHabitDueToday, isHabitOverdue, getNextDueDate, calculateIntervalStreak } from '@/lib/utils';
 import { 
   Check, 
@@ -36,7 +37,8 @@ export function CompactHabitCard({
 }: CompactHabitCardProps) {
   const [loading, setLoading] = useState(false);
   const [internalExpanded, setInternalExpanded] = useState(false);
-  const { isHabitCompleted, toggleCompletion, completions, removeHabit } = useHabits();
+  const { isHabitCompleted, toggleCompletion, completions, removeHabit } = usePersonalData();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   // Use controlled state if provided, otherwise use internal state
   const isExpanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
@@ -80,15 +82,25 @@ export function CompactHabitCard({
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${habit.name}"?`)) {
-      try {
-        await removeHabit(habit.id);
-      } catch (error) {
-        console.error('Failed to delete habit:', error);
-      }
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      setLoading(true);
+      setShowDeleteModal(false);
+      await removeHabit(habit.id);
+    } catch (error) {
+      console.error('Failed to delete habit:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   // Determine card styling based on status
@@ -311,7 +323,7 @@ export function CompactHabitCard({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
@@ -322,6 +334,17 @@ export function CompactHabitCard({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Habit"
+        description={`Are you sure you want to delete "${habit.name}"?`}
+        confirmText="Delete Habit"
+        isLoading={loading}
+      />
     </div>
   );
 }

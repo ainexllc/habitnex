@@ -5,7 +5,8 @@ import { Habit } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Check, Edit, Trash2, Target, Clock, Calendar } from 'lucide-react';
-import { useHabits } from '@/hooks/useHabits';
+import { usePersonalData } from '@/hooks/usePersonalData';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import { calculateStreak, isHabitDueToday, getNextDueDate, getDaysUntilDue, isHabitOverdue, calculateIntervalStreak } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 
@@ -16,7 +17,8 @@ interface HabitCardProps {
 
 export function HabitCard({ habit, onEdit }: HabitCardProps) {
   const [loading, setLoading] = useState(false);
-  const { isHabitCompleted, toggleCompletion, completions, removeHabit } = useHabits();
+  const { isHabitCompleted, toggleCompletion, completions, removeHabit } = usePersonalData();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   const isCompleted = isHabitCompleted(habit.id);
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
@@ -47,14 +49,24 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
     }
   };
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this habit?')) {
-      try {
-        await removeHabit(habit.id);
-      } catch (error) {
-        // Failed to delete habit - handle silently
-      }
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      setLoading(true);
+      setShowDeleteModal(false);
+      await removeHabit(habit.id);
+    } catch (error) {
+      console.error('Failed to delete habit:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   return (
@@ -93,7 +105,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
             <Button variant="ghost" size="sm" onClick={handleEdit}>
               <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleDelete}>
+            <Button variant="ghost" size="sm" onClick={handleDeleteClick}>
               <Trash2 className="w-4 h-4 text-error-500" />
             </Button>
           </div>
@@ -181,6 +193,17 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
           )}
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Habit"
+        description={`Are you sure you want to delete "${habit.name}"?`}
+        confirmText="Delete Habit"
+        isLoading={loading}
+      />
     </Card>
   );
 }
