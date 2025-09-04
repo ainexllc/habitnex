@@ -45,20 +45,9 @@ export function FamilyMemberZone({
   const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [previousStats, setPreviousStats] = useState(member.stats);
-  // Initialize completion statuses from habit data
-  // This matches individual dashboard behavior - read from database completion state
-  const [completionStatuses, setCompletionStatuses] = useState<Record<string, 'success' | 'failure' | null>>(() => {
-    const initialStatuses: Record<string, 'success' | 'failure' | null> = {};
-    // Initialize from database completion status like individual dashboard does
-    habits.forEach(habit => {
-      if (habit.completed) {
-        // For now, default to success for completed habits
-        // In the future, this could read from completion notes like individual dashboard
-        initialStatuses[habit.id] = 'success';
-      }
-    });
-    return initialStatuses;
-  });
+  // Initialize completion statuses - start empty for family dashboard
+  // Family dashboard should show fresh state each day, not carry over from database
+  const [completionStatuses, setCompletionStatuses] = useState<Record<string, 'success' | 'failure' | null>>({});
   
   // Track which habits are expanded to show details
   const [expandedHabits, setExpandedHabits] = useState<Set<string>>(new Set());
@@ -297,9 +286,9 @@ export function FamilyMemberZone({
           ) : (
             habits.map((habit) => {
               const status = completionStatuses[habit.id];
-              // Show status message when habit is completed in database OR user explicitly set success/failure
-              // This matches the individual dashboard behavior exactly
-              const isCompleted = habit.completed || status !== null;
+              // For family dashboard, only show as completed if user explicitly marked it today
+              // Don't use database completion state as that persists across days
+              const isCompleted = status !== null;
               const isExpanded = expandedHabits.has(habit.id);
               
               return (
@@ -339,7 +328,7 @@ export function FamilyMemberZone({
                   </div>
                   
                   {/* Second Line: Dual Completion Buttons or Undo */}
-                  <div className="flex justify-end items-center gap-2">
+                  <div className="flex justify-end items-center gap-2 flex-wrap">
                     {isCompleted ? (
                       <>
                         <div className={cn(
@@ -362,24 +351,26 @@ export function FamilyMemberZone({
                       </>
                     ) : (
                       <>
-                        <Button
-                          onClick={() => handleHabitCompletion(habit.id, true)}
-                          loading={loading}
-                          size="sm"
-                          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Completed
-                        </Button>
-                        <Button
-                          onClick={() => handleHabitCompletion(habit.id, false)}
-                          loading={loading}
-                          size="sm"
-                          className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Failed
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleHabitCompletion(habit.id, true)}
+                            loading={loading}
+                            size="sm"
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Done
+                          </Button>
+                          <Button
+                            onClick={() => handleHabitCompletion(habit.id, false)}
+                            loading={loading}
+                            size="sm"
+                            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Skip
+                          </Button>
+                        </div>
                       </>
                     )}
                   </div>

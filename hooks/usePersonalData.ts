@@ -5,7 +5,7 @@ import { useGlobalData } from '@/contexts/GlobalDataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { HabitCompletion, CreateHabitForm } from '@/types';
 import { getTodayDateString } from '@/lib/utils';
-import { createHabit } from '@/lib/unifiedDb';
+import { createHabit } from '@/lib/db';
 
 /**
  * Hook for accessing ONLY personal/individual data
