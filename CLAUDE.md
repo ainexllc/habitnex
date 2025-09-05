@@ -80,9 +80,11 @@ This file contains important configuration and setup information for this projec
 - **Production Method**: Redirect (better for mobile, SEO-friendly)
 - **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app
 - **Redirect URIs**:
-  - http://localhost:3001/__/auth/handler (configured dev port)
+  - http://localhost:3000/__/auth/handler (default Next.js port)
+  - http://localhost:3001/__/auth/handler (alternative port if 3000 is in use)
   - https://habittracker-eb6bd.firebaseapp.com/__/auth/handler
   - https://nextvibe.app/__/auth/handler
+- **Note**: The development port can be any available port (3000, 3001, etc.). Use `npm run dev` for default port 3000 or `next dev -p [PORT]` for a specific port. Update OAuth redirect URIs in Google Cloud Console accordingly.
 
 #### Key Implementation Files
 - **Authentication**: `lib/auth.ts`, `contexts/AuthContext.tsx`
@@ -766,7 +768,7 @@ vercel rollback <url>    # Rollback deployment
 - Progressive Web App (PWA) capabilities
 
 ### Development Environment ⚙️
-- **Port**: Development server runs on default Next.js port (usually 3000)
+- **Port**: Development server runs on port 3000 by default, or any specified port using `next dev -p [PORT]`. Currently configured to use port 3001 if needed to avoid conflicts
 - **Build**: Static export disabled, API routes enabled
 - **Testing**: Playwright integrated with comprehensive test suite
 - **AI**: Claude Haiku integration with cost tracking and rate limiting
