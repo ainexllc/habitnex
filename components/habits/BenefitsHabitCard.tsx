@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Habit } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { OpenMoji } from '@/components/ui/OpenMoji';
 import {
   Check,
   Edit,
@@ -198,7 +199,7 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
             {isDueToday || isOverdue ? (
               isCompleted ? (
                 <div className="flex items-center gap-2">
-                  <div className={`px-4 py-2 rounded-lg font-medium text-white ${
+                  <div className={`px-4 py-2 rounded-lg font-medium text-white flex items-center ${
                     completionStatus === 'success' ? 'animate-button-merge animate-celebrate' : 
                     completionStatus === 'failure' ? 'animate-button-merge' : ''
                   } transition-all duration-300 ${
@@ -206,9 +207,13 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
                       ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
                       : 'bg-gradient-to-r from-green-500 to-emerald-500'
                   }`}>
-                    {completionStatus === 'success' ? '🎉 Done!' : 
-                     completionStatus === 'failure' ? '😔 Failed' : 
-                     '✅ Completed'}
+                    {completionStatus === 'success' ? (
+                      <>🎉 Done!</>
+                    ) : completionStatus === 'failure' ? (
+                      <><OpenMoji emoji="😔" size={20} className="mr-1" /> Failed</>
+                    ) : (
+                      <>✅ Completed</>
+                    )}
                   </div>
                   <Button
                     onClick={handleUndo}
@@ -500,7 +505,7 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
           {isDueToday || isOverdue ? (
             isCompleted ? (
               <div className="flex items-center gap-3">
-                <div className={`px-6 py-2.5 rounded-full font-bold text-white ${
+                <div className={`px-6 py-2.5 rounded-full font-bold text-white flex items-center justify-center ${
                   completionStatus === 'success' ? 'animate-button-merge animate-celebrate' : 
                   completionStatus === 'failure' ? 'animate-button-merge' : ''
                 } transition-all duration-500 transform shadow-lg ${
@@ -508,9 +513,13 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
                     ? 'bg-gradient-to-r from-gray-500 to-gray-600 shadow-gray-500/25'
                     : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/25'
                 }`}>
-                  {completionStatus === 'success' ? '🎉 Congratulations!' : 
-                   completionStatus === 'failure' ? '😔 Bummer!' : 
-                   '✅ Completed Today'}
+                  {completionStatus === 'success' ? (
+                    <>🎉 Congratulations!</>
+                  ) : completionStatus === 'failure' ? (
+                    <><OpenMoji emoji="😔" size={20} className="mr-1" /> Bummer!</>
+                  ) : (
+                    <>✅ Completed Today</>
+                  )}
                 </div>
                 <Button
                   onClick={handleUndo}
@@ -543,7 +552,7 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
                   className="group/btn relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-105"
                 >
                   <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                  <ThumbsDown className="w-4 h-4 mr-2 relative z-10" />
+                  <OpenMoji emoji="😢" size={20} className="mr-2 relative z-10" />
                   <span className="relative z-10 font-medium">Failed</span>
                 </Button>
               </div>

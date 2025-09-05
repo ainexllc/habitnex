@@ -126,9 +126,10 @@ export function FamilyMemberZone({
       const currentCompletion = getTodaysCompletionStatus(habitId);
       const isCurrentlyCompleted = currentCompletion !== null;
 
-      // If not completed, mark as completed. If already completed, toggle it off first, then back on.
+      // If not completed, mark as completed with appropriate notes
       if (!isCurrentlyCompleted) {
-        await toggleCompletion(habitId, member.id, false); // Mark as completed
+        const notes = success ? 'Completed successfully' : 'Marked as failed';
+        await toggleCompletion(habitId, member.id, false, undefined, notes); // Mark as completed with notes
       }
 
       // Trigger celebration animation only for success
@@ -423,17 +424,16 @@ export function FamilyMemberZone({
                     {isCompleted ? (
                       <>
                         <div className={cn(
-                          "px-3 py-1 rounded-lg font-medium text-white text-sm flex items-center gap-1",
+                          "px-2 py-2 rounded-lg flex items-center justify-center",
                           status === 'failure' 
                             ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
                             : 'bg-gradient-to-r from-green-500 to-emerald-500'
                         )}>
                           <OpenMoji 
-                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😔' : '✅'} 
-                            size={16}
-                            alt={status === 'success' ? 'Party' : status === 'failure' ? 'Sad' : 'Check'}
+                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😢' : '✅'} 
+                            size={24}
+                            alt={status === 'success' ? 'Celebration' : status === 'failure' ? 'Sad' : 'Done'}
                           />
-                          <span>{status === 'success' ? 'Completed!' : status === 'failure' ? 'Failed' : 'Completed'}</span>
                         </div>
                         <Button
                           onClick={() => handleUndo(habit.id)}
@@ -462,8 +462,7 @@ export function FamilyMemberZone({
                               size="sm"
                               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
                             >
-                              <Check className="w-4 h-4 mr-1" />
-                              Completed
+                              Done
                             </Button>
                             <Button
                               onClick={() => handleHabitCompletion(habit.id, false)}
@@ -471,7 +470,6 @@ export function FamilyMemberZone({
                               size="sm"
                               className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
                             >
-                              <X className="w-4 h-4 mr-1" />
                               Failed
                             </Button>
                           </div>

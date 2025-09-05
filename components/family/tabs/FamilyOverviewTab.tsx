@@ -124,9 +124,9 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
         </div>
       </div>
 
-      {/* Member Zones Grid - Enhanced spacing for larger cards */}
+      {/* Member Zones Grid - Compact spacing between cards */}
       <div className={cn(
-        "grid gap-6 md:gap-8",
+        "grid gap-2 md:gap-3",
         touchMode ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
         members.length === 1 && "grid-cols-1 max-w-md mx-auto",
         members.length === 2 && "md:grid-cols-2 max-w-4xl mx-auto",
