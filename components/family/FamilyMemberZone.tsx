@@ -605,15 +605,6 @@ export function FamilyMemberZone({
           </div>
         )}
       </CardContent>
-      
-      {/* Completion Celebration */}
-      {completionRate === 100 && (
-        <div className="absolute top-2 right-2">
-          <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
-            <Star className="w-5 h-5 text-yellow-800" />
-          </div>
-        </div>
-      )}
       </Card>
 
       {/* Benefits Modal */}

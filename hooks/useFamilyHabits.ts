@@ -258,15 +258,19 @@ export function useAllFamilyHabits() {
     const todayString = today.toISOString().split('T')[0];
     
     return allHabits
-      .filter(habit => habit.assignedMembers.includes(memberId))
+      .filter(habit => habit.assignedMembers && Array.isArray(habit.assignedMembers) && habit.assignedMembers.includes(memberId))
       .filter(habit => {
         // Check if habit is due today
         if (habit.frequency === 'daily') {
-          return habit.targetDays.includes(dayOfWeek);
+          return habit.targetDays && Array.isArray(habit.targetDays) && habit.targetDays.includes(dayOfWeek);
         } else if (habit.frequency === 'weekly') {
-          return habit.targetDays.includes(dayOfWeek);
+          return habit.targetDays && Array.isArray(habit.targetDays) && habit.targetDays.includes(dayOfWeek);
+        } else if (habit.frequency === 'interval' && habit.intervalDays && habit.startDate) {
+          const startDate = new Date(habit.startDate);
+          const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+          return daysDiff >= 0 && daysDiff % habit.intervalDays === 0;
         }
-        return true; // Include other frequencies for now
+        return false; // Exclude habits that don't match any frequency criteria
       })
       .map(habit => ({
         ...habit,
@@ -281,13 +285,29 @@ export function useAllFamilyHabits() {
   
   // Get completion stats by member
   const getMemberStats = useCallback((memberId: string) => {
-    const memberCompletions = allCompletions.filter(c => c.memberId === memberId);
-    const memberHabits = allHabits.filter(habit => habit.assignedMembers.includes(memberId));
+    const todayString = new Date().toISOString().split('T')[0];
+    const memberHabits = getHabitsByMember(memberId); // This already filters for today's habits
     
-    const completed = memberCompletions.filter(c => c.completed).length;
+    // Get the IDs of habits that are due today
+    const todaysHabitIds = new Set(memberHabits.map(h => h.id));
+    
+    // Count only TODAY's SUCCESSFUL completions for habits that are actually due today
+    const todaysCompletions = allCompletions.filter(c => 
+      c.memberId === memberId && 
+      c.date === todayString && 
+      c.completed &&
+      c.notes !== 'Marked as failed' && // Exclude failed habits from completed count
+      todaysHabitIds.has(c.habitId) // Only count if the habit is due today
+    );
+    
+    // Count unique habits completed (not duplicate completion records)
+    const uniqueCompletedHabitIds = new Set(todaysCompletions.map(c => c.habitId));
+    const completed = uniqueCompletedHabitIds.size;
     const total = memberHabits.length;
     const completionRate = total > 0 ? (completed / total) * 100 : 0;
-    const totalPoints = memberCompletions.reduce((sum, c) => sum + (c.pointsEarned || 0), 0);
+    const totalPoints = allCompletions
+      .filter(c => c.memberId === memberId)
+      .reduce((sum, c) => sum + (c.pointsEarned || 0), 0); // Keep total points from all time
     
     return {
       completed,
@@ -296,7 +316,7 @@ export function useAllFamilyHabits() {
       totalPoints,
       pending: total - completed
     };
-  }, [allHabits, allCompletions]);
+  }, [allHabits, allCompletions, getHabitsByMember]);
   
   // Update habit
   const updateHabit = useCallback(async (habitId: string, updates: Partial<FamilyHabit>) => {
