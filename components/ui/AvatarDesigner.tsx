@@ -94,10 +94,10 @@ export function AvatarDesigner({
     }
     
     // Only add probabilities if they differ from defaults
-    if (hairProbability !== 100) params.set('hairProbability', String(hairProbability / 100));
-    if (glassesProbability !== 50) params.set('glassesProbability', String(glassesProbability / 100));
-    if (featuresProbability !== 10) params.set('featuresProbability', String(featuresProbability / 100));
-    if (earringsProbability !== 30) params.set('earringsProbability', String(earringsProbability / 100));
+    if (hairProbability !== 100) params.set('hairProbability', String(hairProbability));
+    if (glassesProbability !== 50) params.set('glassesProbability', String(glassesProbability));
+    if (featuresProbability !== 10) params.set('featuresProbability', String(featuresProbability));
+    if (earringsProbability !== 30) params.set('earringsProbability', String(earringsProbability));
     
     if (flip) params.set('flip', 'true');
     if (rotate > 0) params.set('rotate', String(rotate));
