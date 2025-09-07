@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SketchPicker } from 'react-color';
 import { ChevronDown, RotateCcw, Shuffle, Sparkles, Eye, Smile } from 'lucide-react';
 import { createAvatar } from '@dicebear/core';
@@ -77,8 +77,9 @@ export function AdventurerAvatarBuilder({
   onChange,
   className
 }: AdventurerAvatarBuilderProps) {
-  // Ensure we always have a valid seed
-  const [seed, setSeed] = useState(initialSeed || 'default-avatar');
+  // Ensure we always have a valid seed - use a more unique default
+  const defaultSeed = initialSeed || `avatar-${Date.now()}`;
+  const [seed, setSeed] = useState(defaultSeed);
   const [backgroundColor, setBackgroundColor] = useState<string[]>([]);
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const [customColor, setCustomColor] = useState('#E0F2FE');
@@ -95,6 +96,11 @@ export function AdventurerAvatarBuilder({
   const [featuresProbability, setFeaturesProbability] = useState(10);
   const [earringsProbability, setEarringsProbability] = useState(30);
   const [expandedSection, setExpandedSection] = useState<string | null>('basic');
+
+  // Notify parent on mount with initial values
+  useEffect(() => {
+    onChange?.(seed, backgroundColor);
+  }, []); // Only run on mount
 
   // Generate random seed
   const handleRandomize = useCallback(() => {
@@ -191,25 +197,20 @@ export function AdventurerAvatarBuilder({
         theme.border.default,
         "border"
       )}>
-        <div className="mx-auto mb-4" style={{ width: '120px', height: '120px' }}>
-          <div 
-            className="w-full h-full rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center"
-            style={{ 
-              backgroundColor: backgroundColor[0] || 'transparent',
-            }}
-            key={`${seed}-${skinColor.join(',')}-${hairColor.join(',')}-${randomMode}`}
-          >
-            {avatarSvg ? (
-              <div 
-                className="w-full h-full flex items-center justify-center"
-                dangerouslySetInnerHTML={{ __html: avatarSvg }} 
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <span>Loading...</span>
-              </div>
-            )}
-          </div>
+        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: '120px', height: '120px' }}>
+          {avatarSvg ? (
+            <div 
+              className="w-full h-full rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600"
+              style={{ 
+                backgroundColor: backgroundColor[0] || 'transparent',
+              }}
+              dangerouslySetInnerHTML={{ __html: avatarSvg }} 
+            />
+          ) : (
+            <div className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 bg-gray-100">
+              <span>Loading...</span>
+            </div>
+          )}
         </div>
         
         {/* Action Buttons */}
