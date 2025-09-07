@@ -322,27 +322,32 @@ export function AdventurerAvatarBuilder({
               </label>
               <div className="grid grid-cols-6 gap-2">
                 {skinColors.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setSkinColor(skinColor[0] === color.value ? [] : [color.value])}
-                    className={cn(
-                      "p-3 rounded-lg border-2 transition-all relative",
-                      skinColor[0] === color.value
-                        ? 'border-blue-500 scale-105 ring-2 ring-blue-300'
-                        : 'border-gray-300 hover:scale-105 hover:border-gray-400'
-                    )}
-                    style={{ backgroundColor: color.value }}
-                    title={color.label}
-                  >
-                    {skinColor[0] === color.value && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
-                  </button>
+                  <div key={color.value} className="relative group">
+                    <button
+                      type="button"
+                      onClick={() => setSkinColor(skinColor[0] === color.value ? [] : [color.value])}
+                      className={cn(
+                        "w-full p-3 rounded-lg border-2 transition-all relative",
+                        skinColor[0] === color.value
+                          ? 'border-blue-500 scale-105 ring-2 ring-blue-300'
+                          : 'border-gray-300 hover:scale-105 hover:border-gray-400'
+                      )}
+                      style={{ backgroundColor: color.value }}
+                      aria-label={color.label}
+                    >
+                      {skinColor[0] === color.value && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                      {color.label}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -353,28 +358,39 @@ export function AdventurerAvatarBuilder({
                 Hair Color
               </label>
               <div className="grid grid-cols-6 gap-2">
-                {hairColors.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setHairColor(hairColor[0] === color.value ? [] : [color.value])}
-                    className={cn(
-                      "p-3 rounded-lg border-2 transition-all relative",
-                      hairColor[0] === color.value
-                        ? 'border-blue-500 scale-105 ring-2 ring-blue-300'
-                        : 'border-gray-300 hover:scale-105 hover:border-gray-400'
-                    )}
-                    style={{ backgroundColor: color.value }}
-                    title={color.label}
-                  >
-                    {hairColor[0] === color.value && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
-                  </button>
+                {hairColors.map((color, index) => (
+                  <div key={color.value} className="relative group">
+                    <button
+                      type="button"
+                      onClick={() => setHairColor(hairColor[0] === color.value ? [] : [color.value])}
+                      className={cn(
+                        "w-full p-3 rounded-lg border-2 transition-all relative",
+                        hairColor[0] === color.value
+                          ? 'border-blue-500 scale-105 ring-2 ring-blue-300'
+                          : 'border-gray-300 hover:scale-105 hover:border-gray-400',
+                        // Add white inner border for dark colors
+                        (index === 0 || index === 1) && 'ring-1 ring-white/20 ring-inset'
+                      )}
+                      style={{ 
+                        backgroundColor: color.value,
+                        // Add subtle gradient for better visibility
+                        backgroundImage: index === 0 ? 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)' : undefined
+                      }}
+                      aria-label={color.label}
+                    >
+                      {hairColor[0] === color.value && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                      {color.label}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
