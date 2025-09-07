@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { MemberModal } from '@/components/family/MemberModal';
 
-import { DiceBearAvatar, avatarConfigToDiceBearOptions } from '@/components/ui/DiceBearAvatar';
+import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { FamilyMember } from '@/types/family';
 import { Button } from '@/components/ui/Button';
 import { UserPlus, Edit2, Users, Crown, Trophy, Star } from 'lucide-react';
@@ -129,8 +129,8 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
             <div className="flex flex-col items-center mb-6">
               {(member as any).avatarOrigin === 'custom' && (member as any).avatarConfig ? (
                 <DiceBearAvatar
-                  style="avataaars"
-                  options={avatarConfigToDiceBearOptions((member as any).avatarConfig)}
+                  style={(member as any).avatarStyle || 'adventurer'}
+                  options={(member as any).avatarConfig}
                   size={120}
                   className="rounded-full shadow-lg ring-4 ring-white dark:ring-gray-700 hover:ring-opacity-75 transition-all"
                 />

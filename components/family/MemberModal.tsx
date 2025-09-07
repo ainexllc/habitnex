@@ -81,10 +81,28 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   useEffect(() => {
     if (member) {
       const memberData = member as any;
-      setFormData({
-        name: member.name || '',
-        displayName: member.displayName || '',
-        avatarData: {
+      
+      // Handle custom avatar data (from avatarConfig) or fallback to individual fields
+      let avatarData;
+      if (memberData.avatarConfig && memberData.avatarOrigin === 'custom') {
+        // Use existing custom avatar configuration
+        avatarData = {
+          seed: memberData.avatarConfig.seed || memberData.avatarSeed || member.displayName || 'member',
+          eyes: memberData.avatarConfig.eyes || '',
+          eyebrows: memberData.avatarConfig.eyebrows || '',
+          mouth: memberData.avatarConfig.mouth || '',
+          hair: memberData.avatarConfig.hair || '',
+          skinColor: memberData.avatarConfig.skinColor || '',
+          hairColor: memberData.avatarConfig.hairColor || '',
+          backgroundColor: memberData.avatarConfig.backgroundColor || 'transparent',
+          flip: memberData.avatarConfig.flip ?? false,
+          rotate: memberData.avatarConfig.rotate ?? 0,
+          scale: memberData.avatarConfig.scale ?? 100,
+          avatarUrl: memberData.avatarConfig.avatarUrl || ''
+        };
+      } else {
+        // Fallback to individual avatar fields or default
+        avatarData = {
           seed: memberData.avatarSeed || member.displayName || 'member',
           eyes: memberData.eyes || '',
           eyebrows: memberData.eyebrows || '',
@@ -97,7 +115,13 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
           rotate: memberData.rotate ?? 0,
           scale: memberData.scale ?? 100,
           avatarUrl: ''
-        },
+        };
+      }
+      
+      setFormData({
+        name: member.name || '',
+        displayName: member.displayName || '',
+        avatarData,
         color: member.color || '#3B82F6',
         role: member.role || 'child',
       });
@@ -149,6 +173,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
       const memberData = {
         name: formData.name.trim() || formData.displayName.trim(),
         displayName: formData.displayName.trim(),
+        avatar: '', // Not used for adventurer style
         avatarStyle: 'adventurer' as const,
         avatarSeed: formData.avatarData.seed || formData.displayName.trim(),
         avatarConfig: formData.avatarData,
@@ -216,7 +241,10 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
                 ...prev, 
                 displayName: e.target.value,
                 // Auto-generate avatar seed from name if not already set
-                avatarSeed: prev.avatarSeed || e.target.value
+                avatarData: {
+                  ...prev.avatarData,
+                  seed: prev.avatarData.seed || e.target.value
+                }
               }))}
               required
             />
@@ -231,25 +259,10 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
               {/* Avatar Preview */}
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
                 {formData.avatarData.seed ? (
-                  <img 
-                    src={(() => {
-                      const params = new URLSearchParams();
-                      params.set('seed', formData.avatarData.seed);
-                      if (formData.avatarData.eyes) params.set('eyes', formData.avatarData.eyes);
-                      if (formData.avatarData.eyebrows) params.set('eyebrows', formData.avatarData.eyebrows);
-                      if (formData.avatarData.mouth) params.set('mouth', formData.avatarData.mouth);
-                      if (formData.avatarData.hair) params.set('hair', formData.avatarData.hair);
-                      if (formData.avatarData.skinColor) params.set('skinColor', formData.avatarData.skinColor.replace('#', ''));
-                      if (formData.avatarData.hairColor) params.set('hairColor', formData.avatarData.hairColor.replace('#', ''));
-                      if (formData.avatarData.backgroundColor && formData.avatarData.backgroundColor !== 'transparent') {
-                        params.set('backgroundColor', formData.avatarData.backgroundColor.replace('#', ''));
-                      }
-                      if (formData.avatarData.flip) params.set('flip', 'true');
-                      if (formData.avatarData.rotate && formData.avatarData.rotate > 0) params.set('rotate', String(formData.avatarData.rotate));
-                      if (formData.avatarData.scale && formData.avatarData.scale !== 100) params.set('scale', String(formData.avatarData.scale / 100));
-                      return `https://api.dicebear.com/9.x/adventurer/svg?${params.toString()}`;
-                    })()} 
-                    alt="Avatar preview"
+                  <DiceBearAvatar
+                    style="adventurer"
+                    options={formData.avatarData}
+                    size={80}
                     className="w-full h-full"
                   />
                 ) : (

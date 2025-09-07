@@ -258,9 +258,11 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   const addDirectMember = useCallback(async (memberInfo: {
     name: string;
     displayName: string;
-    avatar: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatar?: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
+    avatarConfig?: any;
+    avatarOrigin?: 'auto' | 'custom';
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -294,7 +296,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   // Update family member
   const updateFamilyMember = useCallback(async (memberId: string, updates: {
     displayName?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
     avatarConfig?: any;
     avatarOrigin?: 'auto' | 'custom';

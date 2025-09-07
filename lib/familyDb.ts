@@ -331,8 +331,8 @@ export const addDirectFamilyMember = async (
   memberInfo: {
     name: string;
     displayName: string;
-    avatar: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatar?: string;
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
     avatarConfig?: any; // Custom avatar configuration
     avatarOrigin?: 'auto' | 'custom';
@@ -410,7 +410,7 @@ export const updateFamilyMemberInDb = async (
   memberId: string,
   updates: {
     displayName?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
     avatarConfig?: any;
     avatarOrigin?: 'auto' | 'custom';
