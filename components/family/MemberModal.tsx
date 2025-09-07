@@ -6,7 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
-import { AvatarDesigner } from '@/components/ui/AvatarDesigner';
+import { AdventurerAvatarBuilder } from '@/components/ui/AvataaarsAvatarBuilder';
 import { FamilyMember } from '@/types/family';
 import { UserPlus, UserPen } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -59,13 +59,13 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
     displayName: '',
     avatarData: {
       seed: '',
+      eyes: '',
+      eyebrows: '',
+      mouth: '',
+      hair: '',
       skinColor: '',
       hairColor: '',
       backgroundColor: 'transparent',
-      hairProbability: 100,
-      glassesProbability: 50,
-      featuresProbability: 10,
-      earringsProbability: 30,
       flip: false,
       rotate: 0,
       scale: 100,
@@ -86,13 +86,13 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         displayName: member.displayName || '',
         avatarData: {
           seed: memberData.avatarSeed || member.displayName || 'member',
+          eyes: memberData.eyes || '',
+          eyebrows: memberData.eyebrows || '',
+          mouth: memberData.mouth || '',
+          hair: memberData.hair || '',
           skinColor: memberData.skinColor || '',
           hairColor: memberData.hairColor || '',
           backgroundColor: memberData.backgroundColor || 'transparent',
-          hairProbability: memberData.hairProbability ?? 100,
-          glassesProbability: memberData.glassesProbability ?? 50,
-          featuresProbability: memberData.featuresProbability ?? 10,
-          earringsProbability: memberData.earringsProbability ?? 30,
           flip: memberData.flip ?? false,
           rotate: memberData.rotate ?? 0,
           scale: memberData.scale ?? 100,
@@ -108,13 +108,13 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         displayName: '',
         avatarData: {
           seed: '',
+          eyes: '',
+          eyebrows: '',
+          mouth: '',
+          hair: '',
           skinColor: '',
           hairColor: '',
           backgroundColor: 'transparent',
-          hairProbability: 100,
-          glassesProbability: 50,
-          featuresProbability: 10,
-          earringsProbability: 30,
           flip: false,
           rotate: 0,
           scale: 100,
@@ -150,8 +150,9 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         name: formData.name.trim() || formData.displayName.trim(),
         displayName: formData.displayName.trim(),
         avatarStyle: 'adventurer' as const,
-        ...formData.avatarData,
         avatarSeed: formData.avatarData.seed || formData.displayName.trim(),
+        avatarConfig: formData.avatarData,
+        avatarOrigin: 'custom' as const,
         color: formData.color,
         role: formData.role,
       };
@@ -231,7 +232,23 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
                 {formData.avatarData.seed ? (
                   <img 
-                    src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${formData.avatarData.seed}${formData.avatarData.skinColor ? `&skinColor=${formData.avatarData.skinColor}` : ''}${formData.avatarData.hairColor ? `&hairColor=${formData.avatarData.hairColor}` : ''}${formData.avatarData.backgroundColor && formData.avatarData.backgroundColor !== 'transparent' ? `&backgroundColor=${formData.avatarData.backgroundColor}` : ''}`}
+                    src={(() => {
+                      const params = new URLSearchParams();
+                      params.set('seed', formData.avatarData.seed);
+                      if (formData.avatarData.eyes) params.set('eyes', formData.avatarData.eyes);
+                      if (formData.avatarData.eyebrows) params.set('eyebrows', formData.avatarData.eyebrows);
+                      if (formData.avatarData.mouth) params.set('mouth', formData.avatarData.mouth);
+                      if (formData.avatarData.hair) params.set('hair', formData.avatarData.hair);
+                      if (formData.avatarData.skinColor) params.set('skinColor', formData.avatarData.skinColor.replace('#', ''));
+                      if (formData.avatarData.hairColor) params.set('hairColor', formData.avatarData.hairColor.replace('#', ''));
+                      if (formData.avatarData.backgroundColor && formData.avatarData.backgroundColor !== 'transparent') {
+                        params.set('backgroundColor', formData.avatarData.backgroundColor.replace('#', ''));
+                      }
+                      if (formData.avatarData.flip) params.set('flip', 'true');
+                      if (formData.avatarData.rotate && formData.avatarData.rotate > 0) params.set('rotate', String(formData.avatarData.rotate));
+                      if (formData.avatarData.scale && formData.avatarData.scale !== 100) params.set('scale', String(formData.avatarData.scale / 100));
+                      return `https://api.dicebear.com/9.x/adventurer/svg?${params.toString()}`;
+                    })()} 
                     alt="Avatar preview"
                     className="w-full h-full"
                   />
@@ -360,7 +377,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
       size="xl"
     >
       <div className="h-[600px]">
-        <AvatarDesigner
+        <AdventurerAvatarBuilder
           initialData={formData.avatarData}
           onSave={handleAvatarSave}
           onCancel={() => setShowAvatarDesigner(false)}

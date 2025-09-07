@@ -296,6 +296,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     displayName?: string;
     avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
+    avatarConfig?: any;
+    avatarOrigin?: 'auto' | 'custom';
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => {
