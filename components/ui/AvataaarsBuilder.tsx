@@ -160,7 +160,8 @@ export function AvataaarsBuilder({
   onChange,
   className
 }: AvataaarsBuilderProps) {
-  const [seed, setSeed] = useState(initialSeed);
+  console.log('AvataaarsBuilder mounted with seed:', initialSeed);
+  const [seed, setSeed] = useState(initialSeed || 'default-avatar');
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(['expression']);
@@ -227,18 +228,25 @@ export function AvataaarsBuilder({
 
   // Generate avatar URL
   const avatarUrl = useMemo(() => {
+    // Try a simpler URL first to test if the API works
     const params = new URLSearchParams();
-    params.set('seed', seed);
+    params.set('seed', seed || 'test');
     
-    // Add all customization options
-    Object.entries(options).forEach(([key, value]) => {
-      if (value && value !== 'blank') {
-        params.set(key, value);
-      }
-    });
+    // Only add non-blank options
+    if (options.eyes && options.eyes !== 'default') params.set('eyes', options.eyes);
+    if (options.eyebrow && options.eyebrow !== 'default') params.set('eyebrow', options.eyebrow);
+    if (options.mouth && options.mouth !== 'default') params.set('mouth', options.mouth);
+    if (options.top && options.top !== 'shortFlat') params.set('top', options.top);
+    if (options.hairColor && options.hairColor !== 'brown') params.set('hairColor', options.hairColor);
+    if (options.skinColor && options.skinColor !== 'light') params.set('skinColor', options.skinColor);
+    if (options.accessories && options.accessories !== 'blank') params.set('accessories', options.accessories);
+    if (options.facialHair && options.facialHair !== 'blank') params.set('facialHair', options.facialHair);
+    if (options.clothing) params.set('clothing', options.clothing);
+    if (options.clothingColor) params.set('clothingColor', options.clothingColor);
     
     const url = `https://api.dicebear.com/9.x/avataaars/svg?${params.toString()}`;
     console.log('Avataaars URL:', url);
+    console.log('Avataaars params:', params.toString());
     console.log('Avataaars options:', options);
     return url;
   }, [seed, options]);
@@ -251,7 +259,9 @@ export function AvataaarsBuilder({
 
   // Notify parent on mount
   useEffect(() => {
+    console.log('AvataaarsBuilder initial effect, calling onChange');
     onChange?.(seed, options);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -319,6 +329,11 @@ export function AvataaarsBuilder({
             <Shuffle className="w-4 h-4" />
             Generate Random
           </button>
+        </div>
+        
+        {/* Debug: Show URL */}
+        <div className="text-xs text-gray-500 mt-2 break-all">
+          URL: {avatarUrl}
         </div>
       </div>
 
