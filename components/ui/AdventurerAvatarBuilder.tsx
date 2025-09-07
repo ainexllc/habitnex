@@ -84,6 +84,7 @@ export function AdventurerAvatarBuilder({
   const [flip, setFlip] = useState(false);
   const [rotate, setRotate] = useState(0);
   const [scale, setScale] = useState(100);
+  const [imageLoading, setImageLoading] = useState(true);
   
   // New customization options
   const [randomMode, setRandomMode] = useState(true);
@@ -140,34 +141,45 @@ export function AdventurerAvatarBuilder({
   // Generate avatar URL using DiceBear API
   const avatarUrl = useMemo(() => {
     const params = new URLSearchParams();
-    params.set('seed', seed);
-    params.set('size', '120');
+    params.set('seed', seed || 'default');
     
     if (flip) params.set('flip', 'true');
-    if (rotate) params.set('rotate', String(rotate));
-    if (scale !== 100) params.set('scale', String(scale));
+    if (rotate > 0) params.set('rotate', String(rotate));
+    if (scale !== 100) params.set('scale', String(scale / 100));
     
     // If not in random mode, add specific customizations
     if (!randomMode) {
       if (skinColor.length > 0) {
-        params.set('skinColor', skinColor.join(','));
+        // Remove # from hex colors for the API
+        const cleanColors = skinColor.map(c => c.replace('#', ''));
+        params.set('skinColor', cleanColors.join(','));
       }
       if (hairColor.length > 0) {
-        params.set('hairColor', hairColor.join(','));
+        // Remove # from hex colors for the API
+        const cleanColors = hairColor.map(c => c.replace('#', ''));
+        params.set('hairColor', cleanColors.join(','));
       }
-      params.set('hairProbability', String(hairProbability));
-      params.set('glassesProbability', String(glassesProbability));
-      params.set('featuresProbability', String(featuresProbability));
-      params.set('earringsProbability', String(earringsProbability));
+      // Only set probabilities if they differ from defaults
+      if (hairProbability !== 100) params.set('hairProbability', String(hairProbability / 100));
+      if (glassesProbability !== 50) params.set('glassesProbability', String(glassesProbability / 100));
+      if (featuresProbability !== 10) params.set('featuresProbability', String(featuresProbability / 100));
+      if (earringsProbability !== 30) params.set('earringsProbability', String(earringsProbability / 100));
     }
     
-    if (backgroundColor.length > 0) {
+    if (backgroundColor.length > 0 && backgroundColor[0] !== 'transparent') {
       params.set('backgroundColor', backgroundColor[0].replace('#', ''));
     }
     
-    return `https://api.dicebear.com/9.x/adventurer/svg?${params.toString()}`;
+    const url = `https://api.dicebear.com/9.x/adventurer/svg?${params.toString()}`;
+    console.log('Avatar URL:', url);
+    return url;
   }, [seed, backgroundColor, flip, rotate, scale, randomMode, skinColor, hairColor, 
       hairProbability, glassesProbability, featuresProbability, earringsProbability]);
+  
+  // Reset loading state when URL changes
+  useEffect(() => {
+    setImageLoading(true);
+  }, [avatarUrl]);
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -178,13 +190,24 @@ export function AdventurerAvatarBuilder({
         theme.border.default,
         "border"
       )}>
-        <div className="mx-auto mb-4" style={{ width: '120px', height: '120px' }}>
+        <div className="mx-auto mb-4 relative" style={{ width: '120px', height: '120px' }}>
+          {imageLoading && (
+            <div className="absolute inset-0 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+              <span className="text-gray-400">Loading...</span>
+            </div>
+          )}
           <img 
             src={avatarUrl}
             alt="Avatar preview"
             className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600"
             style={{ 
               backgroundColor: backgroundColor[0] || 'transparent',
+              display: imageLoading ? 'none' : 'block'
+            }}
+            onLoad={() => setImageLoading(false)}
+            onError={() => {
+              console.error('Failed to load avatar from:', avatarUrl);
+              setImageLoading(false);
             }}
           />
         </div>
