@@ -6,7 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
-import { AdventurerAvatarBuilder } from '@/components/ui/AdventurerAvatarBuilder';
+import { AvatarDesigner } from '@/components/ui/AvatarDesigner';
 import { FamilyMember } from '@/types/family';
 import { UserPlus, UserPen } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -52,12 +52,25 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const { addDirectMember, updateFamilyMember, loading } = useFamily();
   
   const isEditing = !!member;
+  const [showAvatarDesigner, setShowAvatarDesigner] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
-    avatarSeed: '',
-    avatarBackgroundColor: '#ffffff',
+    avatarData: {
+      seed: '',
+      skinColor: '',
+      hairColor: '',
+      backgroundColor: 'transparent',
+      hairProbability: 100,
+      glassesProbability: 50,
+      featuresProbability: 10,
+      earringsProbability: 30,
+      flip: false,
+      rotate: 0,
+      scale: 100,
+      avatarUrl: ''
+    },
     color: '#3B82F6',
     role: 'child' as 'parent' | 'child' | 'teen' | 'adult',
   });
@@ -67,11 +80,24 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   // Initialize form data when member changes (for editing)
   useEffect(() => {
     if (member) {
+      const memberData = member as any;
       setFormData({
         name: member.name || '',
         displayName: member.displayName || '',
-        avatarSeed: (member as any).avatarSeed || member.displayName || 'member',
-        avatarBackgroundColor: (member as any).avatarBackgroundColor || '#ffffff',
+        avatarData: {
+          seed: memberData.avatarSeed || member.displayName || 'member',
+          skinColor: memberData.skinColor || '',
+          hairColor: memberData.hairColor || '',
+          backgroundColor: memberData.backgroundColor || 'transparent',
+          hairProbability: memberData.hairProbability ?? 100,
+          glassesProbability: memberData.glassesProbability ?? 50,
+          featuresProbability: memberData.featuresProbability ?? 10,
+          earringsProbability: memberData.earringsProbability ?? 30,
+          flip: memberData.flip ?? false,
+          rotate: memberData.rotate ?? 0,
+          scale: memberData.scale ?? 100,
+          avatarUrl: ''
+        },
         color: member.color || '#3B82F6',
         role: member.role || 'child',
       });
@@ -80,21 +106,34 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
       setFormData({
         name: '',
         displayName: '',
-        avatarSeed: '',
-        avatarBackgroundColor: '#ffffff',
+        avatarData: {
+          seed: '',
+          skinColor: '',
+          hairColor: '',
+          backgroundColor: 'transparent',
+          hairProbability: 100,
+          glassesProbability: 50,
+          featuresProbability: 10,
+          earringsProbability: 30,
+          flip: false,
+          rotate: 0,
+          scale: 100,
+          avatarUrl: ''
+        },
         color: '#3B82F6',
         role: 'child',
       });
     }
+    setShowAvatarDesigner(false);
   }, [member, isOpen]);
   
-  // Handle avatar changes from builder
-  const handleAvatarChange = (seed: string, backgroundColor?: string[]) => {
+  // Handle avatar save from designer
+  const handleAvatarSave = (avatarData: any) => {
     setFormData(prev => ({
       ...prev,
-      avatarSeed: seed,
-      avatarBackgroundColor: backgroundColor?.[0] || '#ffffff'
+      avatarData
     }));
+    setShowAvatarDesigner(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,8 +150,8 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         name: formData.name.trim() || formData.displayName.trim(),
         displayName: formData.displayName.trim(),
         avatarStyle: 'adventurer' as const,
-        avatarSeed: formData.avatarSeed || formData.displayName.trim(),
-        avatarBackgroundColor: formData.avatarBackgroundColor,
+        ...formData.avatarData,
+        avatarSeed: formData.avatarData.seed || formData.displayName.trim(),
         color: formData.color,
         role: formData.role,
       };
@@ -137,12 +176,13 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={isEditing ? 'Edit Family Member' : 'Add Family Member'}
-      size="lg"
-    >
+    <>
+      <Modal
+        isOpen={isOpen && !showAvatarDesigner}
+        onClose={handleClose}
+        title={isEditing ? 'Edit Family Member' : 'Add Family Member'}
+        size="lg"
+      >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Header */}
         <div className="text-center mb-6">
@@ -186,10 +226,35 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
             <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
               Avatar
             </label>
-            <AdventurerAvatarBuilder
-              initialSeed={formData.avatarSeed || formData.displayName || 'member'}
-              onChange={handleAvatarChange}
-            />
+            <div className="flex items-center gap-4">
+              {/* Avatar Preview */}
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                {formData.avatarData.seed ? (
+                  <img 
+                    src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${formData.avatarData.seed}${formData.avatarData.skinColor ? `&skinColor=${formData.avatarData.skinColor}` : ''}${formData.avatarData.hairColor ? `&hairColor=${formData.avatarData.hairColor}` : ''}${formData.avatarData.backgroundColor && formData.avatarData.backgroundColor !== 'transparent' ? `&backgroundColor=${formData.avatarData.backgroundColor}` : ''}`}
+                    alt="Avatar preview"
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <span className="text-gray-400 text-xs">No Avatar</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Design Button */}
+              <button
+                type="button"
+                onClick={() => setShowAvatarDesigner(true)}
+                className={cn(
+                  "px-4 py-2 rounded-lg",
+                  theme.components.button.primary,
+                  "text-white font-medium"
+                )}
+              >
+                {formData.avatarData.seed ? 'Edit Avatar' : 'Create Avatar'}
+              </button>
+            </div>
           </div>
 
           {/* Personal Color */}
@@ -286,5 +351,22 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         </div>
       </form>
     </Modal>
+    
+    {/* Avatar Designer Modal */}
+    <Modal
+      isOpen={showAvatarDesigner}
+      onClose={() => setShowAvatarDesigner(false)}
+      title="Design Your Avatar"
+      size="xl"
+    >
+      <div className="h-[600px]">
+        <AvatarDesigner
+          initialData={formData.avatarData}
+          onSave={handleAvatarSave}
+          onCancel={() => setShowAvatarDesigner(false)}
+        />
+      </div>
+    </Modal>
+    </>
   );
 }
