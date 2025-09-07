@@ -280,13 +280,14 @@ export function AvatarBuilder({
       )}>
         <div className="mx-auto mb-3" style={{ width: '120px', height: '120px' }}>
           <div 
-            className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600"
+            className="w-full h-full rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center"
+            style={{ backgroundColor: config.backgroundColor?.[0] || '#f3f4f6' }}
             dangerouslySetInnerHTML={{ 
               __html: (() => {
                 try {
                   const svg = Object.keys(avatarOptions).length > 0 
-                    ? createAvatar(avataaars as any, { ...avatarOptions, size: 120 }).toString()
-                    : createAvatar(avataaars as any, { seed: 'default-avatar', size: 120 }).toString();
+                    ? createAvatar(avataaars as any, { ...avatarOptions, size: 120, backgroundColor: [] }).toString()
+                    : createAvatar(avataaars as any, { seed: 'default-avatar', size: 120, backgroundColor: [] }).toString();
                   console.log('Avatar SVG created, length:', svg?.length);
                   return svg;
                 } catch (error) {
@@ -763,6 +764,44 @@ export function AvatarBuilder({
                           className="fixed inset-0"
                           onClick={() => setShowColorPicker(null)}
                         />
+                        <SketchPicker
+                          color={config.backgroundColor?.[0] || '#E0E0E0'}
+                          onChange={(color) => updateConfig({ backgroundColor: [color.hex] })}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Background Color */}
+                <div>
+                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+                    Background Color
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowColorPicker(showColorPicker === 'background' ? null : 'background')}
+                      className={cn(
+                        "w-full px-3 py-2 rounded-lg flex items-center justify-between",
+                        theme.surface.primary,
+                        theme.border.default,
+                        theme.text.primary,
+                        "border"
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 rounded border border-gray-300"
+                          style={{ backgroundColor: config.backgroundColor?.[0] || '#E0E0E0' }}
+                        />
+                        {config.backgroundColor?.[0] || '#E0E0E0'}
+                      </span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    
+                    {showColorPicker === 'background' && (
+                      <div className="absolute z-10 mt-2">
                         <SketchPicker
                           color={config.backgroundColor?.[0] || '#E0E0E0'}
                           onChange={(color) => updateConfig({ backgroundColor: [color.hex] })}

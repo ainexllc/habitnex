@@ -143,9 +143,20 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
   // Map AvatarConfig fields to DiceBear avataaars options
   // Note: DiceBear expects arrays for most options and camelCase values
   
-  // Skin color needs lowercase
+  // Skin color - convert to proper format
   if (config.skinColor) {
-    options.skinColor = [config.skinColor.toLowerCase()];
+    // Map our skin color names to hex values that avataaars expects
+    const skinColorMap: Record<string, string> = {
+      'Tanned': '#FD9841',
+      'Yellow': '#F8D25C',
+      'Pale': '#FFDBB4',
+      'Light': '#EDB98A',
+      'Brown': '#D08B5B',
+      'DarkBrown': '#AE5D29',
+      'Black': '#614335'
+    };
+    const skinHex = skinColorMap[config.skinColor] || config.skinColor;
+    options.skinColor = [skinHex];
   }
   
   // Eyes - convert to camelCase
@@ -195,9 +206,23 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
     }
   }
   
-  // Hair color - keep as is, it accepts color names
+  // Hair color - convert to hex values
   if (config.hairColor) {
-    options.hairColor = [config.hairColor.toLowerCase()];
+    const hairColorMap: Record<string, string> = {
+      'Auburn': '#A55728',
+      'Black': '#2C1B18',
+      'Blonde': '#B58143',
+      'BlondeGolden': '#D6B370',
+      'Brown': '#724133',
+      'BrownDark': '#4A312C',
+      'PastelPink': '#F59797',
+      'Blue': '#000FFF',
+      'Platinum': '#ECDCBF',
+      'Red': '#C93305',
+      'SilverGray': '#E8E1E1'
+    };
+    const hairHex = hairColorMap[config.hairColor] || config.hairColor;
+    options.hairColor = [hairHex];
   }
   
   // Facial hair - convert and filter out 'Blank'
