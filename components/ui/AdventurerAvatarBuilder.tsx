@@ -77,7 +77,8 @@ export function AdventurerAvatarBuilder({
   onChange,
   className
 }: AdventurerAvatarBuilderProps) {
-  const [seed, setSeed] = useState(initialSeed);
+  // Ensure we always have a valid seed
+  const [seed, setSeed] = useState(initialSeed || 'default-avatar');
   const [backgroundColor, setBackgroundColor] = useState<string[]>([]);
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const [customColor, setCustomColor] = useState('#E0F2FE');
@@ -168,6 +169,11 @@ export function AdventurerAvatarBuilder({
       
       console.log('Avatar options:', options);
       const svg = createAvatar(adventurer as any, options).toString();
+      console.log('Generated SVG length:', svg?.length);
+      if (!svg || svg.length === 0) {
+        console.error('Empty SVG generated');
+        return null;
+      }
       return svg;
     } catch (error) {
       console.error('Failed to generate adventurer avatar:', error);
@@ -193,8 +199,15 @@ export function AdventurerAvatarBuilder({
             }}
             key={`${seed}-${skinColor.join(',')}-${hairColor.join(',')}-${randomMode}`}
           >
-            {avatarSvg && (
-              <div dangerouslySetInnerHTML={{ __html: avatarSvg }} />
+            {avatarSvg ? (
+              <div 
+                className="w-full h-full flex items-center justify-center"
+                dangerouslySetInnerHTML={{ __html: avatarSvg }} 
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <span>Loading...</span>
+              </div>
             )}
           </div>
         </div>

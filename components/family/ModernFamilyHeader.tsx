@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Users, Target, Trophy, Gift, BarChart3, Home, Settings, LayoutDashboard, Maximize, Minimize, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Logo } from '@/components/ui/Logo';
 
 
 interface ModernFamilyHeaderProps {
@@ -119,6 +120,17 @@ export function ModernFamilyHeader({
           {/* Top Row */}
           <div className="flex justify-between items-center mb-6 pt-[15px]">
             <div className="flex items-center gap-4">
+              {/* NextVibe Logo - Always use light mode colors */}
+              <div className="mr-2">
+                <span 
+                  className="text-2xl font-bold"
+                  style={{ fontFamily: '"Climate Crisis", cursive' }}
+                >
+                  <span className="text-green-600">Next</span>
+                  <span className="text-gray-900">Vibe</span>
+                </span>
+              </div>
+              
               {/* Back to Personal Dashboard Button */}
               <Link href="/dashboard">
                 <Button
