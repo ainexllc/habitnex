@@ -162,6 +162,7 @@ export function AvataaarsBuilder({
 }: AvataaarsBuilderProps) {
   const [seed, setSeed] = useState(initialSeed);
   const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(['expression']);
   
   // Avatar customization state
@@ -236,12 +237,16 @@ export function AvataaarsBuilder({
       }
     });
     
-    return `https://api.dicebear.com/9.x/avataaars/svg?${params.toString()}`;
+    const url = `https://api.dicebear.com/9.x/avataaars/svg?${params.toString()}`;
+    console.log('Avataaars URL:', url);
+    console.log('Avataaars options:', options);
+    return url;
   }, [seed, options]);
 
   // Reset loading state when URL changes
   useEffect(() => {
     setImageLoading(true);
+    setImageError(false);
   }, [avatarUrl]);
 
   // Notify parent on mount
@@ -259,24 +264,32 @@ export function AvataaarsBuilder({
         "border"
       )}>
         <div className="mx-auto mb-4 relative" style={{ width: '120px', height: '120px' }}>
-          {imageLoading && (
+          {(imageLoading || imageError) && (
             <div className="absolute inset-0 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-              <span className="text-gray-400">Loading...</span>
+              <span className="text-gray-400">
+                {imageError ? 'Failed to load' : 'Loading...'}
+              </span>
             </div>
           )}
-          <img 
-            src={avatarUrl}
-            alt="Avatar preview"
-            className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600"
-            style={{ 
-              display: imageLoading ? 'none' : 'block'
-            }}
-            onLoad={() => setImageLoading(false)}
-            onError={() => {
-              console.error('Failed to load avatar from:', avatarUrl);
-              setImageLoading(false);
-            }}
-          />
+          {!imageError && (
+            <img 
+              src={avatarUrl}
+              alt="Avatar preview"
+              className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600"
+              style={{ 
+                display: imageLoading ? 'none' : 'block'
+              }}
+              onLoad={() => {
+                setImageLoading(false);
+                setImageError(false);
+              }}
+              onError={() => {
+                console.error('Failed to load avatar from:', avatarUrl);
+                setImageLoading(false);
+                setImageError(true);
+              }}
+            />
+          )}
         </div>
         
         {/* Action Buttons */}
