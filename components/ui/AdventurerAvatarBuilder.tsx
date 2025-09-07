@@ -106,9 +106,16 @@ export function AdventurerAvatarBuilder({
   const handleReset = useCallback(() => {
     setSeed(initialSeed);
     setBackgroundColor([]);
+    setSkinColor([]);
+    setHairColor([]);
     setFlip(false);
     setRotate(0);
     setScale(100);
+    setHairProbability(100);
+    setGlassesProbability(50);
+    setFeaturesProbability(10);
+    setEarringsProbability(30);
+    setRandomMode(true);
     onChange?.(initialSeed, []);
   }, [initialSeed, onChange]);
 
@@ -133,17 +140,24 @@ export function AdventurerAvatarBuilder({
         size: 120,
         flip,
         rotate,
-        scale,
-      };
+        scale: scale / 100, // Convert percentage to decimal
       
       // If not in random mode, add specific customizations
       if (!randomMode) {
-        if (skinColor.length > 0) options.skinColor = skinColor;
-        if (hairColor.length > 0) options.hairColor = hairColor;
-        options.hairProbability = hairProbability;
-        options.glassesProbability = glassesProbability;
-        options.featuresProbability = featuresProbability;
-        options.earringsProbability = earringsProbability;
+        // Important: DiceBear expects these as arrays of hex colors
+        if (skinColor.length > 0) {
+          options.skinColor = skinColor;
+          console.log('Setting skin color:', skinColor);
+        }
+        if (hairColor.length > 0) {
+          options.hairColor = hairColor;
+          console.log('Setting hair color:', hairColor);
+        }
+        // Convert probabilities to 0-1 range for DiceBear
+        options.hairProbability = hairProbability / 100;
+        options.glassesProbability = glassesProbability / 100;
+        options.featuresProbability = featuresProbability / 100;
+        options.earringsProbability = earringsProbability / 100;
       }
       
       // Only add backgroundColor if it's not empty
@@ -151,6 +165,7 @@ export function AdventurerAvatarBuilder({
         options.backgroundColor = backgroundColor;
       }
       
+      console.log('Avatar options:', options);
       const svg = createAvatar(adventurer as any, options).toString();
       return svg;
     } catch (error) {
@@ -175,6 +190,7 @@ export function AdventurerAvatarBuilder({
             style={{ 
               backgroundColor: backgroundColor[0] || 'transparent',
             }}
+            key={`${seed}-${skinColor.join(',')}-${hairColor.join(',')}-${randomMode}`}
           >
             {avatarSvg && (
               <div dangerouslySetInnerHTML={{ __html: avatarSvg }} />
@@ -524,14 +540,15 @@ export function AdventurerAvatarBuilder({
               <span className={cn("text-sm", theme.text.secondary)}>Scale</span>
               <span className={cn("text-sm", theme.text.muted)}>{scale}%</span>
             </div>
-            <input
-              type="range"
-              min="50"
-              max="150"
-              value={scale}
-              onChange={(e) => setScale(Number(e.target.value))}
-              className="w-full"
-            />
+              <input
+                type="range"
+                min="50"
+                max="150"
+                step="10"
+                value={scale}
+                onChange={(e) => setScale(Number(e.target.value))}
+                className="w-full"
+              />
           </div>
         </div>
       </div>
