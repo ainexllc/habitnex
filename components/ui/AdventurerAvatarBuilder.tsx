@@ -141,6 +141,7 @@ export function AdventurerAvatarBuilder({
         flip,
         rotate,
         scale: scale / 100, // Convert percentage to decimal
+      };
       
       // If not in random mode, add specific customizations
       if (!randomMode) {
