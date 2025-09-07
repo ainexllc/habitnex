@@ -5,9 +5,9 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview, avatarConfigToDiceBearOptions } from '@/components/ui/DiceBearAvatar';
-import { AvatarBuilder } from '@/components/ui/AvatarBuilder';
-import { FamilyMember, AvatarConfig } from '@/types/family';
+import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview } from '@/components/ui/DiceBearAvatar';
+import { AdventurerAvatarBuilder } from '@/components/ui/AdventurerAvatarBuilder';
+import { FamilyMember } from '@/types/family';
 import { UserPlus, UserPen, Palette, Users, Crown, Star, Trophy, Shuffle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
@@ -102,7 +102,8 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
   const [avatarGenerationKey, setAvatarGenerationKey] = useState(0);
   const [avatarMode, setAvatarMode] = useState<'quick' | 'custom'>('quick');
-  const [customAvatarConfig, setCustomAvatarConfig] = useState<AvatarConfig | undefined>(undefined);
+  const [customAvatarSeed, setCustomAvatarSeed] = useState<string>('');
+  const [customBackgroundColor, setCustomBackgroundColor] = useState<string[]>([]);
 
   // Generate avatar previews
   const avatarPreviews = useAvatarPreview(
@@ -156,12 +157,13 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   }, [selectedAvatarIndex, avatarPreviews, avatarMode]);
   
   // Handle custom avatar changes
-  const handleCustomAvatarChange = (config: AvatarConfig) => {
-    setCustomAvatarConfig(config);
+  const handleCustomAvatarChange = (seed: string, backgroundColor?: string[]) => {
+    setCustomAvatarSeed(seed);
+    setCustomBackgroundColor(backgroundColor || []);
     setFormData(prev => ({
       ...prev,
-      avatarStyle: 'avataaars' as AvatarStyle,
-      avatarSeed: ''
+      avatarStyle: 'adventurer' as AvatarStyle,
+      avatarSeed: seed
     }));
   };
 
@@ -176,12 +178,12 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
     
     try {
       // Prepare avatar data based on mode
-      const avatarData = avatarMode === 'custom' && customAvatarConfig
+      const avatarData = avatarMode === 'custom'
         ? {
-            avatarStyle: 'avataaars' as AvatarStyle,
-            avatarConfig: customAvatarConfig,
+            avatarStyle: 'adventurer' as AvatarStyle,
+            avatarSeed: customAvatarSeed,
             avatarOrigin: 'custom' as const,
-            avatarSeed: ''
+            backgroundColor: customBackgroundColor
           }
         : {
             avatarStyle: formData.avatarStyle,
@@ -424,8 +426,8 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
               {/* Custom Builder Mode */}
               {avatarMode === 'custom' && (
                 <div className="mt-4">
-                  <AvatarBuilder
-                    initialConfig={customAvatarConfig}
+                  <AdventurerAvatarBuilder
+                    initialSeed={customAvatarSeed || formData.displayName || 'default'}
                     onChange={handleCustomAvatarChange}
                   />
                 </div>
