@@ -3,8 +3,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SketchPicker } from 'react-color';
 import { ChevronDown, RotateCcw, Shuffle, Sparkles, Eye, Smile } from 'lucide-react';
-import { createAvatar } from '@dicebear/core';
-import { adventurer } from '@dicebear/collection';
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 
@@ -139,53 +137,35 @@ export function AdventurerAvatarBuilder({
     onChange?.(seed, newBg);
   }, [seed, onChange]);
 
-  // Generate avatar SVG
-  const avatarSvg = useMemo(() => {
-    try {
-      const options: any = {
-        seed,
-        size: 120,
-        flip,
-        rotate,
-        scale: scale / 100, // Convert percentage to decimal
-      };
-      
-      // If not in random mode, add specific customizations
-      if (!randomMode) {
-        // Important: DiceBear expects these as arrays of hex colors
-        if (skinColor.length > 0) {
-          options.skinColor = skinColor;
-          console.log('Setting skin color:', skinColor);
-        }
-        if (hairColor.length > 0) {
-          options.hairColor = hairColor;
-          console.log('Setting hair color:', hairColor);
-        }
-        // Convert probabilities to 0-1 range for DiceBear
-        options.hairProbability = hairProbability / 100;
-        options.glassesProbability = glassesProbability / 100;
-        options.featuresProbability = featuresProbability / 100;
-        options.earringsProbability = earringsProbability / 100;
+  // Generate avatar URL using DiceBear API
+  const avatarUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set('seed', seed);
+    params.set('size', '120');
+    
+    if (flip) params.set('flip', 'true');
+    if (rotate) params.set('rotate', String(rotate));
+    if (scale !== 100) params.set('scale', String(scale));
+    
+    // If not in random mode, add specific customizations
+    if (!randomMode) {
+      if (skinColor.length > 0) {
+        params.set('skinColor', skinColor.join(','));
       }
-      
-      // Only add backgroundColor if it's not empty
-      if (backgroundColor.length > 0) {
-        options.backgroundColor = backgroundColor;
+      if (hairColor.length > 0) {
+        params.set('hairColor', hairColor.join(','));
       }
-      
-      console.log('Avatar options:', options);
-      const avatar = createAvatar(adventurer, options);
-      const svg = avatar.toString();
-      console.log('Generated SVG length:', svg?.length);
-      if (!svg || svg.length === 0) {
-        console.error('Empty SVG generated');
-        return null;
-      }
-      return svg;
-    } catch (error) {
-      console.error('Failed to generate adventurer avatar:', error);
-      return null;
+      params.set('hairProbability', String(hairProbability));
+      params.set('glassesProbability', String(glassesProbability));
+      params.set('featuresProbability', String(featuresProbability));
+      params.set('earringsProbability', String(earringsProbability));
     }
+    
+    if (backgroundColor.length > 0) {
+      params.set('backgroundColor', backgroundColor[0].replace('#', ''));
+    }
+    
+    return `https://api.dicebear.com/9.x/adventurer/svg?${params.toString()}`;
   }, [seed, backgroundColor, flip, rotate, scale, randomMode, skinColor, hairColor, 
       hairProbability, glassesProbability, featuresProbability, earringsProbability]);
 
@@ -199,23 +179,14 @@ export function AdventurerAvatarBuilder({
         "border"
       )}>
         <div className="mx-auto mb-4" style={{ width: '120px', height: '120px' }}>
-          {avatarSvg ? (
-            <div 
-              className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600 overflow-hidden flex items-center justify-center"
-              style={{ 
-                backgroundColor: backgroundColor[0] || 'transparent',
-              }}
-            >
-              <div 
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: avatarSvg }} 
-              />
-            </div>
-          ) : (
-            <div className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 bg-gray-100">
-              <span>Loading...</span>
-            </div>
-          )}
+          <img 
+            src={avatarUrl}
+            alt="Avatar preview"
+            className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600"
+            style={{ 
+              backgroundColor: backgroundColor[0] || 'transparent',
+            }}
+          />
         </div>
         
         {/* Action Buttons */}
