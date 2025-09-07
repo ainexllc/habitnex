@@ -139,8 +139,8 @@ export function AdventurerAvatarBuilder({
     onChange?.(seed, newBg);
   }, [seed, onChange]);
 
-  // Generate avatar SVG
-  const avatarSvg = useMemo(() => {
+  // Generate avatar data URI
+  const avatarDataUri = useMemo(() => {
     try {
       const options: any = {
         seed,
@@ -174,13 +174,15 @@ export function AdventurerAvatarBuilder({
       }
       
       console.log('Avatar options:', options);
-      const svg = createAvatar(adventurer as any, options).toString();
+      const avatar = createAvatar(adventurer as any, options);
+      const svg = avatar.toString();
       console.log('Generated SVG length:', svg?.length);
       if (!svg || svg.length === 0) {
         console.error('Empty SVG generated');
         return null;
       }
-      return svg;
+      // Convert to data URI for img src
+      return avatar.toDataUri();
     } catch (error) {
       console.error('Failed to generate adventurer avatar:', error);
       return null;
@@ -198,13 +200,14 @@ export function AdventurerAvatarBuilder({
         "border"
       )}>
         <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: '120px', height: '120px' }}>
-          {avatarSvg ? (
-            <div 
-              className="w-full h-full rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600"
+          {avatarDataUri ? (
+            <img 
+              src={avatarDataUri}
+              alt="Avatar"
+              className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600"
               style={{ 
                 backgroundColor: backgroundColor[0] || 'transparent',
               }}
-              dangerouslySetInnerHTML={{ __html: avatarSvg }} 
             />
           ) : (
             <div className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 bg-gray-100">
