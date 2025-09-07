@@ -139,8 +139,8 @@ export function AdventurerAvatarBuilder({
     onChange?.(seed, newBg);
   }, [seed, onChange]);
 
-  // Generate avatar data URI
-  const avatarDataUri = useMemo(() => {
+  // Generate avatar SVG
+  const avatarSvg = useMemo(() => {
     try {
       const options: any = {
         seed,
@@ -181,11 +181,7 @@ export function AdventurerAvatarBuilder({
         console.error('Empty SVG generated');
         return null;
       }
-      // Create data URI manually from SVG string
-      const encodedSvg = encodeURIComponent(svg);
-      const dataUri = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
-      console.log('Created data URI');
-      return dataUri;
+      return svg;
     } catch (error) {
       console.error('Failed to generate adventurer avatar:', error);
       return null;
@@ -202,16 +198,19 @@ export function AdventurerAvatarBuilder({
         theme.border.default,
         "border"
       )}>
-        <div className="mx-auto mb-4 flex items-center justify-center" style={{ width: '120px', height: '120px' }}>
-          {avatarDataUri ? (
-            <img 
-              src={avatarDataUri}
-              alt="Avatar"
-              className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600"
+        <div className="mx-auto mb-4" style={{ width: '120px', height: '120px' }}>
+          {avatarSvg ? (
+            <div 
+              className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600 overflow-hidden flex items-center justify-center"
               style={{ 
                 backgroundColor: backgroundColor[0] || 'transparent',
               }}
-            />
+            >
+              <div 
+                className="w-full h-full"
+                dangerouslySetInnerHTML={{ __html: avatarSvg }} 
+              />
+            </div>
           ) : (
             <div className="w-full h-full rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 bg-gray-100">
               <span>Loading...</span>
