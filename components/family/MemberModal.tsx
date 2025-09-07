@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { AdventurerAvatarBuilder } from '@/components/ui/AdventurerAvatarBuilder';
-import { AvataaarsBuilder } from '@/components/ui/AvataaarsBuilder';
 import { FamilyMember } from '@/types/family';
 import { UserPlus, UserPen } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -59,8 +58,6 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
     displayName: '',
     avatarSeed: '',
     avatarBackgroundColor: '#ffffff',
-    avatarStyle: 'adventurer' as 'adventurer' | 'avataaars',
-    avatarOptions: {} as any,
     color: '#3B82F6',
     role: 'child' as 'parent' | 'child' | 'teen' | 'adult',
   });
@@ -75,8 +72,6 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         displayName: member.displayName || '',
         avatarSeed: (member as any).avatarSeed || member.displayName || 'member',
         avatarBackgroundColor: (member as any).avatarBackgroundColor || '#ffffff',
-        avatarStyle: (member as any).avatarStyle || 'adventurer',
-        avatarOptions: (member as any).avatarOptions || {},
         color: member.color || '#3B82F6',
         role: member.role || 'child',
       });
@@ -87,8 +82,6 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         displayName: '',
         avatarSeed: '',
         avatarBackgroundColor: '#ffffff',
-        avatarStyle: 'adventurer',
-        avatarOptions: {},
         color: '#3B82F6',
         role: 'child',
       });
@@ -96,22 +89,12 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   }, [member, isOpen]);
   
   // Handle avatar changes from builder
-  const handleAvatarChange = (seed: string, optionsOrBg?: any) => {
-    if (formData.avatarStyle === 'adventurer') {
-      // For adventurer, second param is backgroundColor array
-      setFormData(prev => ({
-        ...prev,
-        avatarSeed: seed,
-        avatarBackgroundColor: optionsOrBg?.[0] || '#ffffff'
-      }));
-    } else {
-      // For avataaars, second param is options object
-      setFormData(prev => ({
-        ...prev,
-        avatarSeed: seed,
-        avatarOptions: optionsOrBg || {}
-      }));
-    }
+  const handleAvatarChange = (seed: string, backgroundColor?: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      avatarSeed: seed,
+      avatarBackgroundColor: backgroundColor?.[0] || '#ffffff'
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,10 +110,9 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
       const memberData = {
         name: formData.name.trim() || formData.displayName.trim(),
         displayName: formData.displayName.trim(),
-        avatarStyle: formData.avatarStyle,
+        avatarStyle: 'adventurer' as const,
         avatarSeed: formData.avatarSeed || formData.displayName.trim(),
         avatarBackgroundColor: formData.avatarBackgroundColor,
-        avatarOptions: formData.avatarOptions,
         color: formData.color,
         role: formData.role,
       };
@@ -202,46 +184,12 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
           {/* Avatar */}
           <div>
             <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-              Avatar Style
+              Avatar
             </label>
-            <div className="flex gap-2 mb-4">
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, avatarStyle: 'adventurer' }))}
-                className={cn(
-                  "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  formData.avatarStyle === 'adventurer'
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                )}
-              >
-                Simple (Adventurer)
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, avatarStyle: 'avataaars' }))}
-                className={cn(
-                  "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  formData.avatarStyle === 'avataaars'
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                )}
-              >
-                Detailed (Avataaars)
-              </button>
-            </div>
-            
-            {formData.avatarStyle === 'adventurer' ? (
-              <AdventurerAvatarBuilder
-                initialSeed={formData.avatarSeed || formData.displayName || 'member'}
-                onChange={handleAvatarChange}
-              />
-            ) : (
-              <AvataaarsBuilder
-                initialSeed={formData.avatarSeed || formData.displayName || 'member'}
-                onChange={handleAvatarChange}
-              />
-            )}
+            <AdventurerAvatarBuilder
+              initialSeed={formData.avatarSeed || formData.displayName || 'member'}
+              onChange={handleAvatarChange}
+            />
           </div>
 
           {/* Personal Color */}
