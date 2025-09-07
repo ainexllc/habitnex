@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { FamilyMember, FamilyHabit } from '@/types/family';
+import { FamilyMember, FamilyHabit, FamilyHabitCompletion } from '@/types/family';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
 import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp, Info } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getTodayDateString } from '@/lib/utils';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { HabitBenefitsModal } from './HabitBenefitsModal';
 import { OpenMoji } from '@/components/ui/OpenMoji';
@@ -17,7 +17,7 @@ import { theme } from '@/lib/theme';
 
 interface FamilyMemberZoneProps {
   member: FamilyMember;
-  habits: (FamilyHabit & { completed: boolean })[];
+  habits: (FamilyHabit & { completed: boolean; todaysCompletion: FamilyHabitCompletion | null })[];
   stats: {
     completed: number;
     total: number;
@@ -53,10 +53,21 @@ export function FamilyMemberZone({
   const [benefitsModalHabit, setBenefitsModalHabit] = useState<FamilyHabit | null>(null);
 
   // Get today's date for completion checking
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
 
   // Check actual database completion status for today
   const getTodaysCompletionStatus = useCallback((habitId: string) => {
+    // First check if the habit has todaysCompletion data from the hook
+    const habit = habits.find(h => h.id === habitId);
+    if (habit?.todaysCompletion && habit.todaysCompletion.completed) {
+      // Return success/failure based on notes, default to success
+      if (habit.todaysCompletion.notes === 'Marked as failed') {
+        return 'failure';
+      }
+      return 'success';
+    }
+    
+    // Fallback to direct database query if needed
     const todaysCompletion = getHabitCompletion(habitId, today);
     if (todaysCompletion && todaysCompletion.completed) {
       // Return success/failure based on notes, default to success
@@ -66,7 +77,7 @@ export function FamilyMemberZone({
       return 'success';
     }
     return null;
-  }, [getHabitCompletion, today]);
+  }, [habits, getHabitCompletion, today]);
   
   const toggleHabitExpanded = useCallback((habitId: string) => {
     setExpandedHabits(prev => {
@@ -122,14 +133,17 @@ export function FamilyMemberZone({
   // New handlers for dual completion buttons
   const handleHabitCompletion = useCallback(async (habitId: string, success: boolean) => {
     try {
-      // Check current completion status
+      // Check current completion status for TODAY specifically
       const currentCompletion = getTodaysCompletionStatus(habitId);
       const isCurrentlyCompleted = currentCompletion !== null;
+      
+      console.log(`🎯 DEBUG handleHabitCompletion: habitId=${habitId}, success=${success}, isCurrentlyCompleted=${isCurrentlyCompleted}, currentCompletion=${currentCompletion}`);
 
       // If not completed, mark as completed with appropriate notes
       if (!isCurrentlyCompleted) {
         const notes = success ? 'Completed successfully' : 'Marked as failed';
-        await toggleCompletion(habitId, member.id, false, undefined, notes); // Mark as completed with notes
+        // Pass the actual current completion status instead of hardcoding false
+        await toggleCompletion(habitId, member.id, isCurrentlyCompleted, today, notes);
       }
 
       // Trigger celebration animation only for success
@@ -162,37 +176,62 @@ export function FamilyMemberZone({
 
   const handleUndo = useCallback(async (habitId: string) => {
     try {
-      // Check if currently completed
+      // Check if currently completed for TODAY
       const currentCompletion = getTodaysCompletionStatus(habitId);
       const isCurrentlyCompleted = currentCompletion !== null;
+      
+      console.log(`↩️ DEBUG handleUndo: habitId=${habitId}, isCurrentlyCompleted=${isCurrentlyCompleted}`);
 
       // If completed, toggle to uncompleted
       if (isCurrentlyCompleted) {
-        await toggleCompletion(habitId, member.id, true); // Mark as uncompleted
+        await toggleCompletion(habitId, member.id, isCurrentlyCompleted, today); // Pass correct current state
       }
     } catch (error) {
       console.error('Failed to undo habit:', error);
     }
-  }, [toggleCompletion, member.id, getTodaysCompletionStatus]);
+  }, [toggleCompletion, member.id, getTodaysCompletionStatus, today]);
   
   const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
   const level = Math.floor(member.stats.totalPoints / 100) + 1; // Level up every 100 points
   const pointsToNextLevel = 100 - (member.stats.totalPoints % 100);
   
+  // Helper function to determine if a color is light or dark
+  const isLightColor = (color: string): boolean => {
+    // Convert hex to RGB
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+  };
+
+  const isLight = isLightColor(member.color);
+  const textColor = isLight ? 'text-gray-900' : 'text-white';
+  const mutedTextColor = isLight ? 'text-gray-700' : 'text-gray-200';
+  const borderColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+  
+  // Check if we're in dark mode (you can also check theme context if available)
+  const isDarkMode = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
   return (
     <>
       <Card 
       className={cn(
         "relative overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:scale-[1.02]",
-        theme.surface.primary,
         touchMode && "touch-optimized shadow-2xl",
         isExpanded && touchMode && "scale-105 shadow-2xl z-10",
-        "border-2 rounded-3xl",
+        "rounded-3xl",
         className
       )}
       style={{ 
-        borderColor: member.color,
-        background: `linear-gradient(145deg, ${theme.surface.primary}, ${member.color}05)`
+        backgroundColor: isDarkMode && !isLight ? `${member.color}66` : member.color,
+        backgroundImage: isDarkMode && !isLight 
+          ? `linear-gradient(135deg, ${member.color}44 0%, ${member.color}33 100%)`
+          : `linear-gradient(135deg, ${member.color} 0%, ${member.color}dd 100%)`,
+        border: `2px solid ${borderColor}`,
+        backdropFilter: isDarkMode && !isLight ? 'blur(12px)' : 'none'
       }}
       onClick={touchMode && onExpand ? onExpand : undefined}
     >
@@ -207,26 +246,30 @@ export function FamilyMemberZone({
           <div className="relative mb-4">
             {member.avatarStyle && member.avatarSeed ? (
               <div 
-                className="rounded-full border-4 shadow-lg ring-4 ring-opacity-20 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
-                style={{ borderColor: member.color }}
+                className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
+                style={{ 
+                  borderColor: borderColor,
+                  ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
+                }}
               >
                 <DiceBearAvatar
                   seed={member.avatarSeed}
                   style={member.avatarStyle}
                   size={touchMode ? 120 : 96}
-                  backgroundColor={member.color}
+                  backgroundColor={isLight ? '#ffffff' : '#1f2937'}
                   fallbackEmoji={member.avatar}
                 />
               </div>
             ) : (
               <div 
                 className={cn(
-                  "rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-4 ring-opacity-20 transition-all hover:shadow-xl hover:scale-105 border-4",
-                  touchMode ? "w-30 h-30 text-5xl" : "w-24 h-24 text-4xl"
+                  "rounded-full flex items-center justify-center font-bold shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 border-4",
+                  touchMode ? "w-30 h-30 text-5xl" : "w-24 h-24 text-4xl",
+                  isLight ? "bg-white text-gray-900" : "bg-gray-900 text-white"
                 )}
                 style={{ 
-                  backgroundColor: member.color,
-                  borderColor: member.color 
+                  borderColor: borderColor,
+                  ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
                 }}
               >
                 {member.avatar}
@@ -247,31 +290,39 @@ export function FamilyMemberZone({
           <div>
             <h3 className={cn(
               "font-bold mb-2 leading-tight",
-              touchMode ? "text-4xl" : "text-3xl"
+              touchMode ? "text-4xl" : "text-3xl",
+              textColor
             )} style={{
               fontFamily: '"Henny Penny", cursive',
-              color: member.color,
-              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              textShadow: isLight ? '0 1px 2px rgba(0,0,0,0.1)' : '0 1px 2px rgba(0,0,0,0.3)'
             }}>
               {member.displayName}
             </h3>
             
             {/* Level and Points Info */}
             <div className="flex items-center justify-center gap-4 mb-3">
-              <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 px-4 py-2 rounded-full">
-                <Star className="w-5 h-5 text-yellow-500" />
+              <div className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm",
+                isLight ? "bg-black/10" : (isDarkMode ? "bg-white/5" : "bg-white/20")
+              )}>
+                <Star className="w-5 h-5 text-yellow-400" />
                 <span className={cn(
-                  "font-bold text-yellow-800 dark:text-yellow-200",
-                  touchMode ? "text-lg" : "text-base"
+                  "font-bold",
+                  touchMode ? "text-lg" : "text-base",
+                  textColor
                 )}>
                   Level {level}
                 </span>
               </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 px-4 py-2 rounded-full">
-                <Trophy className="w-5 h-5 text-purple-500" />
+              <div className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm",
+                isLight ? "bg-black/10" : (isDarkMode ? "bg-white/5" : "bg-white/20")
+              )}>
+                <Trophy className="w-5 h-5 text-purple-400" />
                 <span className={cn(
-                  "font-bold text-purple-800 dark:text-purple-200",
-                  touchMode ? "text-lg" : "text-base"
+                  "font-bold",
+                  touchMode ? "text-lg" : "text-base",
+                  textColor
                 )}>
                   {member.stats.totalPoints} pts
                 </span>
@@ -281,11 +332,11 @@ export function FamilyMemberZone({
             {/* Daily Completion Status */}
             <div className="flex items-center justify-center">
               <div className={cn(
-                "px-6 py-3 rounded-full font-bold shadow-md",
+                "px-6 py-3 rounded-full font-bold shadow-md text-white",
                 touchMode ? "text-xl" : "text-lg",
                 completionRate === 100 
-                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white" 
-                  : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500" 
+                  : "bg-gradient-to-r from-blue-500 to-indigo-500"
               )}>
                 {stats.completed}/{stats.total} Today ({Math.round(completionRate)}%)
               </div>
@@ -299,15 +350,16 @@ export function FamilyMemberZone({
           <div>
             <div className="flex justify-between items-center mb-2">
               <span className={cn(
-                "font-semibold text-gray-700 dark:text-gray-300",
-                touchMode ? "text-lg" : "text-base"
+                "font-semibold",
+                touchMode ? "text-lg" : "text-base",
+                mutedTextColor
               )}>
                 Today's Progress
               </span>
               <span className={cn(
                 "font-bold",
                 touchMode ? "text-lg" : "text-base",
-                completionRate === 100 ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"
+                textColor
               )}>
                 {Math.round(completionRate)}%
               </span>
@@ -319,7 +371,7 @@ export function FamilyMemberZone({
                 touchMode ? "h-4" : "h-3"
               )}
               style={{ 
-                backgroundColor: `${member.color}20`,
+                backgroundColor: isLight ? 'rgba(0,0,0,0.1)' : (isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.2)'),
               }}
             />
           </div>
@@ -328,14 +380,16 @@ export function FamilyMemberZone({
           <div>
             <div className="flex justify-between items-center mb-2">
               <span className={cn(
-                "font-semibold text-gray-700 dark:text-gray-300",
-                touchMode ? "text-lg" : "text-base"
+                "font-semibold",
+                touchMode ? "text-lg" : "text-base",
+                mutedTextColor
               )}>
                 Level Progress
               </span>
               <span className={cn(
-                "font-bold text-purple-600 dark:text-purple-400",
-                touchMode ? "text-lg" : "text-base"
+                "font-bold",
+                touchMode ? "text-lg" : "text-base",
+                textColor
               )}>
                 {pointsToNextLevel} pts to Level {level + 1}
               </span>
@@ -347,7 +401,7 @@ export function FamilyMemberZone({
                 touchMode ? "h-4" : "h-3"
               )}
               style={{ 
-                backgroundColor: '#e0e7ff',
+                backgroundColor: isLight ? 'rgba(0,0,0,0.1)' : (isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.2)'),
               }}
             />
           </div>
@@ -373,24 +427,110 @@ export function FamilyMemberZone({
               const isCompleted = status !== null;
               const isExpanded = expandedHabits.has(habit.id);
               
+              // Debug logging
+              console.log(`🎯 FamilyMemberZone - ${member.displayName} - ${habit.name}:`, {
+                habitCompleted: habit.completed,
+                status,
+                isCompleted,
+                todaysCompletion: habit.todaysCompletion,
+                today
+              });
+              
               return (
                 <div
                   key={habit.id}
                   className={cn(
-                    "relative p-3 rounded-lg transition-all duration-200 space-y-3",
+                    "relative p-3 rounded-lg transition-all duration-200 space-y-3 overflow-hidden backdrop-blur-sm",
                     touchMode ? "p-4" : "p-3",
                     isCompleted 
-                      ? "bg-green-50/50 dark:bg-green-950/10 border border-green-200/50 dark:border-green-800/30" 
-                      : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
-                    celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
+                      ? (isLight 
+                          ? "bg-green-900/20 border border-green-900/30" 
+                          : (isDarkMode ? "bg-green-400/5 border border-green-400/10" : "bg-green-400/20 border border-green-400/30")
+                        )
+                      : (isLight 
+                          ? "bg-black/10 hover:bg-black/15 border border-black/20" 
+                          : (isDarkMode ? "bg-white/[0.02] hover:bg-white/[0.04] border border-white/5" : "bg-white/10 hover:bg-white/15 border border-white/20")
+                        ),
+                    celebratingHabitId === habit.id && "animate-pulse bg-yellow-400/30 border-yellow-400",
                     loading && "opacity-50 pointer-events-none"
                   )}
                 >
-                  {/* First Line: Expand arrow, emoji and habit name */}
+                  {/* Celebration SVG Background - Only show when completed */}
+                  {isCompleted && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      {/* Confetti pieces */}
+                      <svg className="absolute w-full h-full opacity-20" viewBox="0 0 200 60" preserveAspectRatio="none">
+                        <g className="animate-pulse">
+                          {/* Star bursts */}
+                          <path d="M20,15 L22,10 L24,15 L29,13 L24,17 L26,22 L20,18 L14,22 L16,17 L11,13 Z" 
+                                fill={status === 'success' ? '#10b981' : '#6b7280'} opacity="0.3"/>
+                          <path d="M170,25 L172,20 L174,25 L179,23 L174,27 L176,32 L170,28 L164,32 L166,27 L161,23 Z" 
+                                fill={status === 'success' ? '#34d399' : '#9ca3af'} opacity="0.25"/>
+                          
+                          {/* Confetti rectangles */}
+                          <rect x="40" y="10" width="3" height="8" fill="#fbbf24" opacity="0.4" transform="rotate(25 41.5 14)" className="animate-bounce" style={{animationDelay: '0.1s'}}/>
+                          <rect x="60" y="35" width="3" height="8" fill="#f59e0b" opacity="0.3" transform="rotate(-15 61.5 39)" className="animate-bounce" style={{animationDelay: '0.3s'}}/>
+                          <rect x="90" y="15" width="3" height="8" fill="#ec4899" opacity="0.35" transform="rotate(45 91.5 19)" className="animate-bounce" style={{animationDelay: '0.2s'}}/>
+                          <rect x="120" y="30" width="3" height="8" fill="#8b5cf6" opacity="0.3" transform="rotate(-30 121.5 34)" className="animate-bounce" style={{animationDelay: '0.4s'}}/>
+                          <rect x="150" y="8" width="3" height="8" fill="#3b82f6" opacity="0.4" transform="rotate(60 151.5 12)" className="animate-bounce" style={{animationDelay: '0.15s'}}/>
+                          
+                          {/* Circles */}
+                          <circle cx="30" cy="40" r="2" fill="#ef4444" opacity="0.3" className="animate-ping"/>
+                          <circle cx="80" cy="35" r="2" fill="#10b981" opacity="0.35" className="animate-ping" style={{animationDelay: '0.5s'}}/>
+                          <circle cx="140" cy="42" r="2" fill="#f59e0b" opacity="0.3" className="animate-ping" style={{animationDelay: '0.25s'}}/>
+                          <circle cx="185" cy="15" r="2" fill="#6366f1" opacity="0.35" className="animate-ping" style={{animationDelay: '0.35s'}}/>
+                          
+                          {/* Streamers */}
+                          <path d="M10,5 Q15,15 10,25 T10,45" stroke="#14b8a6" strokeWidth="1" fill="none" opacity="0.2" className="animate-pulse"/>
+                          <path d="M190,5 Q185,15 190,25 T190,45" stroke="#f43f5e" strokeWidth="1" fill="none" opacity="0.2" className="animate-pulse" style={{animationDelay: '0.3s'}}/>
+                        </g>
+                      </svg>
+                      
+                      {/* Success specific graphics */}
+                      {status === 'success' && (
+                        <svg className="absolute -right-8 -top-8 w-32 h-32 opacity-10 animate-spin" style={{animationDuration: '20s'}}>
+                          <path d="M64,16 L72,40 L96,40 L76,56 L84,80 L64,64 L44,80 L52,56 L32,40 L56,40 Z" 
+                                fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
+                        </svg>
+                      )}
+                      
+                      {/* Sparkles animation */}
+                      <div className="absolute inset-0">
+                        {[...Array(6)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute animate-pulse"
+                            style={{
+                              left: `${15 + i * 25}%`,
+                              top: `${20 + (i % 2) * 40}%`,
+                              animationDelay: `${i * 0.2}s`,
+                              animationDuration: '2s'
+                            }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 16 16">
+                              <path d="M8,0 L10,6 L16,8 L10,10 L8,16 L6,10 L0,8 L6,6 Z" 
+                                    fill={status === 'success' ? '#10b981' : '#6b7280'} 
+                                    opacity="0.2"/>
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Gradient overlay for depth */}
+                      <div className={cn(
+                        "absolute inset-0",
+                        status === 'success' 
+                          ? "bg-gradient-to-br from-green-400/5 via-transparent to-emerald-400/5"
+                          : "bg-gradient-to-br from-gray-400/5 via-transparent to-gray-400/5"
+                      )}/>
+                    </div>
+                  )}
+                  {/* Single Compact Line: Expand arrow, habit name, points, and action buttons */}
                   <div className="flex items-center gap-2">
+                    {/* Expand/Collapse Button */}
                     <button
                       onClick={() => toggleHabitExpanded(habit.id)}
-                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-all duration-200 hover:scale-110"
+                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 hover:scale-110 flex-shrink-0"
                       aria-label={isExpanded ? "Collapse details" : "Expand details"}
                     >
                       {isExpanded ? (
@@ -400,82 +540,78 @@ export function FamilyMemberZone({
                       )}
                     </button>
                     
-                    {habit.emoji && (
-                      <div className="flex-shrink-0">
-                        <OpenMoji 
-                          emoji={habit.emoji} 
-                          size={touchMode ? 32 : 24}
-                          alt={habit.name}
-                        />
-                      </div>
-                    )}
-                    
+                    {/* Habit Name - Takes remaining space */}
                     <h4 className={cn(
-                      `font-semibold flex-1 ${theme.text.primary}`,
-                      touchMode ? "text-lg" : "text-base",
-                      isCompleted && (status === 'failure' ? "line-through text-gray-500 dark:text-gray-400" : "line-through text-green-700 dark:text-green-400")
+                      "font-squada font-medium flex-1",
+                      touchMode ? "text-base" : "text-sm",
+                      textColor,
+                      isCompleted && "line-through opacity-70"
                     )}>
                       {habit.name}
                     </h4>
-                  </div>
-                  
-                  {/* Second Line: Dual Completion Buttons or Undo */}
-                  <div className="flex justify-end items-center gap-2 flex-wrap">
-                    {isCompleted ? (
-                      <>
-                        <div className={cn(
-                          "px-2 py-2 rounded-lg flex items-center justify-center",
-                          status === 'failure' 
-                            ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
-                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
-                        )}>
-                          <OpenMoji 
-                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😢' : '✅'} 
-                            size={24}
-                            alt={status === 'success' ? 'Celebration' : status === 'failure' ? 'Sad' : 'Done'}
-                          />
-                        </div>
-                        <Button
-                          onClick={() => handleUndo(habit.id)}
-                          size="sm"
-                          variant="outline"
-                          className="hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          title="Undo"
-                        >
-                          <Undo2 className="w-4 h-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-3">
-                          {/* Points Display */}
-                          <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs font-bold rounded">
-                            <span>{habit.basePoints || 10}</span>
-                            <span>pts</span>
+                    
+                    {/* Points Badge */}
+                    <div className={cn(
+                      "flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full flex-shrink-0",
+                      isLight ? "bg-black/10 text-gray-900" : (isDarkMode ? "bg-white/5 text-white" : "bg-white/20 text-white")
+                    )}>
+                      <span>{habit.basePoints || 10}</span>
+                      <span className="text-[10px]">pts</span>
+                    </div>
+                    
+                    {/* Action Buttons - Compact */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {isCompleted ? (
+                        <>
+                          {/* Status Indicator */}
+                          <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center shadow-sm",
+                            status === 'failure' 
+                              ? 'bg-gradient-to-r from-red-500 to-red-600' 
+                              : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                          )}>
+                            {status === 'success' ? (
+                              <Check className="w-4 h-4 text-white" />
+                            ) : (
+                              <X className="w-4 h-4 text-white" />
+                            )}
                           </div>
-
-                          {/* Completion Buttons */}
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => handleHabitCompletion(habit.id, true)}
-                              loading={loading}
-                              size="sm"
-                              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-300 hover:scale-105"
-                            >
-                              Done
-                            </Button>
-                            <Button
-                              onClick={() => handleHabitCompletion(habit.id, false)}
-                              loading={loading}
-                              size="sm"
-                              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-300 hover:scale-105"
-                            >
-                              Failed
-                            </Button>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                          {/* Undo Button */}
+                          <Button
+                            onClick={() => handleUndo(habit.id)}
+                            size="sm"
+                            variant="ghost"
+                            className="w-8 h-8 p-0 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full flex-shrink-0"
+                            title="Undo completion"
+                          >
+                            <Undo2 className="w-4 h-4 text-gray-600 hover:text-red-600" />
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {/* Success Button */}
+                          <Button
+                            onClick={() => handleHabitCompletion(habit.id, true)}
+                            loading={loading}
+                            size="sm"
+                            className="w-8 h-8 p-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
+                            title="Mark as completed"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          {/* Failure Button */}
+                          <Button
+                            onClick={() => handleHabitCompletion(habit.id, false)}
+                            loading={loading}
+                            size="sm"
+                            className="w-8 h-8 p-0 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
+                            title="Mark as failed"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Expanded Details Section */}

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Squada_One } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -8,6 +9,12 @@ import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay'
 import { SoundFeedback } from '@/components/celebration/SoundFeedback'
 import { Toaster } from 'react-hot-toast'
+
+const squadaOne = Squada_One({
+  subsets: ['latin'],
+  variable: '--font-squada',
+  weight: '400'
+})
 
 export const metadata: Metadata = {
   title: 'NextVibe - Build Better Habits',
@@ -48,7 +55,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased">
+      <body className={`antialiased ${squadaOne.variable}`}>
         <ThemeProvider>
           <AuthProvider>
             <FamilyProvider>

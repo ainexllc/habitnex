@@ -42,6 +42,8 @@ export interface FamilyMember {
   avatar: string;              // Legacy: URL or emoji (kept for backwards compatibility)
   avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas'; // DiceBear style
   avatarSeed?: string;         // Seed for DiceBear avatar generation
+  avatarConfig?: AvatarConfig; // Custom avatar configuration
+  avatarOrigin?: 'auto' | 'custom'; // Track if avatar is auto-generated or custom
   color: string;               // Personal theme color (hex)
   role: 'parent' | 'child' | 'teen' | 'adult';
   birthYear?: number;          // For age-appropriate features
@@ -355,3 +357,29 @@ export type HabitDifficulty = 'easy' | 'medium' | 'hard';
 export type RewardCategory = 'experience' | 'purchase' | 'privilege' | 'activity' | 'time';
 export type ChallengeType = 'streak' | 'total' | 'race' | 'collaboration';
 export type RedemptionStatus = 'pending' | 'approved' | 'denied' | 'completed';
+
+// Avatar customization configuration for avataaars style
+export interface AvatarConfig {
+  // Face
+  skinColor?: string;
+  eyeType?: string;
+  eyebrowType?: string;
+  mouthType?: string;
+  
+  // Hair
+  topType?: string; // Hair style
+  hairColor?: string;
+  facialHairType?: string;
+  facialHairColor?: string;
+  
+  // Accessories
+  accessoriesType?: string;
+  
+  // Clothing
+  clotheType?: string;
+  clotheColor?: string;
+  graphicType?: string;
+  
+  // Background
+  backgroundColor?: string[];
+}

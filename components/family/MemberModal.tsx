@@ -5,9 +5,10 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview } from '@/components/ui/DiceBearAvatar';
-import { FamilyMember } from '@/types/family';
-import { UserPlus, UserPen, Palette, Users, Crown, Star, Trophy, Shuffle } from 'lucide-react';
+import { DiceBearAvatar, AvatarStyle, getDefaultAvatarStyle, useAvatarPreview, avatarConfigToDiceBearOptions } from '@/components/ui/DiceBearAvatar';
+import { AvatarBuilder } from '@/components/ui/AvatarBuilder';
+import { FamilyMember, AvatarConfig } from '@/types/family';
+import { UserPlus, UserPen, Palette, Users, Crown, Star, Trophy, Shuffle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 
@@ -100,6 +101,8 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
   const [avatarGenerationKey, setAvatarGenerationKey] = useState(0);
+  const [avatarMode, setAvatarMode] = useState<'quick' | 'custom'>('quick');
+  const [customAvatarConfig, setCustomAvatarConfig] = useState<AvatarConfig | undefined>(undefined);
 
   // Generate avatar previews
   const avatarPreviews = useAvatarPreview(
@@ -144,13 +147,23 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
 
   // Update avatar seed when selection changes
   useEffect(() => {
-    if (avatarPreviews[selectedAvatarIndex]) {
+    if (avatarMode === 'quick' && avatarPreviews[selectedAvatarIndex]) {
       setFormData(prev => ({ 
         ...prev, 
         avatarSeed: avatarPreviews[selectedAvatarIndex].seed 
       }));
     }
-  }, [selectedAvatarIndex, avatarPreviews]);
+  }, [selectedAvatarIndex, avatarPreviews, avatarMode]);
+  
+  // Handle custom avatar changes
+  const handleCustomAvatarChange = (config: AvatarConfig) => {
+    setCustomAvatarConfig(config);
+    setFormData(prev => ({
+      ...prev,
+      avatarStyle: 'avataaars' as AvatarStyle,
+      avatarSeed: ''
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,13 +175,26 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
     }
     
     try {
+      // Prepare avatar data based on mode
+      const avatarData = avatarMode === 'custom' && customAvatarConfig
+        ? {
+            avatarStyle: 'avataaars' as AvatarStyle,
+            avatarConfig: customAvatarConfig,
+            avatarOrigin: 'custom' as const,
+            avatarSeed: ''
+          }
+        : {
+            avatarStyle: formData.avatarStyle,
+            avatarSeed: formData.avatarSeed,
+            avatarOrigin: 'auto' as const
+          };
+      
       if (isEditing && member) {
         // Update existing member
         await updateFamilyMember(member.id, {
           name: formData.name.trim(),
           displayName: formData.displayName.trim(),
-          avatarStyle: formData.avatarStyle,
-          avatarSeed: formData.avatarSeed,
+          ...avatarData,
           color: formData.color,
           role: formData.role,
           ...(formData.birthYear > 1950 && { birthYear: formData.birthYear }),
@@ -180,8 +206,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
           name: formData.name.trim(),
           displayName: formData.displayName.trim(),
           avatar: formData.avatar,
-          avatarStyle: formData.avatarStyle,
-          avatarSeed: formData.avatarSeed,
+          ...avatarData,
           color: formData.color,
           role: formData.role,
           birthYear: formData.birthYear > 1950 ? formData.birthYear : undefined,
@@ -325,40 +350,86 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
 
             <div>
               <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                Avatar Style
+                Avatar
               </label>
-              <div className="grid grid-cols-4 gap-2 relative z-10">
-                {avatarPreviews.map((preview, index) => (
-                  <button
-                    key={preview.seed}
-                    type="button"
-                    className={cn(
-                      "p-2 rounded-lg border-2 hover:scale-105 transition-transform relative z-20",
-                      selectedAvatarIndex === index
-                        ? `border-blue-500 ${theme.status.info.bg}`
-                        : `${theme.border.default} hover:border-gray-300`
-                    )}
-                    onClick={() => setSelectedAvatarIndex(index)}
-                  >
-                    <div
-                      className="mx-auto relative z-30 flex items-center justify-center rounded-full overflow-hidden"
-                      style={{ width: 40, height: 40, isolation: 'isolate' }}
-                      dangerouslySetInnerHTML={{ __html: preview.svg }}
-                    />
-                  </button>
-                ))}
+              
+              {/* Avatar Mode Tabs */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setAvatarMode('quick')}
+                  className={cn(
+                    "flex-1 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
+                    avatarMode === 'quick'
+                      ? theme.components.button.primary + ' text-white'
+                      : theme.surface.secondary + ' ' + theme.text.primary + ' hover:' + theme.surface.hover
+                  )}
+                >
+                  <Shuffle className="w-4 h-4" />
+                  Quick Select
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAvatarMode('custom')}
+                  className={cn(
+                    "flex-1 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
+                    avatarMode === 'custom'
+                      ? theme.components.button.primary + ' text-white'
+                      : theme.surface.secondary + ' ' + theme.text.primary + ' hover:' + theme.surface.hover
+                  )}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Create Custom
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setAvatarGenerationKey(prev => prev + 1);
-                  setSelectedAvatarIndex(0);
-                }}
-                className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                <Shuffle className="w-3 h-3" />
-                Generate new avatars
-              </button>
+              
+              {/* Quick Select Mode */}
+              {avatarMode === 'quick' && (
+                <>
+                  <div className="grid grid-cols-4 gap-2 relative z-10">
+                    {avatarPreviews.map((preview, index) => (
+                      <button
+                        key={preview.seed}
+                        type="button"
+                        className={cn(
+                          "p-2 rounded-lg border-2 hover:scale-105 transition-transform relative z-20",
+                          selectedAvatarIndex === index
+                            ? `border-blue-500 ${theme.status.info.bg}`
+                            : `${theme.border.default} hover:border-gray-300`
+                        )}
+                        onClick={() => setSelectedAvatarIndex(index)}
+                      >
+                        <div
+                          className="mx-auto relative z-30 flex items-center justify-center rounded-full overflow-hidden"
+                          style={{ width: 40, height: 40, isolation: 'isolate' }}
+                          dangerouslySetInnerHTML={{ __html: preview.svg }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAvatarGenerationKey(prev => prev + 1);
+                      setSelectedAvatarIndex(0);
+                    }}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    <Shuffle className="w-3 h-3" />
+                    Generate new avatars
+                  </button>
+                </>
+              )}
+              
+              {/* Custom Builder Mode */}
+              {avatarMode === 'custom' && (
+                <div className="mt-4">
+                  <AvatarBuilder
+                    initialConfig={customAvatarConfig}
+                    onChange={handleCustomAvatarChange}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -496,12 +567,21 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
 
             <div className={cn("rounded-lg p-6", theme.surface.secondary)}>
               <div className="flex items-center space-x-4 mb-4">
-                <div 
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl"
-                  style={{ backgroundColor: formData.color }}
-                >
-                  {formData.avatar}
-                </div>
+                {avatarMode === 'custom' && customAvatarConfig ? (
+                  <DiceBearAvatar
+                    style="avataaars"
+                    options={avatarConfigToDiceBearOptions(customAvatarConfig)}
+                    size={64}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <DiceBearAvatar
+                    style={formData.avatarStyle}
+                    seed={formData.avatarSeed}
+                    size={64}
+                    className="rounded-full"
+                  />
+                )}
                 <div>
                   <h3 className={cn("font-bold", theme.text.primary)}>{formData.displayName}</h3>
                   <p className={theme.text.secondary}>{formData.name}</p>

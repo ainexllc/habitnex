@@ -137,7 +137,7 @@ export function FamilyStats({
               "flex items-center justify-center",
               touchMode ? "text-base" : "text-sm"
             )}>
-              <Star className="w-4 h-4 mr-1", theme.status.info.icon />
+              <Star className={cn("w-4 h-4 mr-1", theme.status.info.icon)} />
               Total Points
             </div>
           </div>
@@ -155,7 +155,7 @@ export function FamilyStats({
               "flex items-center justify-center",
               touchMode ? "text-base" : "text-sm"
             )}>
-              <TrendingUp className="w-4 h-4 mr-1", theme.status.success.icon />
+              <TrendingUp className={cn("w-4 h-4 mr-1", theme.status.success.icon)} />
               Team Streak
             </div>
           </div>
@@ -173,7 +173,7 @@ export function FamilyStats({
               "flex items-center justify-center",
               touchMode ? "text-base" : "text-sm"
             )}>
-              <Target className="w-4 h-4 mr-1", theme.status.info.icon />
+              <Target className={cn("w-4 h-4 mr-1", theme.status.info.icon)} />
               Members
             </div>
           </div>

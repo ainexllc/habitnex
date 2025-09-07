@@ -21,6 +21,28 @@ export function getTodayDateString(): string {
   return `${year}-${month}-${day}`;
 }
 
+// Timezone-safe date string for current user's local date
+// This should be used instead of new Date().toISOString().split('T')[0]
+export function getLocalDateString(date?: Date): string {
+  const d = date || new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Get local date string for any timezone offset (for server-side use)
+export function getLocalDateStringForTimezone(timezoneOffsetMinutes: number, date?: Date): string {
+  const d = date || new Date();
+  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+  const localTime = new Date(utc + (timezoneOffsetMinutes * 60000));
+  
+  const year = localTime.getFullYear();
+  const month = String(localTime.getMonth() + 1).padStart(2, '0');
+  const day = String(localTime.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function getDateString(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');

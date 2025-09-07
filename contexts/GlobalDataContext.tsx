@@ -12,6 +12,7 @@ import {
   Unsubscribe 
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { getTodayDateString } from '@/lib/utils';
 import type { Habit, HabitCompletion, MoodEntry } from '@/types';
 import type { FamilyHabit, FamilyHabitCompletion } from '@/types/family';
 
@@ -248,6 +249,30 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
           const validatedFamilyCompletions = familyCompletionsData.filter(completion => 
             completion.familyId === currentFamily.id && completion.memberId
           );
+          
+          // Debug logging for completion data
+          const today = getTodayDateString();
+          const todaysCompletions = validatedFamilyCompletions.filter(c => c.date === today);
+          const yesterdaysCompletions = validatedFamilyCompletions.filter(c => c.date === '2025-09-06');
+          console.log('\n🔍 FAMILY COMPLETIONS DEBUG:');
+          console.log(`📅 Today: ${today}`);
+          console.log(`📊 Total completions loaded: ${validatedFamilyCompletions.length}`);
+          console.log(`🎯 Today's completions (${today}):`, todaysCompletions.length);
+          console.log(`⏮️ Yesterday's completions (2025-09-06):`, yesterdaysCompletions.length);
+          if (todaysCompletions.length > 0) {
+            console.log('Today\'s completion details:');
+            todaysCompletions.forEach(c => {
+              const timestamp = c.timestamp?.toDate ? c.timestamp.toDate() : new Date(c.timestamp);
+              console.log(`  - ${c.habitName || c.habitId} (${c.memberId}): completed=${c.completed}, date=${c.date}, timestamp=${timestamp?.toISOString()}, notes=${c.notes || 'none'}`);
+            });
+          }
+          if (yesterdaysCompletions.length > 0) {
+            console.log('Yesterday\'s completion details:');
+            yesterdaysCompletions.forEach(c => {
+              const timestamp = c.timestamp?.toDate ? c.timestamp.toDate() : new Date(c.timestamp);
+              console.log(`  - ${c.habitName || c.habitId} (${c.memberId}): completed=${c.completed}, date=${c.date}, timestamp=${timestamp?.toISOString()}, notes=${c.notes || 'none'}`);
+            });
+          }
           
           setFamilyCompletions(validatedFamilyCompletions);
           console.log('Family completions loaded:', validatedFamilyCompletions.length, 'completions for family', currentFamily.id);

@@ -18,6 +18,7 @@ import {
   limit
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { getTodayDateString } from './utils';
 import type {
   Family,
   FamilyMember,
@@ -333,6 +334,8 @@ export const addDirectFamilyMember = async (
     avatar: string;
     avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
+    avatarConfig?: any; // Custom avatar configuration
+    avatarOrigin?: 'auto' | 'custom';
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -368,6 +371,8 @@ export const addDirectFamilyMember = async (
       avatar: memberInfo.avatar,
       ...(memberInfo.avatarStyle && { avatarStyle: memberInfo.avatarStyle }),
       ...(memberInfo.avatarSeed && { avatarSeed: memberInfo.avatarSeed }),
+      ...(memberInfo.avatarConfig && { avatarConfig: memberInfo.avatarConfig }),
+      ...(memberInfo.avatarOrigin && { avatarOrigin: memberInfo.avatarOrigin }),
       color: memberInfo.color,
       role: memberInfo.role,
       ...(memberInfo.birthYear && { birthYear: memberInfo.birthYear }),
@@ -407,6 +412,8 @@ export const updateFamilyMemberInDb = async (
     displayName?: string;
     avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
+    avatarConfig?: any;
+    avatarOrigin?: 'auto' | 'custom';
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }
@@ -419,6 +426,8 @@ export const updateFamilyMemberInDb = async (
     if (updates.displayName !== undefined) updateData.displayName = updates.displayName;
     if (updates.avatarStyle !== undefined) updateData.avatarStyle = updates.avatarStyle;
     if (updates.avatarSeed !== undefined) updateData.avatarSeed = updates.avatarSeed;
+    if (updates.avatarConfig !== undefined) updateData.avatarConfig = updates.avatarConfig;
+    if (updates.avatarOrigin !== undefined) updateData.avatarOrigin = updates.avatarOrigin;
     if (updates.color !== undefined) updateData.color = updates.color;
     if (updates.role !== undefined) updateData.role = updates.role;
     
@@ -878,7 +887,7 @@ export const startChallenge = async (familyId: string, challengeId: string): Pro
     const challengeRef = doc(db, 'families', familyId, 'challenges', challengeId);
     await updateDoc(challengeRef, {
       status: 'active',
-      startDate: new Date().toISOString().split('T')[0]
+      startDate: getTodayDateString()
     });
   } catch (error) {
     throw error;
@@ -1215,7 +1224,7 @@ export const subscribeFamilyData = (familyId: string, callback: (data: Partial<F
   
   // Subscribe to completions
   const completionsRef = collection(db, 'families', familyId, 'completions');
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const completionsQuery = query(completionsRef, where('date', '==', today));
   
   const completionsUnsub = onSnapshot(completionsQuery, (snapshot) => {
@@ -1260,8 +1269,8 @@ export const getFamilyDashboardData = async (familyId: string): Promise<FamilyDa
       getFamily(familyId),
       getFamilyHabits(familyId),
       getFamilyCompletions(familyId, { 
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
+        startDate: getTodayDateString(),
+        endDate: getTodayDateString()
       }),
       getFamilyRewards(familyId)
     ]);
