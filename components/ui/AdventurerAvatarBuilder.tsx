@@ -327,14 +327,22 @@ export function AdventurerAvatarBuilder({
                     type="button"
                     onClick={() => setSkinColor(skinColor[0] === color.value ? [] : [color.value])}
                     className={cn(
-                      "p-3 rounded-lg border-2 transition-all",
+                      "p-3 rounded-lg border-2 transition-all relative",
                       skinColor[0] === color.value
-                        ? 'border-blue-500 scale-105'
-                        : 'border-gray-300 hover:scale-105'
+                        ? 'border-blue-500 scale-105 ring-2 ring-blue-300'
+                        : 'border-gray-300 hover:scale-105 hover:border-gray-400'
                     )}
                     style={{ backgroundColor: color.value }}
                     title={color.label}
-                  />
+                  >
+                    {skinColor[0] === color.value && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
@@ -351,14 +359,22 @@ export function AdventurerAvatarBuilder({
                     type="button"
                     onClick={() => setHairColor(hairColor[0] === color.value ? [] : [color.value])}
                     className={cn(
-                      "p-3 rounded-lg border-2 transition-all",
+                      "p-3 rounded-lg border-2 transition-all relative",
                       hairColor[0] === color.value
-                        ? 'border-blue-500 scale-105'
-                        : 'border-gray-300 hover:scale-105'
+                        ? 'border-blue-500 scale-105 ring-2 ring-blue-300'
+                        : 'border-gray-300 hover:scale-105 hover:border-gray-400'
                     )}
                     style={{ backgroundColor: color.value }}
                     title={color.label}
-                  />
+                  >
+                    {hairColor[0] === color.value && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
