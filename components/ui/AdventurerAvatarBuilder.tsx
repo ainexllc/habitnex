@@ -174,15 +174,18 @@ export function AdventurerAvatarBuilder({
       }
       
       console.log('Avatar options:', options);
-      const avatar = createAvatar(adventurer as any, options);
+      const avatar = createAvatar(adventurer, options);
       const svg = avatar.toString();
       console.log('Generated SVG length:', svg?.length);
       if (!svg || svg.length === 0) {
         console.error('Empty SVG generated');
         return null;
       }
-      // Convert to data URI for img src
-      return avatar.toDataUri();
+      // Create data URI manually from SVG string
+      const encodedSvg = encodeURIComponent(svg);
+      const dataUri = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
+      console.log('Created data URI');
+      return dataUri;
     } catch (error) {
       console.error('Failed to generate adventurer avatar:', error);
       return null;
