@@ -44,6 +44,8 @@ interface FamilyContextType {
     name: string;
     displayName: string;
     avatarSeed?: string;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -52,6 +54,8 @@ interface FamilyContextType {
   updateFamilyMember: (memberId: string, updates: {
     displayName?: string;
     avatarSeed?: string;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => Promise<void>;
@@ -256,6 +260,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     name: string;
     displayName: string;
     avatarSeed?: string;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -290,6 +296,8 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   const updateFamilyMember = useCallback(async (memberId: string, updates: {
     displayName?: string;
     avatarSeed?: string;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => {
