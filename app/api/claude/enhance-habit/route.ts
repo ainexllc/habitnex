@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
           throw secondParseError;
         }
 
-      } catch (alternativeParseError) {
+      } catch {
         console.error('All parsing methods failed, using fallback');
 
         // Fallback: create a basic enhancement from the response text
@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
           };
 
           // Using fallback enhancement due to JSON parse error
-        } catch (fallbackError) {
+        } catch {
           throw new Error('Invalid response format from AI. Please try again.');
         }
       }
@@ -265,7 +265,7 @@ export async function POST(req: NextRequest) {
     // Cache the result
     setHabitEnhancement(habitName, enhancement, cost);
     
-    const totalDuration = Date.now() - startTime;
+    // Performance tracking - request completed
     
     // Track successful usage (but don't fail if tracking doesn't work)
     try {
