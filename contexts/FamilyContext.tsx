@@ -43,8 +43,6 @@ interface FamilyContextType {
   addDirectMember: (memberInfo: {
     name: string;
     displayName: string;
-    avatar: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
@@ -53,7 +51,6 @@ interface FamilyContextType {
   }) => Promise<void>;
   updateFamilyMember: (memberId: string, updates: {
     displayName?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
@@ -258,11 +255,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   const addDirectMember = useCallback(async (memberInfo: {
     name: string;
     displayName: string;
-    avatar?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
-    avatarConfig?: any;
-    avatarOrigin?: 'auto' | 'custom';
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -296,10 +289,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   // Update family member
   const updateFamilyMember = useCallback(async (memberId: string, updates: {
     displayName?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
-    avatarConfig?: any;
-    avatarOrigin?: 'auto' | 'custom';
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => {

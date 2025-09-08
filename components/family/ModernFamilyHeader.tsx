@@ -120,40 +120,16 @@ export function ModernFamilyHeader({
           {/* Top Row */}
           <div className="flex justify-between items-center mb-6 pt-[15px]">
             <div className="flex items-center gap-4">
-              {/* NextVibe Logo - Always use light mode colors */}
-              <div className="mr-2">
-                <span 
-                  className="text-2xl font-bold"
-                  style={{ fontFamily: '"Climate Crisis", cursive' }}
-                >
-                  <span className="text-green-600">Next</span>
-                  <span className="text-gray-900">Vibe</span>
-                </span>
-              </div>
               
-              {/* Back to Personal Dashboard Button */}
-              <Link href="/dashboard">
-                <Button
-                  variant="ghost"
-                  size={touchMode ? "default" : "sm"}
-                  className={cn(
-                    "bg-white/10 hover:bg-white/20 text-white border border-white/20",
-                    touchMode && "min-h-[48px] px-6"
-                  )}
-                  title="Back to Personal Dashboard"
-                >
-                  <ArrowLeft className={cn("mr-2", touchMode ? "w-5 h-5" : "w-4 h-4")} />
-                  <span className={touchMode ? "text-base" : "text-sm"}>Personal</span>
-                </Button>
-              </Link>
+
               
               <h1
                 className={cn(
-                  "font-bold",
+                  "font-bold mt-[10px] ml-[10px]",
                   touchMode ? "text-4xl md:text-5xl" : "text-3xl md:text-4xl lg:text-5xl"
                 )}
                 style={{
-                  fontFamily: '"Kablammo", sans-serif',
+                  fontFamily: '"Henny Penny", cursive',
                   fontWeight: 700
                 }}
               >

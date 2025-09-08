@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { FamilyMember, FamilyHabit, FamilyHabitCompletion } from '@/types/family';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
@@ -212,8 +212,56 @@ export function FamilyMemberZone({
   const mutedTextColor = isLight ? 'text-gray-700' : 'text-gray-200';
   const borderColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
   
-  // Check if we're in dark mode (you can also check theme context if available)
-  const isDarkMode = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Build adventurer avatar options from stored avatarConfig so dashboard matches edit form
+  const avatarOptions = useMemo(() => {
+    const cfg = (member as any).avatarConfig || {};
+    const strip = (c?: string) => (c ? c.replace('#', '') : c);
+    const opts: any = {};
+    if (cfg.skinColor) opts.skinColor = [strip(cfg.skinColor)];
+    if (cfg.mouthType) opts.mouth = [cfg.mouthType];
+    if (cfg.hairColor) opts.hairColor = [strip(cfg.hairColor)];
+    if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
+    if (typeof cfg.glassesProbability === 'number') opts.glassesProbability = cfg.glassesProbability / 100;
+    if (typeof cfg.featuresProbability === 'number') opts.featuresProbability = cfg.featuresProbability / 100;
+    if (typeof cfg.earringsProbability === 'number') opts.earringsProbability = cfg.earringsProbability / 100;
+    return opts;
+  }, [member]);
+  
+  // Check if we're in dark mode - improved detection
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  useEffect(() => {
+    // Check for dark mode class on document or body
+    const checkDarkMode = () => {
+      if (typeof window !== 'undefined') {
+        const htmlElement = document.documentElement;
+        const bodyElement = document.body;
+        const hasDarkClass = htmlElement.classList.contains('dark') || bodyElement.classList.contains('dark');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setIsDarkMode(hasDarkClass || prefersDark);
+      }
+    };
+
+    checkDarkMode();
+    console.log('🎨 FamilyMemberZone Dark Mode Detection:', { isDarkMode, memberName: member.displayName, memberColor: member.color, isLight });
+    
+    // Listen for theme changes
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const observer = new MutationObserver(checkDarkMode);
+      
+      mediaQuery.addListener(checkDarkMode);
+      observer.observe(document.documentElement, { 
+        attributes: true, 
+        attributeFilter: ['class'] 
+      });
+      
+      return () => {
+        mediaQuery.removeListener(checkDarkMode);
+        observer.disconnect();
+      };
+    }
+  }, []);
 
   return (
     <>
@@ -226,9 +274,9 @@ export function FamilyMemberZone({
         className
       )}
       style={{ 
-        backgroundColor: isDarkMode && !isLight ? `${member.color}66` : member.color,
+        backgroundColor: isDarkMode && !isLight ? `${member.color}33` : member.color,
         backgroundImage: isDarkMode && !isLight 
-          ? `linear-gradient(135deg, ${member.color}44 0%, ${member.color}33 100%)`
+          ? `linear-gradient(135deg, ${member.color}22 0%, ${member.color}11 100%)`
           : `linear-gradient(135deg, ${member.color} 0%, ${member.color}dd 100%)`,
         border: `2px solid ${borderColor}`,
         backdropFilter: isDarkMode && !isLight ? 'blur(12px)' : 'none'
@@ -242,55 +290,23 @@ export function FamilyMemberZone({
       )}>
         {/* Centered Avatar and Name Layout */}
         <div className="flex flex-col items-center text-center mb-6">
-          {/* Large Avatar */}
+          {/* Large Avatar - Always Adventurer Style */}
           <div className="relative mb-4">
-            {(member as any).avatarOrigin === 'custom' && (member as any).avatarConfig ? (
-              <div 
-                className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
-                style={{ 
-                  borderColor: borderColor,
-                  ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
-                }}
-              >
-                <DiceBearAvatar
-                  style={(member as any).avatarStyle || 'adventurer'}
-                  options={(member as any).avatarConfig}
-                  size={touchMode ? 120 : 96}
-                  backgroundColor={isLight ? '#ffffff' : '#1f2937'}
-                  fallbackEmoji={member.avatar}
-                />
-              </div>
-            ) : (member as any).avatarSeed ? (
-              <div 
-                className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
-                style={{ 
-                  borderColor: borderColor,
-                  ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
-                }}
-              >
-                <DiceBearAvatar
-                  seed={(member as any).avatarSeed}
-                  style={(member as any).avatarStyle || 'adventurer'}
-                  size={touchMode ? 120 : 96}
-                  backgroundColor={isLight ? '#ffffff' : '#1f2937'}
-                  fallbackEmoji={member.avatar}
-                />
-              </div>
-            ) : (
-              <div 
-                className={cn(
-                  "rounded-full flex items-center justify-center font-bold shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 border-4",
-                  touchMode ? "w-30 h-30 text-5xl" : "w-24 h-24 text-4xl",
-                  isLight ? "bg-white text-gray-900" : "bg-gray-900 text-white"
-                )}
-                style={{ 
-                  borderColor: borderColor,
-                  ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
-                }}
-              >
-                {member.avatar}
-              </div>
-            )}
+            <div 
+              className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
+              style={{ 
+                borderColor: borderColor,
+                ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
+              }}
+            >
+              <DiceBearAvatar
+                seed={member.avatarSeed || member.id}
+                style="adventurer"
+                size={touchMode ? 120 : 96}
+                backgroundColor={isLight ? '#ffffff' : '#1f2937'}
+                options={avatarOptions}
+              />
+            </div>
             
             {/* Completion Badge on Avatar */}
             {completionRate === 100 && (

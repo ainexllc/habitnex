@@ -67,7 +67,7 @@ export default function TestAvatarBuilderPage() {
                   <div className="flex items-end gap-4">
                     <div className="text-center">
                       <DiceBearAvatar
-                        style="avataaars"
+                        style="adventurer"
                         options={avatarConfigToDiceBearOptions(savedConfig)}
                         size={32}
                       />
@@ -75,7 +75,7 @@ export default function TestAvatarBuilderPage() {
                     </div>
                     <div className="text-center">
                       <DiceBearAvatar
-                        style="avataaars"
+                        style="adventurer"
                         options={avatarConfigToDiceBearOptions(savedConfig)}
                         size={48}
                       />
@@ -83,7 +83,7 @@ export default function TestAvatarBuilderPage() {
                     </div>
                     <div className="text-center">
                       <DiceBearAvatar
-                        style="avataaars"
+                        style="adventurer"
                         options={avatarConfigToDiceBearOptions(savedConfig)}
                         size={64}
                       />
@@ -91,7 +91,7 @@ export default function TestAvatarBuilderPage() {
                     </div>
                     <div className="text-center">
                       <DiceBearAvatar
-                        style="avataaars"
+                        style="adventurer"
                         options={avatarConfigToDiceBearOptions(savedConfig)}
                         size={96}
                       />
@@ -99,7 +99,7 @@ export default function TestAvatarBuilderPage() {
                     </div>
                     <div className="text-center">
                       <DiceBearAvatar
-                        style="avataaars"
+                        style="adventurer"
                         options={avatarConfigToDiceBearOptions(savedConfig)}
                         size={128}
                       />
@@ -137,7 +137,7 @@ export default function TestAvatarBuilderPage() {
                   <code className={cn("text-sm", theme.text.primary)}>
                     {`// Using with custom config
 <DiceBearAvatar
-  style="avataaars"
+  style="adventurer"
   options={avatarConfigToDiceBearOptions(config)}
   size={64}
 />
@@ -145,7 +145,7 @@ export default function TestAvatarBuilderPage() {
 // The config would be stored in Firestore as:
 {
   avatarOrigin: 'custom',
-  avatarStyle: 'avataaars',
+  avatarStyle: 'adventurer',
   avatarConfig: ${JSON.stringify(savedConfig, null, 2).split('\n').map((line, i) => i === 0 ? line : '  ' + line).join('\n')}
 }`}
                   </code>

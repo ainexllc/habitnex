@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createAvatar } from '@dicebear/core';
-import { avataaars } from '@dicebear/collection';
+import { adventurer } from '@dicebear/collection';
 import { AvatarBuilder } from '@/components/ui/AvatarBuilder';
 import { avatarConfigToDiceBearOptions } from '@/components/ui/DiceBearAvatar';
 import type { AvatarConfig } from '@/types/family';
@@ -31,7 +31,7 @@ export default function TestAvatarDebug() {
     try {
       const options = avatarConfigToDiceBearOptions(config);
       console.log('Test avatar options:', options);
-      const svg = createAvatar(avataaars as any, { ...options, size: 120 }).toString();
+      const svg = createAvatar(adventurer as any, { ...options, size: 120 }).toString();
       console.log('Test avatar SVG generated, length:', svg?.length);
       return svg;
     } catch (error) {

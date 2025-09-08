@@ -326,16 +326,14 @@ export const updateFamilyMember = async (familyId: string, memberId: string, upd
 };
 
 export const addDirectFamilyMember = async (
-  familyId: string, 
+  familyId: string,
   createdBy: string,
   memberInfo: {
     name: string;
     displayName: string;
-    avatar?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
-    avatarConfig?: any; // Custom avatar configuration
-    avatarOrigin?: 'auto' | 'custom';
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -368,16 +366,27 @@ export const addDirectFamilyMember = async (
       // Don't include userId field at all for direct members
       name: memberInfo.name.trim(),
       displayName: memberInfo.displayName.trim(),
-      avatar: memberInfo.avatar,
-      ...(memberInfo.avatarStyle && { avatarStyle: memberInfo.avatarStyle }),
-      ...(memberInfo.avatarSeed && { avatarSeed: memberInfo.avatarSeed }),
-      ...(memberInfo.avatarConfig && { avatarConfig: memberInfo.avatarConfig }),
-      ...(memberInfo.avatarOrigin && { avatarOrigin: memberInfo.avatarOrigin }),
+      avatarSeed: memberInfo.avatarSeed || `${memberInfo.displayName.trim()}-${Date.now()}`,
       color: memberInfo.color,
       role: memberInfo.role,
       ...(memberInfo.birthYear && { birthYear: memberInfo.birthYear }),
       isActive: true,
       joinedAt: Timestamp.now(),
+
+      // Handle avatar configuration - save all avatar options in avatarConfig
+      ...(memberInfo.avatarSkinColor || memberInfo.avatarMouth || memberInfo.avatarHairColor || 
+          memberInfo.hairProbability !== undefined || memberInfo.glassesProbability !== undefined ||
+          memberInfo.featuresProbability !== undefined || memberInfo.earringsProbability !== undefined ? {
+        avatarConfig: {
+          ...(memberInfo.avatarSkinColor && { skinColor: memberInfo.avatarSkinColor }),
+          ...(memberInfo.avatarMouth && { mouthType: memberInfo.avatarMouth }),
+          ...(memberInfo.avatarHairColor && { hairColor: memberInfo.avatarHairColor }),
+          ...(memberInfo.hairProbability !== undefined && { hairProbability: memberInfo.hairProbability }),
+          ...(memberInfo.glassesProbability !== undefined && { glassesProbability: memberInfo.glassesProbability }),
+          ...(memberInfo.featuresProbability !== undefined && { featuresProbability: memberInfo.featuresProbability }),
+          ...(memberInfo.earringsProbability !== undefined && { earringsProbability: memberInfo.earringsProbability }),
+        }
+      } : {}),
       preferences: {
         favoriteEmojis: [],
         difficulty: 'normal',
@@ -410,10 +419,9 @@ export const updateFamilyMemberInDb = async (
   memberId: string,
   updates: {
     displayName?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
-    avatarConfig?: any;
-    avatarOrigin?: 'auto' | 'custom';
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }
@@ -424,12 +432,38 @@ export const updateFamilyMemberInDb = async (
     // Build update object with only provided fields
     const updateData: any = {};
     if (updates.displayName !== undefined) updateData.displayName = updates.displayName;
-    if (updates.avatarStyle !== undefined) updateData.avatarStyle = updates.avatarStyle;
     if (updates.avatarSeed !== undefined) updateData.avatarSeed = updates.avatarSeed;
-    if (updates.avatarConfig !== undefined) updateData.avatarConfig = updates.avatarConfig;
-    if (updates.avatarOrigin !== undefined) updateData.avatarOrigin = updates.avatarOrigin;
     if (updates.color !== undefined) updateData.color = updates.color;
     if (updates.role !== undefined) updateData.role = updates.role;
+
+    // Handle avatar configuration - save all avatar options in avatarConfig
+    if (updates.avatarSkinColor !== undefined || updates.avatarMouth !== undefined || 
+        updates.avatarHairColor !== undefined || updates.hairProbability !== undefined ||
+        updates.glassesProbability !== undefined || updates.featuresProbability !== undefined ||
+        updates.earringsProbability !== undefined) {
+      updateData.avatarConfig = {};
+      if (updates.avatarSkinColor !== undefined) {
+        updateData.avatarConfig.skinColor = updates.avatarSkinColor;
+      }
+      if (updates.avatarMouth !== undefined) {
+        updateData.avatarConfig.mouthType = updates.avatarMouth;
+      }
+      if (updates.avatarHairColor !== undefined) {
+        updateData.avatarConfig.hairColor = updates.avatarHairColor;
+      }
+      if (updates.hairProbability !== undefined) {
+        updateData.avatarConfig.hairProbability = updates.hairProbability;
+      }
+      if (updates.glassesProbability !== undefined) {
+        updateData.avatarConfig.glassesProbability = updates.glassesProbability;
+      }
+      if (updates.featuresProbability !== undefined) {
+        updateData.avatarConfig.featuresProbability = updates.featuresProbability;
+      }
+      if (updates.earringsProbability !== undefined) {
+        updateData.avatarConfig.earringsProbability = updates.earringsProbability;
+      }
+    }
     
     await updateDoc(memberRef, updateData);
     console.log('Member updated successfully:', memberId);

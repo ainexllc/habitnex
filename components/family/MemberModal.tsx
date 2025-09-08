@@ -6,9 +6,8 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
-import { AdventurerAvatarBuilder } from '@/components/ui/AvataaarsAvatarBuilder';
 import { FamilyMember } from '@/types/family';
-import { UserPlus, UserPen } from 'lucide-react';
+import { UserPlus, UserPen, RefreshCw, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 
@@ -48,119 +47,129 @@ const roleOptions = [
   { value: 'adult', label: 'Adult' },
 ];
 
+// Skin color options for adventurer avatars - using hex values that adventurer collection supports
+const skinColors = [
+  { value: 'f2d3b1', label: 'Light', color: '#f2d3b1' },
+  { value: 'ecad80', label: 'Medium', color: '#ecad80' },
+  { value: '9e5622', label: 'Dark', color: '#9e5622' },
+  { value: '763900', label: 'Deep', color: '#763900' },
+];
+
+// Mouth expressions for adventurer avatars  
+const mouthOptions = [
+  { value: 'variant01', label: '😊 Happy', icon: '😊' },
+  { value: 'variant02', label: '😄 Big Smile', icon: '😄' },
+  { value: 'variant03', label: '😮 Surprised', icon: '😮' },
+  { value: 'variant04', label: '😐 Neutral', icon: '😐' },
+  { value: 'variant05', label: '🙂 Slight Smile', icon: '🙂' },
+  { value: 'variant06', label: '😔 Sad', icon: '😔' },
+  { value: 'variant07', label: '😎 Cool', icon: '😎' },
+  { value: 'variant08', label: '😋 Playful', icon: '😋' },
+  { value: 'variant09', label: '🤔 Thinking', icon: '🤔' },
+  { value: 'variant10', label: '😴 Sleepy', icon: '😴' },
+];
+
+// Hair color options for adventurer avatars (using hex values)
+const hairColors = [
+  { value: '2C1B18', label: 'Black', color: '#2C1B18' },
+  { value: '724133', label: 'Brown', color: '#724133' },
+  { value: 'A55728', label: 'Light Brown', color: '#A55728' },
+  { value: 'B58143', label: 'Blonde', color: '#B58143' },
+  { value: 'C93305', label: 'Red', color: '#C93305' },
+  { value: 'B7B7B7', label: 'Gray', color: '#B7B7B7' },
+  { value: 'E8E1E1', label: 'White', color: '#E8E1E1' },
+  { value: 'FF69B4', label: 'Pink', color: '#FF69B4' },
+];
+
+// Probability-based options for adventurer features
+const featureProbabilities = [
+  { key: 'hairProbability', label: 'Hair', description: 'Chance of having hair' },
+  { key: 'glassesProbability', label: 'Glasses', description: 'Chance of wearing glasses' },
+  { key: 'featuresProbability', label: 'Features', description: 'Chance of facial features (freckles, etc.)' },
+  { key: 'earringsProbability', label: 'Earrings', description: 'Chance of wearing earrings' },
+];
+
 export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const { addDirectMember, updateFamilyMember, loading } = useFamily();
   
   const isEditing = !!member;
-  const [showAvatarDesigner, setShowAvatarDesigner] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
-    avatarData: {
-      seed: '',
-      eyes: '',
-      eyebrows: '',
-      mouth: '',
-      hair: '',
-      skinColor: '',
-      hairColor: '',
-      backgroundColor: 'transparent',
-      flip: false,
-      rotate: 0,
-      scale: 100,
-      avatarUrl: ''
-    },
+    avatarSeed: '',
+    avatarSkinColor: '',
+    avatarMouth: '',
+    avatarHairColor: '',
+    hairProbability: 100,
+    glassesProbability: 50,
+    featuresProbability: 10,
+    earringsProbability: 30,
     color: '#3B82F6',
     role: 'child' as 'parent' | 'child' | 'teen' | 'adult',
   });
 
   const [error, setError] = useState<string | null>(null);
+  
+  // Generate a unique avatar seed
+  const generateAvatarSeed = (baseName: string = '') => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `${baseName || 'member'}-${timestamp}-${random}`;
+  };
+
+  // Generate a seed that's more likely to show hair and customizations
+  const generateCustomizationFriendlySeed = (baseName: string = '') => {
+    // Use specific seeds that are known to work well with customizations
+    const goodSeeds = ['alex', 'sam', 'jordan', 'taylor', 'casey', 'riley', 'morgan', 'avery'];
+    const randomSeed = goodSeeds[Math.floor(Math.random() * goodSeeds.length)];
+    const timestamp = Date.now().toString().slice(-6);
+    return `${randomSeed}-${baseName}-${timestamp}`;
+  };
 
   // Initialize form data when member changes (for editing)
   useEffect(() => {
     if (member) {
-      const memberData = member as any;
-      
-      // Handle custom avatar data (from avatarConfig) or fallback to individual fields
-      let avatarData;
-      if (memberData.avatarConfig && memberData.avatarOrigin === 'custom') {
-        // Use existing custom avatar configuration
-        avatarData = {
-          seed: memberData.avatarConfig.seed || memberData.avatarSeed || member.displayName || 'member',
-          eyes: memberData.avatarConfig.eyes || '',
-          eyebrows: memberData.avatarConfig.eyebrows || '',
-          mouth: memberData.avatarConfig.mouth || '',
-          hair: memberData.avatarConfig.hair || '',
-          skinColor: memberData.avatarConfig.skinColor || '',
-          hairColor: memberData.avatarConfig.hairColor || '',
-          backgroundColor: memberData.avatarConfig.backgroundColor || 'transparent',
-          flip: memberData.avatarConfig.flip ?? false,
-          rotate: memberData.avatarConfig.rotate ?? 0,
-          scale: memberData.avatarConfig.scale ?? 100,
-          avatarUrl: memberData.avatarConfig.avatarUrl || ''
-        };
-      } else {
-        // Fallback to individual avatar fields or default
-        avatarData = {
-          seed: memberData.avatarSeed || member.displayName || 'member',
-          eyes: memberData.eyes || '',
-          eyebrows: memberData.eyebrows || '',
-          mouth: memberData.mouth || '',
-          hair: memberData.hair || '',
-          skinColor: memberData.skinColor || '',
-          hairColor: memberData.hairColor || '',
-          backgroundColor: memberData.backgroundColor || 'transparent',
-          flip: memberData.flip ?? false,
-          rotate: memberData.rotate ?? 0,
-          scale: memberData.scale ?? 100,
-          avatarUrl: ''
-        };
-      }
+      console.log('🎭 Loading member for edit:', {
+        id: member.id,
+        name: member.displayName,
+        avatarSeed: member.avatarSeed,
+        avatarConfig: member.avatarConfig
+      });
       
       setFormData({
         name: member.name || '',
         displayName: member.displayName || '',
-        avatarData,
+        avatarSeed: member.avatarSeed || member.id || generateAvatarSeed(member.displayName),
+        avatarSkinColor: member.avatarConfig?.skinColor || '',
+        avatarMouth: member.avatarConfig?.mouthType || '',
+        avatarHairColor: member.avatarConfig?.hairColor || '',
+        hairProbability: member.avatarConfig?.hairProbability !== undefined ? member.avatarConfig.hairProbability : 100,
+        glassesProbability: member.avatarConfig?.glassesProbability !== undefined ? member.avatarConfig.glassesProbability : 50,
+        featuresProbability: member.avatarConfig?.featuresProbability !== undefined ? member.avatarConfig.featuresProbability : 10,
+        earringsProbability: member.avatarConfig?.earringsProbability !== undefined ? member.avatarConfig.earringsProbability : 30,
         color: member.color || '#3B82F6',
         role: member.role || 'child',
       });
     } else {
-      // Reset for new member
+      // Reset for new member - use customization-friendly seed
+      const newSeed = generateCustomizationFriendlySeed('member');
       setFormData({
         name: '',
         displayName: '',
-        avatarData: {
-          seed: '',
-          eyes: '',
-          eyebrows: '',
-          mouth: '',
-          hair: '',
-          skinColor: '',
-          hairColor: '',
-          backgroundColor: 'transparent',
-          flip: false,
-          rotate: 0,
-          scale: 100,
-          avatarUrl: ''
-        },
+        avatarSeed: newSeed,
+        avatarSkinColor: '',
+        avatarMouth: '',
+        avatarHairColor: '',
+        hairProbability: 100,
+        glassesProbability: 50,
+        featuresProbability: 10,
+        earringsProbability: 30,
         color: '#3B82F6',
         role: 'child',
       });
     }
-    setShowAvatarDesigner(false);
   }, [member, isOpen]);
-  
-  // Handle avatar save from designer
-  const handleAvatarSave = (avatarData: any) => {
-    console.log('🎨 Avatar data received from designer:', avatarData);
-    setFormData(prev => ({
-      ...prev,
-      avatarData
-    }));
-    setShowAvatarDesigner(false);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -171,14 +180,20 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
     }
     
     try {
+      // Generate avatar seed if not set
+      const avatarSeed = formData.avatarSeed || generateAvatarSeed(formData.displayName.trim());
+      
       const memberData = {
         name: formData.name.trim() || formData.displayName.trim(),
         displayName: formData.displayName.trim(),
-        avatar: '', // Not used for adventurer style
-        avatarStyle: 'adventurer' as const,
-        avatarSeed: formData.avatarData.seed || formData.displayName.trim(),
-        avatarConfig: formData.avatarData,
-        avatarOrigin: 'custom' as const,
+        avatarSeed: avatarSeed,
+        avatarSkinColor: formData.avatarSkinColor,
+        avatarMouth: formData.avatarMouth,
+        avatarHairColor: formData.avatarHairColor,
+        hairProbability: formData.hairProbability,
+        glassesProbability: formData.glassesProbability,
+        featuresProbability: formData.featuresProbability,
+        earringsProbability: formData.earringsProbability,
         color: formData.color,
         role: formData.role,
       };
@@ -203,13 +218,12 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   };
 
   return (
-    <>
-      <Modal
-        isOpen={isOpen && !showAvatarDesigner}
-        onClose={handleClose}
-        title={isEditing ? 'Edit Family Member' : 'Add Family Member'}
-        size="lg"
-      >
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditing ? 'Edit Family Member' : 'Add Family Member'}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Header */}
         <div className="text-center mb-6">
@@ -238,15 +252,17 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
               type="text"
               placeholder="e.g., Dad, Mom, Emma, etc."
               value={formData.displayName}
-              onChange={(e) => setFormData(prev => ({ 
-                ...prev, 
-                displayName: e.target.value,
-                // Auto-generate avatar seed from name if not already set
-                avatarData: {
-                  ...prev.avatarData,
-                  seed: prev.avatarData.seed || e.target.value
-                }
-              }))}
+              onChange={(e) => {
+                const newDisplayName = e.target.value;
+                setFormData(prev => ({ 
+                  ...prev, 
+                  displayName: newDisplayName,
+                  // Auto-generate avatar seed if it's empty and we're creating a new member
+                  avatarSeed: (!isEditing && !prev.avatarSeed && newDisplayName) 
+                    ? generateAvatarSeed(newDisplayName) 
+                    : prev.avatarSeed
+                }));
+              }}
               required
             />
           </div>
@@ -258,43 +274,265 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
             </label>
             <div className="flex items-center gap-4">
               {/* Avatar Preview */}
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
-                {formData.avatarData.seed ? (
-                  <DiceBearAvatar
-                    style="adventurer"
-                    options={formData.avatarData}
-                    size={80}
-                    className="w-full h-full"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    <span className="text-gray-400 text-xs">No Avatar</span>
-                  </div>
-                )}
+              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-300 dark:border-gray-600 shadow-lg">
+                <DiceBearAvatar
+                  seed={formData.avatarSeed || formData.displayName || 'preview'}
+                  style="adventurer"
+                  size={96}
+                  backgroundColor="#ffffff"
+                  options={{
+                    ...(formData.avatarSkinColor && { skinColor: [formData.avatarSkinColor] }),
+                    ...(formData.avatarMouth && { mouth: [formData.avatarMouth] }),
+                    ...(formData.avatarHairColor && { 
+                      hairColor: [formData.avatarHairColor.replace('#', '')] 
+                    }),
+                    hairProbability: formData.hairProbability !== undefined ? formData.hairProbability / 100 : 1,
+                    glassesProbability: formData.glassesProbability !== undefined ? formData.glassesProbability / 100 : 0.5,
+                    featuresProbability: formData.featuresProbability !== undefined ? formData.featuresProbability / 100 : 0.1,
+                    earringsProbability: formData.earringsProbability !== undefined ? formData.earringsProbability / 100 : 0.3,
+                  }}
+                />
               </div>
               
-              {/* Design Button */}
-              <button
-                type="button"
-                onClick={() => setShowAvatarDesigner(true)}
-                className={cn(
-                  "px-4 py-2 rounded-lg",
-                  theme.components.button.primary,
-                  "text-white font-medium"
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSeed = generateCustomizationFriendlySeed(formData.displayName);
+                    setFormData(prev => ({ ...prev, avatarSeed: newSeed }));
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg",
+                    "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700",
+                    "text-white font-medium shadow-md hover:shadow-lg transition-all"
+                  )}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  New Avatar
+                </button>
+                
+                {formData.avatarSeed && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSeed = generateCustomizationFriendlySeed(formData.displayName);
+                      setFormData(prev => ({ ...prev, avatarSeed: newSeed }));
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-lg",
+                      "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
+                      "text-gray-700 dark:text-gray-300 font-medium transition-all"
+                    )}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Regenerate
+                  </button>
                 )}
-              >
-                {formData.avatarData.seed ? 'Edit Avatar' : 'Create Avatar'}
-              </button>
+              </div>
             </div>
             
-            {/* Debug info */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs text-gray-500 mt-2">
-                Seed: {formData.avatarData.seed || 'none'}<br/>
-                Hair: {formData.avatarData.hair || 'none'}<br/>
-                Eyes: {formData.avatarData.eyes || 'none'}
-              </div>
-            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Each avatar is unique and generated based on a seed. Click "New Avatar" to see different options.
+            </p>
+          </div>
+
+          {/* Skin Color Selection */}
+          <div>
+            <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+              Skin Color
+            </label>
+            <div className={`flex flex-wrap gap-2 p-3 border rounded-lg ${theme.surface.secondary} ${theme.border.default}`}>
+              {skinColors.map((skinColor) => (
+                <button
+                  key={skinColor.value}
+                  type="button"
+                  className={cn(
+                    "rounded-full border transition-all flex items-center justify-center",
+                    formData.avatarSkinColor === skinColor.value
+                      ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110'
+                      : 'border-gray-400 hover:scale-110 hover:border-gray-600'
+                  )}
+                  style={{
+                    backgroundColor: skinColor.color,
+                    width: '32px',
+                    height: '32px',
+                  }}
+                  onClick={() => setFormData(prev => ({ ...prev, avatarSkinColor: skinColor.value }))}
+                  title={skinColor.label}
+                >
+                  {formData.avatarSkinColor === skinColor.value && (
+                    <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full shadow-md" />
+                    </div>
+                  )}
+                </button>
+              ))}
+              {/* Clear button */}
+              <button
+                type="button"
+                className={cn(
+                  "rounded-full border transition-all flex items-center justify-center",
+                  !formData.avatarSkinColor
+                    ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110'
+                    : 'border-gray-400 hover:scale-110 hover:border-gray-600 bg-gray-100'
+                )}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                }}
+                onClick={() => setFormData(prev => ({ ...prev, avatarSkinColor: '' }))}
+                title="Default"
+              >
+                {!formData.avatarSkinColor && (
+                  <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full shadow-md" />
+                  </div>
+                )}
+                <span className="text-xs">✕</span>
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Choose a skin color for the avatar. Leave blank for default.
+            </p>
+          </div>
+
+          {/* Mouth Expression */}
+          <div>
+            <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+              Expression
+            </label>
+            <div className={`grid grid-cols-5 gap-2 p-3 border rounded-lg ${theme.surface.secondary} ${theme.border.default}`}>
+              {mouthOptions.map((mouth) => (
+                <button
+                  key={mouth.value}
+                  type="button"
+                  className={cn(
+                    "rounded-lg border transition-all flex flex-col items-center justify-center p-2",
+                    formData.avatarMouth === mouth.value
+                      ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  )}
+                  onClick={() => setFormData(prev => ({ ...prev, avatarMouth: mouth.value }))}
+                  title={mouth.label}
+                >
+                  <span className="text-lg mb-1">{mouth.icon}</span>
+                  <span className="text-xs text-center">{mouth.label.split(' ')[1]}</span>
+                </button>
+              ))}
+              {/* Clear button */}
+              <button
+                type="button"
+                className={cn(
+                  "rounded-lg border transition-all flex flex-col items-center justify-center p-2",
+                  !formData.avatarMouth
+                    ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                )}
+                onClick={() => setFormData(prev => ({ ...prev, avatarMouth: '' }))}
+                title="Default"
+              >
+                <span className="text-lg mb-1">😶</span>
+                <span className="text-xs text-center">Default</span>
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Choose an expression for the avatar. Leave blank for default.
+            </p>
+          </div>
+
+          {/* Hair Color */}
+          <div>
+            <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+              Hair Color
+            </label>
+            <div className={`flex flex-wrap gap-2 p-3 border rounded-lg ${theme.surface.secondary} ${theme.border.default}`}>
+              {hairColors.map((hairColor) => (
+                <button
+                  key={hairColor.value}
+                  type="button"
+                  className={cn(
+                    "rounded-full border transition-all relative",
+                    formData.avatarHairColor === hairColor.value 
+                      ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110' 
+                      : 'border-gray-400 hover:scale-110 hover:border-gray-600'
+                  )}
+                  style={{
+                    backgroundColor: hairColor.color,
+                    width: '32px',
+                    height: '32px',
+                  }}
+                  onClick={() => setFormData(prev => ({ ...prev, avatarHairColor: hairColor.value }))}
+                  title={hairColor.label}
+                >
+                  {formData.avatarHairColor === hairColor.value && (
+                    <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full shadow-md" />
+                    </div>
+                  )}
+                </button>
+              ))}
+              {/* Clear button */}
+              <button
+                type="button"
+                className={cn(
+                  "rounded-full border transition-all flex items-center justify-center",
+                  !formData.avatarHairColor
+                    ? 'border-gray-900 shadow-sm ring-2 ring-blue-400 scale-110'
+                    : 'border-gray-400 hover:scale-110 hover:border-gray-600 bg-gray-100'
+                )}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                }}
+                onClick={() => setFormData(prev => ({ ...prev, avatarHairColor: '' }))}
+                title="Random"
+              >
+                {!formData.avatarHairColor && (
+                  <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full shadow-md" />
+                  </div>
+                )}
+                <span className="text-xs">?</span>
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Choose a hair color. Leave blank for random.
+            </p>
+          </div>
+
+          {/* Feature Probabilities */}
+          <div>
+            <label className={cn("block text-sm font-medium mb-3", theme.text.primary)}>
+              Avatar Features
+            </label>
+            <div className="space-y-4">
+              {featureProbabilities.map((feature) => (
+                <div key={feature.key}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={cn("text-sm font-medium", theme.text.primary)}>{feature.label}</span>
+                    <span className={cn("text-sm", theme.text.muted)}>
+                      {formData[feature.key as keyof typeof formData] as number}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="10"
+                    value={formData[feature.key as keyof typeof formData] as number}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      [feature.key]: Number(e.target.value) 
+                    }))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 slider"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Personal Color */}
@@ -333,7 +571,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
 
           {/* Role Selection (simplified) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className={cn("block text-sm font-medium mb-3", theme.text.primary)}>
               Family Role
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -348,10 +586,10 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
                     className="sr-only"
                   />
                   <div className={cn(
-                    "p-3 border-2 rounded-lg text-center",
+                    "p-3 border-2 rounded-lg text-center transition-all",
                     formData.role === option.value 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400' 
+                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                   )}>
                     <div className={cn("font-medium", theme.text.primary)}>{option.label}</div>
                   </div>
@@ -391,22 +629,5 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         </div>
       </form>
     </Modal>
-    
-    {/* Avatar Designer Modal */}
-    <Modal
-      isOpen={showAvatarDesigner}
-      onClose={() => setShowAvatarDesigner(false)}
-      title="Design Your Avatar"
-      size="xl"
-    >
-      <div className="h-[600px]">
-        <AdventurerAvatarBuilder
-          initialData={formData.avatarData}
-          onSave={handleAvatarSave}
-          onCancel={() => setShowAvatarDesigner(false)}
-        />
-      </div>
-    </Modal>
-    </>
   );
 }

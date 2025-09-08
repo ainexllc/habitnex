@@ -4,12 +4,12 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { SketchPicker } from 'react-color';
 import { ChevronDown, RotateCcw, Undo2, Redo2, Shuffle } from 'lucide-react';
 import { createAvatar } from '@dicebear/core';
-import { avataaars } from '@dicebear/collection';
+import { adventurer } from '@dicebear/collection';
 import { DiceBearAvatar, avatarConfigToDiceBearOptions } from './DiceBearAvatar';
 import type { AvatarConfig } from '@/types/family';
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
-// Available options for avataaars style
+// Available options for adventurer style
 const AVATAR_OPTIONS = {
   topType: [
     { value: 'NoHair', label: 'No Hair', emoji: '🎯' },
@@ -286,8 +286,8 @@ export function AvatarBuilder({
               __html: (() => {
                 try {
                   const svg = Object.keys(avatarOptions).length > 0 
-                    ? createAvatar(avataaars as any, { ...avatarOptions, size: 120, backgroundColor: [] }).toString()
-                    : createAvatar(avataaars as any, { seed: 'default-avatar', size: 120, backgroundColor: [] }).toString();
+                    ? createAvatar(adventurer as any, { ...avatarOptions, size: 120, backgroundColor: [] }).toString()
+                    : createAvatar(adventurer as any, { seed: 'default-avatar', size: 120, backgroundColor: [] }).toString();
                   console.log('Avatar SVG created, length:', svg?.length);
                   return svg;
                 } catch (error) {

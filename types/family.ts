@@ -17,7 +17,7 @@ export interface FamilySettings {
   timezone: string;
   weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   theme: 'light' | 'dark';
-  avatarStyle: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';  // Consistent avatar style for whole family
+  avatarStyle: 'fun-emoji' | 'bottts' | 'personas' | 'adventurer';  // Consistent avatar style for whole family
   touchScreenMode: boolean;    // Optimized for wall mount displays
   voiceFeedback: boolean;      // Audio confirmations
   autoTimeout: number;         // Minutes before returning to main screen
@@ -40,7 +40,7 @@ export interface FamilyMember {
   name: string;
   displayName: string;
   avatar: string;              // Legacy: URL or emoji (kept for backwards compatibility)
-  avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas'; // DiceBear style
+  avatarStyle?: 'fun-emoji' | 'bottts' | 'personas' | 'adventurer'; // DiceBear style
   avatarSeed?: string;         // Seed for DiceBear avatar generation
   avatarConfig?: AvatarConfig; // Custom avatar configuration
   avatarOrigin?: 'auto' | 'custom'; // Track if avatar is auto-generated or custom
@@ -263,7 +263,7 @@ export interface CreateFamilyRequest {
     name: string;
     displayName: string;
     avatar: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
+    avatarStyle?: 'fun-emoji' | 'bottts' | 'personas' | 'adventurer';
     avatarSeed?: string;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
@@ -358,7 +358,7 @@ export type RewardCategory = 'experience' | 'purchase' | 'privilege' | 'activity
 export type ChallengeType = 'streak' | 'total' | 'race' | 'collaboration';
 export type RedemptionStatus = 'pending' | 'approved' | 'denied' | 'completed';
 
-// Avatar customization configuration for avataaars style
+// Avatar customization configuration for adventurer style
 export interface AvatarConfig {
   // Face
   skinColor?: string;
@@ -382,4 +382,10 @@ export interface AvatarConfig {
   
   // Background
   backgroundColor?: string[];
+  
+  // Adventurer-specific probabilities (0-100)
+  hairProbability?: number;
+  glassesProbability?: number;
+  featuresProbability?: number;
+  earringsProbability?: number;
 }

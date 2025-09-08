@@ -2,11 +2,12 @@
 
 import React, { useMemo } from 'react';
 import { createAvatar } from '@dicebear/core';
-import { funEmoji, avataaars, bottts, personas, adventurer } from '@dicebear/collection';
+import { funEmoji, bottts, personas, adventurer } from '@dicebear/collection';
+import * as adventurerCollection from '@dicebear/collection/adventurer';
 import { cn } from '@/lib/utils';
 import type { AvatarConfig } from '@/types/family';
 
-export type AvatarStyle = 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
+export type AvatarStyle = 'fun-emoji' | 'bottts' | 'personas' | 'adventurer';
 
 interface DiceBearAvatarProps {
   seed?: string;
@@ -21,7 +22,6 @@ interface DiceBearAvatarProps {
 // Style collections mapping
 const styleCollections = {
   'fun-emoji': funEmoji,
-  'avataaars': avataaars,
   'bottts': bottts,
   'personas': personas,
   'adventurer': adventurer,
@@ -34,7 +34,7 @@ export const getDefaultAvatarStyle = (role: string): AvatarStyle => {
     case 'child':
       return 'bottts'; // Fun robots for kids
     case 'teen':
-      return 'avataaars'; // Popular illustrated style
+      return 'adventurer'; // Popular illustrated style
     case 'adult':
     case 'parent':
       return 'personas'; // Professional style
@@ -64,8 +64,9 @@ export function DiceBearAvatar({
       if (options && Object.keys(options).length > 0) {
         // Filter out avatarUrl as it's not a DiceBear option
         const { avatarUrl, ...filteredOptions } = options;
-        
+
         const customOptions: any = {
+          seed: seed || 'default', // Always include seed for deterministic generation
           ...filteredOptions,
           size,
         };
@@ -77,9 +78,26 @@ export function DiceBearAvatar({
           customOptions.backgroundColor = ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
         }
         
-        console.log('Creating avatar with custom options:', { style, customOptions });
+        // Ensure adventurer style uses proper options format
+        if (style === 'adventurer') {
+          console.log('Using adventurer style with options:', customOptions);
+
+          // Ensure skinColor and mouth are properly formatted as arrays
+          if (customOptions.skinColor && !Array.isArray(customOptions.skinColor)) {
+            customOptions.skinColor = [customOptions.skinColor];
+          }
+          if (customOptions.mouth && !Array.isArray(customOptions.mouth)) {
+            customOptions.mouth = [customOptions.mouth];
+          }
+          if (customOptions.hairColor && !Array.isArray(customOptions.hairColor)) {
+            customOptions.hairColor = [customOptions.hairColor];
+          }
+
+          console.log('Formatted options for adventurer:', customOptions);
+          console.log('Hair color details:', customOptions.hairColor, 'Hair probability:', customOptions.hairProbability);
+        }
+
         const result = createAvatar(collection as any, customOptions).toString();
-        console.log('Avatar SVG length:', result?.length);
         return result;
       }
       
@@ -89,10 +107,11 @@ export function DiceBearAvatar({
         size,
       };
       
-      // Add background for adventurer style to make it visible
+      // Add background for styles that need it
       if (style === 'adventurer') {
         seedOptions.backgroundColor = backgroundColor ? [backgroundColor] : ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
       } else if (backgroundColor) {
+        // Other styles that support backgroundColor
         seedOptions.backgroundColor = [backgroundColor];
       }
       
@@ -143,12 +162,12 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
     return str.charAt(0).toLowerCase() + str.slice(1);
   };
   
-  // Map AvatarConfig fields to DiceBear avataaars options
+  // Map AvatarConfig fields to DiceBear options
   // Note: DiceBear expects arrays for most options and camelCase values
   
   // Skin color - convert to proper format
   if (config.skinColor) {
-    // Map our skin color names to hex values that avataaars expects
+    // Map our skin color names to hex values that adventurer expects
     const skinColorMap: Record<string, string> = {
       'Tanned': '#FD9841',
       'Yellow': '#F8D25C',
