@@ -18,6 +18,7 @@ import {
   limit
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { getTodayDateString } from './utils';
 import type {
   Family,
   FamilyMember,
@@ -325,14 +326,14 @@ export const updateFamilyMember = async (familyId: string, memberId: string, upd
 };
 
 export const addDirectFamilyMember = async (
-  familyId: string, 
+  familyId: string,
   createdBy: string,
   memberInfo: {
     name: string;
     displayName: string;
-    avatar: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -365,14 +366,27 @@ export const addDirectFamilyMember = async (
       // Don't include userId field at all for direct members
       name: memberInfo.name.trim(),
       displayName: memberInfo.displayName.trim(),
-      avatar: memberInfo.avatar,
-      ...(memberInfo.avatarStyle && { avatarStyle: memberInfo.avatarStyle }),
-      ...(memberInfo.avatarSeed && { avatarSeed: memberInfo.avatarSeed }),
+      avatarSeed: memberInfo.avatarSeed || `${memberInfo.displayName.trim()}-${Date.now()}`,
       color: memberInfo.color,
       role: memberInfo.role,
       ...(memberInfo.birthYear && { birthYear: memberInfo.birthYear }),
       isActive: true,
       joinedAt: Timestamp.now(),
+
+      // Handle avatar configuration - save all avatar options in avatarConfig
+      ...(memberInfo.avatarSkinColor || memberInfo.avatarMouth || memberInfo.avatarHairColor || 
+          memberInfo.hairProbability !== undefined || memberInfo.glassesProbability !== undefined ||
+          memberInfo.featuresProbability !== undefined || memberInfo.earringsProbability !== undefined ? {
+        avatarConfig: {
+          ...(memberInfo.avatarSkinColor && { skinColor: memberInfo.avatarSkinColor }),
+          ...(memberInfo.avatarMouth && { mouthType: memberInfo.avatarMouth }),
+          ...(memberInfo.avatarHairColor && { hairColor: memberInfo.avatarHairColor }),
+          ...(memberInfo.hairProbability !== undefined && { hairProbability: memberInfo.hairProbability }),
+          ...(memberInfo.glassesProbability !== undefined && { glassesProbability: memberInfo.glassesProbability }),
+          ...(memberInfo.featuresProbability !== undefined && { featuresProbability: memberInfo.featuresProbability }),
+          ...(memberInfo.earringsProbability !== undefined && { earringsProbability: memberInfo.earringsProbability }),
+        }
+      } : {}),
       preferences: {
         favoriteEmojis: [],
         difficulty: 'normal',
@@ -405,8 +419,9 @@ export const updateFamilyMemberInDb = async (
   memberId: string,
   updates: {
     displayName?: string;
-    avatarStyle?: 'fun-emoji' | 'avataaars' | 'bottts' | 'personas';
     avatarSeed?: string;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }
@@ -417,10 +432,38 @@ export const updateFamilyMemberInDb = async (
     // Build update object with only provided fields
     const updateData: any = {};
     if (updates.displayName !== undefined) updateData.displayName = updates.displayName;
-    if (updates.avatarStyle !== undefined) updateData.avatarStyle = updates.avatarStyle;
     if (updates.avatarSeed !== undefined) updateData.avatarSeed = updates.avatarSeed;
     if (updates.color !== undefined) updateData.color = updates.color;
     if (updates.role !== undefined) updateData.role = updates.role;
+
+    // Handle avatar configuration - save all avatar options in avatarConfig
+    if (updates.avatarSkinColor !== undefined || updates.avatarMouth !== undefined || 
+        updates.avatarHairColor !== undefined || updates.hairProbability !== undefined ||
+        updates.glassesProbability !== undefined || updates.featuresProbability !== undefined ||
+        updates.earringsProbability !== undefined) {
+      updateData.avatarConfig = {};
+      if (updates.avatarSkinColor !== undefined) {
+        updateData.avatarConfig.skinColor = updates.avatarSkinColor;
+      }
+      if (updates.avatarMouth !== undefined) {
+        updateData.avatarConfig.mouthType = updates.avatarMouth;
+      }
+      if (updates.avatarHairColor !== undefined) {
+        updateData.avatarConfig.hairColor = updates.avatarHairColor;
+      }
+      if (updates.hairProbability !== undefined) {
+        updateData.avatarConfig.hairProbability = updates.hairProbability;
+      }
+      if (updates.glassesProbability !== undefined) {
+        updateData.avatarConfig.glassesProbability = updates.glassesProbability;
+      }
+      if (updates.featuresProbability !== undefined) {
+        updateData.avatarConfig.featuresProbability = updates.featuresProbability;
+      }
+      if (updates.earringsProbability !== undefined) {
+        updateData.avatarConfig.earringsProbability = updates.earringsProbability;
+      }
+    }
     
     await updateDoc(memberRef, updateData);
     console.log('Member updated successfully:', memberId);
@@ -878,7 +921,7 @@ export const startChallenge = async (familyId: string, challengeId: string): Pro
     const challengeRef = doc(db, 'families', familyId, 'challenges', challengeId);
     await updateDoc(challengeRef, {
       status: 'active',
-      startDate: new Date().toISOString().split('T')[0]
+      startDate: getTodayDateString()
     });
   } catch (error) {
     throw error;
@@ -1215,7 +1258,7 @@ export const subscribeFamilyData = (familyId: string, callback: (data: Partial<F
   
   // Subscribe to completions
   const completionsRef = collection(db, 'families', familyId, 'completions');
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const completionsQuery = query(completionsRef, where('date', '==', today));
   
   const completionsUnsub = onSnapshot(completionsQuery, (snapshot) => {
@@ -1260,8 +1303,8 @@ export const getFamilyDashboardData = async (familyId: string): Promise<FamilyDa
       getFamily(familyId),
       getFamilyHabits(familyId),
       getFamilyCompletions(familyId, { 
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
+        startDate: getTodayDateString(),
+        endDate: getTodayDateString()
       }),
       getFamilyRewards(familyId)
     ]);

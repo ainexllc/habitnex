@@ -127,21 +127,14 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
             
             {/* Member Avatar - Much Larger */}
             <div className="flex flex-col items-center mb-6">
-              {(member as any).avatarSeed ? (
+              <div className="rounded-full shadow-lg ring-4 ring-white dark:ring-gray-700 hover:ring-opacity-75 transition-all overflow-hidden">
                 <DiceBearAvatar
-                  seed={(member as any).avatarSeed}
+                  seed={member.avatarSeed || member.id}
                   style="adventurer"
                   size={120}
-                  className="rounded-full shadow-lg ring-4 ring-white dark:ring-gray-700 hover:ring-opacity-75 transition-all"
+                  backgroundColor="#ffffff"
                 />
-              ) : (
-                <div
-                  className="w-30 h-30 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-lg ring-4 ring-white dark:ring-gray-700 hover:ring-opacity-75 transition-all"
-                  style={{ backgroundColor: member.color || '#6B7280' }}
-                >
-                  {member.displayName?.charAt(0).toUpperCase()}
-                </div>
-              )}
+              </div>
               
               {/* Current User Crown Indicator */}
               {member.id === currentMember.id && (

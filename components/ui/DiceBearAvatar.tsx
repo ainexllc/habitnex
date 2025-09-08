@@ -2,24 +2,26 @@
 
 import React, { useMemo } from 'react';
 import { createAvatar } from '@dicebear/core';
-import { funEmoji, avataaars, bottts, personas, adventurer } from '@dicebear/collection';
+import { funEmoji, bottts, personas, adventurer } from '@dicebear/collection';
+import * as adventurerCollection from '@dicebear/collection/adventurer';
 import { cn } from '@/lib/utils';
+import type { AvatarConfig } from '@/types/family';
 
-export type AvatarStyle = 'fun-emoji' | 'avataaars' | 'bottts' | 'personas' | 'adventurer';
+export type AvatarStyle = 'fun-emoji' | 'bottts' | 'personas' | 'adventurer';
 
 interface DiceBearAvatarProps {
-  seed: string;
+  seed?: string;
   style?: AvatarStyle;
   size?: number;
   className?: string;
   backgroundColor?: string;
   fallbackEmoji?: string;
+  options?: Record<string, any>; // Custom avatar options for deterministic rendering
 }
 
 // Style collections mapping
 const styleCollections = {
   'fun-emoji': funEmoji,
-  'avataaars': avataaars,
   'bottts': bottts,
   'personas': personas,
   'adventurer': adventurer,
@@ -32,7 +34,7 @@ export const getDefaultAvatarStyle = (role: string): AvatarStyle => {
     case 'child':
       return 'bottts'; // Fun robots for kids
     case 'teen':
-      return 'avataaars'; // Popular illustrated style
+      return 'adventurer'; // Popular illustrated style
     case 'adult':
     case 'parent':
       return 'personas'; // Professional style
@@ -47,35 +49,78 @@ export function DiceBearAvatar({
   size = 64,
   className,
   backgroundColor,
-  fallbackEmoji = '👤'
+  fallbackEmoji = '👤',
+  options
 }: DiceBearAvatarProps) {
   const avatarSvg = useMemo(() => {
     try {
       const collection = styleCollections[style];
       if (!collection) {
         console.warn(`Avatar style "${style}" not found, falling back to personas`);
-        return createAvatar(personas as any, { seed }).toString();
+        return createAvatar(personas as any, { seed: seed || 'default' }).toString();
       }
 
-      // Special handling for adventurer style which needs a background
-      const options: any = {
-        seed,
+      // If custom options are provided, use them directly (for custom avatars)
+      if (options && Object.keys(options).length > 0) {
+        // Filter out avatarUrl as it's not a DiceBear option
+        const { avatarUrl, ...filteredOptions } = options;
+
+        const customOptions: any = {
+          seed: seed || 'default', // Always include seed for deterministic generation
+          ...filteredOptions,
+          size,
+        };
+        
+        // Ensure backgroundColor is included if provided
+        if (backgroundColor) {
+          customOptions.backgroundColor = Array.isArray(backgroundColor) ? backgroundColor : [backgroundColor];
+        } else if (style === 'adventurer' && !customOptions.backgroundColor) {
+          customOptions.backgroundColor = ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
+        }
+        
+        // Ensure adventurer style uses proper options format
+        if (style === 'adventurer') {
+          console.log('Using adventurer style with options:', customOptions);
+
+          // Ensure skinColor and mouth are properly formatted as arrays
+          if (customOptions.skinColor && !Array.isArray(customOptions.skinColor)) {
+            customOptions.skinColor = [customOptions.skinColor];
+          }
+          if (customOptions.mouth && !Array.isArray(customOptions.mouth)) {
+            customOptions.mouth = [customOptions.mouth];
+          }
+          if (customOptions.hairColor && !Array.isArray(customOptions.hairColor)) {
+            customOptions.hairColor = [customOptions.hairColor];
+          }
+
+          console.log('Formatted options for adventurer:', customOptions);
+          console.log('Hair color details:', customOptions.hairColor, 'Hair probability:', customOptions.hairProbability);
+        }
+
+        const result = createAvatar(collection as any, customOptions).toString();
+        return result;
+      }
+      
+      // Original seed-based generation
+      const seedOptions: any = {
+        seed: seed || 'default',
         size,
       };
       
-      // Add background for adventurer style to make it visible
+      // Add background for styles that need it
       if (style === 'adventurer') {
-        options.backgroundColor = backgroundColor ? [backgroundColor] : ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
+        seedOptions.backgroundColor = backgroundColor ? [backgroundColor] : ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
       } else if (backgroundColor) {
-        options.backgroundColor = [backgroundColor];
+        // Other styles that support backgroundColor
+        seedOptions.backgroundColor = [backgroundColor];
       }
       
-      return createAvatar(collection as any, options).toString();
+      return createAvatar(collection as any, seedOptions).toString();
     } catch (error) {
       console.error('Failed to generate DiceBear avatar:', error);
       return null;
     }
-  }, [seed, style, size, backgroundColor]);
+  }, [seed, style, size, backgroundColor, options]);
 
   // Fallback to emoji if avatar generation fails
   if (!avatarSvg) {
@@ -104,6 +149,156 @@ export function DiceBearAvatar({
       dangerouslySetInnerHTML={{ __html: avatarSvg }}
     />
   );
+}
+
+// Helper function to convert AvatarConfig to DiceBear options
+export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<string, any> {
+  if (!config) return {};
+  
+  const options: Record<string, any> = {};
+  
+  // Helper to convert PascalCase to camelCase
+  const toCamelCase = (str: string): string => {
+    return str.charAt(0).toLowerCase() + str.slice(1);
+  };
+  
+  // Map AvatarConfig fields to DiceBear options
+  // Note: DiceBear expects arrays for most options and camelCase values
+  
+  // Skin color - convert to proper format
+  if (config.skinColor) {
+    // Map our skin color names to hex values that adventurer expects
+    const skinColorMap: Record<string, string> = {
+      'Tanned': '#FD9841',
+      'Yellow': '#F8D25C',
+      'Pale': '#FFDBB4',
+      'Light': '#EDB98A',
+      'Brown': '#D08B5B',
+      'DarkBrown': '#AE5D29',
+      'Black': '#614335'
+    };
+    const skinHex = skinColorMap[config.skinColor] || config.skinColor;
+    options.skinColor = [skinHex];
+  }
+  
+  // Eyes - convert to camelCase
+  if (config.eyeType) {
+    const eyeValue = config.eyeType === 'EyeRoll' ? 'eyeRoll' : 
+                     config.eyeType === 'WinkWacky' ? 'winkWacky' :
+                     toCamelCase(config.eyeType);
+    options.eyes = [eyeValue];
+  }
+  
+  // Eyebrows - convert to camelCase
+  if (config.eyebrowType) {
+    const eyebrowValue = toCamelCase(config.eyebrowType);
+    options.eyebrows = [eyebrowValue];
+  }
+  
+  // Mouth - convert to camelCase
+  if (config.mouthType) {
+    const mouthValue = config.mouthType === 'ScreamOpen' ? 'screamOpen' :
+                       toCamelCase(config.mouthType);
+    options.mouth = [mouthValue];
+  }
+  
+  // Top/Hair - needs special conversion
+  if (config.topType) {
+    // Convert values like ShortHairShortFlat to shortFlat
+    let topValue = config.topType;
+    if (topValue.startsWith('ShortHair')) {
+      topValue = toCamelCase(topValue.replace('ShortHair', ''));
+    } else if (topValue.startsWith('LongHair')) {
+      topValue = toCamelCase(topValue.replace('LongHair', ''));
+    } else if (topValue === 'NoHair') {
+      // NoHair is not a valid option, skip it
+      topValue = null;
+    } else if (topValue === 'Hat') {
+      topValue = 'hat';
+    } else if (topValue === 'Hijab') {
+      topValue = 'hijab';
+    } else if (topValue === 'Turban') {
+      topValue = 'turban';
+    } else if (topValue.startsWith('WinterHat')) {
+      topValue = toCamelCase(topValue);
+    }
+    
+    if (topValue) {
+      options.top = [topValue];
+    }
+  }
+  
+  // Hair color - convert to hex values
+  if (config.hairColor) {
+    const hairColorMap: Record<string, string> = {
+      'Auburn': '#A55728',
+      'Black': '#2C1B18',
+      'Blonde': '#B58143',
+      'BlondeGolden': '#D6B370',
+      'Brown': '#724133',
+      'BrownDark': '#4A312C',
+      'PastelPink': '#F59797',
+      'Blue': '#000FFF',
+      'Platinum': '#ECDCBF',
+      'Red': '#C93305',
+      'SilverGray': '#E8E1E1'
+    };
+    const hairHex = hairColorMap[config.hairColor] || config.hairColor;
+    options.hairColor = [hairHex];
+  }
+  
+  // Facial hair - convert and filter out 'Blank'
+  if (config.facialHairType && config.facialHairType !== 'Blank') {
+    const facialHairValue = toCamelCase(config.facialHairType);
+    options.facialHair = [facialHairValue];
+  }
+  
+  if (config.facialHairColor) {
+    options.facialHairColor = [config.facialHairColor];
+  }
+  
+  // Accessories - convert and filter out 'Blank'
+  if (config.accessoriesType && config.accessoriesType !== 'Blank') {
+    const accessoriesValue = config.accessoriesType === 'Prescription01' ? 'prescription01' :
+                             config.accessoriesType === 'Prescription02' ? 'prescription02' :
+                             config.accessoriesType === 'Kurt' ? 'kurt' :
+                             config.accessoriesType === 'Round' ? 'round' :
+                             config.accessoriesType === 'Sunglasses' ? 'sunglasses' :
+                             config.accessoriesType === 'Wayfarers' ? 'wayfarers' :
+                             toCamelCase(config.accessoriesType);
+    options.accessories = [accessoriesValue];
+  }
+  
+  // Clothing - convert to camelCase
+  if (config.clotheType) {
+    const clothingValue = config.clotheType === 'BlazerShirt' ? 'blazerAndShirt' :
+                         config.clotheType === 'BlazerSweater' ? 'blazerAndSweater' :
+                         config.clotheType === 'CollarSweater' ? 'collarAndSweater' :
+                         config.clotheType === 'GraphicShirt' ? 'graphicShirt' :
+                         config.clotheType === 'Hoodie' ? 'hoodie' :
+                         config.clotheType === 'Overall' ? 'overall' :
+                         config.clotheType === 'ShirtCrewNeck' ? 'shirtCrewNeck' :
+                         config.clotheType === 'ShirtScoopNeck' ? 'shirtScoopNeck' :
+                         config.clotheType === 'ShirtVNeck' ? 'shirtVNeck' :
+                         toCamelCase(config.clotheType);
+    options.clothing = [clothingValue];
+  }
+  
+  // Clothing color - should be hex colors in an array
+  if (config.clotheColor) {
+    options.clothesColor = [config.clotheColor];
+  }
+  
+  if (config.graphicType) {
+    options.clothingGraphic = [toCamelCase(config.graphicType)];
+  }
+  
+  if (config.backgroundColor) {
+    options.backgroundColor = config.backgroundColor;
+  }
+  
+  console.log('Converting config to options:', { config, options });
+  return options;
 }
 
 // Hook for generating avatar previews during selection

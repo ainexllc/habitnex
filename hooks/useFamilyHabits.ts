@@ -14,6 +14,7 @@ import {
   toggleFamilyHabitCompletion,
   getFamilyCompletions
 } from '@/lib/familyDb';
+import { getTodayDateString } from '@/lib/utils';
 
 // Helper function for default points
 const getDefaultPoints = (difficulty: 'easy' | 'medium' | 'hard'): number => {
@@ -92,7 +93,7 @@ export function useFamilyHabits(memberId?: string) {
   // Toggle habit completion
   const toggleCompletion = useCallback(async (
     habitId: string, 
-    date: string = new Date().toISOString().split('T')[0],
+    date: string = getTodayDateString(),
     completed?: boolean,
     notes?: string
   ) => {
@@ -257,6 +258,15 @@ export function useAllFamilyHabits() {
     const dayOfWeek = today.getDay();
     const todayString = today.toISOString().split('T')[0];
     
+    // Debug logging
+    console.log('🔍 DEBUG getHabitsByMember:', {
+      memberId,
+      todayString,
+      dayOfWeek,
+      totalCompletions: allCompletions.length,
+      todaysCompletions: allCompletions.filter(c => c.date === todayString).length
+    });
+    
     return allHabits
       .filter(habit => habit.assignedMembers && Array.isArray(habit.assignedMembers) && habit.assignedMembers.includes(memberId))
       .filter(habit => {
@@ -272,20 +282,32 @@ export function useAllFamilyHabits() {
         }
         return false; // Exclude habits that don't match any frequency criteria
       })
-      .map(habit => ({
-        ...habit,
-        completed: allCompletions.some(c => 
+      .map(habit => {
+        // Find today's completion record for this habit and member
+        const todaysCompletion = allCompletions.find(c => 
           c.habitId === habit.id && 
           c.memberId === memberId && 
-          c.date === todayString && 
-          c.completed
-        )
-      }));
+          c.date === todayString
+        );
+        
+        // Debug logging for each habit
+        const isCompleted = todaysCompletion ? todaysCompletion.completed : false;
+        console.log(`📋 Habit ${habit.name}: todaysCompletion=${todaysCompletion ? 'exists' : 'null'}, completed=${isCompleted}, date=${todaysCompletion?.date || 'N/A'}`);
+        
+        return {
+          ...habit,
+          // Set completed to false for new day if no completion record exists
+          // or if the completion record shows not completed
+          completed: isCompleted,
+          // Add completion details for status checking
+          todaysCompletion: todaysCompletion || null
+        };
+      });
   }, [allHabits, allCompletions]);
   
   // Get completion stats by member
   const getMemberStats = useCallback((memberId: string) => {
-    const todayString = new Date().toISOString().split('T')[0];
+    const todayString = getTodayDateString();
     const memberHabits = getHabitsByMember(memberId); // This already filters for today's habits
     
     // Get the IDs of habits that are due today
@@ -353,12 +375,14 @@ export function useAllFamilyHabits() {
     habitId: string, 
     memberId: string,
     currentCompleted: boolean,
-    date: string = new Date().toISOString().split('T')[0],
+    date: string = getTodayDateString(),
     notes?: string
   ) => {
     if (!currentFamily?.id) {
       throw new Error('Must be in a family to toggle completions');
     }
+    
+    console.log(`🔄 DEBUG toggleMemberCompletion: habitId=${habitId}, memberId=${memberId}, currentCompleted=${currentCompleted}, date=${date}, toggleTo=${!currentCompleted}`);
     
     try {
       await toggleFamilyHabitCompletion(

@@ -112,6 +112,7 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         'task': ['Work Sans', 'Inter', 'system-ui', 'sans-serif'],
         'kablammo': ['Kablammo', 'sans-serif'],
+        'squada': ['var(--font-squada)', 'system-ui', 'sans-serif'],
       },
       fontWeight: {
         'task-title': '550',

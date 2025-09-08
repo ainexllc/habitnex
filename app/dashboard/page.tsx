@@ -1,21 +1,19 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/Header';
-import { BenefitsHabitCard } from '@/components/habits/BenefitsHabitCard';
 import { EditHabitModal } from '@/components/habits/EditHabitModal';
 import { CreateHabitModal } from '@/components/habits/CreateHabitModal';
 import { MoodBar } from '@/components/moods/MoodBar';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
 import { FamilyCreationBanner } from '@/components/ui/FamilyCreationBanner';
 import { UnifiedView } from '@/components/dashboard/UnifiedView';
 
 import { usePersonalData } from '@/hooks/usePersonalData';
-import { calculateStreak, calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
+import { calculateCompletionRate, getTodayDateString, isHabitDueToday, isHabitOverdue } from '@/lib/utils';
 import { theme } from '@/lib/theme';
-import { Target, Plus, Flame, RefreshCw, TrendingUp, Heart } from 'lucide-react';
+import { Target, Plus, Flame, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Habit } from '@/types';
@@ -180,7 +178,7 @@ export default function DashboardPage() {
                             <div key={i} className="w-2 h-2 bg-white/80 rounded-full animate-pulse" style={{ animationDelay: `${i * 150}ms` }}></div>
                           ))}
                         </div>
-                        <span className="text-white/90 font-medium">You're crushing it today!</span>
+                        <span className="text-white/90 font-medium">You&apos;re crushing it today!</span>
                       </div>
                     </div>
                   </div>
@@ -203,7 +201,7 @@ export default function DashboardPage() {
                   <div className="flex items-start gap-3">
                     <div className="flex-1">
                       <blockquote className="text-white/95 italic text-sm leading-relaxed mb-2">
-                        "{currentQuote.text}"
+                        &ldquo;{currentQuote.text}&rdquo;
                       </blockquote>
                       <cite className="text-white/70 text-xs font-medium not-italic">
                         — {currentQuote.author}
@@ -232,7 +230,7 @@ export default function DashboardPage() {
                       <span className="text-2xl">🧘</span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Today's Vibe</h3>
+                      <h3 className="text-lg font-bold text-white">Today&apos;s Vibe</h3>
                       <p className="text-white/70 text-sm">How are you feeling?</p>
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
+import { getDocs, collection, query, where } from 'firebase/firestore';
 
 export async function GET(request: Request) {
   try {
@@ -29,7 +29,6 @@ export async function GET(request: Request) {
       // Get all members of this family
       const membersSnapshot = await getDocs(collection(db, 'families', familyDoc.id, 'members'));
       const members = [];
-      let isUserMember = false;
       
       for (const memberDoc of membersSnapshot.docs) {
         const memberData = memberDoc.data();
@@ -42,7 +41,6 @@ export async function GET(request: Request) {
         });
         
         if (memberDoc.id === userId) {
-          isUserMember = true;
           userFamilies.push({
             familyId: familyDoc.id,
             familyName: familyData.name,
