@@ -468,6 +468,10 @@ export function FamilyMemberZone({
                 today
               });
               
+              // Check if this is an incomplete task from yesterday
+              const isFromYesterday = habit.yesterdayStatus === 'incomplete';
+              const autoFailed = isFromYesterday && !isCompleted;
+              
               return (
                 <div
                   key={habit.id}
@@ -475,15 +479,11 @@ export function FamilyMemberZone({
                     "relative p-3 rounded-lg transition-all duration-200 space-y-3 overflow-hidden backdrop-blur-sm",
                     touchMode ? "p-4" : "p-3",
                     isCompleted 
-                      ? (isLight 
-                          ? "bg-green-900/20 border border-green-900/30" 
-                          : (isDarkMode ? "bg-green-400/5 border border-green-400/10" : "bg-green-400/20 border border-green-400/30")
-                        )
-                      : (isLight 
-                          ? "bg-black/10 hover:bg-black/15 border border-black/20" 
-                          : (isDarkMode ? "bg-white/[0.02] hover:bg-white/[0.04] border border-white/5" : "bg-white/10 hover:bg-white/15 border border-white/20")
-                        ),
-                    celebratingHabitId === habit.id && "animate-pulse bg-yellow-400/30 border-yellow-400",
+                      ? "bg-green-50/50 dark:bg-green-950/10 border border-green-200/50 dark:border-green-800/30" 
+                      : autoFailed
+                      ? "bg-red-50/30 dark:bg-red-950/10 border border-red-200/50 dark:border-red-800/30"
+                      : `${theme.surface.secondary} ${theme.surface.hover} border ${theme.border.default}`,
+                    celebratingHabitId === habit.id && "animate-pulse bg-yellow-100 border-yellow-300",
                     loading && "opacity-50 pointer-events-none"
                   )}
                 >
@@ -574,53 +574,68 @@ export function FamilyMemberZone({
                     
                     {/* Habit Name - Takes remaining space */}
                     <h4 className={cn(
-                      "font-squada font-medium flex-1",
-                      touchMode ? "text-base" : "text-sm",
-                      textColor,
-                      isCompleted && "line-through opacity-70"
+                      `font-semibold flex-1 ${theme.text.primary}`,
+                      touchMode ? "text-lg" : "text-base",
+                      isCompleted && (status === 'failure' ? "line-through text-gray-500 dark:text-gray-400" : "line-through text-green-700 dark:text-green-400"),
+                      autoFailed && "line-through text-red-500 dark:text-red-400"
                     )}>
                       {habit.name}
+                      {autoFailed && (
+                        <span className="ml-2 text-xs text-red-600 dark:text-red-400 font-normal">
+                          (Yesterday - Failed)
+                        </span>
+                      )}
                     </h4>
-                    
-                    {/* Points Badge */}
-                    <div className={cn(
-                      "flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full flex-shrink-0",
-                      isLight ? "bg-black/10 text-gray-900" : (isDarkMode ? "bg-white/5 text-white" : "bg-white/20 text-white")
-                    )}>
-                      <span>{habit.basePoints || 10}</span>
-                      <span className="text-[10px]">pts</span>
-                    </div>
-                    
-                    {/* Action Buttons - Compact */}
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {isCompleted ? (
-                        <>
-                          {/* Status Indicator */}
-                          <div className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center shadow-sm",
-                            status === 'failure' 
-                              ? 'bg-gradient-to-r from-red-500 to-red-600' 
-                              : 'bg-gradient-to-r from-green-500 to-emerald-500'
-                          )}>
-                            {status === 'success' ? (
-                              <Check className="w-4 h-4 text-white" />
-                            ) : (
-                              <X className="w-4 h-4 text-white" />
-                            )}
+                  </div>
+                  
+                  {/* Second Line: Dual Completion Buttons or Undo */}
+                  <div className="flex justify-end items-center gap-2 flex-wrap">
+                    {autoFailed ? (
+                      // Show auto-failed state for yesterday's incomplete tasks
+                      <div className="flex items-center gap-2">
+                        <div className="px-2 py-2 rounded-lg flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500">
+                          <OpenMoji 
+                            emoji="😔" 
+                            size={24}
+                            alt="Auto-failed"
+                          />
+                        </div>
+                        <span className="text-xs text-red-600 dark:text-red-400">
+                          Missed yesterday
+                        </span>
+                      </div>
+                    ) : isCompleted ? (
+                      <>
+                        <div className={cn(
+                          "px-2 py-2 rounded-lg flex items-center justify-center",
+                          status === 'failure' 
+                            ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
+                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                        )}>
+                          <OpenMoji 
+                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😢' : '✅'} 
+                            size={24}
+                            alt={status === 'success' ? 'Celebration' : status === 'failure' ? 'Sad' : 'Done'}
+                          />
+                        </div>
+                        <Button
+                          onClick={() => handleUndo(habit.id)}
+                          size="sm"
+                          variant="outline"
+                          className="hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          title="Undo"
+                        >
+                          <Undo2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3">
+                          {/* Points Display */}
+                          <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs font-bold rounded">
+                            <span>{habit.basePoints || 10}</span>
+                            <span>pts</span>
                           </div>
-                          {/* Undo Button */}
-                          <Button
-                            onClick={() => handleUndo(habit.id)}
-                            size="sm"
-                            variant="ghost"
-                            className="w-8 h-8 p-0 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full flex-shrink-0"
-                            title="Undo completion"
-                          >
-                            <Undo2 className="w-4 h-4 text-gray-600 hover:text-red-600" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
                           {/* Success Button */}
                           <Button
                             onClick={() => handleHabitCompletion(habit.id, true)}
@@ -641,9 +656,9 @@ export function FamilyMemberZone({
                           >
                             <X className="w-4 h-4" />
                           </Button>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   {/* Expanded Details Section */}

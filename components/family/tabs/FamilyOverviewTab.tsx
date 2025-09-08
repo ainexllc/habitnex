@@ -7,6 +7,7 @@ import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
 import { HabitDetailsModal } from '@/components/habits/HabitDetailsModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { FamilyHabit } from '@/types/family';
+import { DebugPanel } from '@/components/family/DebugPanel';
 
 
 
@@ -98,6 +99,9 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
 
   return (
     <div className="px-6">
+      {/* Debug Panel - TEMPORARY */}
+      <DebugPanel />
+      
       {/* Tab Header - Simplified */}
       <div className="flex items-center justify-between mb-8 py-2">
         <div className="flex items-center gap-4">

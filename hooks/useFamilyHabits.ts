@@ -93,10 +93,18 @@ export function useFamilyHabits(memberId?: string) {
   // Toggle habit completion
   const toggleCompletion = useCallback(async (
     habitId: string, 
-    date: string = getTodayDateString(),
+    date?: string,
     completed?: boolean,
     notes?: string
   ) => {
+    // Use local date if not provided
+    if (!date) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      date = `${year}-${month}-${day}`;
+    }
     if (!currentFamily?.id || !targetMemberId) {
       throw new Error('Must be in a family to toggle completions');
     }
@@ -132,7 +140,11 @@ export function useFamilyHabits(memberId?: string) {
   const getTodayHabits = useCallback(() => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const todayString = today.toISOString().split('T')[0];
+    // Use local date string to avoid timezone issues
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
     
     return habits.filter(habit => {
       // Check if habit is due today
@@ -256,7 +268,22 @@ export function useAllFamilyHabits() {
   const getHabitsByMember = useCallback((memberId: string) => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const todayString = today.toISOString().split('T')[0];
+    // Use local date string to avoid timezone issues
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+    
+    // Calculate yesterday's date
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayYear = yesterday.getFullYear();
+    const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
+    const yesterdayString = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
+    
+    // Debug: Log the date strings being used
+    console.log('[DEBUG] getHabitsByMember - Today:', todayString, 'Yesterday:', yesterdayString, 'Day of week:', dayOfWeek, 'Current time:', today.toString());
     
     // Debug logging
     console.log('🔍 DEBUG getHabitsByMember:', {
@@ -283,31 +310,54 @@ export function useAllFamilyHabits() {
         return false; // Exclude habits that don't match any frequency criteria
       })
       .map(habit => {
-        // Find today's completion record for this habit and member
-        const todaysCompletion = allCompletions.find(c => 
+        // Check if habit was completed today
+        const todayCompletion = allCompletions.find(c => 
           c.habitId === habit.id && 
           c.memberId === memberId && 
           c.date === todayString
         );
         
-        // Debug logging for each habit
-        const isCompleted = todaysCompletion ? todaysCompletion.completed : false;
-        console.log(`📋 Habit ${habit.name}: todaysCompletion=${todaysCompletion ? 'exists' : 'null'}, completed=${isCompleted}, date=${todaysCompletion?.date || 'N/A'}`);
+        // Debug: Log completion status
+        if (todayCompletion) {
+          console.log(`[DEBUG] Found today's completion for ${habit.name}:`, {
+            date: todayCompletion.date,
+            completed: todayCompletion.completed,
+            habitId: habit.id,
+            memberId
+          });
+        }
+        
+        // Check if habit was completed yesterday (for showing failure state)
+        const yesterdayCompletion = allCompletions.find(c => 
+          c.habitId === habit.id && 
+          c.memberId === memberId && 
+          c.date === yesterdayString
+        );
         
         return {
           ...habit,
-          // Set completed to false for new day if no completion record exists
-          // or if the completion record shows not completed
-          completed: isCompleted,
-          // Add completion details for status checking
-          todaysCompletion: todaysCompletion || null
+          // Only mark as completed if there's an actual completion record for TODAY with completed: true
+          completed: todayCompletion ? (todayCompletion.completed === true) : false,
+          // Add yesterday's status for UI display
+          yesterdayStatus: yesterdayCompletion ? 
+            (yesterdayCompletion.completed ? 
+              (yesterdayCompletion.notes === 'Marked as failed' ? 'failed' : 'completed') 
+              : 'incomplete'
+            ) : null,
+          // Add completion details for status checking (backward compatibility)
+          todaysCompletion: todayCompletion || null
         };
       });
   }, [allHabits, allCompletions]);
   
   // Get completion stats by member
   const getMemberStats = useCallback((memberId: string) => {
-    const todayString = getTodayDateString();
+    const today = new Date();
+    // Use local date string to avoid timezone issues
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
     const memberHabits = getHabitsByMember(memberId); // This already filters for today's habits
     
     // Get the IDs of habits that are due today
