@@ -244,7 +244,7 @@ export function FamilyMemberZone({
         <div className="flex flex-col items-center text-center mb-6">
           {/* Large Avatar */}
           <div className="relative mb-4">
-            {member.avatarStyle && member.avatarSeed ? (
+            {(member as any).avatarOrigin === 'custom' && (member as any).avatarConfig ? (
               <div 
                 className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
                 style={{ 
@@ -253,8 +253,24 @@ export function FamilyMemberZone({
                 }}
               >
                 <DiceBearAvatar
-                  seed={member.avatarSeed}
-                  style={member.avatarStyle}
+                  style={(member as any).avatarStyle || 'adventurer'}
+                  options={(member as any).avatarConfig}
+                  size={touchMode ? 120 : 96}
+                  backgroundColor={isLight ? '#ffffff' : '#1f2937'}
+                  fallbackEmoji={member.avatar}
+                />
+              </div>
+            ) : (member as any).avatarSeed ? (
+              <div 
+                className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
+                style={{ 
+                  borderColor: borderColor,
+                  ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
+                }}
+              >
+                <DiceBearAvatar
+                  seed={(member as any).avatarSeed}
+                  style={(member as any).avatarStyle || 'adventurer'}
                   size={touchMode ? 120 : 96}
                   backgroundColor={isLight ? '#ffffff' : '#1f2937'}
                   fallbackEmoji={member.avatar}
