@@ -153,6 +153,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   
   // Handle avatar save from designer
   const handleAvatarSave = (avatarData: any) => {
+    console.log('🎨 Avatar data received from designer:', avatarData);
     setFormData(prev => ({
       ...prev,
       avatarData
@@ -285,6 +286,15 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
                 {formData.avatarData.seed ? 'Edit Avatar' : 'Create Avatar'}
               </button>
             </div>
+            
+            {/* Debug info */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-gray-500 mt-2">
+                Seed: {formData.avatarData.seed || 'none'}<br/>
+                Hair: {formData.avatarData.hair || 'none'}<br/>
+                Eyes: {formData.avatarData.eyes || 'none'}
+              </div>
+            )}
           </div>
 
           {/* Personal Color */}

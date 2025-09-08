@@ -62,8 +62,11 @@ export function DiceBearAvatar({
 
       // If custom options are provided, use them directly (for custom avatars)
       if (options && Object.keys(options).length > 0) {
+        // Filter out avatarUrl as it's not a DiceBear option
+        const { avatarUrl, ...filteredOptions } = options;
+        
         const customOptions: any = {
-          ...options,
+          ...filteredOptions,
           size,
         };
         
