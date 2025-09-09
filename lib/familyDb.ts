@@ -334,6 +334,12 @@ export const addDirectFamilyMember = async (
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
+    avatarHairStyle?: string;
+    avatarHairColor?: string;
+    hairProbability?: number;
+    glassesProbability?: number;
+    featuresProbability?: number;
+    earringsProbability?: number;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -374,12 +380,13 @@ export const addDirectFamilyMember = async (
       joinedAt: Timestamp.now(),
 
       // Handle avatar configuration - save all avatar options in avatarConfig
-      ...(memberInfo.avatarSkinColor || memberInfo.avatarMouth || memberInfo.avatarHairColor || 
+      ...(memberInfo.avatarSkinColor || memberInfo.avatarMouth || memberInfo.avatarHairStyle || memberInfo.avatarHairColor || 
           memberInfo.hairProbability !== undefined || memberInfo.glassesProbability !== undefined ||
           memberInfo.featuresProbability !== undefined || memberInfo.earringsProbability !== undefined ? {
         avatarConfig: {
           ...(memberInfo.avatarSkinColor && { skinColor: memberInfo.avatarSkinColor }),
           ...(memberInfo.avatarMouth && { mouthType: memberInfo.avatarMouth }),
+          ...(memberInfo.avatarHairStyle && { topType: memberInfo.avatarHairStyle }),
           ...(memberInfo.avatarHairColor && { hairColor: memberInfo.avatarHairColor }),
           ...(memberInfo.hairProbability !== undefined && { hairProbability: memberInfo.hairProbability }),
           ...(memberInfo.glassesProbability !== undefined && { glassesProbability: memberInfo.glassesProbability }),
@@ -422,6 +429,12 @@ export const updateFamilyMemberInDb = async (
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
+    avatarHairStyle?: string;
+    avatarHairColor?: string;
+    hairProbability?: number;
+    glassesProbability?: number;
+    featuresProbability?: number;
+    earringsProbability?: number;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }
@@ -438,7 +451,7 @@ export const updateFamilyMemberInDb = async (
 
     // Handle avatar configuration - save all avatar options in avatarConfig
     if (updates.avatarSkinColor !== undefined || updates.avatarMouth !== undefined || 
-        updates.avatarHairColor !== undefined || updates.hairProbability !== undefined ||
+        updates.avatarHairStyle !== undefined || updates.avatarHairColor !== undefined || updates.hairProbability !== undefined ||
         updates.glassesProbability !== undefined || updates.featuresProbability !== undefined ||
         updates.earringsProbability !== undefined) {
       updateData.avatarConfig = {};
@@ -447,6 +460,9 @@ export const updateFamilyMemberInDb = async (
       }
       if (updates.avatarMouth !== undefined) {
         updateData.avatarConfig.mouthType = updates.avatarMouth;
+      }
+      if (updates.avatarHairStyle !== undefined) {
+        updateData.avatarConfig.topType = updates.avatarHairStyle;
       }
       if (updates.avatarHairColor !== undefined) {
         updateData.avatarConfig.hairColor = updates.avatarHairColor;
@@ -814,7 +830,7 @@ export const createReward = async (request: CreateRewardRequest): Promise<string
 export const getFamilyRewards = async (familyId: string, memberId?: string): Promise<Reward[]> => {
   try {
     const rewardsRef = collection(db, 'families', familyId, 'rewards');
-    let q = query(rewardsRef, where('isActive', '==', true), orderBy('pointsRequired', 'asc'));
+    const q = query(rewardsRef, where('isActive', '==', true), orderBy('pointsRequired', 'asc'));
     
     const querySnapshot = await getDocs(q);
     let rewards = querySnapshot.docs.map(doc => ({
@@ -1010,6 +1026,49 @@ export const getChallengeProgress = async (familyId: string, challengeId: string
   }
 };
 
+// Daily progress breakdown per member within challenge period
+export const getChallengeDailyProgress = async (
+  familyId: string,
+  challengeId: string
+): Promise<Record<string, { date: string; count: number }[]>> => {
+  try {
+    const challengeRef = doc(db, 'families', familyId, 'challenges', challengeId);
+    const challengeSnap = await getDoc(challengeRef);
+    const challenge = challengeSnap.data() as FamilyChallenge;
+    if (!challenge) return {};
+
+    const completionsRef = collection(db, 'families', familyId, 'completions');
+    const completionsQuery = query(
+      completionsRef,
+      where('habitId', 'in', challenge.habitIds),
+      where('date', '>=', challenge.startDate),
+      where('date', '<=', challenge.endDate)
+    );
+    const completionsSnap = await getDocs(completionsQuery);
+    const completions = completionsSnap.docs.map(doc => doc.data()) as FamilyHabitCompletion[];
+
+    const byMemberDate: Record<string, Record<string, number>> = {};
+    for (const memberId of challenge.participantIds) {
+      byMemberDate[memberId] = {};
+    }
+    for (const c of completions) {
+      if (!byMemberDate[c.memberId]) continue;
+      byMemberDate[c.memberId][c.date] = (byMemberDate[c.memberId][c.date] || 0) + 1;
+    }
+
+    const result: Record<string, { date: string; count: number }[]> = {};
+    for (const memberId of Object.keys(byMemberDate)) {
+      const entries = Object.entries(byMemberDate[memberId])
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => (a.date < b.date ? -1 : 1));
+      result[memberId] = entries;
+    }
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Helper function to calculate max streak from completions
 function calculateMaxStreak(completions: FamilyHabitCompletion[]): number {
   if (completions.length === 0) return 0;
@@ -1093,7 +1152,7 @@ export const getFamilyMoods = async (familyId: string, startDate?: Date, endDate
 export const getFamilyAnalyticsSummary = async (familyId: string, period: 'week' | 'month' | 'year'): Promise<any> => {
   try {
     const now = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
     
     switch (period) {
       case 'week':

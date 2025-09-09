@@ -7,7 +7,8 @@ import {
   startChallenge, 
   completeChallenge, 
   joinChallenge,
-  getChallengeProgress 
+  getChallengeProgress,
+  getChallengeDailyProgress
 } from '@/lib/familyDb';
 import { useFamily } from '@/contexts/FamilyContext';
 import type { FamilyChallenge } from '@/types/family';
@@ -26,6 +27,7 @@ export function useFamilyChallenges() {
   const [upcomingChallenges, setUpcomingChallenges] = useState<FamilyChallenge[]>([]);
   const [completedChallenges, setCompletedChallenges] = useState<FamilyChallenge[]>([]);
   const [challengeProgress, setChallengeProgress] = useState<Record<string, ChallengeProgress>>({});
+  const [dailyProgress, setDailyProgress] = useState<Record<string, Record<string, { date: string; count: number }[]>>>({});
   const [loading, setLoading] = useState(false);
 
   const loadChallenges = useCallback(async () => {
@@ -45,11 +47,19 @@ export function useFamilyChallenges() {
       
       // Load progress for active challenges
       const progressMap: Record<string, ChallengeProgress> = {};
+      const dailyMap: Record<string, Record<string, { date: string; count: number }[]>> = {};
       for (const challenge of allChallenges.filter(c => c.status === 'active')) {
         const progress = await getChallengeProgress(currentFamily.id, challenge.id);
         progressMap[challenge.id] = progress;
+        try {
+          const daily = await getChallengeDailyProgress(currentFamily.id, challenge.id);
+          dailyMap[challenge.id] = daily;
+        } catch (e) {
+          // ignore breakdown errors; keep main UI functioning
+        }
       }
       setChallengeProgress(progressMap);
+      setDailyProgress(dailyMap);
       
     } catch (error) {
       console.error('Failed to load challenges:', error);
@@ -184,10 +194,59 @@ export function useFamilyChallenges() {
         ...prev,
         [challengeId]: progress
       }));
+      try {
+        const daily = await getChallengeDailyProgress(currentFamily.id, challengeId);
+        setDailyProgress(prev => ({
+          ...prev,
+          [challengeId]: daily
+        }));
+      } catch (e) {}
     } catch (error) {
       console.error('Failed to refresh challenge progress:', error);
     }
   }, [currentFamily?.id]);
+
+  // Duplicate challenge with new dates and status reset
+  const duplicateChallenge = useCallback(async (source: FamilyChallenge, overrides?: Partial<FamilyChallenge>) => {
+    if (!currentFamily?.id) return null;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const duration = overrides?.duration ?? source.duration;
+    const endStr = new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const payload = {
+      name: overrides?.name ?? `${source.name} (Copy)` ,
+      description: overrides?.description ?? source.description,
+      emoji: overrides?.emoji ?? source.emoji,
+      type: overrides?.type ?? source.type,
+      habitIds: overrides?.habitIds ?? source.habitIds,
+      participantIds: overrides?.participantIds ?? source.participantIds,
+      target: overrides?.target ?? source.target,
+      duration,
+      bonusPoints: overrides?.bonusPoints ?? source.bonusPoints,
+      startDate: todayStr,
+      endDate: endStr,
+      winnerReward: overrides?.winnerReward ?? source.winnerReward,
+      participationReward: overrides?.participationReward ?? source.participationReward,
+      createdBy: source.createdBy
+    } as Omit<FamilyChallenge, 'id' | 'familyId' | 'createdAt' | 'status'>;
+    try {
+      setLoading(true);
+      const id = await createFamilyChallenge(currentFamily.id, payload);
+      await loadChallenges();
+      toast({ title: 'Challenge Duplicated', description: `${payload.name} created.` });
+      return id;
+    } catch (e) {
+      console.error('Duplicate challenge failed', e);
+      toast({ title: 'Error', description: 'Failed to duplicate challenge', variant: 'destructive' });
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentFamily?.id, loadChallenges, toast]);
+
+  // Restart completed challenge (duplicate with same name + reset progress)
+  const restartChallenge = useCallback(async (challenge: FamilyChallenge) => {
+    return duplicateChallenge(challenge, { name: `${challenge.name} (Restart)` });
+  }, [duplicateChallenge]);
 
   // Helper functions
   const getChallengeById = useCallback((challengeId: string) => {
@@ -259,6 +318,9 @@ export function useFamilyChallenges() {
     getChallengeLeader,
     isChallengeExpiring,
     getChallengeCompletionRate,
+    dailyProgress,
+    duplicateChallenge,
+    restartChallenge,
     
     // Refresh
     loadChallenges

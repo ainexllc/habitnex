@@ -215,11 +215,12 @@ export function FamilyMemberZone({
   // Build adventurer avatar options from stored avatarConfig so dashboard matches edit form
   const avatarOptions = useMemo(() => {
     const cfg = (member as any).avatarConfig || {};
-    const strip = (c?: string) => (c ? c.replace('#', '') : c);
+    const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
     const opts: any = {};
-    if (cfg.skinColor) opts.skinColor = [strip(cfg.skinColor)];
+    if (cfg.skinColor) opts.skinColor = [addHash(cfg.skinColor)];
     if (cfg.mouthType) opts.mouth = [cfg.mouthType];
-    if (cfg.hairColor) opts.hairColor = [strip(cfg.hairColor)];
+    if (cfg.topType) opts.top = [cfg.topType];
+    if (cfg.hairColor) opts.hairColor = [addHash(cfg.hairColor)];
     if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
     if (typeof cfg.glassesProbability === 'number') opts.glassesProbability = cfg.glassesProbability / 100;
     if (typeof cfg.featuresProbability === 'number') opts.featuresProbability = cfg.featuresProbability / 100;

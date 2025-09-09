@@ -46,6 +46,12 @@ interface FamilyContextType {
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
+    avatarHairStyle?: string;
+    avatarHairColor?: string;
+    hairProbability?: number;
+    glassesProbability?: number;
+    featuresProbability?: number;
+    earringsProbability?: number;
     color: string;
     role: 'parent' | 'child' | 'teen' | 'adult';
     birthYear?: number;
@@ -56,6 +62,12 @@ interface FamilyContextType {
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
+    avatarHairStyle?: string;
+    avatarHairColor?: string;
+    hairProbability?: number;
+    glassesProbability?: number;
+    featuresProbability?: number;
+    earringsProbability?: number;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => Promise<void>;
@@ -298,6 +310,12 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
+    avatarHairStyle?: string;
+    avatarHairColor?: string;
+    hairProbability?: number;
+    glassesProbability?: number;
+    featuresProbability?: number;
+    earringsProbability?: number;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
   }) => {

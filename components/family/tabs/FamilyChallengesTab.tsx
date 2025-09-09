@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { FamilyChallenge, ChallengeType } from '@/types/family';
+import { ChallengeDetailDrawer } from '@/components/family/challenges/ChallengeDetailDrawer';
 
 interface FamilyChallengesTabProps {
   onCreateChallenge?: () => void;
@@ -45,17 +46,21 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
     upcomingChallenges, 
     completedChallenges, 
     challengeProgress,
+    dailyProgress,
     startChallenge,
     completeChallenge,
     joinChallenge,
     getChallengeLeader,
     isChallengeExpiring,
     getChallengeCompletionRate,
+    duplicateChallenge,
+    restartChallenge,
     loading 
   } = useFamilyChallenges();
   const { habits } = useFamilyHabits();
   
   const [selectedTab, setSelectedTab] = useState<'active' | 'upcoming' | 'completed'>('active');
+  const [openDrawerFor, setOpenDrawerFor] = useState<string | null>(null);
 
   if (!currentFamily || !currentMember) {
     return null;
@@ -313,16 +318,15 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
             )}
 
             {/* View Details (for all) */}
-            {challenge.status === 'active' && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                View Details
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-gray-50 dark:hover:bg-gray-800"
+              onClick={() => setOpenDrawerFor(challenge.id)}
+            >
+              View Details
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -431,6 +435,21 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
           getChallengeList().map(renderChallengeCard)
         )}
       </div>
+
+      {/* Detail Drawer */}
+      <ChallengeDetailDrawer
+        open={!!openDrawerFor}
+        onClose={() => setOpenDrawerFor(null)}
+        challenge={[...activeChallenges, ...upcomingChallenges, ...completedChallenges].find(c => c.id === openDrawerFor) || null}
+        progress={openDrawerFor ? challengeProgress[openDrawerFor] : undefined}
+        daily={openDrawerFor ? dailyProgress[openDrawerFor] : undefined}
+        onJoin={joinChallenge}
+        onComplete={completeChallenge}
+        onStart={startChallenge}
+        onDuplicate={(ch) => duplicateChallenge(ch)}
+        onRestart={(ch) => restartChallenge(ch)}
+        loading={loading}
+      />
     </div>
   );
 }
