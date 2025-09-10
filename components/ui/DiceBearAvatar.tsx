@@ -3,7 +3,6 @@
 import React, { useMemo } from 'react';
 import { createAvatar } from '@dicebear/core';
 import { funEmoji, bottts, personas, adventurer } from '@dicebear/collection';
-import * as adventurerCollection from '@dicebear/collection/adventurer';
 import { cn } from '@/lib/utils';
 import type { AvatarConfig } from '@/types/family';
 
@@ -202,30 +201,16 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
     options.mouth = [mouthValue];
   }
   
-  // Top/Hair - needs special conversion
-  if (config.topType) {
-    // Convert values like ShortHairShortFlat to shortFlat
-    let topValue = config.topType;
-    if (topValue.startsWith('ShortHair')) {
-      topValue = toCamelCase(topValue.replace('ShortHair', ''));
-    } else if (topValue.startsWith('LongHair')) {
-      topValue = toCamelCase(topValue.replace('LongHair', ''));
-    } else if (topValue === 'NoHair') {
-      // NoHair is not a valid option, skip it
-      topValue = null;
-    } else if (topValue === 'Hat') {
-      topValue = 'hat';
-    } else if (topValue === 'Hijab') {
-      topValue = 'hijab';
-    } else if (topValue === 'Turban') {
-      topValue = 'turban';
-    } else if (topValue.startsWith('WinterHat')) {
-      topValue = toCamelCase(topValue);
-    }
-    
-    if (topValue) {
-      options.top = [topValue];
-    }
+  // Hair for adventurer style
+  if (config.hair) {
+    options.hair = [config.hair];
+  }
+  
+  // Top/Hair for avataaars style (legacy) - Don't set for adventurer
+  // The adventurer style doesn't recognize topType, only hair
+  if (config.topType && config.topType !== 'NoHair' && !config.hair) {
+    // Only set topType if we're not using adventurer style (no hair property)
+    options.topType = [config.topType];
   }
   
   // Hair color - convert to hex values
@@ -295,6 +280,13 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
   
   if (config.backgroundColor) {
     options.backgroundColor = config.backgroundColor;
+  }
+  
+  // Remove any 'top' property that might have been accidentally added
+  // The adventurer style doesn't recognize 'top', only 'hair'
+  if ('top' in options) {
+    console.warn('Removing invalid "top" property from adventurer options');
+    delete options.top;
   }
   
   console.log('Converting config to options:', { config, options });

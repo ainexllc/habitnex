@@ -11,41 +11,54 @@ import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 // Available options for adventurer style
 const AVATAR_OPTIONS = {
-  topType: [
-    { value: 'NoHair', label: 'No Hair', emoji: '🎯' },
-    { value: 'Hat', label: 'Hat', emoji: '🧢' },
-    { value: 'Hijab', label: 'Hijab', emoji: '🧕' },
-    { value: 'Turban', label: 'Turban', emoji: '👳' },
-    { value: 'WinterHat1', label: 'Winter Hat 1', emoji: '🎿' },
-    { value: 'WinterHat2', label: 'Winter Hat 2', emoji: '❄️' },
-    { value: 'WinterHat3', label: 'Winter Hat 3', emoji: '⛷️' },
-    { value: 'WinterHat4', label: 'Winter Hat 4', emoji: '🏔️' },
-    { value: 'LongHairBigHair', label: 'Big Hair', emoji: '💁' },
-    { value: 'LongHairBob', label: 'Bob', emoji: '💇' },
-    { value: 'LongHairBun', label: 'Bun', emoji: '🍔' },
-    { value: 'LongHairCurly', label: 'Curly', emoji: '🌀' },
-    { value: 'LongHairCurvy', label: 'Curvy', emoji: '〰️' },
-    { value: 'LongHairDreads', label: 'Dreads', emoji: '🦁' },
-    { value: 'LongHairFrida', label: 'Frida', emoji: '🎨' },
-    { value: 'LongHairFro', label: 'Fro', emoji: '☁️' },
-    { value: 'LongHairFroBand', label: 'Fro Band', emoji: '🎾' },
-    { value: 'LongHairNotTooLong', label: 'Not Too Long', emoji: '✂️' },
-    { value: 'LongHairShavedSides', label: 'Shaved Sides', emoji: '⚡' },
-    { value: 'LongHairMiaWallace', label: 'Mia Wallace', emoji: '🎬' },
-    { value: 'LongHairStraight', label: 'Straight', emoji: '📏' },
-    { value: 'LongHairStraight2', label: 'Straight 2', emoji: '📐' },
-    { value: 'LongHairStraightStrand', label: 'Straight Strand', emoji: '🎯' },
-    { value: 'ShortHairDreads01', label: 'Short Dreads 1', emoji: '🌟' },
-    { value: 'ShortHairDreads02', label: 'Short Dreads 2', emoji: '✨' },
-    { value: 'ShortHairFrizzle', label: 'Frizzle', emoji: '💫' },
-    { value: 'ShortHairShaggyMullet', label: 'Mullet', emoji: '🎸' },
-    { value: 'ShortHairShortCurly', label: 'Short Curly', emoji: '🌊' },
-    { value: 'ShortHairShortFlat', label: 'Short Flat', emoji: '📱' },
-    { value: 'ShortHairShortRound', label: 'Short Round', emoji: '⭕' },
-    { value: 'ShortHairShortWaved', label: 'Short Waved', emoji: '🌊' },
-    { value: 'ShortHairSides', label: 'Sides', emoji: '↔️' },
-    { value: 'ShortHairTheCaesar', label: 'Caesar', emoji: '🏛️' },
-    { value: 'ShortHairTheCaesarSidePart', label: 'Caesar Side Part', emoji: '📊' },
+  hair: [
+    { value: '', label: 'No Hair', emoji: '🎯' },
+    { value: 'short01', label: 'Short 01', emoji: '✂️' },
+    { value: 'short02', label: 'Short 02', emoji: '✂️' },
+    { value: 'short03', label: 'Short 03', emoji: '✂️' },
+    { value: 'short04', label: 'Short 04', emoji: '✂️' },
+    { value: 'short05', label: 'Short 05', emoji: '✂️' },
+    { value: 'short06', label: 'Short 06', emoji: '✂️' },
+    { value: 'short07', label: 'Short 07', emoji: '✂️' },
+    { value: 'short08', label: 'Short 08', emoji: '✂️' },
+    { value: 'short09', label: 'Short 09', emoji: '✂️' },
+    { value: 'short10', label: 'Short 10', emoji: '✂️' },
+    { value: 'short11', label: 'Short 11', emoji: '✂️' },
+    { value: 'short12', label: 'Short 12', emoji: '✂️' },
+    { value: 'short13', label: 'Short 13', emoji: '✂️' },
+    { value: 'short14', label: 'Short 14', emoji: '✂️' },
+    { value: 'short15', label: 'Short 15', emoji: '✂️' },
+    { value: 'short16', label: 'Short 16', emoji: '✂️' },
+    { value: 'short17', label: 'Short 17', emoji: '✂️' },
+    { value: 'short18', label: 'Short 18', emoji: '✂️' },
+    { value: 'short19', label: 'Short 19', emoji: '✂️' },
+    { value: 'short20', label: 'Short 20', emoji: '✂️' },
+    { value: 'long01', label: 'Long 01', emoji: '💇' },
+    { value: 'long02', label: 'Long 02', emoji: '💇' },
+    { value: 'long03', label: 'Long 03', emoji: '💇' },
+    { value: 'long04', label: 'Long 04', emoji: '💇' },
+    { value: 'long05', label: 'Long 05', emoji: '💇' },
+    { value: 'long06', label: 'Long 06', emoji: '💇' },
+    { value: 'long07', label: 'Long 07', emoji: '💇' },
+    { value: 'long08', label: 'Long 08', emoji: '💇' },
+    { value: 'long09', label: 'Long 09', emoji: '💇' },
+    { value: 'long10', label: 'Long 10', emoji: '💇' },
+    { value: 'long11', label: 'Long 11', emoji: '💇' },
+    { value: 'long12', label: 'Long 12', emoji: '💇' },
+    { value: 'long13', label: 'Long 13', emoji: '💇' },
+    { value: 'long14', label: 'Long 14', emoji: '💇' },
+    { value: 'long15', label: 'Long 15', emoji: '💇' },
+    { value: 'long16', label: 'Long 16', emoji: '💇' },
+    { value: 'long17', label: 'Long 17', emoji: '💇' },
+    { value: 'long18', label: 'Long 18', emoji: '💇' },
+    { value: 'long19', label: 'Long 19', emoji: '💇' },
+    { value: 'long20', label: 'Long 20', emoji: '💇' },
+    { value: 'long21', label: 'Long 21', emoji: '💇' },
+    { value: 'long22', label: 'Long 22', emoji: '💇' },
+    { value: 'long23', label: 'Long 23', emoji: '💇' },
+    { value: 'long24', label: 'Long 24', emoji: '💇' },
+    { value: 'long25', label: 'Long 25', emoji: '💇' },
+    { value: 'long26', label: 'Long 26', emoji: '💇' },
   ],
   
   hairColor: [
@@ -165,7 +178,7 @@ export function AvatarBuilder({
   
   // State for avatar configuration
   const [config, setConfig] = useState<AvatarConfig>(initialConfig || {
-    topType: 'ShortHairShortFlat',
+    hair: 'short07',
     hairColor: 'Brown',
     eyeType: 'Default',
     eyebrowType: 'Default',
@@ -224,7 +237,7 @@ export function AvatarBuilder({
   // Reset to defaults
   const handleReset = useCallback(() => {
     const defaultConfig: AvatarConfig = {
-      topType: 'ShortHairShortFlat',
+      hair: 'short07',
       hairColor: 'Brown',
       eyeType: 'Default',
       eyebrowType: 'Default',
@@ -242,7 +255,7 @@ export function AvatarBuilder({
   // Randomize avatar
   const handleRandomize = useCallback(() => {
     const randomConfig: AvatarConfig = {
-      topType: AVATAR_OPTIONS.topType[Math.floor(Math.random() * AVATAR_OPTIONS.topType.length)].value,
+      hair: AVATAR_OPTIONS.hair[Math.floor(Math.random() * AVATAR_OPTIONS.hair.length)].value,
       hairColor: AVATAR_OPTIONS.hairColor[Math.floor(Math.random() * AVATAR_OPTIONS.hairColor.length)].value,
       eyeType: AVATAR_OPTIONS.eyeType[Math.floor(Math.random() * AVATAR_OPTIONS.eyeType.length)].value,
       eyebrowType: AVATAR_OPTIONS.eyebrowType[Math.floor(Math.random() * AVATAR_OPTIONS.eyebrowType.length)].value,
@@ -518,8 +531,8 @@ export function AvatarBuilder({
                     Hair Style
                   </label>
                   <select
-                    value={config.topType}
-                    onChange={(e) => updateConfig({ topType: e.target.value })}
+                    value={config.hair || ''}
+                    onChange={(e) => updateConfig({ hair: e.target.value })}
                     className={cn(
                       "w-full px-3 py-2 rounded-lg",
                       theme.surface.primary,
@@ -528,7 +541,7 @@ export function AvatarBuilder({
                       "border"
                     )}
                   >
-                    {AVATAR_OPTIONS.topType.map((option) => (
+                    {AVATAR_OPTIONS.hair.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.emoji} {option.label}
                       </option>
@@ -537,7 +550,7 @@ export function AvatarBuilder({
                 </div>
                 
                 {/* Hair Color */}
-                {config.topType && !config.topType.includes('NoHair') && !config.topType.includes('Hat') && !config.topType.includes('Hijab') && !config.topType.includes('Turban') && !config.topType.includes('Winter') && (
+                {config.hair && (
                   <div>
                     <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
                       Hair Color

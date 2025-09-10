@@ -367,7 +367,8 @@ export interface AvatarConfig {
   mouthType?: string;
   
   // Hair
-  topType?: string; // Hair style
+  hair?: string; // Hair style for adventurer (short01-20, long01-26)
+  topType?: string; // Hair style for avataaars (legacy)
   hairColor?: string;
   facialHairType?: string;
   facialHairColor?: string;

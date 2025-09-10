@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AdventurerAvatarBuilder } from '@/components/ui/AvataaarsAvatarBuilder';
+import { AvataaarsAvatarBuilder } from '@/components/ui/AvataaarsAvatarBuilder';
 import { theme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 
@@ -20,29 +20,25 @@ export default function TestAvataaarsPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className={cn("text-3xl font-bold mb-2", theme.text.primary)}>
-              Adventurer Avatar Builder Test
+              Avataaars Avatar Builder Test
             </h1>
             <p className={theme.text.secondary}>
-              Test the adventurer-style avatar builder with color customization and probability controls
+              Test the avataaars-style avatar builder with color customization and probability controls
             </p>
           </div>
 
           {/* Avatar Builder */}
           <div className={cn("rounded-lg border p-6", theme.surface.secondary, theme.border.default)}>
-            <AdventurerAvatarBuilder
+            <AvataaarsAvatarBuilder
               initialData={{
                 seed: 'test-avatar',
-                eyes: 'variant03',
-                eyebrows: 'variant02',
-                mouth: 'variant01',
-                hair: 'short08',
+                eyes: 'default',
+                eyebrows: 'default',
+                mouth: 'smile',
+                topType: 'ShortHairShortFlat',
                 skinColor: '#EDB98A',
                 hairColor: '#724133',
-                backgroundColor: 'transparent',
-                hairProbability: 100,
-                glassesProbability: 20,
-                featuresProbability: 10,
-                earringsProbability: 30
+                backgroundColor: 'transparent'
               }}
               onSave={handleAvatarSave}
             />
@@ -69,7 +65,7 @@ export default function TestAvataaarsPage() {
                     <div><strong>Eyes:</strong> {savedAvatar.eyes || 'Random'}</div>
                     <div><strong>Eyebrows:</strong> {savedAvatar.eyebrows || 'Random'}</div>
                     <div><strong>Mouth:</strong> {savedAvatar.mouth || 'Random'}</div>
-                    <div><strong>Hair:</strong> {savedAvatar.hair || 'Random'}</div>
+                    <div><strong>Hair:</strong> {savedAvatar.topType || 'Random'}</div>
                     <div><strong>Skin Color:</strong> {savedAvatar.skinColor}</div>
                     <div><strong>Hair Color:</strong> {savedAvatar.hairColor}</div>
                     <div><strong>Background:</strong> {savedAvatar.backgroundColor}</div>

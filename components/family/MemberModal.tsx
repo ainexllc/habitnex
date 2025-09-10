@@ -207,7 +207,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
         avatarSeed: member.avatarSeed || member.id || generateAvatarSeed(member.displayName),
         avatarSkinColor: member.avatarConfig?.skinColor || '',
         avatarMouth: member.avatarConfig?.mouthType || '',
-        avatarHairStyle: member.avatarConfig?.topType || '',
+        avatarHairStyle: member.avatarConfig?.hair || member.avatarConfig?.topType || '',
         avatarHairColor: member.avatarConfig?.hairColor || '',
         hairProbability: member.avatarConfig?.hairProbability !== undefined ? member.avatarConfig.hairProbability : 100,
         glassesProbability: member.avatarConfig?.glassesProbability !== undefined ? member.avatarConfig.glassesProbability : 50,
@@ -350,7 +350,7 @@ export function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
                   options={useMemo(() => ({
                     ...(formData.avatarSkinColor && { skinColor: [formData.avatarSkinColor] }),
                     ...(formData.avatarMouth && { mouth: [formData.avatarMouth] }),
-                    ...(formData.avatarHairStyle && { top: [formData.avatarHairStyle] }),
+                    ...(formData.avatarHairStyle && { hair: [formData.avatarHairStyle] }),
                     ...(formData.avatarHairColor && { 
                       hairColor: [formData.avatarHairColor] 
                     }),

@@ -5,12 +5,12 @@ import { ChevronDown, ChevronUp, RotateCcw, Shuffle, Copy, Check, Eye, Smile, Us
 import { cn } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 
-interface AdventurerConfig {
+interface AvataaarsConfig {
   seed: string;
   eyes?: string;
   eyebrows?: string;
   mouth?: string;
-  hair?: string;
+  topType?: string;
   skinColor?: string;
   hairColor?: string;
   backgroundColor?: string;
@@ -19,45 +19,40 @@ interface AdventurerConfig {
   scale?: number;
 }
 
-interface AdventurerAvatarBuilderProps {
-  initialData?: Partial<AdventurerConfig>;
-  onSave?: (data: AdventurerConfig & { avatarUrl: string }) => void;
+interface AvataaarsAvatarBuilderProps {
+  initialData?: Partial<AvataaarsConfig>;
+  onSave?: (data: AvataaarsConfig & { avatarUrl: string }) => void;
   onCancel?: () => void;
   className?: string;
 }
 
-// Adventurer-specific feature options
+// Avataaars-specific feature options
 const eyeOptions = [
-  'variant01', 'variant02', 'variant03', 'variant04', 'variant05',
-  'variant06', 'variant07', 'variant08', 'variant09', 'variant10',
-  'variant11', 'variant12', 'variant13', 'variant14', 'variant15',
-  'variant16', 'variant17', 'variant18', 'variant19', 'variant20',
-  'variant21', 'variant22', 'variant23', 'variant24', 'variant25', 'variant26'
+  'close', 'cry', 'default', 'dizzy', 'eyeRoll', 'happy', 'hearts',
+  'side', 'squint', 'surprised', 'wink', 'winkWacky'
 ];
 
 const eyebrowOptions = [
-  'variant01', 'variant02', 'variant03', 'variant04', 'variant05',
-  'variant06', 'variant07', 'variant08', 'variant09', 'variant10',
-  'variant11', 'variant12', 'variant13', 'variant14', 'variant15'
+  'angry', 'angryNatural', 'default', 'defaultNatural', 'flatNatural',
+  'raisedExcited', 'raisedExcitedNatural', 'sadConcerned',
+  'sadConcernedNatural', 'unibrowNatural', 'upDown', 'upDownNatural'
 ];
 
 const mouthOptions = [
-  'variant01', 'variant02', 'variant03', 'variant04', 'variant05',
-  'variant06', 'variant07', 'variant08', 'variant09', 'variant10',
-  'variant11', 'variant12', 'variant13', 'variant14', 'variant15',
-  'variant16', 'variant17', 'variant18', 'variant19', 'variant20',
-  'variant21', 'variant22', 'variant23', 'variant24', 'variant25',
-  'variant26', 'variant27', 'variant28', 'variant29', 'variant30'
+  'concerned', 'default', 'disbelief', 'eating', 'grimace', 'sad',
+  'screamOpen', 'serious', 'smile', 'tongue', 'twinkle', 'vomit'
 ];
 
-const hairStyleOptions = [
-  'short01', 'short02', 'short03', 'short04', 'short05', 'short06',
-  'short07', 'short08', 'short09', 'short10', 'short11', 'short12',
-  'short13', 'short14', 'short15', 'short16', 'short17', 'short18', 'short19',
-  'long01', 'long02', 'long03', 'long04', 'long05', 'long06', 'long07',
-  'long08', 'long09', 'long10', 'long11', 'long12', 'long13', 'long14',
-  'long15', 'long16', 'long17', 'long18', 'long19', 'long20', 'long21',
-  'long22', 'long23', 'long24', 'long25', 'long26'
+const topTypeOptions = [
+  'NoHair',
+  'LongHairBigHair', 'LongHairBob', 'LongHairBun', 'LongHairCurly', 'LongHairCurvy',
+  'LongHairDreads', 'LongHairFrida', 'LongHairFro', 'LongHairFroBand',
+  'LongHairNotTooLong', 'LongHairShavedSides', 'LongHairMiaWallace', 'LongHairStraight',
+  'LongHairStraight2', 'LongHairStraightStrand',
+  'ShortHairDreads01', 'ShortHairDreads02', 'ShortHairFrizzle', 'ShortHairShaggyMullet',
+  'ShortHairShortCurly', 'ShortHairShortFlat', 'ShortHairShortRound', 'ShortHairShortWaved',
+  'ShortHairSides', 'ShortHairTheCaesar', 'ShortHairTheCaesarSidePart',
+  'Hat', 'Hijab', 'Turban', 'WinterHat1', 'WinterHat2', 'WinterHat3', 'WinterHat4'
 ];
 
 // Adventurer only supports mustache as facial hair feature
@@ -132,19 +127,19 @@ const backgroundColorOptions = [
   { value: 'Yellow02', label: 'Yellow', hex: '#FDE68A' },
 ];
 
-export function AdventurerAvatarBuilder({
+export function AvataaarsAvatarBuilder({
   initialData = {},
   onSave,
   onCancel,
   className
-}: AdventurerAvatarBuilderProps) {
+}: AvataaarsAvatarBuilderProps) {
   // State
-  const [config, setConfig] = useState<AdventurerConfig>({
+  const [config, setConfig] = useState<AvataaarsConfig>({
     seed: initialData.seed || `avatar-${Date.now()}`,
     eyes: initialData.eyes || '',
     eyebrows: initialData.eyebrows || '',
     mouth: initialData.mouth || '',
-    hair: initialData.hair || '',
+    topType: initialData.topType || '',
     skinColor: initialData.skinColor || '',
     hairColor: initialData.hairColor || '',
     backgroundColor: initialData.backgroundColor || 'transparent',
@@ -160,7 +155,7 @@ export function AdventurerAvatarBuilder({
   const thumbnailUrlCache = useMemo(() => new Map<string, string>(), []);
   
   // Generate thumbnail URL for feature previews with aggressive caching
-  const getThumbnailUrl = useCallback((option: string, type: 'eyes' | 'eyebrows' | 'mouth' | 'hair') => {
+  const getThumbnailUrl = useCallback((option: string, type: 'eyes' | 'eyebrows' | 'mouth' | 'topType') => {
     const cacheKey = `${type}-${option}`;
     
     if (thumbnailUrlCache.has(cacheKey)) {
@@ -168,16 +163,32 @@ export function AdventurerAvatarBuilder({
     }
     
     const params = new URLSearchParams();
-    params.set('seed', cacheKey);
+    params.set('seed', 'thumbnail-preview');
     params.set('size', '64');
     
-    // Only set the specific feature we want to showcase
+    // Set default options for consistent rendering
+    params.set('skinColor', 'EDB98A');
+    params.set('eyes', 'default');
+    params.set('eyebrows', 'default');
+    params.set('mouth', 'smile');
+    
+    // For non-topType previews, set neutral topType
+    if (type !== 'topType') {
+      params.set('topType', 'NoHair');
+    }
+    
+    // Set the specific feature
     if (type === 'eyes') params.set('eyes', option);
     if (type === 'eyebrows') params.set('eyebrows', option);
     if (type === 'mouth') params.set('mouth', option);
-    if (type === 'hair') params.set('hair', option);
+    if (type === 'topType') {
+      params.set('topType', option);
+      // Set hair color for hair types
+      if (option.includes('Hair') && option !== 'NoHair') {
+        params.set('hairColor', '724133');
+      }
+    }
     
-    // Add cache headers for browser caching
     const url = `https://api.dicebear.com/9.x/adventurer/svg?${params.toString()}`;
     
     // Cache the URL
@@ -193,7 +204,7 @@ export function AdventurerAvatarBuilder({
       ...eyeOptions.slice(0, 4).map(option => getThumbnailUrl(option, 'eyes')),
       ...eyebrowOptions.slice(0, 4).map(option => getThumbnailUrl(option, 'eyebrows')),
       ...mouthOptions.slice(0, 4).map(option => getThumbnailUrl(option, 'mouth')),
-      ...hairStyleOptions.slice(0, 4).map(option => getThumbnailUrl(option, 'hair')),
+      ...topTypeOptions.slice(0, 4).map(option => getThumbnailUrl(option, 'topType')),
     ];
     
     // Preload images in background with staggered timing
@@ -211,10 +222,10 @@ export function AdventurerAvatarBuilder({
     const params = new URLSearchParams();
     params.set('seed', config.seed || 'default');
     
-    if (config.eyes) params.set('eyes', config.eyes);
-    if (config.eyebrows) params.set('eyebrows', config.eyebrows);
-    if (config.mouth) params.set('mouth', config.mouth);
-    if (config.hair) params.set('hair', config.hair);
+    if (config.eyes) params.set('eyes', config.eyes.toLowerCase());
+    if (config.eyebrows) params.set('eyebrows', config.eyebrows.toLowerCase());
+    if (config.mouth) params.set('mouth', config.mouth.toLowerCase());
+    if (config.topType) params.set('topType', config.topType);
     
     if (config.skinColor) params.set('skinColor', config.skinColor.replace('#', ''));
     if (config.hairColor) params.set('hairColor', config.hairColor.replace('#', ''));
@@ -231,7 +242,7 @@ export function AdventurerAvatarBuilder({
   }, [config]);
 
   // Update config helper
-  const updateConfig = useCallback((updates: Partial<AdventurerConfig>) => {
+  const updateConfig = useCallback((updates: Partial<AvataaarsConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }));
   }, []);
 
@@ -251,7 +262,7 @@ export function AdventurerAvatarBuilder({
       eyes: Math.random() > 0.3 ? eyeOptions[Math.floor(Math.random() * eyeOptions.length)] : '',
       eyebrows: Math.random() > 0.3 ? eyebrowOptions[Math.floor(Math.random() * eyebrowOptions.length)] : '',
       mouth: Math.random() > 0.3 ? mouthOptions[Math.floor(Math.random() * mouthOptions.length)] : '',
-      hair: Math.random() > 0.3 ? hairStyleOptions[Math.floor(Math.random() * hairStyleOptions.length)] : '',
+      topType: Math.random() > 0.3 ? topTypeOptions[Math.floor(Math.random() * topTypeOptions.length)] : '',
       skinColor: skinColorOptions[Math.floor(Math.random() * skinColorOptions.length)].hex,
       hairColor: colorOptions[Math.floor(Math.random() * colorOptions.length)].hex,
       backgroundColor: backgroundColorOptions[Math.floor(Math.random() * backgroundColorOptions.length)].hex,
@@ -265,7 +276,7 @@ export function AdventurerAvatarBuilder({
       eyes: initialData.eyes || '',
       eyebrows: initialData.eyebrows || '',
       mouth: initialData.mouth || '',
-      hair: initialData.hair || '',
+      topType: initialData.topType || '',
       skinColor: initialData.skinColor || '',
       hairColor: initialData.hairColor || '',
       backgroundColor: initialData.backgroundColor || 'transparent',
@@ -617,10 +628,10 @@ export function AdventurerAvatarBuilder({
                 <div className="grid grid-cols-8 gap-2">
                   <button
                     type="button"
-                    onClick={() => updateConfig({ hair: '' })}
+                    onClick={() => updateConfig({ topType: '' })}
                     className={cn(
                       "p-2 rounded-lg border-2 transition-all relative aspect-square",
-                      !config.hair
+                      !config.topType
                         ? "border-blue-500 ring-2 ring-blue-300"
                         : "border-gray-300 hover:border-gray-400"
                     )}
@@ -628,21 +639,21 @@ export function AdventurerAvatarBuilder({
                   >
                     <div className="text-xs text-center">Random</div>
                   </button>
-                  {hairStyleOptions.map(option => (
+                  {topTypeOptions.map(option => (
                     <button
                       key={option}
                       type="button"
-                      onClick={() => updateConfig({ hair: option })}
+                      onClick={() => updateConfig({ topType: option })}
                       className={cn(
                         "p-1 rounded-lg border-2 transition-all relative aspect-square",
-                        config.hair === option
+                        config.topType === option
                           ? "border-blue-500 ring-2 ring-blue-300"
                           : "border-gray-300 hover:border-gray-400"
                       )}
                       title={option}
                     >
-                      <img 
-                        src={getThumbnailUrl(option, 'hair')}
+                      <img
+                        src={getThumbnailUrl(option, 'topType')}
                         alt={option}
                         className="w-full h-full object-cover rounded"
                         loading="lazy"
@@ -671,7 +682,7 @@ export function AdventurerAvatarBuilder({
                       <div className="hidden text-xs text-center absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded">
                         💇
                       </div>
-                      {config.hair === option && (
+                      {config.topType === option && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded">
                           <Check className="w-3 h-3 text-white" />
                         </div>

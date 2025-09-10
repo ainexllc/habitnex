@@ -386,7 +386,10 @@ export const addDirectFamilyMember = async (
         avatarConfig: {
           ...(memberInfo.avatarSkinColor && { skinColor: memberInfo.avatarSkinColor }),
           ...(memberInfo.avatarMouth && { mouthType: memberInfo.avatarMouth }),
-          ...(memberInfo.avatarHairStyle && { topType: memberInfo.avatarHairStyle }),
+          ...(memberInfo.avatarHairStyle && { 
+            hair: memberInfo.avatarHairStyle,  // For adventurer style
+            topType: memberInfo.avatarHairStyle  // Keep for backwards compatibility
+          }),
           ...(memberInfo.avatarHairColor && { hairColor: memberInfo.avatarHairColor }),
           ...(memberInfo.hairProbability !== undefined && { hairProbability: memberInfo.hairProbability }),
           ...(memberInfo.glassesProbability !== undefined && { glassesProbability: memberInfo.glassesProbability }),
@@ -462,7 +465,9 @@ export const updateFamilyMemberInDb = async (
         updateData.avatarConfig.mouthType = updates.avatarMouth;
       }
       if (updates.avatarHairStyle !== undefined) {
-        updateData.avatarConfig.topType = updates.avatarHairStyle;
+        // Save as 'hair' for adventurer style, keep topType for backwards compatibility
+        updateData.avatarConfig.hair = updates.avatarHairStyle;
+        updateData.avatarConfig.topType = updates.avatarHairStyle; // Keep for backwards compatibility
       }
       if (updates.avatarHairColor !== undefined) {
         updateData.avatarConfig.hairColor = updates.avatarHairColor;
