@@ -361,9 +361,7 @@ export function FamilyHabitForm({ mode, isOpen, onClose, habit }: FamilyHabitFor
       return;
     }
 
-    // Debug log to see what's in assignedMembers
-    console.log('Assigned members on submit:', formData.assignedMembers);
-    console.log('Is shared habit:', formData.isShared);
+
     
     if (mode === 'create' && formData.assignedMembers.length === 0) {
       setError('Please assign this habit to at least one family member');

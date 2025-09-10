@@ -282,17 +282,7 @@ export function useAllFamilyHabits() {
     const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
     const yesterdayString = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
     
-    // Debug: Log the date strings being used
-    console.log('[DEBUG] getHabitsByMember - Today:', todayString, 'Yesterday:', yesterdayString, 'Day of week:', dayOfWeek, 'Current time:', today.toString());
-    
-    // Debug logging
-    console.log('🔍 DEBUG getHabitsByMember:', {
-      memberId,
-      todayString,
-      dayOfWeek,
-      totalCompletions: allCompletions.length,
-      todaysCompletions: allCompletions.filter(c => c.date === todayString).length
-    });
+
     
     return allHabits
       .filter(habit => habit.assignedMembers && Array.isArray(habit.assignedMembers) && habit.assignedMembers.includes(memberId))
@@ -316,16 +306,7 @@ export function useAllFamilyHabits() {
           c.memberId === memberId && 
           c.date === todayString
         );
-        
-        // Debug: Log completion status
-        if (todayCompletion) {
-          console.log(`[DEBUG] Found today's completion for ${habit.name}:`, {
-            date: todayCompletion.date,
-            completed: todayCompletion.completed,
-            habitId: habit.id,
-            memberId
-          });
-        }
+
         
         // Check if habit was completed yesterday (for showing failure state)
         const yesterdayCompletion = allCompletions.find(c => 
@@ -432,7 +413,7 @@ export function useAllFamilyHabits() {
       throw new Error('Must be in a family to toggle completions');
     }
     
-    console.log(`🔄 DEBUG toggleMemberCompletion: habitId=${habitId}, memberId=${memberId}, currentCompleted=${currentCompleted}, date=${date}, toggleTo=${!currentCompleted}`);
+
     
     try {
       await toggleFamilyHabitCompletion(

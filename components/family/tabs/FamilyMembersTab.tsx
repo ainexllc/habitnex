@@ -7,7 +7,7 @@ import { MemberModal } from '@/components/family/MemberModal';
 import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { FamilyMember } from '@/types/family';
 import { Button } from '@/components/ui/Button';
-import { UserPlus, Edit2, Users, Crown, Trophy, Star } from 'lucide-react';
+import { UserPlus, Edit2, Users, Crown, Trophy, Star, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FamilyMembersTabProps {
@@ -15,9 +15,12 @@ interface FamilyMembersTabProps {
 }
 
 export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
-  const { currentFamily, currentMember, isParent } = useFamily();
+  const { currentFamily, currentMember, isParent, removeMember } = useFamily();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<FamilyMember | null>(null);
+  const [removingMember, setRemovingMember] = useState(false);
 
   if (!currentFamily || !currentMember) {
     return null;
@@ -60,19 +63,88 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
     setShowEditModal(true);
   };
 
+  const handleRemoveMember = (member: FamilyMember) => {
+    setMemberToRemove(member);
+    setShowRemoveConfirm(true);
+  };
+
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove) return;
+
+    try {
+      setRemovingMember(true);
+      await removeMember(memberToRemove.id);
+      setShowRemoveConfirm(false);
+      setMemberToRemove(null);
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+      // Error handling is done in the context
+    } finally {
+      setRemovingMember(false);
+    }
+  };
+
+  const cancelRemoveMember = () => {
+    setShowRemoveConfirm(false);
+    setMemberToRemove(null);
+  };
+
+  // Check if current user is the family creator
+  const isFamilyCreator = currentFamily?.createdBy === currentMember?.userId;
+
   // Build adventurer avatar options from stored avatarConfig so members tab matches edit form and dashboard
   const getAvatarOptions = (member: FamilyMember) => {
     const cfg = (member as any).avatarConfig || {};
     const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
     const opts: any = {};
-    if (cfg.skinColor) opts.skinColor = [addHash(cfg.skinColor)];
-    if (cfg.mouthType) opts.mouth = [cfg.mouthType];
-    if (cfg.topType) opts.top = [cfg.topType];
-    if (cfg.hairColor) opts.hairColor = [addHash(cfg.hairColor)];
-    if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
-    if (typeof cfg.glassesProbability === 'number') opts.glassesProbability = cfg.glassesProbability / 100;
-    if (typeof cfg.featuresProbability === 'number') opts.featuresProbability = cfg.featuresProbability / 100;
-    if (typeof cfg.earringsProbability === 'number') opts.earringsProbability = cfg.earringsProbability / 100;
+
+    // Only add options if they have values
+    if (cfg.skinColor || (member as any).avatarSkinColor) {
+      opts.skinColor = [addHash(cfg.skinColor || (member as any).avatarSkinColor)];
+    }
+    if (cfg.mouthType || (member as any).avatarMouth) {
+      opts.mouth = [cfg.mouthType || (member as any).avatarMouth];
+    }
+    if (cfg.hairColor || (member as any).avatarHairColor) {
+      opts.hairColor = [addHash(cfg.hairColor || (member as any).avatarHairColor)];
+    }
+
+    // Get hair probability - use new format or fallback to old
+    const hairProb = (member as any).hairProbability ?? cfg.hairProbability ?? 100;
+    if (hairProb >= 50) {
+      opts.hair = ['short01', 'short02', 'short03', 'short04', 'short05', 'long01', 'long02', 'long03'];
+    }
+
+    // Get glasses probability and set options
+    const glassesProb = (member as any).glassesProbability ?? cfg.glassesProbability ?? 50;
+    if (glassesProb >= 50) {
+      opts.accessories = ['prescription01', 'prescription02', 'round', 'sunglasses'];
+    }
+
+    // Get earrings probability and set options
+    const earringsProb = (member as any).earringsProbability ?? cfg.earringsProbability ?? 30;
+    if (earringsProb >= 50) {
+      opts.earrings = ['variant01', 'variant02', 'variant03'];
+    }
+
+    // Get features probability and set options
+    const featuresProb = (member as any).featuresProbability ?? cfg.featuresProbability ?? 10;
+    if (featuresProb >= 50) {
+      opts.facialHair = ['variant01', 'variant02', 'variant03', 'variant04'];
+    }
+
+    // Strip # from colors for adventurer style compatibility
+    if (opts.skinColor && Array.isArray(opts.skinColor)) {
+      opts.skinColor = opts.skinColor.map(color =>
+        typeof color === 'string' && color.startsWith('#') ? color.slice(1) : color
+      );
+    }
+    if (opts.hairColor && Array.isArray(opts.hairColor)) {
+      opts.hairColor = opts.hairColor.map(color =>
+        typeof color === 'string' && color.startsWith('#') ? color.slice(1) : color
+      );
+    }
+
     return opts;
   };
 
@@ -111,17 +183,29 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
             key={member.id}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-colors duration-200 relative"
           >
-            {/* Edit Button - Positioned at top right */}
-            {isParent && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEditMember(member)}
-                className="absolute top-2 right-2 opacity-60 hover:opacity-100 transition-opacity"
-              >
-                <Edit2 className="w-4 h-4" />
-              </Button>
-            )}
+            {/* Action Buttons - Positioned at top right */}
+            <div className="absolute top-2 right-2 flex gap-1">
+              {isParent && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditMember(member)}
+                  className="opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+              )}
+              {isFamilyCreator && member.id !== currentMember.id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveMember(member)}
+                  className="opacity-60 hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
             
             {/* Member Avatar - Compact */}
             <div className="flex flex-col items-center mb-3">
@@ -131,7 +215,7 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
                     seed={member.avatarSeed || member.id}
                     style="adventurer"
                     size={64}
-                    backgroundColor="#ffffff"
+                    backgroundColor="transparent"
                     options={getAvatarOptions(member)}
                   />
                 </div>
@@ -211,6 +295,50 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
         }}
         member={selectedMember}
       />
+
+      {/* Remove Member Confirmation Dialog */}
+      {showRemoveConfirm && memberToRemove && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
+                <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Remove Family Member
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                Are you sure you want to remove <span className="font-semibold">{memberToRemove.displayName}</span> from the family?
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={cancelRemoveMember}
+                  className="flex-1"
+                  disabled={removingMember}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmRemoveMember}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  disabled={removingMember}
+                >
+                  {removingMember ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Removing...
+                    </div>
+                  ) : (
+                    'Remove Member'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -338,7 +338,7 @@ export function FamilyRewardsTab() {
                           style={member.avatarStyle}
                           size={40}
                           className="border-2 border-white shadow-sm"
-                          backgroundColor={member.color}
+                          backgroundColor="transparent"
                           fallbackEmoji={member.avatar}
                         />
                       ) : (

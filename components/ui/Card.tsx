@@ -8,13 +8,25 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, hover = false, ...props }, ref) => {
+    // Check if backgroundColor is set in style prop - if so, remove bg-* classes from className
+    const hasCustomBackground = props.style && 'backgroundColor' in props.style;
+
+    // Filter out background classes if custom background is provided
+    const filteredClassName = hasCustomBackground && className
+      ? className.split(' ').filter(cls => !cls.startsWith('bg-')).join(' ')
+      : className;
+
     return (
       <div
         ref={ref}
         className={cn(
-          theme.components.card,
+          // Apply theme card styles but filter out background classes if custom background exists
+          hasCustomBackground
+            ? 'border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm'
+            : theme.components.card,
+          // Apply hover styles
           hover && `${theme.components.cardHover} cursor-pointer`,
-          className
+          filteredClassName
         )}
         {...props}
       />

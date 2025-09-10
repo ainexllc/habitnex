@@ -75,50 +75,23 @@ const AVATAR_OPTIONS = {
     { value: 'SilverGray', label: 'Silver', color: '#E8E1E1' },
   ],
   
-  eyeType: [
-    { value: 'Close', label: 'Closed' },
-    { value: 'Cry', label: 'Crying' },
-    { value: 'Default', label: 'Default' },
-    { value: 'Dizzy', label: 'Dizzy' },
-    { value: 'EyeRoll', label: 'Eye Roll' },
-    { value: 'Happy', label: 'Happy' },
-    { value: 'Hearts', label: 'Hearts' },
-    { value: 'Side', label: 'Side' },
-    { value: 'Squint', label: 'Squint' },
-    { value: 'Surprised', label: 'Surprised' },
-    { value: 'Wink', label: 'Wink' },
-    { value: 'WinkWacky', label: 'Wacky Wink' },
-  ],
+  // Adventurer eyes variants
+  eyeType: Array.from({ length: 14 }).map((_, i) => {
+    const idx = (i + 1).toString().padStart(2, '0');
+    return { value: `variant${idx}`, label: `Variant ${idx}` };
+  }),
   
-  eyebrowType: [
-    { value: 'Angry', label: 'Angry' },
-    { value: 'AngryNatural', label: 'Angry Natural' },
-    { value: 'Default', label: 'Default' },
-    { value: 'DefaultNatural', label: 'Default Natural' },
-    { value: 'FlatNatural', label: 'Flat Natural' },
-    { value: 'RaisedExcited', label: 'Excited' },
-    { value: 'RaisedExcitedNatural', label: 'Excited Natural' },
-    { value: 'SadConcerned', label: 'Sad' },
-    { value: 'SadConcernedNatural', label: 'Sad Natural' },
-    { value: 'UnibrowNatural', label: 'Unibrow' },
-    { value: 'UpDown', label: 'Up Down' },
-    { value: 'UpDownNatural', label: 'Up Down Natural' },
-  ],
+  // Adventurer eyebrows variants
+  eyebrowType: Array.from({ length: 10 }).map((_, i) => {
+    const idx = (i + 1).toString().padStart(2, '0');
+    return { value: `variant${idx}`, label: `Variant ${idx}` };
+  }),
   
-  mouthType: [
-    { value: 'Concerned', label: 'Concerned' },
-    { value: 'Default', label: 'Default' },
-    { value: 'Disbelief', label: 'Disbelief' },
-    { value: 'Eating', label: 'Eating' },
-    { value: 'Grimace', label: 'Grimace' },
-    { value: 'Sad', label: 'Sad' },
-    { value: 'ScreamOpen', label: 'Scream' },
-    { value: 'Serious', label: 'Serious' },
-    { value: 'Smile', label: 'Smile' },
-    { value: 'Tongue', label: 'Tongue' },
-    { value: 'Twinkle', label: 'Twinkle' },
-    { value: 'Vomit', label: 'Vomit' },
-  ],
+  // Adventurer mouth variants
+  mouthType: Array.from({ length: 12 }).map((_, i) => {
+    const idx = (i + 1).toString().padStart(2, '0');
+    return { value: `variant${idx}`, label: `Variant ${idx}` };
+  }),
   
   facialHairType: [
     { value: 'Blank', label: 'None' },
@@ -180,15 +153,12 @@ export function AvatarBuilder({
   const [config, setConfig] = useState<AvatarConfig>(initialConfig || {
     hair: 'short07',
     hairColor: 'Brown',
-    eyeType: 'Default',
-    eyebrowType: 'Default',
-    mouthType: 'Smile',
-    facialHairType: 'Blank',
-    accessoriesType: 'Blank',
-    clotheType: 'ShirtCrewNeck',
-    clotheColor: '#3B82F6',
+    // Adventurer uses variantXX for eyes/eyebrows/mouth
+    eyeType: 'variant01',
+    eyebrowType: 'variant01',
+    mouthType: 'variant01',
     skinColor: 'Light',
-    backgroundColor: ['#E0E0E0'],
+    backgroundColor: [],
   });
   
   // Undo/Redo history
@@ -292,23 +262,13 @@ export function AvatarBuilder({
         "border"
       )}>
         <div className="mx-auto mb-3" style={{ width: '120px', height: '120px' }}>
-          <div 
-            className="w-full h-full rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center"
-            style={{ backgroundColor: config.backgroundColor?.[0] || '#f3f4f6' }}
-            dangerouslySetInnerHTML={{ 
-              __html: (() => {
-                try {
-                  const svg = Object.keys(avatarOptions).length > 0 
-                    ? createAvatar(adventurer as any, { ...avatarOptions, size: 120, backgroundColor: [] }).toString()
-                    : createAvatar(adventurer as any, { seed: 'default-avatar', size: 120, backgroundColor: [] }).toString();
-                  console.log('Avatar SVG created, length:', svg?.length);
-                  return svg;
-                } catch (error) {
-                  console.error('Error creating avatar:', error);
-                  return '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#e5e7eb;">❌</div>';
-                }
-              })()
-            }}
+          <DiceBearAvatar
+            seed={config?.seed || 'builder-preview'}
+            style="adventurer"
+            size={120}
+            backgroundColor="transparent"
+            options={avatarOptions}
+            className="border-2 border-gray-300 dark:border-gray-600"
           />
         </div>
             
@@ -424,6 +384,56 @@ export function AvatarBuilder({
                   </div>
                 </div>
                 
+                {/* Hair Style */}
+                <div>
+                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+                    Hair Style
+                  </label>
+                  <select
+                    value={config.hair || ''}
+                    onChange={(e) => updateConfig({ hair: e.target.value })}
+                    className={cn(
+                      "w-full px-3 py-2 rounded-lg",
+                      theme.surface.primary,
+                      theme.border.default,
+                      theme.text.primary,
+                      "border"
+                    )}
+                  >
+                    {AVATAR_OPTIONS.hair.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.emoji} {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Hair Color */}
+                {config.hair && (
+                  <div>
+                    <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
+                      Hair Color
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {AVATAR_OPTIONS.hairColor.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => updateConfig({ hairColor: option.value })}
+                          className={cn(
+                            "w-10 h-10 rounded-full border-2 transition-all",
+                            config.hairColor === option.value
+                              ? 'border-blue-500 scale-110'
+                              : 'border-gray-300 hover:scale-105'
+                          )}
+                          style={{ backgroundColor: option.color }}
+                          title={option.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Eyes */}
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
@@ -499,333 +509,9 @@ export function AvatarBuilder({
             )}
           </div>
           
-          {/* Hair Section */}
-          <div className={cn(
-            "rounded-lg overflow-hidden",
-            theme.surface.secondary,
-            theme.border.default,
-            "border"
-          )}>
-            <button
-              type="button"
-              onClick={() => toggleSection('hair')}
-              className={cn(
-                "w-full px-4 py-3 flex items-center justify-between",
-                theme.surface.hover,
-                "hover:bg-opacity-50 transition-colors"
-              )}
-            >
-              <span className={cn("font-medium", theme.text.primary)}>Hair & Facial Hair</span>
-              <ChevronDown className={cn(
-                "w-5 h-5 transition-transform",
-                theme.text.muted,
-                expandedSection === 'hair' ? 'rotate-180' : ''
-              )} />
-            </button>
-            
-            {expandedSection === 'hair' && (
-              <div className="p-4 space-y-4">
-                {/* Hair Style */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Hair Style
-                  </label>
-                  <select
-                    value={config.hair || ''}
-                    onChange={(e) => updateConfig({ hair: e.target.value })}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg",
-                      theme.surface.primary,
-                      theme.border.default,
-                      theme.text.primary,
-                      "border"
-                    )}
-                  >
-                    {AVATAR_OPTIONS.hair.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.emoji} {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                {/* Hair Color */}
-                {config.hair && (
-                  <div>
-                    <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                      Hair Color
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {AVATAR_OPTIONS.hairColor.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => updateConfig({ hairColor: option.value })}
-                          className={cn(
-                            "w-10 h-10 rounded-full border-2 transition-all",
-                            config.hairColor === option.value
-                              ? 'border-blue-500 scale-110'
-                              : 'border-gray-300 hover:scale-105'
-                          )}
-                          style={{ backgroundColor: option.color }}
-                          title={option.label}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Facial Hair */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Facial Hair
-                  </label>
-                  <select
-                    value={config.facialHairType}
-                    onChange={(e) => updateConfig({ facialHairType: e.target.value })}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg",
-                      theme.surface.primary,
-                      theme.border.default,
-                      theme.text.primary,
-                      "border"
-                    )}
-                  >
-                    {AVATAR_OPTIONS.facialHairType.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                {/* Facial Hair Color */}
-                {config.facialHairType && config.facialHairType !== 'Blank' && (
-                  <div>
-                    <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                      Facial Hair Color
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {AVATAR_OPTIONS.hairColor.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => updateConfig({ facialHairColor: option.value })}
-                          className={cn(
-                            "w-10 h-10 rounded-full border-2 transition-all",
-                            config.facialHairColor === option.value
-                              ? 'border-blue-500 scale-110'
-                              : 'border-gray-300 hover:scale-105'
-                          )}
-                          style={{ backgroundColor: option.color }}
-                          title={option.label}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Hair section removed; moved into Appearance */}
           
-          {/* Accessories & Clothing Section */}
-          <div className={cn(
-            "rounded-lg overflow-hidden",
-            theme.surface.secondary,
-            theme.border.default,
-            "border"
-          )}>
-            <button
-              type="button"
-              onClick={() => toggleSection('accessories')}
-              className={cn(
-                "w-full px-4 py-3 flex items-center justify-between",
-                theme.surface.hover,
-                "hover:bg-opacity-50 transition-colors"
-              )}
-            >
-              <span className={cn("font-medium", theme.text.primary)}>Accessories & Clothing</span>
-              <ChevronDown className={cn(
-                "w-5 h-5 transition-transform",
-                theme.text.muted,
-                expandedSection === 'accessories' ? 'rotate-180' : ''
-              )} />
-            </button>
-            
-            {expandedSection === 'accessories' && (
-              <div className="p-4 space-y-4">
-                {/* Accessories */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Accessories
-                  </label>
-                  <select
-                    value={config.accessoriesType}
-                    onChange={(e) => updateConfig({ accessoriesType: e.target.value })}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg",
-                      theme.surface.primary,
-                      theme.border.default,
-                      theme.text.primary,
-                      "border"
-                    )}
-                  >
-                    {AVATAR_OPTIONS.accessoriesType.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                {/* Clothing Style */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Clothing Style
-                  </label>
-                  <select
-                    value={config.clotheType}
-                    onChange={(e) => updateConfig({ clotheType: e.target.value })}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg",
-                      theme.surface.primary,
-                      theme.border.default,
-                      theme.text.primary,
-                      "border"
-                    )}
-                  >
-                    {AVATAR_OPTIONS.clotheType.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                {/* Clothing Color */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Clothing Color
-                  </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowColorPicker(showColorPicker === 'clothing' ? null : 'clothing')}
-                      className={cn(
-                        "w-full px-3 py-2 rounded-lg flex items-center justify-between",
-                        theme.surface.primary,
-                        theme.border.default,
-                        theme.text.primary,
-                        "border"
-                      )}
-                    >
-                      <span className="flex items-center gap-2">
-                        <div
-                          className="w-6 h-6 rounded border border-gray-300"
-                          style={{ backgroundColor: config.clotheColor || '#3B82F6' }}
-                        />
-                        {config.clotheColor || '#3B82F6'}
-                      </span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    
-                    {showColorPicker === 'clothing' && (
-                      <div className="absolute z-10 mt-2">
-                        <div
-                          className="fixed inset-0"
-                          onClick={() => setShowColorPicker(null)}
-                        />
-                        <SketchPicker
-                          color={config.clotheColor || '#3B82F6'}
-                          onChange={(color) => updateConfig({ clotheColor: color.hex })}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Background Color */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Background Color
-                  </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowColorPicker(showColorPicker === 'background' ? null : 'background')}
-                      className={cn(
-                        "w-full px-3 py-2 rounded-lg flex items-center justify-between",
-                        theme.surface.primary,
-                        theme.border.default,
-                        theme.text.primary,
-                        "border"
-                      )}
-                    >
-                      <span className="flex items-center gap-2">
-                        <div
-                          className="w-6 h-6 rounded border border-gray-300"
-                          style={{ backgroundColor: config.backgroundColor?.[0] || '#E0E0E0' }}
-                        />
-                        {config.backgroundColor?.[0] || '#E0E0E0'}
-                      </span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    
-                    {showColorPicker === 'background' && (
-                      <div className="absolute z-10 mt-2">
-                        <div
-                          className="fixed inset-0"
-                          onClick={() => setShowColorPicker(null)}
-                        />
-                        <SketchPicker
-                          color={config.backgroundColor?.[0] || '#E0E0E0'}
-                          onChange={(color) => updateConfig({ backgroundColor: [color.hex] })}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Background Color */}
-                <div>
-                  <label className={cn("block text-sm font-medium mb-2", theme.text.primary)}>
-                    Background Color
-                  </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowColorPicker(showColorPicker === 'background' ? null : 'background')}
-                      className={cn(
-                        "w-full px-3 py-2 rounded-lg flex items-center justify-between",
-                        theme.surface.primary,
-                        theme.border.default,
-                        theme.text.primary,
-                        "border"
-                      )}
-                    >
-                      <span className="flex items-center gap-2">
-                        <div
-                          className="w-6 h-6 rounded border border-gray-300"
-                          style={{ backgroundColor: config.backgroundColor?.[0] || '#E0E0E0' }}
-                        />
-                        {config.backgroundColor?.[0] || '#E0E0E0'}
-                      </span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    
-                    {showColorPicker === 'background' && (
-                      <div className="absolute z-10 mt-2">
-                        <SketchPicker
-                          color={config.backgroundColor?.[0] || '#E0E0E0'}
-                          onChange={(color) => updateConfig({ backgroundColor: [color.hex] })}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Accessories & Clothing removed as requested. Keep Background Color in basic settings above. */}
       </div>
       
       {/* Save Button */}

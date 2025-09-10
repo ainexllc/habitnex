@@ -379,8 +379,10 @@ export const addDirectFamilyMember = async (
       isActive: true,
       joinedAt: Timestamp.now(),
 
-      // Handle avatar configuration - save all avatar options in avatarConfig
-      ...(memberInfo.avatarSkinColor || memberInfo.avatarMouth || memberInfo.avatarHairStyle || memberInfo.avatarHairColor || 
+      // Handle avatar configuration - prefer full avatarConfig if provided
+      ...(memberInfo.avatarConfig ? {
+        avatarConfig: memberInfo.avatarConfig
+      } : (memberInfo.avatarSkinColor || memberInfo.avatarMouth || memberInfo.avatarHairStyle || memberInfo.avatarHairColor || 
           memberInfo.hairProbability !== undefined || memberInfo.glassesProbability !== undefined ||
           memberInfo.featuresProbability !== undefined || memberInfo.earringsProbability !== undefined ? {
         avatarConfig: {
@@ -396,7 +398,7 @@ export const addDirectFamilyMember = async (
           ...(memberInfo.featuresProbability !== undefined && { featuresProbability: memberInfo.featuresProbability }),
           ...(memberInfo.earringsProbability !== undefined && { earringsProbability: memberInfo.earringsProbability }),
         }
-      } : {}),
+      } : {})),
       preferences: {
         favoriteEmojis: [],
         difficulty: 'normal',
@@ -453,7 +455,10 @@ export const updateFamilyMemberInDb = async (
     if (updates.role !== undefined) updateData.role = updates.role;
 
     // Handle avatar configuration - save all avatar options in avatarConfig
-    if (updates.avatarSkinColor !== undefined || updates.avatarMouth !== undefined || 
+    // Prefer full avatarConfig if provided by UI
+    if ((updates as any).avatarConfig) {
+      updateData.avatarConfig = (updates as any).avatarConfig;
+    } else if (updates.avatarSkinColor !== undefined || updates.avatarMouth !== undefined || 
         updates.avatarHairStyle !== undefined || updates.avatarHairColor !== undefined || updates.hairProbability !== undefined ||
         updates.glassesProbability !== undefined || updates.featuresProbability !== undefined ||
         updates.earringsProbability !== undefined) {
@@ -465,9 +470,8 @@ export const updateFamilyMemberInDb = async (
         updateData.avatarConfig.mouthType = updates.avatarMouth;
       }
       if (updates.avatarHairStyle !== undefined) {
-        // Save as 'hair' for adventurer style, keep topType for backwards compatibility
         updateData.avatarConfig.hair = updates.avatarHairStyle;
-        updateData.avatarConfig.topType = updates.avatarHairStyle; // Keep for backwards compatibility
+        updateData.avatarConfig.topType = updates.avatarHairStyle;
       }
       if (updates.avatarHairColor !== undefined) {
         updateData.avatarConfig.hairColor = updates.avatarHairColor;
@@ -1394,5 +1398,80 @@ export const getFamilyDashboardData = async (familyId: string): Promise<FamilyDa
     };
   } catch (error) {
     throw error;
+  }
+};
+
+// Remove a family member (soft delete - mark as inactive)
+export const removeFamilyMember = async (familyId: string, memberId: string): Promise<void> => {
+  try {
+    console.log('🗑️ Removing family member:', { familyId, memberId });
+
+    const batch = writeBatch(db);
+
+    // Mark member as inactive
+    const memberRef = doc(db, 'families', familyId, 'members', memberId);
+    batch.update(memberRef, {
+      isActive: false,
+      updatedAt: Timestamp.now()
+    });
+
+    // Remove member from all habits they're assigned to
+    const habitsRef = collection(db, 'families', familyId, 'habits');
+    const habitsQuery = query(habitsRef, where('assignedMembers', 'array-contains', memberId));
+    const habitsSnapshot = await getDocs(habitsQuery);
+
+    habitsSnapshot.docs.forEach(habitDoc => {
+      const habitData = habitDoc.data();
+      const assignedMembers = habitData.assignedMembers || [];
+      const updatedMembers = assignedMembers.filter((id: string) => id !== memberId);
+
+      if (updatedMembers.length !== assignedMembers.length) {
+        batch.update(habitDoc.ref, {
+          assignedMembers: updatedMembers,
+          updatedAt: Timestamp.now()
+        });
+      }
+    });
+
+    // Remove all completions for this member
+    const completionsRef = collection(db, 'families', familyId, 'completions');
+    const completionsQuery = query(completionsRef, where('memberId', '==', memberId));
+    const completionsSnapshot = await getDocs(completionsQuery);
+
+    completionsSnapshot.docs.forEach(completionDoc => {
+      batch.delete(completionDoc.ref);
+    });
+
+    // Remove member from any challenges they're participating in
+    const challengesRef = collection(db, 'families', familyId, 'challenges');
+    const challengesQuery = query(challengesRef, where('participantIds', 'array-contains', memberId));
+    const challengesSnapshot = await getDocs(challengesQuery);
+
+    challengesSnapshot.docs.forEach(challengeDoc => {
+      const challengeData = challengeDoc.data();
+      const participantIds = challengeData.participantIds || [];
+      const updatedParticipants = participantIds.filter((id: string) => id !== memberId);
+
+      if (updatedParticipants.length !== participantIds.length) {
+        batch.update(challengeDoc.ref, {
+          participantIds: updatedParticipants,
+          updatedAt: Timestamp.now()
+        });
+      }
+    });
+
+    // Update family updatedAt timestamp
+    const familyRef = doc(db, 'families', familyId);
+    batch.update(familyRef, {
+      updatedAt: Timestamp.now()
+    });
+
+    // Commit all changes
+    await batch.commit();
+
+    console.log('✅ Family member removed successfully');
+  } catch (error) {
+    console.error('❌ Failed to remove family member:', error);
+    throw new Error('Failed to remove family member. Please try again.');
   }
 };

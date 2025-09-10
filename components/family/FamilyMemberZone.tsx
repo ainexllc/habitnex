@@ -217,14 +217,20 @@ export function FamilyMemberZone({
     const cfg = (member as any).avatarConfig || {};
     const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
     const opts: any = {};
-    if (cfg.skinColor) opts.skinColor = [addHash(cfg.skinColor)];
-    if (cfg.mouthType) opts.mouth = [cfg.mouthType];
-    if (cfg.topType) opts.top = [cfg.topType];
-    if (cfg.hairColor) opts.hairColor = [addHash(cfg.hairColor)];
-    if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
-    if (typeof cfg.glassesProbability === 'number') opts.glassesProbability = cfg.glassesProbability / 100;
-    if (typeof cfg.featuresProbability === 'number') opts.featuresProbability = cfg.featuresProbability / 100;
-    if (typeof cfg.earringsProbability === 'number') opts.earringsProbability = cfg.earringsProbability / 100;
+    if (cfg.skinColor || (member as any).avatarSkinColor) opts.skinColor = [addHash(cfg.skinColor || (member as any).avatarSkinColor)];
+    if (cfg.mouthType || (member as any).avatarMouth) opts.mouth = [cfg.mouthType || (member as any).avatarMouth];
+    // Use hairStyle for adventurer style (new format) or topType for legacy
+    if ((member as any).avatarHairStyle) opts.hairStyle = [(member as any).avatarHairStyle];
+    else if (cfg.topType) opts.top = [cfg.topType];
+    if (cfg.hairColor || (member as any).avatarHairColor) opts.hairColor = [addHash(cfg.hairColor || (member as any).avatarHairColor)];
+    if (typeof ((member as any).hairProbability) === 'number') opts.hairProbability = (member as any).hairProbability / 100;
+    else if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
+    if (typeof ((member as any).glassesProbability) === 'number') opts.glassesProbability = (member as any).glassesProbability / 100;
+    else if (typeof cfg.glassesProbability === 'number') opts.glassesProbability = cfg.glassesProbability / 100;
+    if (typeof ((member as any).featuresProbability) === 'number') opts.featuresProbability = (member as any).featuresProbability / 100;
+    else if (typeof cfg.featuresProbability === 'number') opts.featuresProbability = cfg.featuresProbability / 100;
+    if (typeof ((member as any).earringsProbability) === 'number') opts.earringsProbability = (member as any).earringsProbability / 100;
+    else if (typeof cfg.earringsProbability === 'number') opts.earringsProbability = cfg.earringsProbability / 100;
     return opts;
   }, [member]);
   

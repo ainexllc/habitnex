@@ -55,7 +55,6 @@ export function DiceBearAvatar({
     try {
       const collection = styleCollections[style];
       if (!collection) {
-        console.warn(`Avatar style "${style}" not found, falling back to personas`);
         return createAvatar(personas as any, { seed: seed || 'default' }).toString();
       }
 
@@ -70,16 +69,8 @@ export function DiceBearAvatar({
           size,
         };
         
-        // Ensure backgroundColor is included if provided
-        if (backgroundColor) {
-          customOptions.backgroundColor = Array.isArray(backgroundColor) ? backgroundColor : [backgroundColor];
-        } else if (style === 'adventurer' && !customOptions.backgroundColor) {
-          customOptions.backgroundColor = ['#f0f0f0', '#e0e0e0', '#d0d0d0'];
-        }
-        
         // Ensure adventurer style uses proper options format
         if (style === 'adventurer') {
-          console.log('Using adventurer style with options:', customOptions);
 
           // Ensure skinColor and mouth are properly formatted as arrays
           if (customOptions.skinColor && !Array.isArray(customOptions.skinColor)) {
@@ -92,8 +83,52 @@ export function DiceBearAvatar({
             customOptions.hairColor = [customOptions.hairColor];
           }
 
-          console.log('Formatted options for adventurer:', customOptions);
-          console.log('Hair color details:', customOptions.hairColor, 'Hair probability:', customOptions.hairProbability);
+          // For adventurer style, strip # from color values or map named colors
+          const normalizeColor = (c: string) => {
+            const map: Record<string, string> = {
+              Auburn: '#A55728',
+              Black: '#2C1B18',
+              Blonde: '#B58143',
+              BlondeGolden: '#D6B370',
+              Brown: '#724133',
+              BrownDark: '#4A312C',
+              PastelPink: '#F59797',
+              Blue: '#000FFF',
+              Platinum: '#ECDCBF',
+              Red: '#C93305',
+              SilverGray: '#E8E1E1',
+              Tanned: '#FD9841',
+              Yellow: '#F8D25C',
+              Pale: '#FFDBB4',
+              Light: '#EDB98A',
+              DarkBrown: '#AE5D29'
+            };
+            const hex = map[c] || c;
+            return typeof hex === 'string' && hex.startsWith('#') ? hex.slice(1) : hex;
+          };
+          if (customOptions.skinColor && Array.isArray(customOptions.skinColor)) {
+            customOptions.skinColor = customOptions.skinColor.map((c: string) => normalizeColor(c));
+          }
+          if (customOptions.hairColor && Array.isArray(customOptions.hairColor)) {
+            customOptions.hairColor = customOptions.hairColor.map((c: string) => normalizeColor(c));
+          }
+
+          // Always ensure backgroundColor is set for adventurer style
+          if (!customOptions.backgroundColor) {
+            customOptions.backgroundColor = backgroundColor ? [backgroundColor] : ['#ffffff'];
+          }
+
+          // Strip # from backgroundColor for adventurer style as well
+          if (customOptions.backgroundColor && Array.isArray(customOptions.backgroundColor)) {
+            customOptions.backgroundColor = customOptions.backgroundColor.map((c: string) => normalizeColor(c));
+          }
+
+
+        }
+
+        // Ensure backgroundColor is included for non-adventurer styles if provided
+        if (backgroundColor && style !== 'adventurer') {
+          customOptions.backgroundColor = Array.isArray(backgroundColor) ? backgroundColor : [backgroundColor];
         }
 
         const result = createAvatar(collection as any, customOptions).toString();
@@ -116,7 +151,6 @@ export function DiceBearAvatar({
       
       return createAvatar(collection as any, seedOptions).toString();
     } catch (error) {
-      console.error('Failed to generate DiceBear avatar:', error);
       return null;
     }
   }, [seed, style, size, backgroundColor, options]);
@@ -180,25 +214,25 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
     options.skinColor = [skinHex];
   }
   
-  // Eyes - convert to camelCase
+  // Eyes - adventurer uses numeric variants: variant01..variantXX
   if (config.eyeType) {
-    const eyeValue = config.eyeType === 'EyeRoll' ? 'eyeRoll' : 
-                     config.eyeType === 'WinkWacky' ? 'winkWacky' :
-                     toCamelCase(config.eyeType);
-    options.eyes = [eyeValue];
+    options.eyes = [config.eyeType];
+  } else {
+    options.eyes = ['variant01'];
   }
   
-  // Eyebrows - convert to camelCase
+  // Eyebrows - adventurer uses variantXX
   if (config.eyebrowType) {
-    const eyebrowValue = toCamelCase(config.eyebrowType);
-    options.eyebrows = [eyebrowValue];
+    options.eyebrows = [config.eyebrowType];
+  } else {
+    options.eyebrows = ['variant01'];
   }
   
-  // Mouth - convert to camelCase
+  // Mouth - adventurer uses variantXX
   if (config.mouthType) {
-    const mouthValue = config.mouthType === 'ScreamOpen' ? 'screamOpen' :
-                       toCamelCase(config.mouthType);
-    options.mouth = [mouthValue];
+    options.mouth = [config.mouthType];
+  } else {
+    options.mouth = ['variant01'];
   }
   
   // Hair for adventurer style
@@ -232,47 +266,11 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
     options.hairColor = [hairHex];
   }
   
-  // Facial hair - convert and filter out 'Blank'
-  if (config.facialHairType && config.facialHairType !== 'Blank') {
-    const facialHairValue = toCamelCase(config.facialHairType);
-    options.facialHair = [facialHairValue];
-  }
+  // Facial hair removed from builder; ignore any stray values safely
   
-  if (config.facialHairColor) {
-    options.facialHairColor = [config.facialHairColor];
-  }
+  // Accessories removed from builder; ignore
   
-  // Accessories - convert and filter out 'Blank'
-  if (config.accessoriesType && config.accessoriesType !== 'Blank') {
-    const accessoriesValue = config.accessoriesType === 'Prescription01' ? 'prescription01' :
-                             config.accessoriesType === 'Prescription02' ? 'prescription02' :
-                             config.accessoriesType === 'Kurt' ? 'kurt' :
-                             config.accessoriesType === 'Round' ? 'round' :
-                             config.accessoriesType === 'Sunglasses' ? 'sunglasses' :
-                             config.accessoriesType === 'Wayfarers' ? 'wayfarers' :
-                             toCamelCase(config.accessoriesType);
-    options.accessories = [accessoriesValue];
-  }
-  
-  // Clothing - convert to camelCase
-  if (config.clotheType) {
-    const clothingValue = config.clotheType === 'BlazerShirt' ? 'blazerAndShirt' :
-                         config.clotheType === 'BlazerSweater' ? 'blazerAndSweater' :
-                         config.clotheType === 'CollarSweater' ? 'collarAndSweater' :
-                         config.clotheType === 'GraphicShirt' ? 'graphicShirt' :
-                         config.clotheType === 'Hoodie' ? 'hoodie' :
-                         config.clotheType === 'Overall' ? 'overall' :
-                         config.clotheType === 'ShirtCrewNeck' ? 'shirtCrewNeck' :
-                         config.clotheType === 'ShirtScoopNeck' ? 'shirtScoopNeck' :
-                         config.clotheType === 'ShirtVNeck' ? 'shirtVNeck' :
-                         toCamelCase(config.clotheType);
-    options.clothing = [clothingValue];
-  }
-  
-  // Clothing color - should be hex colors in an array
-  if (config.clotheColor) {
-    options.clothesColor = [config.clotheColor];
-  }
+  // Clothing removed from builder; ignore
   
   if (config.graphicType) {
     options.clothingGraphic = [toCamelCase(config.graphicType)];
@@ -285,11 +283,9 @@ export function avatarConfigToDiceBearOptions(config: AvatarConfig): Record<stri
   // Remove any 'top' property that might have been accidentally added
   // The adventurer style doesn't recognize 'top', only 'hair'
   if ('top' in options) {
-    console.warn('Removing invalid "top" property from adventurer options');
     delete options.top;
   }
   
-  console.log('Converting config to options:', { config, options });
   return options;
 }
 
@@ -305,7 +301,6 @@ export function useAvatarPreview(baseSeed: string, style: AvatarStyle) {
         
         const collection = styleCollections[style];
         if (!collection) {
-          console.error(`Style "${style}" not found in styleCollections`);
           continue;
         }
         
@@ -324,7 +319,7 @@ export function useAvatarPreview(baseSeed: string, style: AvatarStyle) {
           svg
         });
       } catch (error) {
-        console.error(`Failed to generate avatar for style "${style}":`, error);
+        // Silent error handling
       }
     }
     return variants;
