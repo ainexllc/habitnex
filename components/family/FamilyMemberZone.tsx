@@ -6,7 +6,6 @@ import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
 import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { cn, getTodayDateString } from '@/lib/utils';
@@ -193,7 +192,6 @@ export function FamilyMemberZone({
   
   const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
   const level = Math.floor(member.stats.totalPoints / 100) + 1; // Level up every 100 points
-  const pointsToNextLevel = 100 - (member.stats.totalPoints % 100);
   
   // Helper function to determine if a color is light or dark
   const isLightColor = (color: string): boolean => {
@@ -356,68 +354,6 @@ export function FamilyMemberZone({
           </div>
         </div>
         
-        {/* Enhanced Progress Bars */}
-        <div className="space-y-4 mt-6">
-          {/* Daily Progress */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <span className={cn(
-                "font-semibold",
-                touchMode ? "text-lg" : "text-base",
-                mutedTextColor
-              )}>
-                Today's Progress
-              </span>
-              <span className={cn(
-                "font-bold",
-                touchMode ? "text-lg" : "text-base",
-                textColor
-              )}>
-                {Math.round(completionRate)}%
-              </span>
-            </div>
-            <Progress 
-              value={completionRate} 
-              className={cn(
-                "w-full",
-                touchMode ? "h-4" : "h-3"
-              )}
-              style={{ 
-                backgroundColor: isLight ? 'rgba(0,0,0,0.1)' : (isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.2)'),
-              }}
-            />
-          </div>
-          
-          {/* Level Progress */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <span className={cn(
-                "font-semibold",
-                touchMode ? "text-lg" : "text-base",
-                mutedTextColor
-              )}>
-                Level Progress
-              </span>
-              <span className={cn(
-                "font-bold",
-                touchMode ? "text-lg" : "text-base",
-                textColor
-              )}>
-                {pointsToNextLevel} pts to Level {level + 1}
-              </span>
-            </div>
-            <Progress 
-              value={(member.stats.totalPoints % 100)} 
-              className={cn(
-                "w-full",
-                touchMode ? "h-4" : "h-3"
-              )}
-              style={{ 
-                backgroundColor: isLight ? 'rgba(0,0,0,0.1)' : (isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.2)'),
-              }}
-            />
-          </div>
-        </div>
       </CardHeader>
       
       {/* Habits List */}
