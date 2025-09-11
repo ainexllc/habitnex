@@ -259,8 +259,8 @@ export function FamilyMemberZone({
         className
       )}
       style={{ 
-        backgroundColor: `${member.color}D9`,
-        backgroundImage: 'none',
+        backgroundImage: `linear-gradient(to bottom, ${member.color}E6 0%, ${member.color}99 40%, ${member.color}4D 70%, ${member.color}1A 90%, transparent 100%)`,
+        backgroundColor: 'transparent',
         border: `2px solid ${borderColor}`,
         backdropFilter: isDarkMode && !isLight ? 'blur(12px)' : 'none'
       }}
