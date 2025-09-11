@@ -431,6 +431,7 @@ export const updateFamilyMemberInDb = async (
   memberId: string,
   updates: {
     displayName?: string;
+    profileImageUrl?: string | null;  // Added for new profile image system
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
@@ -450,6 +451,7 @@ export const updateFamilyMemberInDb = async (
     // Build update object with only provided fields
     const updateData: any = {};
     if (updates.displayName !== undefined) updateData.displayName = updates.displayName;
+    if (updates.profileImageUrl !== undefined) updateData.profileImageUrl = updates.profileImageUrl;  // Added for new profile image system
     if (updates.avatarSeed !== undefined) updateData.avatarSeed = updates.avatarSeed;
     if (updates.color !== undefined) updateData.color = updates.color;
     if (updates.role !== undefined) updateData.role = updates.role;
@@ -489,6 +491,13 @@ export const updateFamilyMemberInDb = async (
         updateData.avatarConfig.earringsProbability = updates.earringsProbability;
       }
     }
+    
+    // Debug logging
+    console.log('🗄️ Database updating member:', { 
+      memberId, 
+      updateData, 
+      hasProfileImageUrl: !!updateData.profileImageUrl 
+    });
     
     await updateDoc(memberRef, updateData);
     console.log('Member updated successfully:', memberId);

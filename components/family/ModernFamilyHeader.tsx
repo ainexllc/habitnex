@@ -20,16 +20,6 @@ interface ModernFamilyHeaderProps {
   onTabChange?: (tab: string) => void;
 }
 
-const encouragingMessages = [
-  "🔥 On fire! Keep that momentum going!",
-  "⭐ Amazing progress this week!",
-  "💪 Building strong habits together!",
-  "🌟 Every small step counts!",
-  "🚀 Consistency is your superpower!",
-  "✨ Great teamwork, family!",
-  "🎯 Focused and determined!",
-  "🏆 Champions in the making!",
-];
 
 export function ModernFamilyHeader({
   familyName,
@@ -42,15 +32,7 @@ export function ModernFamilyHeader({
   activeTab = 'overview',
   onTabChange
 }: ModernFamilyHeaderProps) {
-  const [currentMessage, setCurrentMessage] = useState(encouragingMessages[0]);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  // Rotate encouraging message daily
-  useEffect(() => {
-    const today = new Date().getDate();
-    const messageIndex = today % encouragingMessages.length;
-    setCurrentMessage(encouragingMessages[messageIndex]);
-  }, []);
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -115,7 +97,7 @@ export function ModernFamilyHeader({
   return (
     <header className={cn("bg-gray-900 text-white mb-[10px]", className)}>
       {/* Gradient Header Section */}
-      <div className="bg-gradient-to-b from-blue-600 to-gray-900 pb-8">
+      <div className="bg-gradient-to-b from-blue-600 to-gray-900 pb-0.5">
         <div className="px-6">
           {/* Top Row */}
           <div className="flex justify-between items-center mb-6 pt-[15px]">
@@ -199,16 +181,6 @@ export function ModernFamilyHeader({
 
 
             </div>
-          </div>
-          
-          {/* Info Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-white/90">
-            <span className={cn(
-              "text-blue-200 font-medium",
-              touchMode ? "text-lg" : "text-sm md:text-base"
-            )}>
-              {currentMessage}
-            </span>
           </div>
         </div>
       </div>

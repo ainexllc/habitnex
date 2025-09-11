@@ -7,7 +7,7 @@ import { approveRedemption, denyRedemption } from '@/lib/familyDb';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { ProfileImage } from '@/components/ui/ProfileImage';
 import { CreateFamilyRewardModal } from '@/components/family/CreateFamilyRewardModal';
 import { ManageFamilyRewardsModal } from '@/components/family/ManageFamilyRewardsModal';
 import { Gift, Plus, Star, Clock, Users, DollarSign, Crown, CheckCircle, XCircle, Settings } from 'lucide-react';
@@ -332,23 +332,15 @@ export function FamilyRewardsTab() {
                 return (
                   <div key={redemption.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                     <div className="flex items-center space-x-4">
-                      {member.avatarStyle && member.avatarSeed ? (
-                        <DiceBearAvatar
-                          seed={member.avatarSeed}
-                          style={member.avatarStyle}
-                          size={40}
-                          className="border-2 border-white shadow-sm"
-                          backgroundColor="transparent"
-                          fallbackEmoji={member.avatar}
-                        />
-                      ) : (
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                          style={{ backgroundColor: member.color }}
-                        >
-                          {member.avatar}
-                        </div>
-                      )}
+                      <ProfileImage
+                        name={member.displayName}
+                        profileImageUrl={member.profileImageUrl}
+                        color={member.color}
+                        size={40}
+                        showBorder={true}
+                        borderColor="rgba(255,255,255,0.8)"
+                        className="shadow-sm"
+                      />
                       <div>
                         <div className="font-medium text-gray-900 dark:text-white">
                           {member.displayName} wants to redeem:

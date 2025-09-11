@@ -5,7 +5,7 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
 import { EditFamilyHabitModal } from '@/components/family/EditFamilyHabitModal';
 import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
-import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { ProfileImage } from '@/components/ui/ProfileImage';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -198,49 +198,6 @@ export function FamilyHabitsTab({ onCreateHabit }: FamilyHabitsTabProps = {}) {
     habit.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Build adventurer avatar options from stored avatarConfig so habits tab matches other displays
-  const getAvatarOptions = (member: any) => {
-    const cfg = member.avatarConfig || {};
-    const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
-    const opts: any = {};
-
-    // Only add options if they have values
-    if (cfg.skinColor || member.avatarSkinColor) {
-      opts.skinColor = [addHash(cfg.skinColor || member.avatarSkinColor)];
-    }
-    if (cfg.mouthType || member.avatarMouth) {
-      opts.mouth = [cfg.mouthType || member.avatarMouth];
-    }
-    if (cfg.hairColor || member.avatarHairColor) {
-      opts.hairColor = [addHash(cfg.hairColor || member.avatarHairColor)];
-    }
-
-    // Get hair probability - use new format or fallback to old
-    const hairProb = member.hairProbability ?? cfg.hairProbability ?? 100;
-    if (hairProb >= 50) {
-      opts.hair = ['short01', 'short02', 'short03', 'short04', 'short05', 'long01', 'long02', 'long03'];
-    }
-
-    // Get glasses probability and set options
-    const glassesProb = member.glassesProbability ?? cfg.glassesProbability ?? 50;
-    if (glassesProb >= 50) {
-      opts.accessories = ['prescription01', 'prescription02', 'round', 'sunglasses'];
-    }
-
-    // Get earrings probability and set options
-    const earringsProb = member.earringsProbability ?? cfg.earringsProbability ?? 30;
-    if (earringsProb >= 50) {
-      opts.earrings = ['variant01', 'variant02', 'variant03'];
-    }
-
-    // Get features probability and set options
-    const featuresProb = member.featuresProbability ?? cfg.featuresProbability ?? 10;
-    if (featuresProb >= 50) {
-      opts.facialHair = ['variant01', 'variant02', 'variant03', 'variant04'];
-    }
-
-    return opts;
-  };
 
   return (
     <div className="px-6">
@@ -420,13 +377,12 @@ export function FamilyHabitsTab({ onCreateHabit }: FamilyHabitsTabProps = {}) {
                           return (
                             <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                               <div className="flex items-center gap-3">
-                                <DiceBearAvatar
-                                  seed={member.avatarSeed || member.displayName}
-                                  style="adventurer"
+                                <ProfileImage
+                                  name={member.displayName}
+                                  profileImageUrl={member.profileImageUrl}
+                                  color={member.color}
                                   size={28}
                                   className="flex-shrink-0"
-                                  backgroundColor="transparent"
-                                  options={getAvatarOptions(member)}
                                 />
                                 <div>
                                   <p className="font-medium text-gray-900 dark:text-white text-sm">
@@ -498,13 +454,12 @@ export function FamilyHabitsTab({ onCreateHabit }: FamilyHabitsTabProps = {}) {
                       <CardHeader className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <DiceBearAvatar
-                              seed={member.avatarSeed || member.displayName}
-                              style="adventurer"
+                            <ProfileImage
+                              name={member.displayName}
+                              profileImageUrl={member.profileImageUrl}
+                              color={member.color}
                               size={48}
                               className="flex-shrink-0"
-                              backgroundColor="transparent"
-                              options={getAvatarOptions(member)}
                             />
                             <div>
                               <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">

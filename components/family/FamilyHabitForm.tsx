@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { TagInput } from '@/components/ui/TagInput';
-import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { ProfileImage } from '@/components/ui/ProfileImage';
 import { OpenMojiTrigger } from '@/components/ui/OpenMojiPicker';
 import { OpenMoji } from '@/components/ui/OpenMoji';
 import { EMOJI_MAP } from '@/lib/openmoji/emojiMap';
@@ -939,23 +939,15 @@ export function FamilyHabitForm({ mode, isOpen, onClose, habit }: FamilyHabitFor
                         !formData.isShared && !formData.assignedMembers.includes(member.id) && 
                           'hover:border-gray-300 dark:hover:border-gray-600'
                       )}>
-                        {member.avatarStyle && member.avatarSeed ? (
-                          <DiceBearAvatar
-                            seed={member.avatarSeed}
-                            style={member.avatarStyle}
-                            size={48}
-                            className="border-2 border-white shadow-sm"
-                            backgroundColor={member.color}
-                            fallbackEmoji={member.avatar}
-                          />
-                        ) : (
-                          <div
-                            className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold"
-                            style={{ backgroundColor: member.color }}
-                          >
-                            {member.avatar}
-                          </div>
-                        )}
+                        <ProfileImage
+                          name={member.displayName}
+                          profileImageUrl={member.profileImageUrl}
+                          color={member.color}
+                          size={48}
+                          showBorder={true}
+                          borderColor="rgba(255,255,255,0.8)"
+                          className="shadow-sm"
+                        />
                         <div>
                           <div className="font-medium text-gray-900 dark:text-white">{member.displayName}</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">{member.role}</div>
@@ -1325,23 +1317,15 @@ export function FamilyHabitForm({ mode, isOpen, onClose, habit }: FamilyHabitFor
                       >
                         {/* Avatar with tooltip */}
                         <div className="relative">
-                          {member.avatarStyle && member.avatarSeed ? (
-                            <DiceBearAvatar
-                              seed={member.avatarSeed}
-                              style={member.avatarStyle}
-                              size={48}
-                              className="border-3 border-white dark:border-gray-700 shadow-md rounded-full"
-                              backgroundColor={member.color}
-                              fallbackEmoji={member.avatar}
-                            />
-                          ) : (
-                            <div
-                              className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm border-3 border-white dark:border-gray-700 shadow-md"
-                              style={{ backgroundColor: member.color }}
-                            >
-                              {member.avatar}
-                            </div>
-                          )}
+                          <ProfileImage
+                            name={member.displayName}
+                            profileImageUrl={member.profileImageUrl}
+                            color={member.color}
+                            size={48}
+                            showBorder={true}
+                            borderColor="rgba(255,255,255,0.9)"
+                            className="shadow-md"
+                          />
                           {/* Checkmark indicator */}
                           <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800">
                             <CheckCircle className="w-3 h-3 text-white" />

@@ -59,7 +59,7 @@ export default function CreateFamilyPage() {
       };
       
       await createNewFamily(request);
-      router.push('/dashboard/family');
+      router.push('/dashboard');
       
     } catch (err) {
       // Failed to create family - handle silently

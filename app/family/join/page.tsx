@@ -75,7 +75,7 @@ export default function JoinFamilyPage() {
       };
       
       await joinExistingFamily(request);
-      router.push('/dashboard/family');
+      router.push('/dashboard');
       
     } catch (err) {
       console.error('Failed to join family:', err);

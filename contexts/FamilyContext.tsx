@@ -307,6 +307,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   // Update family member
   const updateFamilyMember = useCallback(async (memberId: string, updates: {
     displayName?: string;
+    profileImageUrl?: string | null;  // Added for new profile image system
     avatarSeed?: string;
     avatarSkinColor?: string;
     avatarMouth?: string;
@@ -327,6 +328,13 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       
       await updateFamilyMemberInDb(currentFamily.id, memberId, updates);
+      
+      // Debug logging
+      console.log('🔄 FamilyContext: Refreshing family data after member update', { 
+        memberId, 
+        updates, 
+        hasProfileImageUrl: !!updates.profileImageUrl 
+      });
       
       // Refresh family data to show updates
       const updatedFamily = await getFamily(currentFamily.id);

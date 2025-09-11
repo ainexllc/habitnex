@@ -39,12 +39,18 @@ export interface FamilyMember {
   userId?: string;             // Connected user account (optional)
   name: string;
   displayName: string;
+  
+  // New Profile Image System
+  profileImageUrl?: string;    // URL to uploaded profile photo (optional)
+  
+  // Legacy Avatar Fields (deprecated but kept for backwards compatibility)
   avatar: string;              // Legacy: URL or emoji (kept for backwards compatibility)
   avatarStyle?: 'fun-emoji' | 'bottts' | 'personas' | 'adventurer'; // DiceBear style
   avatarSeed?: string;         // Seed for DiceBear avatar generation
   avatarConfig?: AvatarConfig; // Custom avatar configuration
   avatarOrigin?: 'auto' | 'custom'; // Track if avatar is auto-generated or custom
-  color: string;               // Personal theme color (hex)
+  
+  color: string;               // Personal theme color (hex) - used for initials background
   role: 'parent' | 'child' | 'teen' | 'adult';
   birthYear?: number;          // For age-appropriate features
   isActive: boolean;
