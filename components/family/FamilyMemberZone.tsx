@@ -219,10 +219,14 @@ export function FamilyMemberZone({
     const opts: any = {};
     if (cfg.skinColor || (member as any).avatarSkinColor) opts.skinColor = [addHash(cfg.skinColor || (member as any).avatarSkinColor)];
     if (cfg.mouthType || (member as any).avatarMouth) opts.mouth = [cfg.mouthType || (member as any).avatarMouth];
-    // Use hairStyle for adventurer style (new format) or topType for legacy
-    if ((member as any).avatarHairStyle) opts.hairStyle = [(member as any).avatarHairStyle];
-    else if (cfg.topType) opts.top = [cfg.topType];
+    // Adventurer hair key is `hair`; accept legacy/top values but map to hair
+    if ((member as any).avatarHairStyle) opts.hair = [(member as any).avatarHairStyle];
+    else if (cfg.hair) opts.hair = [cfg.hair];
+    else if (cfg.topType) opts.hair = [cfg.topType];
     if (cfg.hairColor || (member as any).avatarHairColor) opts.hairColor = [addHash(cfg.hairColor || (member as any).avatarHairColor)];
+    // Eyes and eyebrows if present in config
+    if (cfg.eyeType) opts.eyes = [cfg.eyeType];
+    if (cfg.eyebrowType) opts.eyebrows = [cfg.eyebrowType];
     if (typeof ((member as any).hairProbability) === 'number') opts.hairProbability = (member as any).hairProbability / 100;
     else if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
     if (typeof ((member as any).glassesProbability) === 'number') opts.glassesProbability = (member as any).glassesProbability / 100;
@@ -281,10 +285,8 @@ export function FamilyMemberZone({
         className
       )}
       style={{ 
-        backgroundColor: isDarkMode && !isLight ? `${member.color}33` : member.color,
-        backgroundImage: isDarkMode && !isLight 
-          ? `linear-gradient(135deg, ${member.color}22 0%, ${member.color}11 100%)`
-          : `linear-gradient(135deg, ${member.color} 0%, ${member.color}dd 100%)`,
+        backgroundColor: `${member.color}D9`,
+        backgroundImage: 'none',
         border: `2px solid ${borderColor}`,
         backdropFilter: isDarkMode && !isLight ? 'blur(12px)' : 'none'
       }}
@@ -465,6 +467,10 @@ export function FamilyMemberZone({
               const status = getTodaysCompletionStatus(habit.id);
               const isCompleted = status !== null;
               const isExpanded = expandedHabits.has(habit.id);
+              const hasExpandableContent = Boolean(
+                (habit.description && habit.description.trim().length > 0) ||
+                (habit as any).healthBenefits || (habit as any).mentalBenefits || (habit as any).longTermBenefits || (habit as any).successTips
+              );
               
               // Debug logging
               console.log(`🎯 FamilyMemberZone - ${member.displayName} - ${habit.name}:`, {
@@ -564,20 +570,22 @@ export function FamilyMemberZone({
                       )}/>
                     </div>
                   )}
-                  {/* Single Compact Line: Expand arrow, habit name, points, and action buttons */}
+                  {/* Single Line: Expand, name, and actions */}
                   <div className="flex items-center gap-2">
-                    {/* Expand/Collapse Button */}
-                    <button
-                      onClick={() => toggleHabitExpanded(habit.id)}
-                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 hover:scale-110 flex-shrink-0"
-                      aria-label={isExpanded ? "Collapse details" : "Expand details"}
-                    >
-                      {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      )}
-                    </button>
+                    {/* Expand/Collapse Button (only if there is content to expand) */}
+                    {hasExpandableContent && (
+                      <button
+                        onClick={() => toggleHabitExpanded(habit.id)}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 hover:scale-110 flex-shrink-0"
+                        aria-label={isExpanded ? "Collapse details" : "Expand details"}
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        )}
+                      </button>
+                    )}
                     
                     {/* Habit Name - Takes remaining space */}
                     <h4 className={cn(
@@ -593,12 +601,9 @@ export function FamilyMemberZone({
                         </span>
                       )}
                     </h4>
-                  </div>
-                  
-                  {/* Second Line: Dual Completion Buttons or Undo */}
-                  <div className="flex justify-end items-center gap-2 flex-wrap">
+
+                    {/* Actions */}
                     {autoFailed ? (
-                      // Show auto-failed state for yesterday's incomplete tasks
                       <div className="flex items-center gap-2">
                         <div className="px-2 py-2 rounded-lg flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500">
                           <OpenMoji 
@@ -637,39 +642,34 @@ export function FamilyMemberZone({
                       </>
                     ) : (
                       <>
-                        <div className="flex items-center gap-3">
-                          {/* Points Display */}
-                          <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs font-bold rounded">
-                            <span>{habit.basePoints || 10}</span>
-                            <span>pts</span>
-                          </div>
-                          {/* Success Button */}
-                          <Button
-                            onClick={() => handleHabitCompletion(habit.id, true)}
-                            loading={loading}
-                            size="sm"
-                            className="w-8 h-8 p-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
-                            title="Mark as completed"
-                          >
-                            <Check className="w-4 h-4" />
-                          </Button>
-                          {/* Failure Button */}
-                          <Button
-                            onClick={() => handleHabitCompletion(habit.id, false)}
-                            loading={loading}
-                            size="sm"
-                            className="w-8 h-8 p-0 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
-                            title="Mark as failed"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs font-bold rounded">
+                          <span>{habit.basePoints || 10}</span>
+                          <span>pts</span>
                         </div>
+                        <Button
+                          onClick={() => handleHabitCompletion(habit.id, true)}
+                          loading={loading}
+                          size="sm"
+                          className="w-8 h-8 p-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
+                          title="Mark as completed"
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => handleHabitCompletion(habit.id, false)}
+                          loading={loading}
+                          size="sm"
+                          className="w-8 h-8 p-0 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
+                          title="Mark as failed"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       </>
                     )}
                   </div>
                   
                   {/* Expanded Details Section */}
-                  {isExpanded && (
+                  {hasExpandableContent && isExpanded && (
                     <div className={cn(
                       "mt-3 pt-3 border-t space-y-2",
                       theme.border.light

@@ -83,7 +83,7 @@ export function DiceBearAvatar({
             customOptions.hairColor = [customOptions.hairColor];
           }
 
-          // For adventurer style, strip # from color values or map named colors
+          // For adventurer style, keep hex with #. Map named colors to hex.
           const normalizeColor = (c: string) => {
             const map: Record<string, string> = {
               Auburn: '#A55728',
@@ -103,8 +103,7 @@ export function DiceBearAvatar({
               Light: '#EDB98A',
               DarkBrown: '#AE5D29'
             };
-            const hex = map[c] || c;
-            return typeof hex === 'string' && hex.startsWith('#') ? hex.slice(1) : hex;
+            return map[c] || c;
           };
           if (customOptions.skinColor && Array.isArray(customOptions.skinColor)) {
             customOptions.skinColor = customOptions.skinColor.map((c: string) => normalizeColor(c));
@@ -118,7 +117,7 @@ export function DiceBearAvatar({
             customOptions.backgroundColor = backgroundColor ? [backgroundColor] : ['#ffffff'];
           }
 
-          // Strip # from backgroundColor for adventurer style as well
+          // Keep # for backgroundColor as well
           if (customOptions.backgroundColor && Array.isArray(customOptions.backgroundColor)) {
             customOptions.backgroundColor = customOptions.backgroundColor.map((c: string) => normalizeColor(c));
           }
