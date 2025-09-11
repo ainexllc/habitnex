@@ -101,49 +101,59 @@ export function ModernFamilyHeader({
         <div className="px-6">
           {/* Top Row */}
           <div className="flex justify-between items-center mb-6 pt-[15px]">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               
 
               
-              <h1
-                className={cn(
-                  "font-bold mt-[10px] ml-[10px]",
-                  touchMode ? "text-4xl md:text-5xl" : "text-3xl md:text-4xl lg:text-5xl"
-                )}
-                style={{
-                  fontFamily: '"Henny Penny", cursive',
-                  fontWeight: 700
-                }}
-              >
-              {familyName.split('').map((letter, index) => {
-                const rainbowColors = [
-                  'text-red-400',
-                  'text-orange-400',
-                  'text-yellow-400',
-                  'text-green-400',
-                  'text-blue-400',
-                  'text-indigo-400',
-                  'text-purple-400',
-                  'text-pink-400'
-                ];
+              <div>
+                <h1
+                  className={cn(
+                    "font-bold mt-[10px] ml-[10px]",
+                    touchMode ? "text-4xl md:text-5xl" : "text-3xl md:text-4xl lg:text-5xl"
+                  )}
+                  style={{
+                    fontFamily: '"Henny Penny", cursive',
+                    fontWeight: 700
+                  }}
+                >
+                {familyName.split('').map((letter, index) => {
+                  const rainbowColors = [
+                    'text-red-400',
+                    'text-orange-400',
+                    'text-yellow-400',
+                    'text-green-400',
+                    'text-blue-400',
+                    'text-indigo-400',
+                    'text-purple-400',
+                    'text-pink-400'
+                  ];
 
-                // Every other letter gets rainbow color
-                const isRainbowLetter = index % 2 === 0;
-                const colorIndex = Math.floor(index / 2) % rainbowColors.length;
+                  // Every other letter gets rainbow color
+                  const isRainbowLetter = index % 2 === 0;
+                  const colorIndex = Math.floor(index / 2) % rainbowColors.length;
 
-                return (
-                  <span
-                    key={index}
-                    className={cn(
-                      isRainbowLetter ? rainbowColors[colorIndex] : 'text-white',
-                      letter === ' ' && "text-white"
-                    )}
-                  >
-                    {letter}
-                  </span>
-                );
-              })}
-              </h1>
+                  return (
+                    <span
+                      key={index}
+                      className={cn(
+                        isRainbowLetter ? rainbowColors[colorIndex] : 'text-white',
+                        letter === ' ' && "text-white"
+                      )}
+                    >
+                      {letter}
+                    </span>
+                  );
+                })}
+                </h1>
+                
+                {/* Date Display */}
+                <p className={cn(
+                  "text-blue-200 mt-1 ml-[10px]",
+                  touchMode ? "text-lg md:text-xl" : "text-base md:text-lg"
+                )}>
+                  {date}
+                </p>
+              </div>
             </div>
             
             {/* Action Buttons */}

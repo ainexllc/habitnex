@@ -266,41 +266,41 @@ export function FamilyMemberZone({
       }}
       onClick={touchMode && onExpand ? onExpand : undefined}
     >
-      {/* Member Header - Enhanced with larger avatars and names */}
+      {/* Member Header - Extra Compact */}
       <CardHeader className={cn(
-        "pb-4",
-        touchMode ? "p-8" : "p-6"
+        "pb-2",
+        touchMode ? "p-4 pt-3" : "p-3 pt-2"
       )}>
-        {/* Centered Avatar and Name Layout */}
-        <div className="flex flex-col items-center text-center mb-6">
-          {/* Large Profile Image */}
-          <div className="relative mb-4">
+        {/* Centered Avatar and Name Layout - Extra Compact */}
+        <div className="flex flex-col items-center text-center mb-2">
+          {/* Profile Image - Smaller */}
+          <div className="relative mb-2">
             <ProfileImage
               name={member.displayName}
               profileImageUrl={member.profileImageUrl}
               color={member.color}
-              size={touchMode ? 120 : 96}
+              size={touchMode ? 80 : 64}
               showBorder={true}
               borderColor={isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}
-              className="shadow-lg transition-all hover:shadow-xl hover:scale-105"
+              className="shadow-md transition-all hover:shadow-lg hover:scale-105"
               fontWeight="bold"
             />
             
-            {/* Completion Badge on Avatar */}
+            {/* Completion Badge on Avatar - Compact */}
             {completionRate === 100 && (
-              <div className="absolute -top-2 -right-2">
-                <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <Star className="w-6 h-6 text-white" />
+              <div className="absolute -top-1 -right-1">
+                <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md animate-pulse">
+                  <Star className="w-4 h-4 text-white" />
                 </div>
               </div>
             )}
           </div>
           
-          {/* Large Name and Level Info */}
+          {/* Name and Level Info - Compact */}
           <div>
             <h3 className={cn(
-              "font-bold mb-2 leading-tight",
-              touchMode ? "text-4xl" : "text-3xl",
+              "font-bold mb-1 leading-tight",
+              touchMode ? "text-2xl" : "text-xl",
               textColor
             )} style={{
               fontFamily: '"Henny Penny", cursive',
@@ -309,29 +309,29 @@ export function FamilyMemberZone({
               {member.displayName}
             </h3>
             
-            {/* Level and Points Info */}
-            <div className="flex items-center justify-center gap-4 mb-3">
+            {/* Level and Points Info - Compact */}
+            <div className="flex items-center justify-center gap-2 mb-1">
               <div className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm",
+                "flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm",
                 isLight ? "bg-black/10" : (isDarkMode ? "bg-white/5" : "bg-white/20")
               )}>
-                <Star className="w-5 h-5 text-yellow-400" />
+                <Star className="w-4 h-4 text-yellow-400" />
                 <span className={cn(
-                  "font-bold",
-                  touchMode ? "text-lg" : "text-base",
+                  "font-semibold",
+                  touchMode ? "text-sm" : "text-xs",
                   textColor
                 )}>
                   Level {level}
                 </span>
               </div>
               <div className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm",
+                "flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm",
                 isLight ? "bg-black/10" : (isDarkMode ? "bg-white/5" : "bg-white/20")
               )}>
-                <Trophy className="w-5 h-5 text-purple-400" />
+                <Trophy className="w-4 h-4 text-purple-400" />
                 <span className={cn(
-                  "font-bold",
-                  touchMode ? "text-lg" : "text-base",
+                  "font-semibold",
+                  touchMode ? "text-sm" : "text-xs",
                   textColor
                 )}>
                   {member.stats.totalPoints} pts
@@ -339,11 +339,11 @@ export function FamilyMemberZone({
               </div>
             </div>
             
-            {/* Daily Completion Status */}
+            {/* Daily Completion Status - Compact */}
             <div className="flex items-center justify-center">
               <div className={cn(
-                "px-6 py-3 rounded-full font-bold shadow-md text-white",
-                touchMode ? "text-xl" : "text-lg",
+                "px-3 py-1.5 rounded-full font-semibold shadow-sm text-white",
+                touchMode ? "text-base" : "text-sm",
                 completionRate === 100 
                   ? "bg-gradient-to-r from-green-500 to-emerald-500" 
                   : "bg-gradient-to-r from-blue-500 to-indigo-500"
@@ -356,13 +356,13 @@ export function FamilyMemberZone({
         
       </CardHeader>
       
-      {/* Habits List */}
+      {/* Habits List - Extra Compact */}
       <CardContent className={cn(
-        touchMode ? "p-6 pt-0" : "p-4 pt-0"
+        touchMode ? "p-3 pt-0" : "p-2 pt-0"
       )}>
         <div className="space-y-2">
           {habits.length === 0 ? (
-            <div className={`text-center py-6 ${theme.text.muted}`}>
+            <div className={`text-center py-4 ${theme.text.muted}`}>
               <Trophy className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className={touchMode ? "text-lg" : "text-sm"}>
                 No habits for today
@@ -549,10 +549,6 @@ export function FamilyMemberZone({
                       </>
                     ) : (
                       <>
-                        <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs font-bold rounded">
-                          <span>{habit.basePoints || 10}</span>
-                          <span>pts</span>
-                        </div>
                         <Button
                           onClick={() => handleHabitCompletion(habit.id, true)}
                           loading={loading}
@@ -603,9 +599,6 @@ export function FamilyMemberZone({
                             <span className="underline">View Benefits</span>
                           </button>
                         )}
-                        <span className={theme.text.muted}>
-                          {habit.points || 10} pts
-                        </span>
                         {habit.tags && habit.tags.length > 0 && (
                           <span className={theme.text.muted}>
                             Tags: {habit.tags.join(', ')}

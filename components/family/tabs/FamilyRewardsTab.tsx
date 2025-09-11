@@ -89,29 +89,15 @@ export function FamilyRewardsTab() {
 
   return (
     <div className="px-6">
-      {/* Tab Header - Enhanced */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3" style={{
-            fontFamily: '"Henny Penny", cursive',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Family Rewards
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
-            🎁 Redeem your hard-earned points for awesome rewards
-          </p>
-          <div className="flex items-center gap-4">
-            <span className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-              {memberPoints} Points Available
-            </span>
-            <span className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-              {rewards.length} Rewards Available
-            </span>
-          </div>
+      {/* Stats and Actions Bar */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <span className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+            {memberPoints} Points Available
+          </span>
+          <span className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+            {rewards.length} Rewards Available
+          </span>
         </div>
         
         {isParent && (

@@ -87,36 +87,9 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
   }
 
   const members = currentFamily.members.filter(m => m.isActive);
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
-
 
   return (
     <div className="px-6">
-      {/* Tab Header - Simplified */}
-      <div className="flex items-center justify-between mb-8 py-2">
-        <div className="flex items-center gap-4">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white py-1" style={{
-            fontFamily: '"Henny Penny", cursive',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            lineHeight: '1.2'
-          }}>
-            Family Overview
-          </h2>
-          <span className="text-gray-600 dark:text-gray-400 text-lg">
-            {today}
-          </span>
-        </div>
-      </div>
-
       {/* Member Zones Grid - Compact spacing between cards */}
       <div className={cn(
         "grid gap-2 md:gap-3",
