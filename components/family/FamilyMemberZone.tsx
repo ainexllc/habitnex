@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/Progress';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
 import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { cn, getTodayDateString } from '@/lib/utils';
-import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { ProfileImage } from '@/components/ui/ProfileImage';
 import { HabitBenefitsModal } from './HabitBenefitsModal';
 import { OpenMoji } from '@/components/ui/OpenMoji';
 import { theme } from '@/lib/theme';
@@ -212,31 +212,7 @@ export function FamilyMemberZone({
   const mutedTextColor = isLight ? 'text-gray-700' : 'text-gray-200';
   const borderColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
   
-  // Build adventurer avatar options from stored avatarConfig so dashboard matches edit form
-  const avatarOptions = useMemo(() => {
-    const cfg = (member as any).avatarConfig || {};
-    const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
-    const opts: any = {};
-    if (cfg.skinColor || (member as any).avatarSkinColor) opts.skinColor = [addHash(cfg.skinColor || (member as any).avatarSkinColor)];
-    if (cfg.mouthType || (member as any).avatarMouth) opts.mouth = [cfg.mouthType || (member as any).avatarMouth];
-    // Adventurer hair key is `hair`; accept legacy/top values but map to hair
-    if ((member as any).avatarHairStyle) opts.hair = [(member as any).avatarHairStyle];
-    else if (cfg.hair) opts.hair = [cfg.hair];
-    else if (cfg.topType) opts.hair = [cfg.topType];
-    if (cfg.hairColor || (member as any).avatarHairColor) opts.hairColor = [addHash(cfg.hairColor || (member as any).avatarHairColor)];
-    // Eyes and eyebrows if present in config
-    if (cfg.eyeType) opts.eyes = [cfg.eyeType];
-    if (cfg.eyebrowType) opts.eyebrows = [cfg.eyebrowType];
-    if (typeof ((member as any).hairProbability) === 'number') opts.hairProbability = (member as any).hairProbability / 100;
-    else if (typeof cfg.hairProbability === 'number') opts.hairProbability = cfg.hairProbability / 100;
-    if (typeof ((member as any).glassesProbability) === 'number') opts.glassesProbability = (member as any).glassesProbability / 100;
-    else if (typeof cfg.glassesProbability === 'number') opts.glassesProbability = cfg.glassesProbability / 100;
-    if (typeof ((member as any).featuresProbability) === 'number') opts.featuresProbability = (member as any).featuresProbability / 100;
-    else if (typeof cfg.featuresProbability === 'number') opts.featuresProbability = cfg.featuresProbability / 100;
-    if (typeof ((member as any).earringsProbability) === 'number') opts.earringsProbability = (member as any).earringsProbability / 100;
-    else if (typeof cfg.earringsProbability === 'number') opts.earringsProbability = cfg.earringsProbability / 100;
-    return opts;
-  }, [member]);
+  // No complex avatar options needed - using simple ProfileImage
   
   // Check if we're in dark mode - improved detection
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -299,23 +275,18 @@ export function FamilyMemberZone({
       )}>
         {/* Centered Avatar and Name Layout */}
         <div className="flex flex-col items-center text-center mb-6">
-          {/* Large Avatar - Always Adventurer Style */}
+          {/* Large Profile Image */}
           <div className="relative mb-4">
-            <div 
-              className="rounded-full border-4 shadow-lg ring-4 transition-all hover:shadow-xl hover:scale-105 overflow-hidden"
-              style={{ 
-                borderColor: borderColor,
-                ringColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'
-              }}
-            >
-              <DiceBearAvatar
-                seed={member.avatarSeed || member.id}
-                style="adventurer"
-                size={touchMode ? 120 : 96}
-                backgroundColor={isLight ? '#ffffff' : '#1f2937'}
-                options={avatarOptions}
-              />
-            </div>
+            <ProfileImage
+              name={member.displayName}
+              profileImageUrl={member.profileImageUrl}
+              color={member.color}
+              size={touchMode ? 120 : 96}
+              showBorder={true}
+              borderColor={isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}
+              className="shadow-lg transition-all hover:shadow-xl hover:scale-105"
+              fontWeight="bold"
+            />
             
             {/* Completion Badge on Avatar */}
             {completionRate === 100 && (

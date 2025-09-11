@@ -85,23 +85,33 @@ export function DiceBearAvatar({
 
           // For adventurer style, keep hex with #. Map named colors to hex.
           const normalizeColor = (c: string) => {
+            // If it's already a hex color, return as-is
+            if (c.startsWith('#')) return c;
+            
             const map: Record<string, string> = {
-              Auburn: '#A55728',
+              // Hair colors (matching our color system)
               Black: '#2C1B18',
+              BrownDark: '#4A2C2A', 
+              Brown: '#724133',
+              Auburn: '#A55728',
               Blonde: '#B58143',
               BlondeGolden: '#D6B370',
-              Brown: '#724133',
-              BrownDark: '#4A312C',
-              PastelPink: '#F59797',
-              Blue: '#000FFF',
-              Platinum: '#ECDCBF',
               Red: '#C93305',
-              SilverGray: '#E8E1E1',
-              Tanned: '#FD9841',
-              Yellow: '#F8D25C',
-              Pale: '#FFDBB4',
-              Light: '#EDB98A',
-              DarkBrown: '#AE5D29'
+              SilverGray: '#B7B7B7',
+              Platinum: '#E8E1E1',
+              PastelPink: '#FF69B4',
+              Blue: '#4169E1',
+              Green: '#228B22',
+              Purple: '#9370DB',
+              
+              // Skin colors (matching our color system)
+              Light: '#FDBCB4',
+              Pale: '#FFDBB4', 
+              Yellow: '#F1C27D',
+              Tanned: '#E0AC69',
+              Brown: '#C68642',
+              DarkBrown: '#8D5524',
+              Black: '#5A3A31'
             };
             return map[c] || c;
           };

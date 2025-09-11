@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { MemberModal } from '@/components/family/MemberModal';
 
-import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
+import { ProfileImage } from '@/components/ui/ProfileImage';
 import { FamilyMember } from '@/types/family';
 import { Button } from '@/components/ui/Button';
 import { UserPlus, Edit2, Users, Crown, Trophy, Star, Trash2 } from 'lucide-react';
@@ -92,61 +92,7 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
   // Check if current user is the family creator
   const isFamilyCreator = currentFamily?.createdBy === currentMember?.userId;
 
-  // Build adventurer avatar options from stored avatarConfig so members tab matches edit form and dashboard
-  const getAvatarOptions = (member: FamilyMember) => {
-    const cfg = (member as any).avatarConfig || {};
-    const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
-    const opts: any = {};
-
-    // Only add options if they have values
-    if (cfg.skinColor || (member as any).avatarSkinColor) {
-      opts.skinColor = [addHash(cfg.skinColor || (member as any).avatarSkinColor)];
-    }
-    if (cfg.mouthType || (member as any).avatarMouth) {
-      opts.mouth = [cfg.mouthType || (member as any).avatarMouth];
-    }
-    if (cfg.hairColor || (member as any).avatarHairColor) {
-      opts.hairColor = [addHash(cfg.hairColor || (member as any).avatarHairColor)];
-    }
-
-    // Get hair probability - use new format or fallback to old
-    const hairProb = (member as any).hairProbability ?? cfg.hairProbability ?? 100;
-    if (hairProb >= 50) {
-      opts.hair = ['short01', 'short02', 'short03', 'short04', 'short05', 'long01', 'long02', 'long03'];
-    }
-
-    // Get glasses probability and set options
-    const glassesProb = (member as any).glassesProbability ?? cfg.glassesProbability ?? 50;
-    if (glassesProb >= 50) {
-      opts.accessories = ['prescription01', 'prescription02', 'round', 'sunglasses'];
-    }
-
-    // Get earrings probability and set options
-    const earringsProb = (member as any).earringsProbability ?? cfg.earringsProbability ?? 30;
-    if (earringsProb >= 50) {
-      opts.earrings = ['variant01', 'variant02', 'variant03'];
-    }
-
-    // Get features probability and set options
-    const featuresProb = (member as any).featuresProbability ?? cfg.featuresProbability ?? 10;
-    if (featuresProb >= 50) {
-      opts.facialHair = ['variant01', 'variant02', 'variant03', 'variant04'];
-    }
-
-    // Strip # from colors for adventurer style compatibility
-    if (opts.skinColor && Array.isArray(opts.skinColor)) {
-      opts.skinColor = opts.skinColor.map(color =>
-        typeof color === 'string' && color.startsWith('#') ? color.slice(1) : color
-      );
-    }
-    if (opts.hairColor && Array.isArray(opts.hairColor)) {
-      opts.hairColor = opts.hairColor.map(color =>
-        typeof color === 'string' && color.startsWith('#') ? color.slice(1) : color
-      );
-    }
-
-    return opts;
-  };
+  // No complex avatar options needed with ProfileImage component
 
   return (
     <div className="px-6">
@@ -207,18 +153,18 @@ export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
               )}
             </div>
             
-            {/* Member Avatar - Compact */}
+            {/* Member Profile Image - Compact */}
             <div className="flex flex-col items-center mb-3">
               <div className="relative">
-                <div className="rounded-full ring-2 ring-white dark:ring-gray-700 overflow-hidden">
-                  <DiceBearAvatar
-                    seed={member.avatarSeed || member.id}
-                    style="adventurer"
-                    size={64}
-                    backgroundColor="transparent"
-                    options={getAvatarOptions(member)}
-                  />
-                </div>
+                <ProfileImage
+                  name={member.displayName}
+                  profileImageUrl={member.profileImageUrl}
+                  color={member.color}
+                  size={64}
+                  showBorder={true}
+                  borderColor="rgba(255,255,255,0.2)"
+                  className="shadow-sm transition-all hover:shadow-md hover:scale-105"
+                />
                 {member.id === currentMember.id && (
                   <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1 ring-1 ring-white">
                     <Crown className="w-3 h-3 text-white" />
