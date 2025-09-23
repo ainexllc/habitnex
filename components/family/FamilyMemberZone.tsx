@@ -497,10 +497,14 @@ export function FamilyMemberZone({
                     {/* Habit Name - Takes remaining space */}
                     <h4 className={cn(
                       `font-semibold flex-1 ${theme.text.primary}`,
-                      touchMode ? "text-lg" : "text-base",
+                      "!text-sm",
                       isCompleted && (status === 'failure' ? "line-through text-gray-500 dark:text-gray-400" : "line-through text-green-700 dark:text-green-400"),
                       autoFailed && "line-through text-red-500 dark:text-red-400"
-                    )}>
+                    )}
+                    style={{
+                      fontSize: '14px !important',
+                      lineHeight: '1.25rem !important'
+                    }}>
                       {habit.name}
                       {autoFailed && (
                         <span className="ml-2 text-xs text-red-600 dark:text-red-400 font-normal">
