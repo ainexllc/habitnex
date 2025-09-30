@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FamilyHabitForm } from './FamilyHabitForm';
+import { FamilyHabitFormSimple } from './FamilyHabitFormSimple';
 
 interface CreateFamilyHabitModalProps {
   isOpen: boolean;
@@ -9,5 +9,5 @@ interface CreateFamilyHabitModalProps {
 }
 
 export function CreateFamilyHabitModal({ isOpen, onClose }: CreateFamilyHabitModalProps) {
-  return <FamilyHabitForm mode="create" isOpen={isOpen} onClose={onClose} />;
+  return <FamilyHabitFormSimple mode="create" isOpen={isOpen} onClose={onClose} />;
 }

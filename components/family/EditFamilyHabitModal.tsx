@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FamilyHabitForm } from './FamilyHabitForm';
+import { FamilyHabitFormSimple } from './FamilyHabitFormSimple';
 import { FamilyHabit } from '@/types/family';
 
 interface EditFamilyHabitModalProps {
@@ -17,5 +17,5 @@ export function EditFamilyHabitModal({ isOpen, onClose, habit, onSuccess }: Edit
     onClose();
   };
 
-  return <FamilyHabitForm mode="edit" isOpen={isOpen} onClose={handleSuccess} habit={habit} />;
+  return <FamilyHabitFormSimple mode="edit" isOpen={isOpen} onClose={handleSuccess} habit={habit} />;
 }

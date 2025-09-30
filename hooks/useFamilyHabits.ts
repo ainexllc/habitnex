@@ -431,25 +431,35 @@ export function useAllFamilyHabits() {
     }
   }, [currentFamily?.id]);
 
+  // Get habit completion for a specific habit, member, and date
+  const getHabitCompletion = useCallback((habitId: string, date: string, memberId?: string) => {
+    return allCompletions.find(c =>
+      c.habitId === habitId &&
+      c.date === date &&
+      (!memberId || c.memberId === memberId)
+    ) || null;
+  }, [allCompletions]);
+
   return {
     // Data
     allHabits,
     allCompletions,
-    
+
     // State
     loading,
     error,
-    
+
     // Actions
     createHabit,
     updateHabit,
     deleteHabit,
     toggleMemberCompletion,
     refresh: refreshData,
-    
+
     // Utilities
     getHabitsByMember,
     getMemberStats,
+    getHabitCompletion,
     clearError: () => {} // No-op since error is managed globally
   };
 }

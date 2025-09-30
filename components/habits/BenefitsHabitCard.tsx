@@ -46,11 +46,12 @@ interface BenefitsHabitCardProps {
   onEdit?: (habit: Habit) => void;
   onDelete?: (habit: Habit) => void;
   compact?: boolean;
+  selectedDate?: string; // YYYY-MM-DD format, defaults to today
 }
 
-export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: BenefitsHabitCardProps) {
+export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false, selectedDate }: BenefitsHabitCardProps) {
   const [loading, setLoading] = useState(false);
-  
+
   // Check if habit has AI enhancement data for showing expand button
   const hasAIBenefits = !!(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.tip);
   const [expanded, setExpanded] = useState(false); // Always start collapsed
@@ -58,25 +59,30 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
   const [completionStatus, setCompletionStatus] = useState<'success' | 'failure' | null>(null); // Track completion state
   const [isCompletingAnimation, setIsCompletingAnimation] = useState(false); // Track completion animation
   const [justCompleted, setJustCompleted] = useState(false); // Track if habit was just completed
-  
+
   const { isHabitCompleted, completions, removeHabit, getHabitCompletion, toggleCompletion } = usePersonalData();
   const { timeFormatPreferences } = useUserPreferences();
-  
-  const isCompleted = isHabitCompleted(habit.id);
-  
+
+  // Use selectedDate or default to today
+  const targetDate = selectedDate || new Date().toISOString().split('T')[0];
+
+  // Get completion status for the selected date
+  const completion = getHabitCompletion(habit.id, targetDate);
+  const isCompleted = completion?.completed || false;
+
   // Load completion status from notes when component mounts or completion changes
   useEffect(() => {
-    const todayCompletion = getHabitCompletion(habit.id);
-    if (todayCompletion && todayCompletion.completed) {
-      if (todayCompletion.notes === 'Marked as failed') {
+    const dateCompletion = getHabitCompletion(habit.id, targetDate);
+    if (dateCompletion && dateCompletion.completed) {
+      if (dateCompletion.notes === 'Marked as failed') {
         setCompletionStatus('failure');
-      } else if (todayCompletion.notes === 'Completed successfully') {
+      } else if (dateCompletion.notes === 'Completed successfully') {
         setCompletionStatus('success');
       }
     } else {
       setCompletionStatus(null);
     }
-  }, [habit.id, completions, getHabitCompletion]);
+  }, [habit.id, completions, getHabitCompletion, targetDate]);
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
   const currentStreak = habit.frequency === 'interval' 
     ? calculateIntervalStreak(habit, completions)
@@ -93,17 +99,17 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
       setLoading(true);
       setIsCompletingAnimation(true);
       setJustCompleted(true);
-      
+
       // Always mark as completed (true), but track success/failure separately
-      await toggleCompletion(habit.id, undefined, true, success ? 'Completed successfully' : 'Marked as failed');
+      await toggleCompletion(habit.id, targetDate, true, success ? 'Completed successfully' : 'Marked as failed');
       setCompletionStatus(success ? 'success' : 'failure');
-      
+
       // After 2 seconds, allow the habit to move to completed section
       setTimeout(() => {
         setIsCompletingAnimation(false);
         // The habit will now move to "Completed Today" section via the dashboard logic
       }, 2000);
-      
+
     } catch (error) {
       // Failed to toggle completion - handle silently
       setIsCompletingAnimation(false);
@@ -117,7 +123,7 @@ export function BenefitsHabitCard({ habit, onEdit, onDelete, compact = false }: 
     try {
       setLoading(true);
       // Toggle back to uncompleted
-      await toggleCompletion(habit.id, undefined, false);
+      await toggleCompletion(habit.id, targetDate, false);
       setCompletionStatus(null);
     } catch (error) {
       // Failed to undo - handle silently

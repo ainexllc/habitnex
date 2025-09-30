@@ -56,3 +56,4 @@ components/debug/
 investigate_*.js
 check_user*.js
 .env.test
+.claude/

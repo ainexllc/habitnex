@@ -36,24 +36,6 @@ export function Header() {
             >
               Dashboard
             </Link>
-            <Link
-              href="/habits"
-              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
-            >
-              Habits
-            </Link>
-            <Link
-              href="/moods"
-              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
-            >
-              Moods
-            </Link>
-            <Link
-              href="/stats"
-              className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
-            >
-              Statistics
-            </Link>
           </nav>
 
           <div className="flex items-center space-x-3">

@@ -93,6 +93,39 @@ This file contains important configuration and setup information for this projec
 - **AI Integration**: `hooks/useClaudeAI.ts`, `app/api/claude/*`
 - **Styling**: Enhanced form focus states in `app/globals.css`
 
+## Historical Habit Editing Feature
+
+### Overview
+NextVibe includes a complete **Historical Habit Completion Editing** system that allows users to view and modify habit completions for any past date. This is essential for:
+- Correcting missed entries
+- Filling in gaps in tracking history
+- Maintaining accurate streaks and statistics
+- Reviewing completion patterns over time
+
+### How to Use
+1. Navigate to `/habits` page
+2. Click the **"History"** tab (top right, next to "Today" button)
+3. Use arrow buttons (◀ ▶) to navigate between dates
+4. Click **"Today"** button to return to current date
+5. Mark habits as complete/incomplete for the selected date
+6. Changes save automatically and streaks recalculate in real-time
+
+### Key Components
+- **DateSelector** (`components/ui/DateSelector.tsx`) - Date navigation UI with prev/next/today buttons
+- **HabitsHistoryView** (`components/habits/HabitsHistoryView.tsx`) - Main container integrating date selection with habit display
+- **BenefitsHabitCard** (`components/habits/BenefitsHabitCard.tsx`) - Habit cards with `selectedDate` prop support
+- **HabitCard** (`components/habits/HabitCard.tsx`) - Alternative card component also supporting `selectedDate`
+
+### Technical Details
+- **Date Format**: YYYY-MM-DD string format throughout
+- **Database**: Uses `toggleHabitCompletion(userId, habitId, date, completed, notes?)` from `lib/db.ts`
+- **Streak Calculation**: Automatic recalculation when historical data changes
+- **Real-time Updates**: Firestore listeners ensure UI stays synchronized
+- **Visual Indicators**: Blue borders on habit cards indicate historical mode
+
+### User Guide
+Complete documentation available at: `.claude/HISTORICAL_HABITS_GUIDE.md`
+
 ## AI Enhancement Features
 
 ### Claude AI Integration
@@ -153,6 +186,7 @@ This file contains important configuration and setup information for this projec
 - ✅ **Enhanced form UX** with prominent focus states, hover effects, and visual feedback
 - ✅ **Comprehensive testing** with Playwright integration
 - ✅ **Development workflow** optimized with safe restart scripts
+- ✅ **Historical habit completion editing** - Full calendar-based navigation to edit past dates
 
 ## System Environment
 - **OS**: macOS (Darwin 25.0.0)

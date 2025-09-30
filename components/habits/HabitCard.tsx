@@ -13,19 +13,28 @@ import { theme } from '@/lib/theme';
 interface HabitCardProps {
   habit: Habit;
   onEdit?: (habit: Habit) => void;
+  selectedDate?: string; // YYYY-MM-DD format, defaults to today
 }
 
-export function HabitCard({ habit, onEdit }: HabitCardProps) {
+export function HabitCard({ habit, onEdit, selectedDate }: HabitCardProps) {
   const [loading, setLoading] = useState(false);
-  const { isHabitCompleted, toggleCompletion, completions, removeHabit } = usePersonalData();
+  const { isHabitCompleted, toggleCompletion, completions, removeHabit, getHabitCompletion } = usePersonalData();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
-  const isCompleted = isHabitCompleted(habit.id);
+
+  // Use selectedDate or default to today
+  const targetDate = selectedDate || getTodayDateString();
+  const isToday = targetDate === getTodayDateString();
+  const isPastDate = targetDate < getTodayDateString();
+
+  // Get completion status for the selected date
+  const completion = getHabitCompletion(habit.id, targetDate);
+  const isCompleted = completion?.completed || false;
+
   const habitCompletions = completions.filter(c => c.habitId === habit.id);
-  const currentStreak = habit.frequency === 'interval' 
+  const currentStreak = habit.frequency === 'interval'
     ? calculateIntervalStreak(habit, completions)
     : calculateStreak(habitCompletions);
-  
+
   // Check if habit is due today or overdue
   const isDueToday = isHabitDueToday(habit);
   const isOverdue = isHabitOverdue(habit, completions);
@@ -35,7 +44,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
   const handleToggleCompletion = async () => {
     try {
       setLoading(true);
-      await toggleCompletion(habit.id, undefined, !isCompleted);
+      await toggleCompletion(habit.id, targetDate, !isCompleted);
     } catch (error) {
       // Failed to toggle completion - handle silently
     } finally {
@@ -76,6 +85,8 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
       isCompleted ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 opacity-80' : ''
     } ${
       isOverdue && !isCompleted ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800' : ''
+    } ${
+      isPastDate && !isToday ? 'border-l-4 border-l-blue-500' : ''
     }`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -89,11 +100,16 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
                 isCompleted ? `line-through ${theme.text.muted}` : theme.text.primary
               }`} title={habit.name}>
                 {habit.name}
+                {isPastDate && !isToday && (
+                  <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-normal">
+                    (Historical)
+                  </span>
+                )}
               </CardTitle>
               {habit.description && (
                 <p className={`task-description text-sm font-task-description mt-1 transition-all duration-300 ${
-                  isCompleted 
-                    ? `line-through ${theme.text.muted}` 
+                  isCompleted
+                    ? `line-through ${theme.text.muted}`
                     : theme.text.muted
                 }`}>
                   {habit.description}
@@ -165,15 +181,29 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
             )}
           </div>
 
-          {isDueToday || isOverdue ? (
+          {isPastDate && !isToday ? (
+            <Button
+              onClick={handleToggleCompletion}
+              loading={loading}
+              variant={isCompleted ? "secondary" : "outline"}
+              className={`${
+                isCompleted
+                  ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800'
+                  : ''
+              }`}
+            >
+              <Check className={`w-4 h-4 mr-2 ${isCompleted ? 'text-success-600 dark:text-success-400' : ''}`} />
+              {isCompleted ? 'Completed' : 'Mark Done'}
+            </Button>
+          ) : isDueToday || isOverdue ? (
             <Button
               onClick={handleToggleCompletion}
               loading={loading}
               variant={isCompleted ? "secondary" : "primary"}
               className={`${
-                isCompleted 
-                  ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800' 
-                  : isOverdue 
+                isCompleted
+                  ? 'bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 hover:bg-success-200 dark:hover:bg-success-800'
+                  : isOverdue
                   ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
                   : ''
               }`}
@@ -184,7 +214,7 @@ export function HabitCard({ habit, onEdit }: HabitCardProps) {
           ) : (
             <div className="text-center">
               <div className={`text-sm ${theme.text.muted}`}>
-                {habit.frequency === 'interval' 
+                {habit.frequency === 'interval'
                   ? `Next due: ${nextDueDate ? new Date(nextDueDate).toLocaleDateString() : 'Not scheduled'}`
                   : 'Not due today'
                 }

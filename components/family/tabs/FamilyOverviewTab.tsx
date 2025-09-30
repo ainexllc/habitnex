@@ -5,11 +5,7 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
 import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
 import { HabitDetailsModal } from '@/components/habits/HabitDetailsModal';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { FamilyHabit } from '@/types/family';
-
-
-
 import { cn } from '@/lib/utils';
 
 interface FamilyOverviewTabProps {
@@ -17,7 +13,7 @@ interface FamilyOverviewTabProps {
 
 export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
   const { currentFamily, currentMember, isParent } = useFamily();
-  const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion } = useAllFamilyHabits();
+  const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion, getHabitCompletion } = useAllFamilyHabits();
 
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<(FamilyHabit & { completed: boolean }) | null>(null);
@@ -106,6 +102,7 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
             habits={getHabitsByMember(member.id)}
             stats={getMemberStats(member.id)}
             toggleCompletion={toggleMemberCompletion}
+            getHabitCompletion={getHabitCompletion}
             touchMode={touchMode}
             isExpanded={selectedMember === member.id}
             onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}

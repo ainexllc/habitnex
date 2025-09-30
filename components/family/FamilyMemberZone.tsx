@@ -7,11 +7,13 @@ import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
-import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2 } from 'lucide-react';
 import { cn, getTodayDateString } from '@/lib/utils';
 import { ProfileImage } from '@/components/ui/ProfileImage';
 import { HabitBenefitsModal } from './HabitBenefitsModal';
+import { MemberHistoryModal } from './MemberHistoryModal';
 import { OpenMoji } from '@/components/ui/OpenMoji';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { theme } from '@/lib/theme';
 
 interface FamilyMemberZoneProps {
@@ -24,7 +26,8 @@ interface FamilyMemberZoneProps {
     totalPoints: number;
     pending: number;
   };
-  toggleCompletion: (habitId: string, memberId: string, currentCompleted: boolean) => Promise<void>;
+  toggleCompletion: (habitId: string, memberId: string, currentCompleted: boolean, date?: string) => Promise<void>;
+  getHabitCompletion: (habitId: string, date: string, memberId?: string) => FamilyHabitCompletion | null;
   touchMode?: boolean;
   isExpanded?: boolean;
   onExpand?: () => void;
@@ -36,20 +39,19 @@ export function FamilyMemberZone({
   habits,
   stats,
   toggleCompletion,
+  getHabitCompletion,
   touchMode = false,
   isExpanded = false,
   onExpand,
   className
 }: FamilyMemberZoneProps) {
-  // We still need loading state from the hook, but toggleCompletion comes from props
-  const { loading, getHabitCompletion } = useFamilyHabits(member.id);
+  // We still need loading state from the hook, but toggleCompletion and getHabitCompletion come from props
+  const { loading } = useFamilyHabits(member.id);
   const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [previousStats, setPreviousStats] = useState(member.stats);
-
-  // Track which habits are expanded to show details
-  const [expandedHabits, setExpandedHabits] = useState<Set<string>>(new Set());
   const [benefitsModalHabit, setBenefitsModalHabit] = useState<FamilyHabit | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   // Get today's date for completion checking
   const today = getTodayDateString();
@@ -67,7 +69,7 @@ export function FamilyMemberZone({
     }
     
     // Fallback to direct database query if needed
-    const todaysCompletion = getHabitCompletion(habitId, today);
+    const todaysCompletion = getHabitCompletion(habitId, today, member.id);
     if (todaysCompletion && todaysCompletion.completed) {
       // Return success/failure based on notes, default to success
       if (todaysCompletion.notes === 'Marked as failed') {
@@ -76,23 +78,11 @@ export function FamilyMemberZone({
       return 'success';
     }
     return null;
-  }, [habits, getHabitCompletion, today]);
-  
-  const toggleHabitExpanded = useCallback((habitId: string) => {
-    setExpandedHabits(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(habitId)) {
-        newSet.delete(habitId);
-      } else {
-        newSet.add(habitId);
-      }
-      return newSet;
-    });
-  }, []);
-  
+  }, [habits, getHabitCompletion, today, member.id]);
+
   const handleHabitToggle = useCallback(async (habitId: string, currentCompleted: boolean) => {
     try {
-      await toggleCompletion(habitId, member.id, currentCompleted);
+      await toggleCompletion(habitId, member.id, currentCompleted, today);
       
       // Trigger celebration animation if completing
       if (!currentCompleted) {
@@ -273,8 +263,20 @@ export function FamilyMemberZone({
       )}>
         {/* Centered Avatar and Name Layout - Extra Compact */}
         <div className="flex flex-col items-center text-center mb-2">
-          {/* Profile Image - Smaller */}
+          {/* Profile Image with Calendar Button - Smaller */}
           <div className="relative mb-2">
+            {/* Calendar Button - Top Right */}
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="absolute -top-2 -right-2 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:scale-110 transition-all border-2"
+              style={{ borderColor: member.color }}
+              title="View history"
+            >
+              <CalendarIcon
+                className="w-5 h-5"
+                style={{ color: member.color }}
+              />
+            </button>
             <ProfileImage
               name={member.displayName}
               profileImageUrl={member.profileImageUrl}
@@ -299,7 +301,7 @@ export function FamilyMemberZone({
           {/* Name and Level Info - Compact */}
           <div>
             <h3 className={cn(
-              "font-bold mb-1 leading-tight",
+              "font-bold leading-tight",
               touchMode ? "text-2xl" : "text-xl",
               textColor
             )} style={{
@@ -308,49 +310,6 @@ export function FamilyMemberZone({
             }}>
               {member.displayName}
             </h3>
-            
-            {/* Level and Points Info - Compact */}
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <div className={cn(
-                "flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm",
-                isLight ? "bg-black/10" : (isDarkMode ? "bg-white/5" : "bg-white/20")
-              )}>
-                <Star className="w-4 h-4 text-yellow-400" />
-                <span className={cn(
-                  "font-semibold",
-                  touchMode ? "text-sm" : "text-xs",
-                  textColor
-                )}>
-                  Level {level}
-                </span>
-              </div>
-              <div className={cn(
-                "flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm",
-                isLight ? "bg-black/10" : (isDarkMode ? "bg-white/5" : "bg-white/20")
-              )}>
-                <Trophy className="w-4 h-4 text-purple-400" />
-                <span className={cn(
-                  "font-semibold",
-                  touchMode ? "text-sm" : "text-xs",
-                  textColor
-                )}>
-                  {member.stats.totalPoints} pts
-                </span>
-              </div>
-            </div>
-            
-            {/* Daily Completion Status - Compact */}
-            <div className="flex items-center justify-center">
-              <div className={cn(
-                "px-3 py-1.5 rounded-full font-semibold shadow-sm text-white",
-                touchMode ? "text-base" : "text-sm",
-                completionRate === 100 
-                  ? "bg-gradient-to-r from-green-500 to-emerald-500" 
-                  : "bg-gradient-to-r from-blue-500 to-indigo-500"
-              )}>
-                {stats.completed}/{stats.total} Today ({Math.round(completionRate)}%)
-              </div>
-            </div>
           </div>
         </div>
         
@@ -360,7 +319,7 @@ export function FamilyMemberZone({
       <CardContent className={cn(
         touchMode ? "p-3 pt-0" : "p-2 pt-0"
       )}>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {habits.length === 0 ? (
             <div className={`text-center py-4 ${theme.text.muted}`}>
               <Trophy className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -373,11 +332,6 @@ export function FamilyMemberZone({
               // Check actual database completion for today
               const status = getTodaysCompletionStatus(habit.id);
               const isCompleted = status !== null;
-              const isExpanded = expandedHabits.has(habit.id);
-              const hasExpandableContent = Boolean(
-                (habit.description && habit.description.trim().length > 0) ||
-                (habit as any).healthBenefits || (habit as any).mentalBenefits || (habit as any).longTermBenefits || (habit as any).successTips
-              );
               
               // Debug logging
               console.log(`🎯 FamilyMemberZone - ${member.displayName} - ${habit.name}:`, {
@@ -396,8 +350,8 @@ export function FamilyMemberZone({
                 <div
                   key={habit.id}
                   className={cn(
-                    "relative p-3 rounded-lg transition-all duration-200 space-y-3 overflow-hidden backdrop-blur-sm",
-                    touchMode ? "p-4" : "p-3",
+                    "relative p-2 rounded-lg transition-all duration-200 space-y-1 overflow-hidden backdrop-blur-sm",
+                    touchMode ? "p-3" : "p-2",
                     isCompleted 
                       ? "bg-green-50/50 dark:bg-green-950/10 border border-green-200/50 dark:border-green-800/30" 
                       : autoFailed
@@ -477,33 +431,18 @@ export function FamilyMemberZone({
                       )}/>
                     </div>
                   )}
-                  {/* Single Line: Expand, name, and actions */}
+                  {/* Single Line: name and actions */}
                   <div className="flex items-center gap-2">
-                    {/* Expand/Collapse Button (only if there is content to expand) */}
-                    {hasExpandableContent && (
-                      <button
-                        onClick={() => toggleHabitExpanded(habit.id)}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 hover:scale-110 flex-shrink-0"
-                        aria-label={isExpanded ? "Collapse details" : "Expand details"}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        )}
-                      </button>
-                    )}
-                    
                     {/* Habit Name - Takes remaining space */}
                     <h4 className={cn(
-                      `font-semibold flex-1 ${theme.text.primary}`,
-                      "!text-sm",
+                      `font-medium flex-1 ${theme.text.primary}`,
+                      "!text-xs",
                       isCompleted && (status === 'failure' ? "line-through text-gray-500 dark:text-gray-400" : "line-through text-green-700 dark:text-green-400"),
                       autoFailed && "line-through text-red-500 dark:text-red-400"
                     )}
                     style={{
-                      fontSize: '14px !important',
-                      lineHeight: '1.25rem !important'
+                      fontSize: '13px !important',
+                      lineHeight: '1.2rem !important'
                     }}>
                       {habit.name}
                       {autoFailed && (
@@ -515,11 +454,11 @@ export function FamilyMemberZone({
 
                     {/* Actions */}
                     {autoFailed ? (
-                      <div className="flex items-center gap-2">
-                        <div className="px-2 py-2 rounded-lg flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500">
-                          <OpenMoji 
-                            emoji="😔" 
-                            size={24}
+                      <div className="flex items-center gap-1.5">
+                        <div className="px-1.5 py-1.5 rounded-md flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500">
+                          <OpenMoji
+                            emoji="😔"
+                            size={20}
                             alt="Auto-failed"
                           />
                         </div>
@@ -530,14 +469,14 @@ export function FamilyMemberZone({
                     ) : isCompleted ? (
                       <>
                         <div className={cn(
-                          "px-2 py-2 rounded-lg flex items-center justify-center",
-                          status === 'failure' 
-                            ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
+                          "px-1.5 py-1.5 rounded-md flex items-center justify-center",
+                          status === 'failure'
+                            ? 'bg-gradient-to-r from-gray-500 to-gray-600'
                             : 'bg-gradient-to-r from-green-500 to-emerald-500'
                         )}>
-                          <OpenMoji 
-                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😢' : '✅'} 
-                            size={24}
+                          <OpenMoji
+                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😢' : '✅'}
+                            size={20}
                             alt={status === 'success' ? 'Celebration' : status === 'failure' ? 'Sad' : 'Done'}
                           />
                         </div>
@@ -545,10 +484,10 @@ export function FamilyMemberZone({
                           onClick={() => handleUndo(habit.id)}
                           size="sm"
                           variant="outline"
-                          className="hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="h-7 px-2 hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
                           title="Undo"
                         >
-                          <Undo2 className="w-4 h-4" />
+                          <Undo2 className="w-3.5 h-3.5" />
                         </Button>
                       </>
                     ) : (
@@ -557,60 +496,23 @@ export function FamilyMemberZone({
                           onClick={() => handleHabitCompletion(habit.id, true)}
                           loading={loading}
                           size="sm"
-                          className="w-8 h-8 p-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
+                          className="w-7 h-7 p-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
                           title="Mark as completed"
                         >
-                          <Check className="w-4 h-4" />
+                          <Check className="w-3.5 h-3.5" />
                         </Button>
                         <Button
                           onClick={() => handleHabitCompletion(habit.id, false)}
                           loading={loading}
                           size="sm"
-                          className="w-8 h-8 p-0 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
+                          className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
                           title="Mark as failed"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3.5 h-3.5" />
                         </Button>
                       </>
                     )}
                   </div>
-                  
-                  {/* Expanded Details Section */}
-                  {hasExpandableContent && isExpanded && (
-                    <div className={cn(
-                      "mt-3 pt-3 border-t space-y-2",
-                      theme.border.light
-                    )}>
-                      {habit.description && (
-                        <p className={cn(
-                          "text-sm",
-                          theme.text.secondary
-                        )}>
-                          {habit.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-4 text-sm">
-                        {/* View Benefits Link */}
-                        {(habit.healthBenefits || habit.mentalBenefits || habit.longTermBenefits || habit.successTips || habit.description) && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setBenefitsModalHabit(habit);
-                            }}
-                            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                          >
-                            <Info className="w-4 h-4" />
-                            <span className="underline">View Benefits</span>
-                          </button>
-                        )}
-                        {habit.tags && habit.tags.length > 0 && (
-                          <span className={theme.text.muted}>
-                            Tags: {habit.tags.join(', ')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })
@@ -706,6 +608,16 @@ export function FamilyMemberZone({
         isOpen={!!benefitsModalHabit}
         onClose={() => setBenefitsModalHabit(null)}
         habit={benefitsModalHabit}
+      />
+
+      {/* History Modal */}
+      <MemberHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        member={member}
+        habits={habits}
+        onToggleCompletion={toggleCompletion}
+        getHabitCompletion={getHabitCompletion}
       />
     </>
   );
