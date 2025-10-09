@@ -3,8 +3,8 @@
 This file contains important configuration and setup information for this project and development environment.
 
 ## Project Overview
-- **Project Name**: NextVibe - Habit & Mood Tracking App
-- **Repository**: https://github.com/ainexllc/nextvibe
+- **Project Name**: HabitNex - Habit & Mood Tracking App
+- **Repository**: https://github.com/ainexllc/habitnex
 - **Technology Stack**: Next.js 14.2.31, TypeScript 5.9.2, Firebase 12.1.0, Tailwind CSS 3.4.17, Recharts 3.1.2
 - **Features**: Habit tracking, mood tracking, AI-enhanced habits, analytics, dark/light mode
 - **Current Status**: ✅ Production ready with enhanced AI features and improved UX
@@ -31,7 +31,7 @@ This file contains important configuration and setup information for this projec
 
 ### Available Repositories
 - ainexllc/nexttask (private)
-- ainexllc/nextvibe (public) - **Current Project** (formerly habittracker-nextjs)
+- ainexllc/habitnex (public) - **Current Project** (formerly nextvibe, originally habittracker-nextjs)
 - ainexllc/homekeep (private)
 - ainexllc/journal (private)
 - ainexllc/ainex (private)
@@ -78,12 +78,12 @@ This file contains important configuration and setup information for this projec
 - **OAuth Client ID**: 324797617648-prrbq679kjb59vfg59purusqi8474qu5.apps.googleusercontent.com
 - **Local Method**: Popup (works immediately, no CORS issues)
 - **Production Method**: Redirect (better for mobile, SEO-friendly)
-- **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app
+- **Authorized Domains**: localhost, habittracker-eb6bd.firebaseapp.com, habitnex.app
 - **Redirect URIs**:
   - http://localhost:3000/__/auth/handler (default Next.js port)
   - http://localhost:3001/__/auth/handler (alternative port if 3000 is in use)
   - https://habittracker-eb6bd.firebaseapp.com/__/auth/handler
-  - https://nextvibe.app/__/auth/handler
+  - https://habitnex.app/__/auth/handler
 - **Note**: The development port can be any available port (3000, 3001, etc.). Use `npm run dev` for default port 3000 or `next dev -p [PORT]` for a specific port. Update OAuth redirect URIs in Google Cloud Console accordingly.
 
 #### Key Implementation Files
@@ -168,9 +168,9 @@ Complete documentation available at: `.claude/HISTORICAL_HABITS_GUIDE.md`
 - **Build Command**: `npm run build`
 - **Deploy Command**: `npm run deploy` or `firebase deploy --only hosting`
 - **Current Config**: TypeScript and ESLint checking disabled during builds
-- **Production URLs**: 
+- **Production URLs**:
   - Firebase: https://habittracker-eb6bd.web.app
-  - Vercel: https://nextvibe.app (auto-deployment enabled)
+  - Vercel: https://habitnex.app (auto-deployment enabled)
 
 ## Recent Implementation Notes (Current State)
 - ✅ **Enhanced AI Features** with Claude Haiku integration
@@ -353,9 +353,9 @@ When working on this project, Claude Code can:
 
 **Project Details:**
 - **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
-- **Project Name**: nextvibe (Vercel project name)
-- **Production URL**: https://nextvibe.app
-- **Repository**: https://github.com/ainexllc/nextvibe
+- **Project Name**: nextvibe (Vercel project name - legacy, will update separately)
+- **Production URL**: https://habitnex.app
+- **Repository**: https://github.com/ainexllc/habitnex
 - **Vercel CLI Version**: 46.0.2
 - **Account**: dinohorn35@gmail.com (GitHub authenticated)
 - **Organization**: team_lNWTMcQWMnIRjyREXHHLAcbr
@@ -411,7 +411,7 @@ These agents provide specialized expertise for this project and can be reference
 1. **Firebase Console Setup**:
    - Enable Google Sign-in provider with support email (dinohorn35@gmail.com)
    - Configure public-facing name and branding
-   - Set up authorized domains (localhost, habittracker-eb6bd.firebaseapp.com, nextvibe.app)
+   - Set up authorized domains (localhost, habittracker-eb6bd.firebaseapp.com, habitnex.app)
 
 2. **Google Cloud OAuth Configuration**:
    - OAuth Client ID: 324797617648-prrbq679kjb59vfg59purusqi8474qu5.apps.googleusercontent.com
@@ -761,9 +761,9 @@ vercel rollback <url>    # Rollback deployment
 
 **This Project Configuration:**
 - **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
-- **Project Name**: nextvibe (Vercel project name)
-- **Production URL**: https://nextvibe.app
-- **Repository**: https://github.com/ainexllc/nextvibe
+- **Project Name**: nextvibe (Vercel project name - legacy, will update separately)
+- **Production URL**: https://habitnex.app
+- **Repository**: https://github.com/ainexllc/habitnex
 - **Auto-deployment**: ✅ Enabled on main branch
 - **Preview deployments**: ✅ Enabled for PRs
 - **Build Command**: `next build` (auto-detected)
@@ -814,7 +814,7 @@ vercel rollback <url>    # Rollback deployment
 **Status**: ✅ Fully Integrated (September 2025)
 
 ### Overview
-NextVibe now uses OpenMoji SVGs for all emoji displays, providing consistent, high-quality emoji rendering across all platforms and devices. This replaces system emojis with beautiful, open-source SVG icons.
+HabitNex now uses OpenMoji SVGs for all emoji displays, providing consistent, high-quality emoji rendering across all platforms and devices. This replaces system emojis with beautiful, open-source SVG icons.
 
 ### Resources
 - **OpenMoji SVGs**: 4,294 SVG files in `/public/openmoji/`
@@ -864,9 +864,9 @@ The emoji suggestion system uses AI to recommend relevant emojis based on:
 - Activity type (e.g., "meditation" → 🧘)
 - Category context (e.g., "health" → 💪)
 
-## Custom NextVibe Subagents 🤖
+## Custom HabitNex Subagents 🤖
 
-We have specialized AI subagents designed specifically for NextVibe development. See `CUSTOM_AGENTS.md` for full details. Quick reference:
+We have specialized AI subagents designed specifically for HabitNex development. See `CUSTOM_AGENTS.md` for full details. Quick reference:
 
 ### Available Agents:
 1. **🎯 Habit Analytics Agent** - `"analyze habits"` - Deep habit pattern analysis
