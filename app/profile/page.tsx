@@ -115,7 +115,7 @@ export default function ProfilePage() {
                       Theme Pack
                     </label>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      {availableThemes.map((theme) => (
+                      {availableThemes?.map((theme) => (
                         <button
                           key={theme.id}
                           onClick={() => setPreset(theme.id)}
