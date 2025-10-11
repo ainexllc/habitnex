@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('NextVibe App Verification', () => {
+test.describe('HabitNex App Verification', () => {
   test('should load the application successfully', async ({ page }) => {
     // Navigate to the app
     await page.goto('/');
@@ -8,8 +8,8 @@ test.describe('NextVibe App Verification', () => {
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
     
-    // Check that the page title contains NextVibe or similar
-    await expect(page).toHaveTitle(/NextVibe|Habit|Mood/);
+    // Check that the page title contains HabitNex or similar
+    await expect(page).toHaveTitle(/HabitNex|Habit|Mood/);
     
     // Take a screenshot of the current state
     await page.screenshot({ 

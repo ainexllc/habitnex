@@ -2,7 +2,7 @@
   "timestamp": "2025-08-26T14:31:19.350Z",
   "testSummary": {
     "url": "http://localhost:3000/forgot-password/",
-    "title": "NextVibe - Build Better Habits",
+    "title": "HabitNex - Build Better Habits",
     "totalErrors": 4,
     "totalWarnings": 0,
     "networkIssues": 3

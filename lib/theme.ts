@@ -1,5 +1,5 @@
 /**
- * Centralized Theme System for NextVibe
+ * Centralized Theme System for HabitNex
  * 
  * This file contains all theme-related classes and utilities to ensure
  * consistent light/dark mode styling across the entire application.

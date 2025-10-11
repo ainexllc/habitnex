@@ -7,12 +7,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { theme } from '@/lib/theme';
-import { Target, Heart, Mail, Lock, Eye, EyeOff, ArrowRight, Zap, TrendingUp, Shield, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap, TrendingUp, Shield, CheckCircle } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 
 const loginSchema = z.object({
@@ -95,11 +91,11 @@ export default function LoginPage() {
             <Logo textSize="md" />
 
             <div className="flex items-center space-x-4">
-              <Link 
-                href="/signup" 
+              <Link
+                href="/signup"
                 className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
               >
-                Don't have an account?
+                Don&apos;t have an account?
               </Link>
               <Link 
                 href="/signup" 
@@ -200,7 +196,7 @@ export default function LoginPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                      "NextVibe transformed my daily routine. The AI suggestions are spot-on, and I've maintained my longest streak ever!"
+                      &quot;NextVibe transformed my daily routine. The AI suggestions are spot-on, and I&apos;ve maintained my longest streak ever!&quot;
                     </p>
                     <div className="mt-2">
                       <div className="text-xs font-semibold text-gray-900 dark:text-white">Jane Doe</div>
@@ -374,7 +370,7 @@ export default function LoginPage() {
                 {/* Sign Up Link */}
                 <div className="text-center pt-6 border-t border-gray-200 dark:border-gray-800">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Link
                       href="/signup"
                       className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"

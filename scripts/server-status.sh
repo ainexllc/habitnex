@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Quick server status checker for NextVibe development server
+# Quick server status checker for HabitNex development server
 
-echo "=== NextVibe Server Status ==="
+echo "=== HabitNex Server Status ==="
 echo "Port: 3000"
 echo "Time: $(date)"
 echo ""
 
 # Check if pm2 process is running
 echo "PM2 Process Status:"
-pm2 status | grep nextvibe-dev || echo "No nextvibe-dev process found"
+pm2 status | grep habitnex-dev || echo "No habitnex-dev process found"
 echo ""
 
 # Check if port 3000 is listening
@@ -24,7 +24,7 @@ echo ""
 
 # Show recent logs
 echo "Recent PM2 Logs:"
-pm2 logs nextvibe-dev --lines 3 --nostream 2>/dev/null || echo "No logs available"
+pm2 logs habitnex-dev --lines 3 --nostream 2>/dev/null || echo "No logs available"
 echo ""
 
 echo "=== End Status ==="

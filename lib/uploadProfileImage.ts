@@ -10,7 +10,7 @@ export async function uploadProfileImage(
   memberId: string
 ): Promise<string> {
   try {
-    let processedFile = file;
+    const processedFile = file;
     let fileName = `profile_${Date.now()}`;
     
     // Check if file is HEIC and provide clear guidance

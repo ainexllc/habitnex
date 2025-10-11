@@ -1,11 +1,11 @@
 import { Meter, Counter, Histogram, Gauge, ObservableGauge } from '@opentelemetry/api';
-import { TelemetryProvider, BusinessMetrics, MetricEvent, NextVibeSpanAttributes } from './types';
+import { TelemetryProvider, BusinessMetrics, MetricEvent, HabitNexSpanAttributes } from './types';
 import { createMeter } from './index';
 
 /**
- * NextVibe metrics collection
+ * HabitNex metrics collection
  */
-export class NextVibeMetrics {
+export class HabitNexMetrics {
   private meter: Meter;
   
   // Business metrics
@@ -36,7 +36,7 @@ export class NextVibeMetrics {
   private concurrentRequestsGauge: ObservableGauge;
   
   constructor() {
-    this.meter = createMeter('nextvibe-metrics');
+    this.meter = createMeter('habitnex-metrics');
     this.initializeMetrics();
   }
 
@@ -170,7 +170,7 @@ export class NextVibeMetrics {
   }
 
   // Business metrics methods
-  recordHabitCompletion(attributes: NextVibeSpanAttributes = {}): void {
+  recordHabitCompletion(attributes: HabitNexSpanAttributes = {}): void {
     this.habitCompletionCounter.add(1, {
       'user.id': attributes['user.id'],
       'habit.category': attributes['habit.category'],
@@ -178,14 +178,14 @@ export class NextVibeMetrics {
     });
   }
 
-  recordMoodEntry(rating: number, attributes: NextVibeSpanAttributes = {}): void {
+  recordMoodEntry(rating: number, attributes: HabitNexSpanAttributes = {}): void {
     this.moodEntryCounter.add(1, {
       'user.id': attributes['user.id'],
       'mood.rating': rating,
     });
   }
 
-  recordAIFeatureUsage(feature: string, attributes: NextVibeSpanAttributes = {}): void {
+  recordAIFeatureUsage(feature: string, attributes: HabitNexSpanAttributes = {}): void {
     this.aiFeatureUsageCounter.add(1, {
       'ai.feature': feature,
       'user.id': attributes['user.id'],
@@ -193,7 +193,7 @@ export class NextVibeMetrics {
     });
   }
 
-  recordUserSessionDuration(durationSeconds: number, attributes: NextVibeSpanAttributes = {}): void {
+  recordUserSessionDuration(durationSeconds: number, attributes: HabitNexSpanAttributes = {}): void {
     this.userSessionDuration.record(durationSeconds, {
       'user.id': attributes['user.id'],
     });
@@ -205,7 +205,7 @@ export class NextVibeMetrics {
     method: string, 
     statusCode: number, 
     durationMs: number, 
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.apiRequestCounter.add(1, {
       'api.endpoint': endpoint,
@@ -227,7 +227,7 @@ export class NextVibeMetrics {
   recordError(
     errorType: string, 
     context: string, 
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.errorCounter.add(1, {
       'error.type': errorType,
@@ -241,7 +241,7 @@ export class NextVibeMetrics {
     inputTokens: number, 
     outputTokens: number, 
     cost: number, 
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.claudeTokenUsage.add(inputTokens, {
       type: 'input',
@@ -264,7 +264,7 @@ export class NextVibeMetrics {
     collection: string, 
     durationMs: number, 
     success: boolean,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.databaseQueryDuration.record(durationMs, {
       'db.operation': operation,
@@ -285,14 +285,14 @@ export class NextVibeMetrics {
   }
 
   // User experience metrics methods
-  recordPageLoad(page: string, loadTimeMs: number, attributes: NextVibeSpanAttributes = {}): void {
+  recordPageLoad(page: string, loadTimeMs: number, attributes: HabitNexSpanAttributes = {}): void {
     this.pageLoadTime.record(loadTimeMs, {
       'page.name': page,
       'user.id': attributes['user.id'],
     });
   }
 
-  recordWebVitals(metric: string, value: number, attributes: NextVibeSpanAttributes = {}): void {
+  recordWebVitals(metric: string, value: number, attributes: HabitNexSpanAttributes = {}): void {
     this.webVitalsGauge.record(value, {
       'vitals.metric': metric,
       'page.name': attributes['component.name'],
@@ -302,7 +302,7 @@ export class NextVibeMetrics {
   recordInteraction(
     type: string, 
     durationMs: number, 
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.interactionDuration.record(durationMs, {
       'interaction.type': type,
@@ -310,7 +310,7 @@ export class NextVibeMetrics {
     });
   }
 
-  recordErrorRecovery(errorType: string, attributes: NextVibeSpanAttributes = {}): void {
+  recordErrorRecovery(errorType: string, attributes: HabitNexSpanAttributes = {}): void {
     this.errorRecoveryCounter.add(1, {
       'error.type': errorType,
       'user.id': attributes['user.id'],
@@ -337,14 +337,14 @@ export class NextVibeMetrics {
 /**
  * Global metrics instance
  */
-let globalMetrics: NextVibeMetrics | null = null;
+let globalMetrics: HabitNexMetrics | null = null;
 
 /**
  * Initialize custom metrics
  */
-export async function createCustomMetrics(provider: TelemetryProvider): Promise<NextVibeMetrics> {
+export async function createCustomMetrics(provider: TelemetryProvider): Promise<HabitNexMetrics> {
   if (!globalMetrics) {
-    globalMetrics = new NextVibeMetrics();
+    globalMetrics = new HabitNexMetrics();
     console.log('[Telemetry] Custom metrics initialized');
   }
   
@@ -354,7 +354,7 @@ export async function createCustomMetrics(provider: TelemetryProvider): Promise<
 /**
  * Get global metrics instance
  */
-export function getMetrics(): NextVibeMetrics | null {
+export function getMetrics(): HabitNexMetrics | null {
   return globalMetrics;
 }
 

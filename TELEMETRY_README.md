@@ -1,8 +1,8 @@
-# NextVibe OpenTelemetry Integration
+# HabitNex OpenTelemetry Integration
 
 ## Overview
 
-This implementation provides comprehensive observability, monitoring, and analytics for NextVibe using OpenTelemetry. It includes distributed tracing, custom metrics collection, real user monitoring (RUM), and integration with multiple monitoring services.
+This implementation provides comprehensive observability, monitoring, and analytics for HabitNex using OpenTelemetry. It includes distributed tracing, custom metrics collection, real user monitoring (RUM), and integration with multiple monitoring services.
 
 ## Features
 
@@ -14,7 +14,7 @@ This implementation provides comprehensive observability, monitoring, and analyt
 - **Auto-Instrumentation**: Automatic HTTP, fetch, and database instrumentation
 - **Multiple Exporters**: Support for DataDog, New Relic, Honeycomb, Vercel Analytics, and custom OTLP endpoints
 
-#### NextVibe-Specific Instrumentation
+#### HabitNex-Specific Instrumentation
 - **Habit Tracking**: Trace habit creation, completion, and management operations
 - **Mood Analytics**: Monitor mood entry patterns and analysis
 - **AI Feature Monitoring**: Track Claude API usage, costs, and performance
@@ -61,7 +61,7 @@ lib/telemetry/
 ├── types.ts              # TypeScript definitions
 ├── tracing.ts            # Distributed tracing utilities
 ├── metrics.ts            # Custom metrics collection
-├── instrumentation.ts    # NextVibe-specific instrumentation
+├── instrumentation.ts    # HabitNex-specific instrumentation
 ├── exporters.ts          # Data export configuration
 ├── development.ts        # Development and debugging tools
 └── client.ts             # Client-side telemetry and RUM
@@ -83,7 +83,7 @@ instrumentation.ts        # Next.js instrumentation hook
 
 #### 2. Distributed Tracing (`lib/telemetry/tracing.ts`)
 - Provides high-level APIs for creating spans
-- Implements NextVibe-specific span types (user journeys, API calls, AI operations)
+- Implements HabitNex-specific span types (user journeys, API calls, AI operations)
 - Automatic performance measurement and error tracking
 - Context propagation across async operations
 
@@ -114,7 +114,7 @@ OTEL_ENABLE_METRICS=true
 OTEL_SAMPLING_RATE=1.0  # 0.0 to 1.0
 
 # Service identification
-OTEL_SERVICE_NAME=nextvibe
+OTEL_SERVICE_NAME=habitnex
 OTEL_SERVICE_VERSION=1.0.0
 ```
 
@@ -129,7 +129,7 @@ NEW_RELIC_LICENSE_KEY=your_newrelic_license_key
 
 # Honeycomb
 HONEYCOMB_API_KEY=your_honeycomb_api_key
-HONEYCOMB_DATASET=nextvibe
+HONEYCOMB_DATASET=habitnex
 
 # Custom OTLP Endpoint
 OTEL_EXPORTER_OTLP_ENDPOINT=https://your-endpoint.com/v1/traces
@@ -347,20 +347,20 @@ Create custom dashboards with these queries:
 
 ```
 # API Performance
-avg:nextvibe.api_response_time_ms{endpoint:/api/claude/enhance-habit}
+avg:habitnex.api_response_time_ms{endpoint:/api/claude/enhance-habit}
 
 # Error Rate
-sum:nextvibe.errors_total{*}.as_rate()
+sum:habitnex.errors_total{*}.as_rate()
 
 # Business Metrics
-avg:nextvibe.habit_completion_rate{*}
+avg:habitnex.habit_completion_rate{*}
 ```
 
 ### New Relic Queries
 
 ```sql
 -- API Performance
-SELECT average(duration) FROM Span WHERE service.name = 'nextvibe' AND name LIKE 'api.%'
+SELECT average(duration) FROM Span WHERE service.name = 'habitnex' AND name LIKE 'api.%'
 
 -- AI Feature Usage
 SELECT count(*) FROM Span WHERE ai.feature IS NOT NULL FACET ai.feature
@@ -370,10 +370,10 @@ SELECT count(*) FROM Span WHERE ai.feature IS NOT NULL FACET ai.feature
 
 ```promql
 # API Response Time P95
-histogram_quantile(0.95, nextvibe_api_response_time_ms_bucket)
+histogram_quantile(0.95, habitnex_api_response_time_ms_bucket)
 
 # Error Rate
-rate(nextvibe_errors_total[5m])
+rate(habitnex_errors_total[5m])
 ```
 
 ## Performance Considerations
@@ -464,7 +464,7 @@ TELEMETRY_CONSOLE_OUTPUT=true
 
 When adding new telemetry:
 
-1. **Define Custom Attributes**: Use the `NextVibeSpanAttributes` interface
+1. **Define Custom Attributes**: Use the `HabitNexSpanAttributes` interface
 2. **Create Specific Spans**: Use appropriate span types (API, database, AI, etc.)
 3. **Record Business Metrics**: Update relevant business metrics
 4. **Add Error Handling**: Ensure errors are properly traced

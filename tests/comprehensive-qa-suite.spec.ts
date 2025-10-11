@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 /**
- * Comprehensive QA Test Suite for NextVibe Habit Tracking Application
+ * Comprehensive QA Test Suite for HabitNex Habit Tracking Application
  * 
  * Senior QA Engineer - Playwright Testing Agent
  * Testing Areas:
@@ -125,7 +125,7 @@ function trackConsoleErrors(page: Page): string[] {
   return errors;
 }
 
-test.describe('NextVibe Comprehensive QA Test Suite', () => {
+test.describe('HabitNex Comprehensive QA Test Suite', () => {
   
   test.beforeEach(async ({ page }) => {
     // Clear cookies and localStorage safely
@@ -149,7 +149,7 @@ test.describe('NextVibe Comprehensive QA Test Suite', () => {
       const loadTime = await measurePageLoad(page, '/');
       
       // Check page loads
-      await expect(page).toHaveTitle(/NextVibe|Habit/i);
+      await expect(page).toHaveTitle(/HabitNex|Habit/i);
       
       // Check for essential elements
       const loginButton = page.locator('a[href="/login"], button:has-text("Login")');

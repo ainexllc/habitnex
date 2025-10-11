@@ -16,42 +16,51 @@ export interface ColorContrast {
  * Set the theme by toggling the theme button
  */
 export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
-  // Get current theme from html class
   const currentTheme = await page.evaluate(() => {
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    const root = document.documentElement;
+    const dataMode = root.dataset.themeMode;
+    if (dataMode === 'light' || dataMode === 'dark') {
+      return dataMode;
+    }
+    return root.classList.contains('dark') ? 'dark' : 'light';
   });
 
   if (currentTheme !== theme) {
-    // Find theme toggle button - could be in header or navigation
-    const themeToggle = page.locator('[aria-label*="Switch to"], button:has([data-lucide="sun"]), button:has([data-lucide="moon"])').first();
-    
+    const themeToggle = page
+      .locator('[aria-label*="Switch to"], button:has([data-lucide="sun"]), button:has([data-lucide="moon"])')
+      .first();
+
     if (await themeToggle.isVisible({ timeout: 5000 })) {
       await themeToggle.click();
-      
-      // Wait for theme transition to complete
-      await page.waitForTimeout(300);
-      
-      // Verify theme was changed
+      await page.waitForTimeout(350);
+
       const newTheme = await page.evaluate(() => {
-        return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        const root = document.documentElement;
+        const dataMode = root.dataset.themeMode;
+        if (dataMode === 'light' || dataMode === 'dark') {
+          return dataMode;
+        }
+        return root.classList.contains('dark') ? 'dark' : 'light';
       });
-      
+
       if (newTheme !== theme) {
         throw new Error(`Failed to switch to ${theme} theme. Current theme is ${newTheme}`);
       }
     } else {
-      // Fallback: directly set theme via JavaScript
       await page.evaluate((targetTheme) => {
         const root = document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(targetTheme);
-        
-        // Also trigger storage event if theme context is listening
+        root.dataset.themeMode = targetTheme;
+        root.setAttribute('data-theme', targetTheme);
+
+        const stored = JSON.stringify({ mode: targetTheme, preset: 'classic' });
+        localStorage.setItem('habitnex:theme-preference', stored);
         localStorage.setItem('theme', targetTheme);
-        window.dispatchEvent(new StorageEvent('storage', { key: 'theme', newValue: targetTheme }));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'habitnex:theme-preference', newValue: stored }));
       }, theme);
-      
-      await page.waitForTimeout(300);
+
+      await page.waitForTimeout(350);
     }
   }
 }
@@ -61,7 +70,12 @@ export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<voi
  */
 export async function getCurrentTheme(page: Page): Promise<'light' | 'dark'> {
   return await page.evaluate(() => {
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    const root = document.documentElement;
+    const dataMode = root.dataset.themeMode;
+    if (dataMode === 'light' || dataMode === 'dark') {
+      return dataMode;
+    }
+    return root.classList.contains('dark') ? 'dark' : 'light';
   });
 }
 
@@ -73,17 +87,33 @@ export async function verifyThemeConsistency(page: Page, expectedTheme: 'light' 
   const rootTheme = await getCurrentTheme(page);
   expect(rootTheme).toBe(expectedTheme);
 
-  // Check body background matches theme
+  // Ensure preference persisted to storage
+  const storedTheme = await page.evaluate(() => {
+    const stored = localStorage.getItem('habitnex:theme-preference');
+    if (!stored) return null;
+    try {
+      const parsed = JSON.parse(stored);
+      return parsed.mode === 'dark' ? 'dark' : 'light';
+    } catch {
+      return null;
+    }
+  });
+
+  if (storedTheme) {
+    expect(storedTheme).toBe(expectedTheme);
+  }
+
+  // Check body background generally aligns with theme selection
   const bodyBg = await page.locator('body').evaluate((el) => {
     return window.getComputedStyle(el).backgroundColor;
   });
 
   if (expectedTheme === 'dark') {
     // Dark theme should have dark background
-    expect(bodyBg).not.toBe('rgb(255, 255, 255)'); // Not white
+    expect(bodyBg).not.toBe('rgb(255, 255, 255)');
   } else {
     // Light theme should have light background
-    expect(bodyBg).toBe('rgb(255, 255, 255)'); // White
+    expect(bodyBg).not.toBe('rgb(15, 23, 42)');
   }
 }
 

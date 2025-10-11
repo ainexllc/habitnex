@@ -46,9 +46,9 @@ export interface TelemetryConfig {
 }
 
 /**
- * Custom span attributes for NextVibe-specific operations
+ * Custom span attributes for HabitNex-specific operations
  */
-export interface NextVibeSpanAttributes {
+export interface HabitNexSpanAttributes {
   // User attributes
   'user.id'?: string;
   'user.email'?: string;
@@ -98,7 +98,7 @@ export interface NextVibeSpanAttributes {
 }
 
 /**
- * Business metrics for NextVibe
+ * Business metrics for HabitNex
  */
 export interface BusinessMetrics {
   // User engagement metrics
@@ -139,7 +139,7 @@ export interface MetricEvent {
   name: string;
   value: number;
   unit: string;
-  attributes: NextVibeSpanAttributes;
+  attributes: HabitNexSpanAttributes;
   timestamp: Date;
 }
 
@@ -162,7 +162,7 @@ export interface PerformanceMeasurement {
   startTime: number;
   endTime: number;
   duration: number;
-  attributes: NextVibeSpanAttributes;
+  attributes: HabitNexSpanAttributes;
 }
 
 /**

@@ -28,7 +28,7 @@ async function testComponentFixes() {
   });
 
   try {
-    console.log('🔧 Testing NextVibe Component Fixes...\n');
+    console.log('🔧 Testing HabitNex Component Fixes...\n');
 
     // 1. Test Home Page
     console.log('📱 Step 1: Testing Home Page');

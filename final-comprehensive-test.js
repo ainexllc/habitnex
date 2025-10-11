@@ -41,7 +41,7 @@ async function runComprehensiveTest() {
   });
 
   try {
-    console.log('🎯 COMPREHENSIVE NEXTVIBE TESTING - TypeScript Fixes Verification\n');
+    console.log('🎯 COMPREHENSIVE HABITNEX TESTING - TypeScript Fixes Verification\n');
 
     // Step 1: Home Page
     console.log('📱 Step 1: Home Page Analysis');

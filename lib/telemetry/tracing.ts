@@ -6,16 +6,16 @@ import {
   SpanStatusCode, 
   Tracer 
 } from '@opentelemetry/api';
-import { NextVibeSpanAttributes, TraceContext, PerformanceMeasurement } from './types';
+import { HabitNexSpanAttributes, TraceContext, PerformanceMeasurement } from './types';
 import { createTracer } from './index';
 
 /**
- * NextVibe distributed tracing utilities
+ * HabitNex distributed tracing utilities
  */
-export class NextVibeTracing {
+export class HabitNexTracing {
   private tracer: Tracer;
 
-  constructor(name: string = 'nextvibe-tracing') {
+  constructor(name: string = 'habitnex-tracing') {
     this.tracer = createTracer(name);
   }
 
@@ -25,7 +25,7 @@ export class NextVibeTracing {
   startUserJourneySpan(
     journeyName: string,
     userId?: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`user_journey.${journeyName}`, {
       kind: SpanKind.SERVER,
@@ -46,7 +46,7 @@ export class NextVibeTracing {
   startApiSpan(
     endpoint: string,
     method: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`api.${endpoint}`, {
       kind: SpanKind.SERVER,
@@ -70,7 +70,7 @@ export class NextVibeTracing {
     operation: string,
     collection: string,
     documentId?: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`db.${operation}`, {
       kind: SpanKind.CLIENT,
@@ -93,7 +93,7 @@ export class NextVibeTracing {
   startAISpan(
     feature: string,
     model: string = 'claude',
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`ai.${feature}`, {
       kind: SpanKind.CLIENT,
@@ -115,7 +115,7 @@ export class NextVibeTracing {
   startComponentSpan(
     componentName: string,
     componentType: 'page' | 'component' | 'hook' = 'component',
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`component.${componentName}`, {
       kind: SpanKind.INTERNAL,
@@ -136,7 +136,7 @@ export class NextVibeTracing {
     operation: string,
     habitId?: string,
     habitName?: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`habit.${operation}`, {
       kind: SpanKind.INTERNAL,
@@ -159,7 +159,7 @@ export class NextVibeTracing {
     operation: string,
     moodId?: string,
     rating?: number,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Span {
     const span = this.tracer.startSpan(`mood.${operation}`, {
       kind: SpanKind.INTERNAL,
@@ -178,7 +178,7 @@ export class NextVibeTracing {
   /**
    * Add custom attributes to current span
    */
-  addAttributes(attributes: NextVibeSpanAttributes): void {
+  addAttributes(attributes: HabitNexSpanAttributes): void {
     const span = trace.getActiveSpan();
     if (span) {
       span.setAttributes(attributes);
@@ -188,7 +188,7 @@ export class NextVibeTracing {
   /**
    * Add an event to current span
    */
-  addEvent(name: string, attributes?: NextVibeSpanAttributes): void {
+  addEvent(name: string, attributes?: HabitNexSpanAttributes): void {
     const span = trace.getActiveSpan();
     if (span) {
       span.addEvent(name, attributes);
@@ -198,7 +198,7 @@ export class NextVibeTracing {
   /**
    * Record an exception in current span
    */
-  recordException(error: Error, attributes?: NextVibeSpanAttributes): void {
+  recordException(error: Error, attributes?: HabitNexSpanAttributes): void {
     const span = trace.getActiveSpan();
     if (span) {
       span.recordException(error);
@@ -229,7 +229,7 @@ export class NextVibeTracing {
   async withSpan<T>(
     spanName: string,
     fn: (span: Span) => Promise<T> | T,
-    attributes: NextVibeSpanAttributes = {},
+    attributes: HabitNexSpanAttributes = {},
     spanKind: SpanKind = SpanKind.INTERNAL
   ): Promise<T> {
     const span = this.tracer.startSpan(spanName, {
@@ -254,7 +254,7 @@ export class NextVibeTracing {
     journeyName: string,
     userId: string,
     fn: (span: Span) => Promise<T> | T,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Promise<T> {
     const span = this.startUserJourneySpan(journeyName, userId, attributes);
 
@@ -278,7 +278,7 @@ export class NextVibeTracing {
     endpoint: string,
     method: string,
     fn: (span: Span) => Promise<T> | T,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Promise<T> {
     const span = this.startApiSpan(endpoint, method, attributes);
 
@@ -305,7 +305,7 @@ export class NextVibeTracing {
     collection: string,
     fn: (span: Span) => Promise<T> | T,
     documentId?: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Promise<T> {
     const span = this.startDatabaseSpan(operation, collection, documentId, attributes);
     const startTime = Date.now();
@@ -340,7 +340,7 @@ export class NextVibeTracing {
     feature: string,
     fn: (span: Span) => Promise<T> | T,
     model: string = 'claude',
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Promise<T> {
     const span = this.startAISpan(feature, model, attributes);
     const startTime = Date.now();
@@ -388,7 +388,7 @@ export class NextVibeTracing {
    */
   createChildSpan(
     name: string,
-    attributes: NextVibeSpanAttributes = {},
+    attributes: HabitNexSpanAttributes = {},
     spanKind: SpanKind = SpanKind.INTERNAL
   ): Span {
     return this.tracer.startSpan(name, {
@@ -403,7 +403,7 @@ export class NextVibeTracing {
   async measurePerformance<T>(
     name: string,
     fn: () => Promise<T> | T,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): Promise<{ result: T; measurement: PerformanceMeasurement }> {
     const startTime = performance.now();
     
@@ -449,14 +449,14 @@ export class NextVibeTracing {
 /**
  * Global tracing instance
  */
-let globalTracing: NextVibeTracing | null = null;
+let globalTracing: HabitNexTracing | null = null;
 
 /**
  * Get global tracing instance
  */
-export function getTracing(): NextVibeTracing {
+export function getTracing(): HabitNexTracing {
   if (!globalTracing) {
-    globalTracing = new NextVibeTracing();
+    globalTracing = new HabitNexTracing();
   }
   return globalTracing;
 }
@@ -465,51 +465,51 @@ export function getTracing(): NextVibeTracing {
  * Convenience functions for common operations
  */
 export const tracing = {
-  startUserJourney: (journeyName: string, userId?: string, attributes?: NextVibeSpanAttributes) => 
+  startUserJourney: (journeyName: string, userId?: string, attributes?: HabitNexSpanAttributes) => 
     getTracing().startUserJourneySpan(journeyName, userId, attributes),
     
-  startApi: (endpoint: string, method: string, attributes?: NextVibeSpanAttributes) =>
+  startApi: (endpoint: string, method: string, attributes?: HabitNexSpanAttributes) =>
     getTracing().startApiSpan(endpoint, method, attributes),
     
-  startDatabase: (operation: string, collection: string, documentId?: string, attributes?: NextVibeSpanAttributes) =>
+  startDatabase: (operation: string, collection: string, documentId?: string, attributes?: HabitNexSpanAttributes) =>
     getTracing().startDatabaseSpan(operation, collection, documentId, attributes),
     
-  startAI: (feature: string, model?: string, attributes?: NextVibeSpanAttributes) =>
+  startAI: (feature: string, model?: string, attributes?: HabitNexSpanAttributes) =>
     getTracing().startAISpan(feature, model, attributes),
     
-  startComponent: (componentName: string, componentType?: 'page' | 'component' | 'hook', attributes?: NextVibeSpanAttributes) =>
+  startComponent: (componentName: string, componentType?: 'page' | 'component' | 'hook', attributes?: HabitNexSpanAttributes) =>
     getTracing().startComponentSpan(componentName, componentType, attributes),
     
-  startHabit: (operation: string, habitId?: string, habitName?: string, attributes?: NextVibeSpanAttributes) =>
+  startHabit: (operation: string, habitId?: string, habitName?: string, attributes?: HabitNexSpanAttributes) =>
     getTracing().startHabitSpan(operation, habitId, habitName, attributes),
     
-  startMood: (operation: string, moodId?: string, rating?: number, attributes?: NextVibeSpanAttributes) =>
+  startMood: (operation: string, moodId?: string, rating?: number, attributes?: HabitNexSpanAttributes) =>
     getTracing().startMoodSpan(operation, moodId, rating, attributes),
     
-  addAttributes: (attributes: NextVibeSpanAttributes) => getTracing().addAttributes(attributes),
+  addAttributes: (attributes: HabitNexSpanAttributes) => getTracing().addAttributes(attributes),
   
-  addEvent: (name: string, attributes?: NextVibeSpanAttributes) => getTracing().addEvent(name, attributes),
+  addEvent: (name: string, attributes?: HabitNexSpanAttributes) => getTracing().addEvent(name, attributes),
   
-  recordException: (error: Error, attributes?: NextVibeSpanAttributes) => getTracing().recordException(error, attributes),
+  recordException: (error: Error, attributes?: HabitNexSpanAttributes) => getTracing().recordException(error, attributes),
   
   setStatus: (code: SpanStatusCode, message?: string) => getTracing().setSpanStatus(code, message),
   
-  withSpan: <T>(spanName: string, fn: (span: Span) => Promise<T> | T, attributes?: NextVibeSpanAttributes, spanKind?: SpanKind) =>
+  withSpan: <T>(spanName: string, fn: (span: Span) => Promise<T> | T, attributes?: HabitNexSpanAttributes, spanKind?: SpanKind) =>
     getTracing().withSpan(spanName, fn, attributes, spanKind),
     
-  withUserJourney: <T>(journeyName: string, userId: string, fn: (span: Span) => Promise<T> | T, attributes?: NextVibeSpanAttributes) =>
+  withUserJourney: <T>(journeyName: string, userId: string, fn: (span: Span) => Promise<T> | T, attributes?: HabitNexSpanAttributes) =>
     getTracing().withUserJourney(journeyName, userId, fn, attributes),
     
-  withApi: <T>(endpoint: string, method: string, fn: (span: Span) => Promise<T> | T, attributes?: NextVibeSpanAttributes) =>
+  withApi: <T>(endpoint: string, method: string, fn: (span: Span) => Promise<T> | T, attributes?: HabitNexSpanAttributes) =>
     getTracing().withApiSpan(endpoint, method, fn, attributes),
     
-  withDatabase: <T>(operation: string, collection: string, fn: (span: Span) => Promise<T> | T, documentId?: string, attributes?: NextVibeSpanAttributes) =>
+  withDatabase: <T>(operation: string, collection: string, fn: (span: Span) => Promise<T> | T, documentId?: string, attributes?: HabitNexSpanAttributes) =>
     getTracing().withDatabaseSpan(operation, collection, fn, documentId, attributes),
     
-  withAI: <T>(feature: string, fn: (span: Span) => Promise<T> | T, model?: string, attributes?: NextVibeSpanAttributes) =>
+  withAI: <T>(feature: string, fn: (span: Span) => Promise<T> | T, model?: string, attributes?: HabitNexSpanAttributes) =>
     getTracing().withAISpan(feature, fn, model, attributes),
     
-  measurePerformance: <T>(name: string, fn: () => Promise<T> | T, attributes?: NextVibeSpanAttributes) =>
+  measurePerformance: <T>(name: string, fn: () => Promise<T> | T, attributes?: HabitNexSpanAttributes) =>
     getTracing().measurePerformance(name, fn, attributes),
     
   getCurrentContext: () => getTracing().getCurrentTraceContext(),

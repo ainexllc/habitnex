@@ -55,7 +55,7 @@ export function HabitWave({
 
   // Apply hover and active effects
   const currentWaveParams = useMemo(() => {
-    let params = { ...baseWaveParams };
+    const params = { ...baseWaveParams };
     
     if (isHovered) {
       params.amplitude *= 1.3;
@@ -133,7 +133,7 @@ export function HabitWave({
   const getMomentumIndicatorProps = () => {
     const { level, intensity, completionRate } = momentum.momentum;
     
-    let indicatorColor = currentWaveParams.color;
+    const indicatorColor = currentWaveParams.color;
     let pulseSpeed = 2000;
     
     switch (level) {

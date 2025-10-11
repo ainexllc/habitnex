@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * NextVibe Monitor CLI
+ * HabitNex Monitor CLI
  * A comprehensive monitoring tool for the Next.js development server
  */
 
@@ -39,15 +39,15 @@ function getPM2Status() {
     try {
         const output = execSync('pm2 jlist', { encoding: 'utf8' });
         const processes = JSON.parse(output);
-        const nextvibeProcess = processes.find(p => p.name === 'nextvibe-dev');
-        return nextvibeProcess ? nextvibeProcess.pm2_env.status : 'not found';
+        const habitnexProcess = processes.find(p => p.name === 'habitnex-dev');
+        return habitnexProcess ? habitnexProcess.pm2_env.status : 'not found';
     } catch (error) {
         return 'error';
     }
 }
 
 async function showStatus() {
-    log('\n🚀 NextVibe Server Status', 'cyan');
+    log('\n🚀 HabitNex Server Status', 'cyan');
     log('═'.repeat(30), 'cyan');
 
     // PM2 Status
@@ -77,12 +77,12 @@ async function showStatus() {
     try {
         const pm2Output = execSync('pm2 jlist', { encoding: 'utf8' });
         const processes = JSON.parse(pm2Output);
-        const nextvibeProcess = processes.find(p => p.name === 'nextvibe-dev');
+        const habitnexProcess = processes.find(p => p.name === 'habitnex-dev');
 
-        if (nextvibeProcess) {
-            const cpu = nextvibeProcess.monit.cpu;
-            const memory = Math.round(nextvibeProcess.monit.memory / 1024 / 1024);
-            const restarts = nextvibeProcess.pm2_env.restart_time;
+        if (habitnexProcess) {
+            const cpu = habitnexProcess.monit.cpu;
+            const memory = Math.round(habitnexProcess.monit.memory / 1024 / 1024);
+            const restarts = habitnexProcess.pm2_env.restart_time;
             log(`\n📊 Resources: ${cpu}% CPU, ${memory}MB RAM, ${restarts} restarts`, 'blue');
         }
     } catch (error) {
@@ -91,15 +91,15 @@ async function showStatus() {
 }
 
 async function startServer() {
-    log('🚀 Starting NextVibe development server...', 'yellow');
+    log('🚀 Starting HabitNex development server...', 'yellow');
 
     try {
-        execSync('pm2 delete nextvibe-dev', { stdio: 'pipe' });
+        execSync('pm2 delete habitnex-dev', { stdio: 'pipe' });
     } catch {
         // Process doesn't exist, that's fine
     }
 
-    exec('pm2 start "npm run dev -- -p 3000" --name "nextvibe-dev"', (error) => {
+    exec('pm2 start "npm run dev -- -p 3000" --name "habitnex-dev"', (error) => {
         if (error) {
             log('❌ Failed to start server', 'red');
             return;
@@ -111,10 +111,10 @@ async function startServer() {
 }
 
 function stopServer() {
-    log('🛑 Stopping NextVibe server...', 'yellow');
+    log('🛑 Stopping HabitNex server...', 'yellow');
 
     try {
-        execSync('pm2 delete nextvibe-dev', { stdio: 'pipe' });
+        execSync('pm2 delete habitnex-dev', { stdio: 'pipe' });
         log('✅ Server stopped successfully!', 'green');
     } catch (error) {
         log('❌ Failed to stop server', 'red');
@@ -126,7 +126,7 @@ function showLogs(lines = 20) {
     log('─'.repeat(50), 'blue');
 
     try {
-        execSync(`pm2 logs nextvibe-dev --lines ${lines}`, { stdio: 'inherit' });
+        execSync(`pm2 logs habitnex-dev --lines ${lines}`, { stdio: 'inherit' });
     } catch {
         log('No logs available', 'yellow');
     }
@@ -137,7 +137,7 @@ function showErrors(lines = 20) {
     log('─'.repeat(50), 'red');
 
     try {
-        execSync(`pm2 logs nextvibe-dev --err --lines ${lines}`, { stdio: 'inherit' });
+        execSync(`pm2 logs habitnex-dev --err --lines ${lines}`, { stdio: 'inherit' });
     } catch {
         log('No error logs available', 'yellow');
     }
@@ -220,7 +220,7 @@ switch (command) {
 
     case 'help':
     default:
-        log('\n🎯 NextVibe Monitor CLI', 'cyan');
+        log('\n🎯 HabitNex Monitor CLI', 'cyan');
         log('Usage: node scripts/monitor-cli.js <command>', 'yellow');
         log('');
         log('Commands:', 'bright');

@@ -45,8 +45,8 @@ export default function FamilyOnboardingPage() {
               Welcome to Family Mode! 
             </h1>
             <p className={`text-xl ${theme.text.secondary} max-w-2xl mx-auto leading-relaxed`}>
-              Transform your habit tracking into a family adventure. Build better habits together, 
-              celebrate each other's wins, and create lasting positive changes as a team.
+              Transform your habit tracking into a family adventure. Build better habits together,
+              celebrate each other&apos;s wins, and create lasting positive changes as a team.
             </p>
           </div>
           

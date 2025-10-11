@@ -13,7 +13,7 @@ import { setupDevelopmentTools } from './development';
  * Default telemetry configuration
  */
 const getDefaultConfig = (): TelemetryConfig => ({
-  serviceName: process.env.OTEL_SERVICE_NAME || 'nextvibe',
+  serviceName: process.env.OTEL_SERVICE_NAME || 'habitnex',
   version: process.env.npm_package_version || '1.0.0',
   environment: process.env.NODE_ENV || 'development',
   enableTracing: process.env.OTEL_ENABLE_TRACING !== 'false',
@@ -40,7 +40,7 @@ const getDefaultConfig = (): TelemetryConfig => ({
     honeycomb: {
       enabled: !!process.env.HONEYCOMB_API_KEY,
       apiKey: process.env.HONEYCOMB_API_KEY,
-      dataset: process.env.HONEYCOMB_DATASET || 'nextvibe',
+      dataset: process.env.HONEYCOMB_DATASET || 'habitnex',
     },
     vercel: {
       enabled: !!process.env.VERCEL,
@@ -88,7 +88,7 @@ export async function initializeTelemetry(config?: Partial<TelemetryConfig>): Pr
       [SEMRESATTRS_SERVICE_NAME]: fullConfig.serviceName,
       [SEMRESATTRS_SERVICE_VERSION]: fullConfig.version,
       'service.environment': fullConfig.environment,
-      'service.namespace': 'nextvibe',
+      'service.namespace': 'habitnex',
       'deployment.environment': fullConfig.environment,
     });
 

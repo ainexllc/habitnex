@@ -5,6 +5,7 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { signUp, signIn, signInWithGoogle, logOut, resetPassword, handleRedirectResult, getAuthErrorMessage } from '@/lib/auth';
 import { createUserProfile, getUserProfile } from '@/lib/db';
+import { defaultThemePreference, themePresets, themeFonts } from '@/lib/theme-presets';
 import type { User as UserType } from '@/types';
 
 interface AuthContextType {
@@ -58,17 +59,55 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
           let profile = await getUserProfile(firebaseUser.uid);
           
+          const resolveInitialTheme = () => {
+            if (typeof window === 'undefined') {
+              return defaultThemePreference;
+            }
+
+            const persisted = localStorage.getItem('habitnex:theme-preference');
+            if (persisted) {
+              try {
+                const parsed = JSON.parse(persisted);
+                if (
+                  parsed &&
+                  (parsed.mode === 'light' || parsed.mode === 'dark') &&
+                  parsed.preset &&
+                  parsed.preset in themePresets
+                ) {
+                  const font =
+                    parsed.font && parsed.font in themeFonts
+                      ? parsed.font
+                      : defaultThemePreference.font;
+
+                  return {
+                    mode: parsed.mode,
+                    preset: parsed.preset,
+                    font,
+                  };
+                }
+              } catch {
+                // ignore parsing errors and fall back
+              }
+            }
+
+            const legacyTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+            const systemMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+            return {
+              mode: legacyTheme || systemMode,
+              preset: defaultThemePreference.preset,
+              font: defaultThemePreference.font,
+            };
+          };
+
           if (!profile) {
-            // Create new user profile with theme from localStorage if available
-            const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            
+            const themePreference = resolveInitialTheme();
             await createUserProfile(firebaseUser.uid, {
               email: firebaseUser.email || '',
               displayName: firebaseUser.displayName || '',
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               preferences: {
-                theme: savedTheme || systemTheme,
+                theme: themePreference,
                 weekStartsOn: 0,
                 notifications: true,
                 timeFormat: '12h', // Default to 12-hour format
@@ -77,13 +116,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
             profile = await getUserProfile(firebaseUser.uid);
           } else if (!profile.preferences?.theme) {
-            // Migrate existing users without theme preference
-            const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            
+            const themePreference = resolveInitialTheme();
             await createUserProfile(firebaseUser.uid, {
               preferences: {
-                theme: savedTheme || systemTheme,
+                theme: themePreference,
                 weekStartsOn: profile.preferences?.weekStartsOn || 0,
                 notifications: profile.preferences?.notifications ?? true,
                 timeFormat: profile.preferences?.timeFormat || '12h',

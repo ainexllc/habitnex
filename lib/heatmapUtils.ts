@@ -77,7 +77,7 @@ export function processCompletionsForHeatmap(
   const weeks: HeatmapWeek[] = [];
   const monthLabels: Array<{ month: string; weekIndex: number; position: number }> = [];
   
-  let currentDate = new Date(firstSunday);
+  const currentDate = new Date(firstSunday);
   let weekIndex = 0;
   let lastMonth = -1;
 

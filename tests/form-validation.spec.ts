@@ -150,7 +150,7 @@ test.describe('Habit Form Validation Tests', () => {
       // Debug what's actually on the page
       const bodyText = await page.locator('body').textContent();
       console.log('Page body contains:', {
-        hasNextVibe: bodyText.includes('NextVibe'),
+        hasHabitNex: bodyText.includes('HabitNex'),
         hasLogin: bodyText.includes('Login') || bodyText.includes('Sign'),
         hasError: bodyText.includes('Error') || bodyText.includes('error'),
         hasLoading: bodyText.includes('Loading') || bodyText.includes('loading'),

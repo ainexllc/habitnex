@@ -4,7 +4,7 @@
 
 const { spawn } = require('child_process');
 
-console.log('🔍 Testing NextVibe OpenTelemetry Implementation...\n');
+console.log('🔍 Testing HabitNex OpenTelemetry Implementation...\n');
 
 // Test endpoints
 const endpoints = [

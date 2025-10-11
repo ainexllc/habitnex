@@ -1,6 +1,6 @@
 # Theme Testing Suite
 
-This directory contains comprehensive tests for the NextVibe application's light/dark theme system.
+This directory contains comprehensive tests for the HabitNex application's light/dark theme system.
 
 ## Test Files
 

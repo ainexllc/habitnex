@@ -1,9 +1,9 @@
 /**
- * Client-side telemetry utilities for NextVibe
+ * Client-side telemetry utilities for HabitNex
  * Handles browser-specific telemetry, RUM data, and Web Vitals
  */
 
-import { NextVibeSpanAttributes, RUMData, MetricEvent } from './types';
+import { HabitNexSpanAttributes, RUMData, MetricEvent } from './types';
 
 /**
  * Client-side telemetry manager
@@ -65,7 +65,7 @@ export class ClientTelemetry {
   /**
    * Track page view
    */
-  trackPageView(page: string, attributes: NextVibeSpanAttributes = {}): void {
+  trackPageView(page: string, attributes: HabitNexSpanAttributes = {}): void {
     const pageViewData = {
       page,
       url: window.location.href,
@@ -86,7 +86,7 @@ export class ClientTelemetry {
   /**
    * Track custom event
    */
-  trackEvent(eventName: string, attributes: NextVibeSpanAttributes = {}): void {
+  trackEvent(eventName: string, attributes: HabitNexSpanAttributes = {}): void {
     const eventData = {
       event: eventName,
       timestamp: Date.now(),
@@ -105,7 +105,7 @@ export class ClientTelemetry {
   trackHabitOperation(
     operation: 'create' | 'complete' | 'edit' | 'delete',
     habitId: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.trackEvent('habit.operation', {
       'habit.operation': operation,
@@ -117,7 +117,7 @@ export class ClientTelemetry {
   /**
    * Track mood entry
    */
-  trackMoodEntry(rating: number, attributes: NextVibeSpanAttributes = {}): void {
+  trackMoodEntry(rating: number, attributes: HabitNexSpanAttributes = {}): void {
     this.trackEvent('mood.entry', {
       'mood.rating': rating,
       ...attributes,
@@ -127,7 +127,7 @@ export class ClientTelemetry {
   /**
    * Track AI feature usage
    */
-  trackAIFeature(feature: string, attributes: NextVibeSpanAttributes = {}): void {
+  trackAIFeature(feature: string, attributes: HabitNexSpanAttributes = {}): void {
     this.trackEvent('ai.feature', {
       'ai.feature': feature,
       ...attributes,
@@ -141,7 +141,7 @@ export class ClientTelemetry {
     componentName: string,
     operation: 'mount' | 'update' | 'unmount',
     duration?: number,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     this.trackEvent('component.performance', {
       'component.name': componentName,
@@ -157,7 +157,7 @@ export class ClientTelemetry {
   trackInteraction(
     type: 'click' | 'scroll' | 'input' | 'focus' | 'keypress',
     target: string,
-    attributes: NextVibeSpanAttributes = {}
+    attributes: HabitNexSpanAttributes = {}
   ): void {
     const interaction = {
       type,
@@ -495,19 +495,19 @@ export function getClientTelemetry(): ClientTelemetry {
 export function useComponentTelemetry(componentName: string) {
   const telemetry = typeof window !== 'undefined' ? getClientTelemetry() : null;
   
-  const trackMount = (attributes?: NextVibeSpanAttributes) => {
+  const trackMount = (attributes?: HabitNexSpanAttributes) => {
     telemetry?.trackComponentPerformance(componentName, 'mount', undefined, attributes);
   };
   
-  const trackUpdate = (duration?: number, attributes?: NextVibeSpanAttributes) => {
+  const trackUpdate = (duration?: number, attributes?: HabitNexSpanAttributes) => {
     telemetry?.trackComponentPerformance(componentName, 'update', duration, attributes);
   };
   
-  const trackUnmount = (attributes?: NextVibeSpanAttributes) => {
+  const trackUnmount = (attributes?: HabitNexSpanAttributes) => {
     telemetry?.trackComponentPerformance(componentName, 'unmount', undefined, attributes);
   };
   
-  const trackEvent = (eventName: string, attributes?: NextVibeSpanAttributes) => {
+  const trackEvent = (eventName: string, attributes?: HabitNexSpanAttributes) => {
     telemetry?.trackEvent(eventName, { 'component.name': componentName, ...attributes });
   };
   
@@ -551,18 +551,18 @@ export const clientTelemetry = {
   setUser: (userId: string, attributes?: Record<string, any>) => 
     getClientTelemetry().setUser(userId, attributes),
     
-  trackPageView: (page: string, attributes?: NextVibeSpanAttributes) =>
+  trackPageView: (page: string, attributes?: HabitNexSpanAttributes) =>
     getClientTelemetry().trackPageView(page, attributes),
     
-  trackEvent: (eventName: string, attributes?: NextVibeSpanAttributes) =>
+  trackEvent: (eventName: string, attributes?: HabitNexSpanAttributes) =>
     getClientTelemetry().trackEvent(eventName, attributes),
     
-  trackHabit: (operation: 'create' | 'complete' | 'edit' | 'delete', habitId: string, attributes?: NextVibeSpanAttributes) =>
+  trackHabit: (operation: 'create' | 'complete' | 'edit' | 'delete', habitId: string, attributes?: HabitNexSpanAttributes) =>
     getClientTelemetry().trackHabitOperation(operation, habitId, attributes),
     
-  trackMood: (rating: number, attributes?: NextVibeSpanAttributes) =>
+  trackMood: (rating: number, attributes?: HabitNexSpanAttributes) =>
     getClientTelemetry().trackMoodEntry(rating, attributes),
     
-  trackAI: (feature: string, attributes?: NextVibeSpanAttributes) =>
+  trackAI: (feature: string, attributes?: HabitNexSpanAttributes) =>
     getClientTelemetry().trackAIFeature(feature, attributes),
 };

@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
+import type { ThemePreference } from '@/lib/theme-presets';
 
 export interface User {
   id: string;
@@ -11,7 +12,7 @@ export interface User {
   lastSelectedFamilyId?: string;
   lastSelectedFamilyUpdatedAt?: Timestamp;
   preferences: {
-    theme: 'light' | 'dark';
+    theme: ThemePreference | 'light' | 'dark';
     weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, etc.
     notifications: boolean;
     timeFormat: '12h' | '24h'; // 12-hour or 24-hour time format

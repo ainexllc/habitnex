@@ -8,7 +8,7 @@ if (!fs.existsSync(screenshotsDir)) {
   fs.mkdirSync(screenshotsDir, { recursive: true });
 }
 
-async function testNextVibeAuthentication() {
+async function testHabitNexAuthentication() {
   const browser = await chromium.launch({ 
     headless: false,  // Show browser for debugging
     slowMo: 1000,     // Slow down for visibility
@@ -19,7 +19,7 @@ async function testNextVibeAuthentication() {
   const page = await context.newPage();
 
   try {
-    console.log('🚀 Starting NextVibe Authentication & Component Tests...\n');
+    console.log('🚀 Starting HabitNex Authentication & Component Tests...\n');
 
     // 1. Navigate to home page and take screenshot
     console.log('📱 Step 1: Navigating to home page');
@@ -225,4 +225,4 @@ async function testNextVibeAuthentication() {
 }
 
 // Run the test
-testNextVibeAuthentication().catch(console.error);
+testHabitNexAuthentication().catch(console.error);

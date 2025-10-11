@@ -4,7 +4,7 @@
 
 ### **What Was Accomplished:**
 
-We've successfully implemented a comprehensive avatar customization system for the NextVibe family habit tracking application. The system provides users with extensive control over their avatar appearance, similar to the DiceBear playground interface.
+We've successfully implemented a comprehensive avatar customization system for the HabitNex family habit tracking application. The system provides users with extensive control over their avatar appearance, similar to the DiceBear playground interface.
 
 ### **Key Features Delivered:**
 

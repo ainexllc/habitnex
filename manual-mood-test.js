@@ -28,7 +28,7 @@ async function manualMoodTest() {
   }
   
   try {
-    console.log('🌐 Opening NextVibe app...');
+    console.log('🌐 Opening HabitNex app...');
     await page.goto('http://localhost:3001');
     await page.waitForLoadState('networkidle');
     

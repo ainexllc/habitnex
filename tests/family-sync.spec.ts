@@ -91,7 +91,7 @@ test.describe('Family Data Sync Test', () => {
     
     // Test production
     console.log('\n=== TESTING PRODUCTION ===');
-    await prodPage.goto('https://nextvibe.app/login');
+    await prodPage.goto('https://habitnex.app/login');
     
     // Repeat the same process for production
     await prodPage.click('button:has-text("Continue with Google")');

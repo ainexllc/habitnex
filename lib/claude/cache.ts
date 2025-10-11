@@ -15,7 +15,7 @@ export interface CacheStats {
 }
 
 // Cache statistics
-let stats = {
+const stats = {
   totalRequests: 0,
   cacheHits: 0,
   cacheMisses: 0,

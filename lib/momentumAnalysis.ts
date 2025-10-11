@@ -120,7 +120,7 @@ function calculateStreakData(
   // Calculate current streak (from today backwards)
   let currentStreak = 0;
   const today = new Date(analysisDate);
-  let checkDate = new Date(today);
+  const checkDate = new Date(today);
 
   while (true) {
     const dateString = checkDate.toISOString().split('T')[0];

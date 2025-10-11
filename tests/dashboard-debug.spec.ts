@@ -69,7 +69,7 @@ test.describe('Dashboard Debug Tests', () => {
     console.log('📋 Habits section visible:', habitsSection);
     
     // Check for empty state vs habits
-    const emptyState = await page.locator('text=Welcome to NextVibe!').isVisible().catch(() => false);
+    const emptyState = await page.locator('text=Welcome to HabitNex!').isVisible().catch(() => false);
     const habitCards = await page.locator('[data-testid="habit-card"], .habit-card, [class*="habit"]').count();
     
     console.log('🆕 Empty state visible:', emptyState);

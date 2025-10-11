@@ -13,7 +13,7 @@ async function diagnoseWhiteScreen() {
   };
 
   // Test Production Site
-  console.log('Testing Production: https://nextvibe.app');
+  console.log('Testing Production: https://habitnex.app');
   const prodPage = await context.newPage();
   
   // Capture network requests and console logs
@@ -56,7 +56,7 @@ async function diagnoseWhiteScreen() {
   });
 
   try {
-    await prodPage.goto('https://nextvibe.app', { waitUntil: 'networkidle', timeout: 30000 });
+    await prodPage.goto('https://habitnex.app', { waitUntil: 'networkidle', timeout: 30000 });
     await prodPage.waitForTimeout(5000); // Wait for any delayed loading
     
     // Take screenshot
@@ -161,7 +161,7 @@ async function diagnoseWhiteScreen() {
   
   // Print summary
   console.log('\n=== DIAGNOSIS SUMMARY ===');
-  console.log('Production Site (https://nextvibe.app):');
+  console.log('Production Site (https://habitnex.app):');
   console.log(`- Title: "${results.production.title || 'N/A'}"`);
   console.log(`- Content Length: ${results.production.contentLength || 0} characters`);
   console.log(`- Has Content: ${results.production.hasContent ? 'Yes' : 'No'}`);

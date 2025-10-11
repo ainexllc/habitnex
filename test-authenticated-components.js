@@ -30,7 +30,7 @@ async function testAuthenticatedComponents() {
   });
 
   try {
-    console.log('🔐 Testing NextVibe with Authentication...\n');
+    console.log('🔐 Testing HabitNex with Authentication...\n');
 
     // Step 1: Navigate to home and take screenshot
     console.log('📱 Step 1: Home page');
@@ -80,7 +80,7 @@ async function testAuthenticatedComponents() {
     // Inject a mock authenticated user
     await page.evaluate(() => {
       // Mock localStorage auth
-      localStorage.setItem('nextvibeAuth', JSON.stringify({
+      localStorage.setItem('habitnexAuth', JSON.stringify({
         user: {
           uid: 'test-user-123',
           email: 'test@example.com',

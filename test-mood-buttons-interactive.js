@@ -23,7 +23,7 @@ async function interactiveMoodButtonTest() {
   }
   
   try {
-    console.log('1. 🌐 Opening NextVibe app at localhost:3001...');
+    console.log('1. 🌐 Opening HabitNex app at localhost:3001...');
     await page.goto('http://localhost:3001');
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: 'test-screenshots/step1-homepage.png', fullPage: true });

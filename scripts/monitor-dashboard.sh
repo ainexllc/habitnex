@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NextVibe Monitoring Dashboard
+# HabitNex Monitoring Dashboard
 # Comprehensive monitoring and troubleshooting tool
 
 # Colors
@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 clear
 echo -e "${CYAN}╔══════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║           NextVibe Monitoring Dashboard      ║${NC}"
+echo -e "${CYAN}║           HabitNex Monitoring Dashboard      ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -22,7 +22,7 @@ echo ""
 echo -e "${BLUE}📊 SERVER STATUS${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-PM2_STATUS=$(pm2 jlist 2>/dev/null | jq -r '.[] | select(.name == "nextvibe-dev") | .pm2_env.status' 2>/dev/null)
+PM2_STATUS=$(pm2 jlist 2>/dev/null | jq -r '.[] | select(.name == "habitnex-dev") | .pm2_env.status' 2>/dev/null)
 if [ "$PM2_STATUS" = "online" ]; then
     echo -e "PM2 Process: ${GREEN}● Online${NC}"
 else
@@ -53,7 +53,7 @@ echo -e "${BLUE}💻 SYSTEM RESOURCES${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 # PM2 Process Info
-PM2_INFO=$(pm2 jlist 2>/dev/null | jq -r '.[] | select(.name == "nextvibe-dev") | "\(.monit.cpu)% CPU, \(.monit.memory/1024/1024 | floor)MB RAM, \(.pm2_env.restart_time) restarts"' 2>/dev/null)
+PM2_INFO=$(pm2 jlist 2>/dev/null | jq -r '.[] | select(.name == "habitnex-dev") | "\(.monit.cpu)% CPU, \(.monit.memory/1024/1024 | floor)MB RAM, \(.pm2_env.restart_time) restarts"' 2>/dev/null)
 if [ ! -z "$PM2_INFO" ]; then
     echo -e "Process: $PM2_INFO"
 fi
@@ -70,12 +70,12 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 
 # PM2 Logs
 echo -e "${YELLOW}PM2 Output (last 3 lines):${NC}"
-pm2 logs nextvibe-dev --lines 3 --nostream 2>/dev/null | tail -3 || echo "No PM2 logs available"
+pm2 logs habitnex-dev --lines 3 --nostream 2>/dev/null | tail -3 || echo "No PM2 logs available"
 
 # Error Logs
 echo ""
 echo -e "${YELLOW}PM2 Errors (last 3 lines):${NC}"
-pm2 logs nextvibe-dev --lines 3 --err --nostream 2>/dev/null | tail -3 || echo "No error logs available"
+pm2 logs habitnex-dev --lines 3 --err --nostream 2>/dev/null | tail -3 || echo "No error logs available"
 
 # Monitor Logs
 if [ -f "logs/server-monitor.log" ]; then
@@ -104,27 +104,27 @@ while true; do
     case $choice in
         r|R)
             echo -e "${YELLOW}Restarting server...${NC}"
-            pm2 restart nextvibe-dev
+            pm2 restart habitnex-dev
             sleep 2
             exec "$0"  # Reload dashboard
             ;;
         s|S)
             echo -e "${YELLOW}Full PM2 logs:${NC}"
-            pm2 logs nextvibe-dev --lines 20
+            pm2 logs habitnex-dev --lines 20
             echo ""
             read -p "Press Enter to continue..."
             exec "$0"
             ;;
         e|E)
             echo -e "${YELLOW}Error logs only:${NC}"
-            pm2 logs nextvibe-dev --err --lines 20
+            pm2 logs habitnex-dev --err --lines 20
             echo ""
             read -p "Press Enter to continue..."
             exec "$0"
             ;;
         m|M)
             echo -e "${YELLOW}Live monitoring (Ctrl+C to exit):${NC}"
-            pm2 logs nextvibe-dev
+            pm2 logs habitnex-dev
             exec "$0"
             ;;
         q|Q)

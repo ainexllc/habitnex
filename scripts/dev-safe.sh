@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# NextVibe Safe Development Server
+# HabitNex Safe Development Server
 # Prevents white screen issues by managing Next.js cache properly
 
-echo "🚀 Starting NextVibe development server with white screen prevention..."
+echo "🚀 Starting HabitNex development server with white screen prevention..."
 
 # Function to clean caches
 clean_cache() {

@@ -21,6 +21,7 @@ export interface FamilySettings {
   touchScreenMode: boolean;    // Optimized for wall mount displays
   voiceFeedback: boolean;      // Audio confirmations
   autoTimeout: number;         // Minutes before returning to main screen
+  weatherZip?: string;         // Optional ZIP code for weather lookups
   notifications: {
     dailyReminders: boolean;
     weeklyReports: boolean;

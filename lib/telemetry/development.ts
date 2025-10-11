@@ -62,7 +62,7 @@ export class TelemetryDevelopmentTools {
    * Start a development trace
    */
   startDevelopmentTrace(name: string): Span {
-    const tracer = trace.getActiveTracer('nextvibe-dev');
+    const tracer = trace.getActiveTracer('habitnex-dev');
     const span = tracer.startSpan(`dev.${name}`, {
       attributes: {
         'dev.manual_trace': true,

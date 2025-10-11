@@ -1,6 +1,6 @@
-# NextVibe Custom Subagents
+# HabitNex Custom Subagents
 
-These custom AI subagents are specifically designed for the NextVibe project, understanding our codebase structure, patterns, and development workflow.
+These custom AI subagents are specifically designed for the HabitNex project, understanding our codebase structure, patterns, and development workflow.
 
 ## 🎯 Habit Analytics Agent
 **Trigger**: "analyze habits", "show analytics", "habit insights", "usage patterns"
@@ -392,4 +392,4 @@ These agents can work together for complex tasks:
 ---
 
 *Last Updated: September 2025*
-*NextVibe Version: 1.0.0*
+*HabitNex Version: 1.0.0*

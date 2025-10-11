@@ -103,7 +103,7 @@ export default function JoinFamilyPage() {
               Join a Family
             </h1>
             <p className={familyText.secondary}>
-              Enter your family's invite code to get started
+              Enter your family&apos;s invite code to get started
             </p>
           </div>
           

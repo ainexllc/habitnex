@@ -128,6 +128,7 @@ export const createFamily = async (creatorUserId: string, request: CreateFamilyR
         touchScreenMode: false,
         voiceFeedback: false,
         autoTimeout: 5,
+        weatherZip: request.settings?.weatherZip || '',
         notifications: {
           dailyReminders: true,
           weeklyReports: true,

@@ -31,7 +31,7 @@ This file contains important configuration and setup information for this projec
 
 ### Available Repositories
 - ainexllc/nexttask (private)
-- ainexllc/habitnex (public) - **Current Project** (formerly nextvibe, originally habittracker-nextjs)
+- ainexllc/habitnex (public) - **Current Project** (formerly NextVibe, originally habittracker-nextjs)
 - ainexllc/homekeep (private)
 - ainexllc/journal (private)
 - ainexllc/ainex (private)
@@ -96,7 +96,7 @@ This file contains important configuration and setup information for this projec
 ## Historical Habit Editing Feature
 
 ### Overview
-NextVibe includes a complete **Historical Habit Completion Editing** system that allows users to view and modify habit completions for any past date. This is essential for:
+HabitNex includes a complete **Historical Habit Completion Editing** system that allows users to view and modify habit completions for any past date. This is essential for:
 - Correcting missed entries
 - Filling in gaps in tracking history
 - Maintaining accurate streaks and statistics
@@ -192,7 +192,7 @@ Complete documentation available at: `.claude/HISTORICAL_HABITS_GUIDE.md`
 - **OS**: macOS (Darwin 25.0.0)
 - **Node.js**: Check with `node --version`
 - **NPM**: Check with `npm --version`
-- **Working Directory**: /Users/dino/AiFirst/nextvibeapp
+- **Working Directory**: /Users/dino/ainex/habitnex-app
 
 ## Claude Configuration
 - **Config Location**: ~/.config/claude/
@@ -353,7 +353,7 @@ When working on this project, Claude Code can:
 
 **Project Details:**
 - **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
-- **Project Name**: nextvibe (Vercel project name - legacy, will update separately)
+- **Project Name**: HabitNex (Vercel project name updated from NextVibe)
 - **Production URL**: https://habitnex.app
 - **Repository**: https://github.com/ainexllc/habitnex
 - **Vercel CLI Version**: 46.0.2
@@ -761,7 +761,7 @@ vercel rollback <url>    # Rollback deployment
 
 **This Project Configuration:**
 - **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
-- **Project Name**: nextvibe (Vercel project name - legacy, will update separately)
+- **Project Name**: HabitNex (Vercel project name updated from NextVibe)
 - **Production URL**: https://habitnex.app
 - **Repository**: https://github.com/ainexllc/habitnex
 - **Auto-deployment**: ✅ Enabled on main branch

@@ -156,7 +156,7 @@ gh auth token
 
 ### Available Repositories
 - ainexllc/nexttask (private)
-- ainexllc/nextvibe (public) - formerly habittracker-nextjs
+- ainexllc/habitnex (public) - formerly NextVibe and habittracker-nextjs
 - ainexllc/homekeep (private)
 - ainexllc/journal (private)
 - ainexllc/ainex (private)

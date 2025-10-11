@@ -83,11 +83,25 @@ export const clearUserSelectedFamily = async (userId: string) => {
   }
 };
 
-export const updateUserTheme = async (userId: string, theme: 'light' | 'dark') => {
+import { defaultThemePreference, themePresets, themeFonts, type ThemePreference } from '@/lib/theme-presets';
+
+export const updateUserTheme = async (userId: string, theme: ThemePreference | 'light' | 'dark') => {
   try {
     const userRef = doc(db, 'users', userId);
+    const themeValue: ThemePreference =
+      typeof theme === 'string'
+        ? {
+            mode: theme === 'dark' ? 'dark' : 'light',
+            preset: defaultThemePreference.preset,
+            font: defaultThemePreference.font,
+          }
+        : {
+            mode: theme.mode === 'dark' ? 'dark' : 'light',
+            preset: theme.preset && theme.preset in themePresets ? theme.preset : defaultThemePreference.preset,
+            font: theme.font && theme.font in themeFonts ? theme.font : defaultThemePreference.font,
+          };
     await updateDoc(userRef, {
-      'preferences.theme': theme,
+      'preferences.theme': themeValue,
       updatedAt: Timestamp.now()
     });
   } catch (error) {

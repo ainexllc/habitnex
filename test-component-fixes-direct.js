@@ -28,7 +28,7 @@ async function testComponentFixesDirect() {
   });
 
   try {
-    console.log('🔧 Testing NextVibe Component Fixes Directly...\n');
+    console.log('🔧 Testing HabitNex Component Fixes Directly...\n');
 
     // Mock localStorage to simulate authenticated state
     await page.addInitScript(() => {

@@ -122,7 +122,7 @@ class DataDogExporter implements SpanExporter {
       ...span,
       attributes: {
         ...span.attributes,
-        'service.name': 'nextvibe',
+        'service.name': 'habitnex',
         'env': process.env.NODE_ENV,
       },
     }));
@@ -173,7 +173,7 @@ class NewRelicExporter implements SpanExporter {
 class HoneycombExporter implements SpanExporter {
   private otlpExporter: OTLPTraceExporter;
 
-  constructor(apiKey: string, dataset: string = 'nextvibe') {
+  constructor(apiKey: string, dataset: string = 'habitnex') {
     this.otlpExporter = new OTLPTraceExporter({
       url: 'https://api.honeycomb.io/v1/traces',
       headers: {

@@ -12,11 +12,11 @@ async function testTypescriptFixes() {
     fs.mkdirSync(screenshotsDir, { recursive: true });
   }
 
-  console.log('🧪 Testing TypeScript fixes on NextVibe app...');
+  console.log('🧪 Testing TypeScript fixes on HabitNex app...');
   
   try {
     // STEP 1: Navigate to the app and check initial state
-    console.log('📱 Step 1: Navigating to NextVibe app...');
+    console.log('📱 Step 1: Navigating to HabitNex app...');
     await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.screenshot({ path: path.join(screenshotsDir, '01-landing-page.png') });

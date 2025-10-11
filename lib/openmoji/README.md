@@ -476,4 +476,4 @@ Visit `/test-openmoji` for a comprehensive test page featuring:
 
 ## License
 
-This integration system is part of the NextVibe project. OpenMoji SVGs are licensed under CC BY-SA 4.0.
+This integration system is part of the HabitNex project. OpenMoji SVGs are licensed under CC BY-SA 4.0.

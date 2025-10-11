@@ -1,12 +1,12 @@
 import { Instrumentation, InstrumentationBase, InstrumentationConfig } from '@opentelemetry/instrumentation';
 import { trace, SpanKind, SpanStatusCode } from '@opentelemetry/api';
-import { NextVibeSpanAttributes } from './types';
+import { HabitNexSpanAttributes } from './types';
 import { getMetrics } from './metrics';
 
 /**
- * NextVibe custom instrumentation configuration
+ * HabitNex custom instrumentation configuration
  */
-export interface NextVibeInstrumentationConfig extends InstrumentationConfig {
+export interface HabitNexInstrumentationConfig extends InstrumentationConfig {
   /** Enable habit tracking instrumentation */
   enableHabitInstrumentation?: boolean;
   /** Enable mood tracking instrumentation */
@@ -22,13 +22,13 @@ export interface NextVibeInstrumentationConfig extends InstrumentationConfig {
 }
 
 /**
- * Custom instrumentation for NextVibe application
+ * Custom instrumentation for HabitNex application
  */
-export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrumentationConfig> {
-  protected override _config!: NextVibeInstrumentationConfig;
+export class HabitNexInstrumentation extends InstrumentationBase<HabitNexInstrumentationConfig> {
+  protected override _config!: HabitNexInstrumentationConfig;
 
-  constructor(config: NextVibeInstrumentationConfig = {}) {
-    super('nextvibe-instrumentation', '1.0.0', {
+  constructor(config: HabitNexInstrumentationConfig = {}) {
+    super('habitnex-instrumentation', '1.0.0', {
       enableHabitInstrumentation: true,
       enableMoodInstrumentation: true,
       enableAIInstrumentation: true,
@@ -70,7 +70,7 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
     
     this._wrap('habit-operations', 'createHabit', (original: Function) => {
       return function(this: any, ...args: any[]) {
-        const span = trace.getActiveTracer('nextvibe').startSpan('habit.create', {
+        const span = trace.getActiveTracer('habitnex').startSpan('habit.create', {
           kind: SpanKind.INTERNAL,
           attributes: {
             'component.type': 'business_logic',
@@ -126,7 +126,7 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
     this._wrap('mood-operations', 'createMoodEntry', (original: Function) => {
       return function(this: any, ...args: any[]) {
         const moodData = args[0];
-        const span = trace.getActiveTracer('nextvibe').startSpan('mood.create', {
+        const span = trace.getActiveTracer('habitnex').startSpan('mood.create', {
           kind: SpanKind.INTERNAL,
           attributes: {
             'component.type': 'business_logic',
@@ -181,7 +181,7 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
     this._wrap('ai-operations', 'callClaudeAPI', (original: Function) => {
       return function(this: any, ...args: any[]) {
         const [feature, prompt] = args;
-        const span = trace.getActiveTracer('nextvibe').startSpan('ai.claude_api_call', {
+        const span = trace.getActiveTracer('habitnex').startSpan('ai.claude_api_call', {
           kind: SpanKind.CLIENT,
           attributes: {
             'component.type': 'ai',
@@ -237,7 +237,7 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
     this._wrap('auth-operations', 'signIn', (original: Function) => {
       return function(this: any, ...args: any[]) {
         const [provider] = args;
-        const span = trace.getActiveTracer('nextvibe').startSpan('auth.sign_in', {
+        const span = trace.getActiveTracer('habitnex').startSpan('auth.sign_in', {
           kind: SpanKind.INTERNAL,
           attributes: {
             'component.type': 'auth',
@@ -303,7 +303,7 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
       // Client-side component instrumentation
       (window as any).instrumentComponent = (WrappedComponent: any, componentName: string) => {
         return function InstrumentedComponent(props: any) {
-          const span = trace.getActiveTracer('nextvibe').startSpan(`component.${componentName}`, {
+          const span = trace.getActiveTracer('habitnex').startSpan(`component.${componentName}`, {
             kind: SpanKind.INTERNAL,
             attributes: {
               'component.type': 'page',
@@ -586,9 +586,9 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
       instrumentHabitOperation: async <T>(
         operation: string,
         fn: () => Promise<T> | T,
-        attributes: NextVibeSpanAttributes = {}
+        attributes: HabitNexSpanAttributes = {}
       ): Promise<T> => {
-        const span = trace.getActiveTracer('nextvibe').startSpan(`habit.${operation}`, {
+        const span = trace.getActiveTracer('habitnex').startSpan(`habit.${operation}`, {
           kind: SpanKind.INTERNAL,
           attributes: {
             'component.type': 'business_logic',
@@ -643,9 +643,9 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
       instrumentMoodOperation: async <T>(
         operation: string,
         fn: () => Promise<T> | T,
-        attributes: NextVibeSpanAttributes = {}
+        attributes: HabitNexSpanAttributes = {}
       ): Promise<T> => {
-        const span = trace.getActiveTracer('nextvibe').startSpan(`mood.${operation}`, {
+        const span = trace.getActiveTracer('habitnex').startSpan(`mood.${operation}`, {
           kind: SpanKind.INTERNAL,
           attributes: {
             'component.type': 'business_logic',
@@ -700,9 +700,9 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
       instrumentAIOperation: async <T>(
         feature: string,
         fn: () => Promise<T> | T,
-        attributes: NextVibeSpanAttributes = {}
+        attributes: HabitNexSpanAttributes = {}
       ): Promise<T> => {
-        const span = trace.getActiveTracer('nextvibe').startSpan(`ai.${feature}`, {
+        const span = trace.getActiveTracer('habitnex').startSpan(`ai.${feature}`, {
           kind: SpanKind.CLIENT,
           attributes: {
             'component.type': 'ai',
@@ -758,4 +758,4 @@ export class NextVibeInstrumentation extends InstrumentationBase<NextVibeInstrum
 /**
  * Export instrumentation helpers for manual use
  */
-export const instrumentationHelpers = NextVibeInstrumentation.createInstrumentationHelpers();
+export const instrumentationHelpers = HabitNexInstrumentation.createInstrumentationHelpers();

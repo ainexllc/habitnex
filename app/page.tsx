@@ -324,8 +324,8 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                      "HabitNex transformed my daily routine. The AI suggestions are spot-on, and I've maintained my longest
-                      streak ever!"
+                      &quot;HabitNex transformed my daily routine. The AI suggestions are spot-on, and I&apos;ve maintained my longest
+                      streak ever!&quot;
                     </p>
                     <div className="mt-2">
                       <div className="text-xs font-semibold text-gray-900 dark:text-white">Jane Doe</div>
@@ -492,7 +492,7 @@ export default function HomePage() {
 
                 <div className="text-center pt-6 border-t border-gray-200 dark:border-gray-800">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Link
                       href="/signup"
                       className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"

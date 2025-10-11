@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# NextVibe White Screen Fix Script
+# HabitNex White Screen Fix Script
 # Quick fix for white screen issues without full server restart
 
-echo "🔧 NextVibe White Screen Fix"
+echo "🔧 HabitNex White Screen Fix"
 echo "=============================="
 
 # Stop all Next.js processes

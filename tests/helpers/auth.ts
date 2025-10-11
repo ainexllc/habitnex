@@ -20,19 +20,17 @@ export async function signInUser(page: Page, user: TestUser = DEFAULT_TEST_USER)
   // Navigate to login page
   await page.goto('/login');
   
-  // Check if already signed in by looking for dashboard redirect
-  await page.waitForLoadState('networkidle');
-  
-  if (page.url().includes('/dashboard')) {
-    console.log('User already signed in');
-    return; // Already signed in
-  }
-  
   try {
-    // Look for email input
+    await page.waitForLoadState('networkidle');
+
     const emailInput = page.locator('input[type="email"], input[name="email"]');
     const passwordInput = page.locator('input[type="password"], input[name="password"]');
     const loginButton = page.locator('button:has-text("Sign In"), button[type="submit"]');
+
+    if ((await emailInput.count()) === 0) {
+      console.log('User already signed in');
+      return;
+    }
     
     // Wait for form to be visible
     await expect(emailInput).toBeVisible({ timeout: 10000 });
@@ -45,7 +43,7 @@ export async function signInUser(page: Page, user: TestUser = DEFAULT_TEST_USER)
     await loginButton.click();
     
     // Wait for navigation to dashboard or main app
-    await page.waitForURL('**/dashboard**', { timeout: 15000 });
+    await page.waitForURL(url => new URL(url).pathname === '/', { timeout: 15000 });
     
     console.log('Successfully signed in user:', user.email);
     
@@ -94,7 +92,7 @@ export async function createTestUser(page: Page, user: TestUser = DEFAULT_TEST_U
     await signUpButton.click();
     
     // Wait for account creation and navigation
-    await page.waitForURL('**/dashboard**', { timeout: 15000 });
+    await page.waitForURL(url => new URL(url).pathname === '/', { timeout: 15000 });
     
     console.log('Successfully created test account:', user.email);
     
@@ -116,7 +114,10 @@ export async function signOutUser(page: Page) {
       await signOutButton.click();
       
       // Wait for navigation to login page
-      await page.waitForURL('**/login**', { timeout: 10000 });
+      await page.waitForURL(url => {
+        const { pathname } = new URL(url);
+        return pathname === '/login' || pathname === '/';
+      }, { timeout: 10000 });
       console.log('Successfully signed out user');
     }
   } catch (error) {
@@ -132,11 +133,11 @@ export async function ensureAuthenticated(page: Page, user: TestUser = DEFAULT_T
   if (page.url().includes('/login') || page.url().includes('/signup')) {
     await signInUser(page, user);
   } else {
-    // Check if we can access protected content
-    await page.goto('/dashboard');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
-    if (page.url().includes('/login')) {
+
+    const loginInputs = await page.locator('input[type="email"], input[name="email"]').count();
+    if (loginInputs > 0) {
       await signInUser(page, user);
     }
   }

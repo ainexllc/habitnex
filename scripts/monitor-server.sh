@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NextVibe Server Monitor Script
+# HabitNex Server Monitor Script
 # Monitors the development server on port 3000 and logs any errors
 
 LOG_FILE="./logs/server-monitor.log"
@@ -17,7 +17,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo "Starting NextVibe server monitor..." | tee -a "$LOG_FILE"
+echo "Starting HabitNex server monitor..." | tee -a "$LOG_FILE"
 echo "Monitoring: $HEALTH_CHECK_URL" | tee -a "$LOG_FILE"
 echo "Check interval: ${CHECK_INTERVAL}s" | tee -a "$LOG_FILE"
 echo "Log file: $LOG_FILE" | tee -a "$LOG_FILE"
@@ -27,14 +27,14 @@ while true; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
     # Check if pm2 process is running
-    PM2_STATUS=$(pm2 jlist | jq -r '.[] | select(.name == "nextvibe-dev") | .pm2_env.status')
+    PM2_STATUS=$(pm2 jlist | jq -r '.[] | select(.name == "habitnex-dev") | .pm2_env.status')
 
     if [ "$PM2_STATUS" != "online" ]; then
         echo -e "${RED}[$TIMESTAMP] ERROR: PM2 process is not online (status: $PM2_STATUS)${NC}" | tee -a "$LOG_FILE"
 
         # Try to restart the process
         echo -e "${YELLOW}[$TIMESTAMP] Attempting to restart server...${NC}" | tee -a "$LOG_FILE"
-        pm2 restart nextvibe-dev >> "$LOG_FILE" 2>&1
+        pm2 restart habitnex-dev >> "$LOG_FILE" 2>&1
 
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}[$TIMESTAMP] Server restarted successfully${NC}" | tee -a "$LOG_FILE"
@@ -56,7 +56,7 @@ while true; do
 
         # Try to restart
         echo -e "${YELLOW}[$TIMESTAMP] Attempting to restart unresponsive server...${NC}" | tee -a "$LOG_FILE"
-        pm2 restart nextvibe-dev >> "$LOG_FILE" 2>&1
+        pm2 restart habitnex-dev >> "$LOG_FILE" 2>&1
     else
         echo -e "${RED}[$TIMESTAMP] ERROR: Server returned HTTP $HTTP_STATUS${NC}" | tee -a "$LOG_FILE"
 
@@ -66,7 +66,7 @@ while true; do
     fi
 
     # Check pm2 logs for errors
-    RECENT_LOGS=$(pm2 logs nextvibe-dev --lines 5 --nostream 2>/dev/null | grep -i "error\|exception\|failed" | tail -3)
+    RECENT_LOGS=$(pm2 logs habitnex-dev --lines 5 --nostream 2>/dev/null | grep -i "error\|exception\|failed" | tail -3)
 
     if [ ! -z "$RECENT_LOGS" ]; then
         echo -e "${YELLOW}[$TIMESTAMP] WARNING: Recent errors in logs:${NC}" | tee -a "$LOG_FILE"
