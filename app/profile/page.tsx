@@ -12,8 +12,8 @@ import { User, Moon, Sun, Bell, Globe } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, userProfile } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const [loading, setLoading] = useState(false);
+  const { mode, setMode, preset, setPreset, availableThemes } = useTheme();
+  const [loading] = useState(false);
 
   return (
     <ProtectedRoute>
@@ -77,7 +77,7 @@ export default function ProfilePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  {theme === 'light' ? (
+                  {mode === 'light' ? (
                     <Sun className="w-5 h-5 mr-2" />
                   ) : (
                     <Moon className="w-5 h-5 mr-2" />
@@ -93,21 +93,59 @@ export default function ProfilePage() {
                     </label>
                     <div className="flex items-center space-x-4">
                       <Button
-                        variant={theme === 'light' ? 'primary' : 'outline'}
+                        variant={mode === 'light' ? 'primary' : 'outline'}
                         size="sm"
-                        onClick={() => theme === 'dark' && toggleTheme()}
+                        onClick={() => setMode('light')}
                       >
                         <Sun className="w-4 h-4 mr-1" />
                         Light
                       </Button>
                       <Button
-                        variant={theme === 'dark' ? 'primary' : 'outline'}
+                        variant={mode === 'dark' ? 'primary' : 'outline'}
                         size="sm"
-                        onClick={() => theme === 'light' && toggleTheme()}
+                        onClick={() => setMode('dark')}
                       >
                         <Moon className="w-4 h-4 mr-1" />
                         Dark
                       </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
+                      Theme Pack
+                    </label>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {availableThemes.map((theme) => (
+                        <button
+                          key={theme.id}
+                          onClick={() => setPreset(theme.id)}
+                          className={`relative overflow-hidden rounded-xl border-2 transition-all text-left ${
+                            preset === theme.id
+                              ? 'border-blue-500 shadow-lg shadow-blue-500/20'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
+                          }`}
+                        >
+                          <div
+                            className="h-20 w-full rounded-lg m-3"
+                            style={{ backgroundImage: theme.previewGradient }}
+                          />
+                          <div className="px-4 pb-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">
+                                {theme.name}
+                              </span>
+                              {preset === theme.id && (
+                                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                  Active
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                              {theme.description}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,4 @@
 'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -10,13 +7,11 @@ import Link from 'next/link';
 import { theme } from '@/lib/theme';
 
 export default function FamilyOnboardingPage() {
-  const router = useRouter();
-  
   const features = [
     {
       icon: <Users className="w-8 h-8" />,
       title: "Family Dashboard",
-      description: "See everyone's habits and progress on one beautiful screen"
+      description: "See everyone&apos;s habits and progress on one beautiful screen"
     },
     {
       icon: <Trophy className="w-8 h-8" />,
@@ -107,7 +102,7 @@ export default function FamilyOnboardingPage() {
                     <span className="text-2xl font-bold text-purple-600">3</span>
                   </div>
                   <h4 className={`font-bold ${theme.text.primary} mb-2`}>Track Together</h4>
-                  <p className={theme.text.secondary}>See everyone's progress and celebrate wins together</p>
+                  <p className={theme.text.secondary}>See everyone&apos;s progress and celebrate wins together</p>
                 </div>
               </div>
             </CardContent>
@@ -140,7 +135,7 @@ export default function FamilyOnboardingPage() {
             <p className={`${theme.text.secondary} mb-4`}>
               Not ready for family mode? You can always continue with individual habit tracking.
             </p>
-            <Link href="/dashboard">
+            <Link href="/">
               <Button variant="ghost" className={theme.components.button.ghost}>
                 Continue with Individual Mode
               </Button>

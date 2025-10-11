@@ -7,12 +7,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { theme } from '@/lib/theme';
-import { UserPlus, Target, Heart, Users, Mail, Lock, Eye, EyeOff, User, ArrowRight, Rocket, Trophy, Star, CheckCircle2 } from 'lucide-react';
+import { Heart, Users, Mail, Lock, Eye, EyeOff, User, ArrowRight, Rocket, Trophy, Star, CheckCircle2 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 
 const signUpSchema = z.object({
@@ -38,7 +35,7 @@ export default function SignUpPage() {
   // Redirect to dashboard if user is already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/dashboard');
+      router.push('/');
     }
   }, [user, authLoading, router]);
 
@@ -51,9 +48,10 @@ export default function SignUpPage() {
       setLoading(true);
       setError('');
       await signUp(data.email, data.password, data.displayName);
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+      router.push('/');
+    } catch (err) {
+      const error = err as { message?: string };
+      setError(error.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -73,13 +71,14 @@ export default function SignUpPage() {
       
       // If using popup and we get a result immediately, navigate
       if (result) {
-        router.push('/dashboard');
+        router.push('/');
       } else if (!usePopup) {
         // If using redirect, the page will reload after auth
         // No need to navigate here
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+    } catch (err) {
+      const error = err as { message?: string };
+      setError(error.message || 'Failed to sign in with Google');
     } finally {
       setLoading(false);
     }
@@ -155,7 +154,7 @@ export default function SignUpPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">No credit card required</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Start free and upgrade when you're ready</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Start free and upgrade when you&apos;re ready</p>
                   </div>
                 </div>
 

@@ -1,497 +1,644 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { LucideIcon } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { 
-  Target, TrendingUp, Shield, Users, Zap, 
-  ArrowRight, CheckCircle, Heart, Trophy, Star, 
-  BarChart3, Calendar, Brain, Smartphone, Clock,
-  ChevronRight, Play, Menu, X
-} from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
+import { useAuth } from '@/contexts/AuthContext';
+import FamilyDashboard from './dashboard/page';
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  CheckCircle,
+  TrendingUp,
+  Shield,
+  Target,
+  Zap,
+  Users,
+  Trophy,
+} from 'lucide-react';
+
+const featureHighlights: Array<{
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  accent: string;
+}> = [
+  {
+    title: 'Habit Playbooks',
+    description: 'Start fast with guided routines for wellness, productivity, and family life.',
+    icon: Target,
+    accent: 'from-blue-500 to-indigo-600',
+  },
+  {
+    title: 'Collaborative Dashboards',
+    description: 'Invite family, compare streaks, and celebrate wins together with shared views.',
+    icon: Users,
+    accent: 'from-emerald-500 to-teal-600',
+  },
+  {
+    title: 'AI-Powered Nudges',
+    description: 'Receive actionable recommendations that adapt as your habits improve.',
+    icon: Zap,
+    accent: 'from-purple-500 to-pink-600',
+  },
+];
+
+const howItWorks: Array<{ step: string; title: string; description: string }> = [
+  {
+    step: '1',
+    title: 'Create Your Space',
+    description: 'Sign up in seconds and tailor your dashboard to personal or family goals.',
+  },
+  {
+    step: '2',
+    title: 'Add Habits & Automations',
+    description: 'Choose templates or build your own routines with reminders and AI insights.',
+  },
+  {
+    step: '3',
+    title: 'Track, Learn, Celebrate',
+    description: 'Review streaks, monitor mood, and unlock celebrations as milestones stack up.',
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      'HabitNex keeps our family aligned without nagging. Shared streaks make accountability fun rather than stressful.',
+    name: 'The Martinez Family',
+    role: 'Weekend reset champions',
+  },
+  {
+    quote:
+      'I finally understand my habit patterns. The analytics surface exactly when I slip so I can course-correct fast.',
+    name: 'Riya Singh',
+    role: 'Product designer & morning routine enthusiast',
+  },
+];
+
+const quickMetrics: Array<{
+  label: string;
+  value: string;
+  caption: string;
+  icon: LucideIcon;
+}> = [
+  {
+    label: 'Families collaborating',
+    value: '12k+',
+    caption: 'Share goals in private HabitNex spaces',
+    icon: Users,
+  },
+  {
+    label: 'Average streak sustained',
+    value: '28 days',
+    caption: 'Consistency unlocked with smart reminders',
+    icon: Trophy,
+  },
+  {
+    label: 'Habit recommendations delivered',
+    value: '2.3M',
+    caption: 'Real-time coaching tailored to each check-in',
+    icon: Zap,
+  },
+];
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
 
 export default function HomePage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const {
+    user,
+    signIn,
+    signInWithGoogle,
+    authError,
+    clearAuthError,
+    loading: authLoading,
+  } = useAuth();
+  const router = useRouter();
+  const isAuthenticated = !authLoading && Boolean(user);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      setLoading(true);
+      setError('');
+      await signIn(data.email, data.password);
+      router.replace('/');
+    } catch (err) {
+      const error = err as { message?: string };
+      setError(error.message || 'Failed to sign in');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const isLocalhost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const usePopup = !isLocalhost;
+
+    try {
+      setLoading(true);
+      setError('');
+      clearAuthError();
+
+      const result = await signInWithGoogle(usePopup);
+      if (result) {
+        router.replace('/');
+      }
+    } catch (err) {
+      const error = err as { message?: string };
+      setError(error.message || 'Failed to sign in with Google');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isAuthenticated) {
+    return <FamilyDashboard />;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:from-gray-900 dark:via-blue-950/20 dark:to-gray-900">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-indigo-600/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gradient-to-br from-emerald-400/10 to-teal-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }} />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full opacity-20 blur-3xl animate-pulse" />
+        <div
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full opacity-20 blur-3xl animate-pulse"
+          style={{ animationDelay: '2s' }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full opacity-10 blur-3xl animate-pulse"
+          style={{ animationDelay: '4s' }}
+        />
       </div>
 
-      {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg' : 'bg-transparent'
-      }`}>
+      <header className="relative backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Logo textSize="md" />
+            <Logo textSize="md" />
 
-              {/* Desktop Navigation */}
-              <div className="hidden md:flex items-center space-x-8 ml-10">
-                <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Features</a>
-                <a href="#how-it-works" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">How it Works</a>
-                <a href="#testimonials" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Testimonials</a>
-                <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Pricing</a>
-              </div>
-            </div>
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+              <a href="#overview" className="hover:text-gray-900 dark:hover:text-white transition-colors duration-200">
+                Overview
+              </a>
+              <a href="#features" className="hover:text-gray-900 dark:hover:text-white transition-colors duration-200">
+                Features
+              </a>
+              <a
+                href="#how-it-works"
+                className="hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+              >
+                How It Works
+              </a>
+              <a
+                href="#testimonials"
+                className="hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+              >
+                Stories
+              </a>
+            </nav>
 
             <div className="flex items-center space-x-4">
+              <Link
+                href="/signup"
+                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+              >
+                Get HabitNex
+              </Link>
+              <Link
+                href="/signup"
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+              >
+                Create Account
+              </Link>
               <ThemeToggle />
-              <Link 
-                href="/login" 
-                className="hidden md:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link 
-                href="/signup" 
-                className="hidden md:block px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
-              >
-                Get Started
-              </Link>
-
-              {/* Mobile Menu Button */}
-              <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-gray-600 dark:text-gray-300"
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-            <div className="px-4 py-6 space-y-4">
-              <a href="#features" className="block text-gray-600 dark:text-gray-300">Features</a>
-              <a href="#how-it-works" className="block text-gray-600 dark:text-gray-300">How it Works</a>
-              <a href="#testimonials" className="block text-gray-600 dark:text-gray-300">Testimonials</a>
-              <a href="#pricing" className="block text-gray-600 dark:text-gray-300">Pricing</a>
-              <Link href="/login" className="block text-gray-600 dark:text-gray-300">Sign In</Link>
-              <Link href="/signup" className="block w-full text-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg">
-                Get Started
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full mb-8">
-              <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">AI-POWERED HABIT TRACKING</span>
-            </div>
-
-            {/* Hero Text */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Build Habits That
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-                Transform Your Life
-              </span>
-            </h1>
-
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
-              Join over 10,000 people who've transformed their daily routines with intelligent habit tracking, 
-              beautiful analytics, and AI-powered recommendations.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Link 
-                href="/signup" 
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-              >
-                Start Free Trial
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-lg">
-                <Play className="w-5 h-5" />
-                Watch Demo
-              </button>
-            </div>
-
-            {/* Trust Indicators */}
-            <div className="flex items-center justify-center gap-8 mb-16">
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
-                ))}
-                <span className="ml-2 text-gray-600 dark:text-gray-400">4.9/5 rating</span>
+      <main id="overview" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
+          <div className="flex-1 max-w-xl lg:pr-8">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                  TRUSTED BY 10,000+ USERS
+                </span>
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
-                <span className="font-bold text-gray-900 dark:text-white">10,000+</span> active users
-              </div>
-              <div className="text-gray-600 dark:text-gray-400">
-                <span className="font-bold text-gray-900 dark:text-white">2M+</span> habits tracked
-              </div>
-            </div>
 
-            {/* Hero Image/Demo */}
-            <div className="relative max-w-5xl mx-auto">
-              <div className="relative bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 shadow-2xl">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Sample Dashboard Cards */}
-                  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Today's Progress</h3>
-                      <Trophy className="w-5 h-5 text-yellow-500" />
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">87%</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">7 of 8 habits completed</div>
-                    <div className="mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style={{ width: '87%' }} />
+              <div className="space-y-6">
+                <h1 className="text-5xl lg:text-6xl font-bold">
+                  <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    Transform Your
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                    Daily Habits
+                  </span>
+                </h1>
+                <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                  Welcome to HabitNex. Track progress, build streaks, and achieve your goals with AI-powered insights and
+                  effortless collaboration.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-6 py-6 border-y border-gray-200 dark:border-gray-700">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">98%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Report real progress</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">30+</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Habit templates included</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">24/7</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">AI coaching available</div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 group">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-200">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Smart Habit Tracking</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">AI-powered recommendations and insights</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 group">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-200">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Visual Progress Analytics</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Beautiful charts and streak tracking</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 group">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-200">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Privacy First</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Your data is encrypted and secure</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">JD</span>
                     </div>
                   </div>
-
-                  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Current Streak</h3>
-                      <Target className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">21 days</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Personal best: 45 days</div>
-                    <div className="mt-4 flex gap-1">
-                      {[...Array(7)].map((_, i) => (
-                        <div key={i} className={`h-8 w-full rounded ${i < 5 ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`} />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Mood Trend</h3>
-                      <Heart className="w-5 h-5 text-red-500" />
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">+15%</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Improvement this week</div>
-                    <div className="mt-4">
-                      <svg className="w-full h-12" viewBox="0 0 100 40">
-                        <path d="M 0,35 Q 25,30 50,20 T 100,10" stroke="url(#gradient)" strokeWidth="2" fill="none" />
-                        <defs>
-                          <linearGradient id="gradient">
-                            <stop offset="0%" stopColor="#10B981" />
-                            <stop offset="100%" stopColor="#3B82F6" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 italic">
+                      "HabitNex transformed my daily routine. The AI suggestions are spot-on, and I've maintained my longest
+                      streak ever!"
+                    </p>
+                    <div className="mt-2">
+                      <div className="text-xs font-semibold text-gray-900 dark:text-white">Jane Doe</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">120-day streak holder</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Everything You Need to Succeed
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Powerful features designed to help you build lasting habits and achieve your goals.
-            </p>
+          <div className="flex-shrink-0 w-full max-w-md">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8 backdrop-blur-lg bg-opacity-95 dark:bg-opacity-95">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back</h2>
+                <p className="text-gray-500 dark:text-gray-400">Sign in to continue your journey</p>
+              </div>
+
+              <div className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" />
+                      </div>
+                      <input
+                        type="email"
+                        placeholder="you@example.com"
+                        className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                          errors.email ? 'border-red-500 focus:ring-red-500' : ''
+                        }`}
+                        {...register('email')}
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <span className="text-xs">⚠</span> {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                      >
+                        Forgot?
+                      </Link>
+                    </div>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" />
+                      </div>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        className={`w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                          errors.password ? 'border-red-500 focus:ring-red-500' : ''
+                        }`}
+                        {...register('password')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200" />
+                        ) : (
+                          <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <span className="text-xs">⚠</span> {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                    </label>
+                  </div>
+
+                  {(error || authError) && (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>⚠</span>
+                        <span>{error || authError}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Signing in...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <span>Sign in</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
+                    )}
+                  </button>
+                </form>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300 dark:border-gray-700" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white dark:bg-gray-900 px-4 text-gray-500 dark:text-gray-400">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={handleGoogleSignIn}
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group shadow-sm hover:shadow-md"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      />
+                    </svg>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Continue with Google</span>
+                  </button>
+                </div>
+
+                <div className="text-center pt-6 border-t border-gray-200 dark:border-gray-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Don't have an account?{' '}
+                    <Link
+                      href="/signup"
+                      className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                    >
+                      Sign up for free
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">AI Recommendations</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Get personalized habit suggestions based on your goals and progress patterns.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-6">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Advanced Analytics</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Visualize your progress with beautiful charts and gain insights into your patterns.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-6">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Family Sharing</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Share your journey with family and friends for accountability and support.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-6">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Streak Tracking</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Build momentum with streak tracking and celebrate your consistency milestones.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
-                <Smartphone className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Mobile Ready</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Access your habits anywhere with our responsive design that works on all devices.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl flex items-center justify-center mb-6">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Privacy First</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Your data is encrypted and secure. We never share your information with third parties.
-              </p>
-            </div>
+        <div className="mt-16 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Teams and creators building with HabitNex</p>
+          <div className="flex items-center justify-center gap-8 opacity-50 grayscale">
+            <div className="text-2xl font-bold text-gray-400">FocusLab</div>
+            <div className="text-2xl font-bold text-gray-400">Nimbus</div>
+            <div className="text-2xl font-bold text-gray-400">Oak & Co</div>
+            <div className="text-2xl font-bold text-gray-400">BrightPath</div>
           </div>
         </div>
-      </section>
+      </main>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Start Your Journey in 3 Simple Steps
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Getting started with NextVibe is easy. You'll be tracking habits in minutes.
+      <section id="features" className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Why teams choose HabitNex</h2>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Blend guidance and accountability with flexible modules that grow with your habits.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
-                1
+            {featureHighlights.map(({ title, description, icon: Icon, accent }) => (
+              <div
+                key={title}
+                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur rounded-2xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-8 transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className={`w-12 h-12 mb-6 bg-gradient-to-br ${accent} rounded-xl flex items-center justify-center`}>
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{description}</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Create Your Account</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Sign up in seconds with your email or Google account. No credit card required.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
-                2
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Add Your Habits</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Choose from templates or create custom habits. Our AI will help optimize them.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
-                3
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Track & Grow</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Check off habits daily, build streaks, and watch your progress transform your life.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Loved by Thousands
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              See what our users have to say about their transformation journey.
+      <section id="how-it-works" className="py-16 bg-white dark:bg-gray-950">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Start in minutes</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400">
+              HabitNex guides you from your first habit to long-term streaks with a simple onboarding flow.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                "NextVibe completely changed how I approach my daily routine. The AI suggestions are incredibly helpful!"
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">SJ</span>
+            {howItWorks.map(({ step, title, description }) => (
+              <div
+                key={step}
+                className="relative p-8 bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg"
+              >
+                <div className="absolute -top-4 left-8 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold rounded-xl flex items-center justify-center shadow-lg">
+                  {step}
                 </div>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white">Sarah Johnson</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">120-day streak</div>
-                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{description}</p>
               </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                "The analytics feature helps me understand my patterns. I've never been more consistent with my habits!"
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">MC</span>
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white">Mike Chen</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">85-day streak</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                "Family sharing keeps me accountable. My whole family is now building better habits together!"
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">EP</span>
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white">Emily Park</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">200-day streak</div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-12 shadow-2xl">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Ready to Transform Your Life?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8">
-              Join thousands who are already building better habits. Start your free trial today.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/signup" 
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-xl"
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid gap-6 sm:grid-cols-3">
+            {quickMetrics.map(({ label, value, caption, icon: Icon }) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur p-6 shadow-lg"
               >
-                Get Started Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link 
-                href="/login" 
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-200"
-              >
-                Sign In
-                <ChevronRight className="w-5 h-5" />
-              </Link>
-            </div>
-            <p className="text-sm text-blue-100 mt-6">
-              No credit card required • 30-day free trial • Cancel anytime
-            </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">{caption}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="mb-4">
-                <Logo linkToHome={false} textSize="md" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Transform your daily habits with AI-powered tracking and insights.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><a href="#features" className="hover:text-gray-900 dark:hover:text-white">Features</a></li>
-                <li><a href="#pricing" className="hover:text-gray-900 dark:hover:text-white">Pricing</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">API</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">Integrations</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">About</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">Blog</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">Careers</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">Contact</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><a href="/privacy" className="hover:text-gray-900 dark:hover:text-white">Privacy</a></li>
-                <li><a href="/terms" className="hover:text-gray-900 dark:hover:text-white">Terms</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">Security</a></li>
-                <li><a href="#" className="hover:text-gray-900 dark:hover:text-white">GDPR</a></li>
-              </ul>
-            </div>
+      <section id="testimonials" className="py-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center text-white">
+            <h2 className="text-3xl font-bold">Real stories from HabitNex builders</h2>
+            <p className="mt-3 text-white/80">
+              From solo streaks to family accountability squads, HabitNex adapts to every routine.
+            </p>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-              © 2024 NextVibe. All rights reserved.
-            </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            {testimonials.map(({ quote, name, role }) => (
+              <div key={name} className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-8 text-white shadow-xl">
+                <p className="text-lg leading-relaxed mb-4">“{quote}”</p>
+                <div className="space-y-1">
+                  <div className="font-semibold">{name}</div>
+                  <div className="text-sm text-white/70">{role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-12 bg-gray-950">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 text-gray-400 text-sm">
+            <div>
+              <Logo textSize="sm" />
+              <p className="mt-2 text-xs text-gray-500">
+                © {new Date().getFullYear()} HabitNex. Build healthier routines—together.
+              </p>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/privacy" className="hover:text-white transition-colors duration-200">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-white transition-colors duration-200">
+                Terms
+              </Link>
+              <a
+                href="mailto:support@habitnex.app"
+                className="hover:text-white transition-colors duration-200"
+              >
+                Support
+              </a>
+            </div>
           </div>
         </div>
       </footer>

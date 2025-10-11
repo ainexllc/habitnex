@@ -6,7 +6,7 @@ import { checkExporterHealth } from '@/lib/telemetry/exporters';
 /**
  * Telemetry health check endpoint
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const provider = getTelemetryProvider();
     const config = getTelemetryConfig();
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const healthData = {
       timestamp: new Date().toISOString(),
       service: {
-        name: 'nextvibe',
+        name: 'habitnex',
         version: process.env.npm_package_version || '1.0.0',
         environment: process.env.NODE_ENV,
       },
@@ -37,10 +37,10 @@ export async function GET(req: NextRequest) {
 
     // Include business metrics if available
     try {
-      const businessMetrics = await calculateBusinessMetrics();
+      await calculateBusinessMetrics();
       // healthData.metrics = businessMetrics; // Temporarily disabled due to TypeScript error
-    } catch (error) {
-      console.warn('[Telemetry Health] Failed to calculate business metrics:', error);
+    } catch (metricError) {
+      console.warn('[Telemetry Health] Failed to calculate business metrics:', metricError);
     }
 
     const status = provider?.isInitialized ? 200 : 503;
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       error: 'Telemetry health check failed',
       message: error instanceof Error ? error.message : 'Unknown error',
       service: {
-        name: 'nextvibe',
+        name: 'habitnex',
         version: process.env.npm_package_version || '1.0.0',
         environment: process.env.NODE_ENV,
       },
@@ -87,8 +87,9 @@ export async function POST(req: NextRequest) {
       updates: updates,
       note: 'Runtime configuration updates not yet implemented',
     });
-    
-  } catch (error) {
+
+  } catch (configError) {
+    console.error('[Telemetry Health] Config update error:', configError);
     return NextResponse.json(
       { error: 'Failed to update configuration' },
       { status: 400 }

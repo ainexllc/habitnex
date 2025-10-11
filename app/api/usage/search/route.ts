@@ -187,14 +187,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const searchCriteria = await req.json();
-    const { 
-      query,
-      filters,
-      sort,
-      pagination,
-      aggregations 
-    } = searchCriteria;
+    // Parse search criteria (for future use)
+    await req.json();
 
     // This would implement more advanced search functionality
     // For now, redirect to GET method

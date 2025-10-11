@@ -59,9 +59,9 @@ export default function CreateFamilyPage() {
       };
       
       await createNewFamily(request);
-      router.push('/dashboard');
-      
-    } catch (err) {
+      router.push('/');
+
+    } catch {
       // Failed to create family - handle silently
     }
   };
@@ -95,7 +95,7 @@ export default function CreateFamilyPage() {
           
           {/* Back Button */}
           <div className="mb-6">
-            <Link href="/dashboard">
+            <Link href="/">
               <Button variant="ghost" className={cn(
                 "flex items-center",
                 familyAnimations.hover
@@ -335,7 +335,7 @@ export default function CreateFamilyPage() {
           {/* Help Text */}
           <div className="mt-8 text-center text-gray-600">
             <p className="text-sm">
-              After creating your family, you'll get an invite code to share with family members
+              After creating your family, you&apos;ll get an invite code to share with family members
             </p>
           </div>
         </div>

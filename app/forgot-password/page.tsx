@@ -35,8 +35,9 @@ export default function ForgotPasswordPage() {
       setMessage('');
       await resetPassword(data.email);
       setMessage('Check your inbox for further instructions');
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
+    } catch (err) {
+      const error = err as { message?: string };
+      setError(error.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }

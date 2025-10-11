@@ -487,7 +487,7 @@ export default function RewardManagementPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-600">
-                  Are you sure you want to deny <strong>{denialDialog.memberName}'s</strong> request for <strong>{denialDialog.rewardTitle}</strong>?
+                  Are you sure you want to deny <strong>{denialDialog.memberName}&apos;s</strong> request for <strong>{denialDialog.rewardTitle}</strong>?
                 </p>
                 
                 <div>
@@ -538,7 +538,7 @@ export default function RewardManagementPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-600">
-                  Mark <strong>{completionDialog.memberName}'s</strong> <strong>{completionDialog.rewardTitle}</strong> as completed.
+                  Mark <strong>{completionDialog.memberName}&apos;s</strong> <strong>{completionDialog.rewardTitle}</strong> as completed.
                 </p>
                 
                 <div>

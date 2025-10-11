@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/firebase-admin';
 import { db } from '@/lib/firebaseConfig';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 
 export async function GET(request: Request) {
   try {
@@ -11,8 +10,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.split('Bearer ')[1];
-    
     // Verify the token (simplified for debugging)
     // In production, you'd verify this properly
     

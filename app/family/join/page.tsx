@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { JoinFamilyRequest } from '@/types/family';
 import { Users, ArrowLeft, UserPlus, Palette } from 'lucide-react';
-import { familyBackgrounds, familyText, familyIcons, familyAlerts, familyAnimations, getFamilyInput } from '@/lib/familyThemes';
+import { familyBackgrounds, familyText, familyIcons, familyAnimations } from '@/lib/familyThemes';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -75,7 +75,7 @@ export default function JoinFamilyPage() {
       };
       
       await joinExistingFamily(request);
-      router.push('/dashboard');
+      router.push('/');
       
     } catch (err) {
       console.error('Failed to join family:', err);
@@ -109,7 +109,7 @@ export default function JoinFamilyPage() {
           
           {/* Back Button */}
           <div className="mb-6">
-            <Link href="/dashboard">
+            <Link href="/">
               <Button variant="ghost" className={cn(
                 "flex items-center",
                 familyAnimations.hover
@@ -248,7 +248,7 @@ export default function JoinFamilyPage() {
                               name="role"
                               value={option.value}
                               checked={formData.role === option.value}
-                              onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as any }))}
+                              onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as 'parent' | 'child' | 'teen' | 'adult' }))}
                               className="sr-only"
                             />
                             <div className={`p-3 border-2 rounded-lg ${
@@ -425,7 +425,7 @@ export default function JoinFamilyPage() {
           {/* Help Text */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600 mb-4">
-              Don't have a family invite code?
+              Don&apos;t have a family invite code?
             </p>
             <Link href="/family/create">
               <Button variant="outline">

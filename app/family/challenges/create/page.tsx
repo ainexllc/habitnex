@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useFamilyChallenges } from '@/hooks/useFamilyChallenges';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -15,20 +15,15 @@ import { DiceBearAvatar } from '@/components/ui/DiceBearAvatar';
 import { CreateFamilyHabitModal } from '@/components/family/CreateFamilyHabitModal';
 import {
   ArrowLeft,
-  Trophy,
   Target,
   Users,
   Zap,
   Flag,
-  Clock,
-  CalendarDays,
-  Gift,
   Plus,
-  X,
   CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ChallengeType, FamilyHabit } from '@/types/family';
+import type { ChallengeType } from '@/types/family';
 
 interface ChallengeFormData {
   name: string;
@@ -179,7 +174,7 @@ export default function CreateChallengePage() {
     setCurrentStep(2);
   };
 
-  const handleInputChange = (field: keyof ChallengeFormData, value: any) => {
+  const handleInputChange = (field: keyof ChallengeFormData, value: string | number | ChallengeType) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -265,10 +260,19 @@ export default function CreateChallengePage() {
   };
 
   // Build adventurer avatar options from stored avatarConfig so challenges page matches other displays
-  const getAvatarOptions = (member: any) => {
+  const getAvatarOptions = (member: {
+    avatarConfig?: Record<string, string | number>;
+    avatarSkinColor?: string;
+    avatarMouth?: string;
+    avatarHairColor?: string;
+    hairProbability?: number;
+    glassesProbability?: number;
+    earringsProbability?: number;
+    featuresProbability?: number;
+  }) => {
     const cfg = member.avatarConfig || {};
     const addHash = (c?: string) => (c ? (c.startsWith('#') ? c : `#${c}`) : c);
-    const opts: any = {};
+    const opts: Record<string, string[] | string[]> = {};
 
     // Only add options if they have values
     if (cfg.skinColor || member.avatarSkinColor) {

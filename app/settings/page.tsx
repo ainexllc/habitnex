@@ -6,20 +6,21 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { detectSystemTimeFormat } from '@/lib/timeUtils';
+import { useTheme } from '@/contexts/ThemeContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Settings, Clock, Globe, Bell, Palette } from 'lucide-react';
+import { Settings, Clock, Bell, Palette, Sun, Moon } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const { preferences } = useUserPreferences();
+  const { mode, setMode, preset, setPreset, availableThemes } = useTheme();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   
   // Local state for form
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('12h');
   const [locale, setLocale] = useState('en-US');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [notifications, setNotifications] = useState(true);
   const [weekStartsOn, setWeekStartsOn] = useState(0);
 
@@ -28,7 +29,6 @@ export default function SettingsPage() {
     if (preferences) {
       setTimeFormat(preferences.timeFormat);
       setLocale(preferences.locale);
-      setTheme(preferences.theme);
       setNotifications(preferences.notifications);
       setWeekStartsOn(preferences.weekStartsOn);
     }
@@ -44,7 +44,6 @@ export default function SettingsPage() {
       await updateDoc(userRef, {
         'preferences.timeFormat': timeFormat,
         'preferences.locale': locale,
-        'preferences.theme': theme,
         'preferences.notifications': notifications,
         'preferences.weekStartsOn': weekStartsOn,
         updatedAt: new Date()
@@ -87,7 +86,7 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
         </div>
         <p className="text-gray-600 dark:text-gray-400">
-          Customize your NextVibe experience and preferences.
+          Customize your HabitNex experience and preferences.
         </p>
       </div>
 
@@ -210,31 +209,68 @@ export default function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Theme
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="light"
-                    checked={theme === 'light'}
-                    onChange={(e) => setTheme(e.target.value as 'light')}
-                    className="mr-2"
-                  />
-                  Light
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Theme Mode
                 </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="dark"
-                    checked={theme === 'dark'}
-                    onChange={(e) => setTheme(e.target.value as 'dark')}
-                    className="mr-2"
-                  />
-                  Dark
+                <div className="flex gap-4">
+                  <Button
+                    variant={mode === 'light' ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => setMode('light')}
+                  >
+                    <Sun className="w-4 h-4 mr-2" />
+                    Light
+                  </Button>
+                  <Button
+                    variant={mode === 'dark' ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => setMode('dark')}
+                  >
+                    <Moon className="w-4 h-4 mr-2" />
+                    Dark
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Theme Pack
                 </label>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {availableThemes.map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setPreset(theme.id)}
+                      className={`relative overflow-hidden rounded-xl border-2 transition-all text-left ${
+                        preset === theme.id
+                          ? 'border-blue-500 shadow-lg shadow-blue-500/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
+                      }`}
+                    >
+                      <div
+                        className="h-20 w-full rounded-lg m-3"
+                        style={{ backgroundImage: theme.previewGradient }}
+                      />
+                      <div className="px-4 pb-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {theme.name}
+                          </span>
+                          {preset === theme.id && (
+                            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                          {theme.description}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </CardContent>

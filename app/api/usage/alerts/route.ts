@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getActiveAlerts } from '@/lib/db/usageOperations';
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  Timestamp 
+import {
+  collection,
+  addDoc,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { UsageAlert } from '@/types';

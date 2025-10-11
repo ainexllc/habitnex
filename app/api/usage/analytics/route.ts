@@ -48,7 +48,19 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    let responseData: any = {};
+    let responseData: {
+      userStats?: Awaited<ReturnType<typeof getUserUsageStats>>;
+      systemStats?: Awaited<ReturnType<typeof getSystemUsageStats>>;
+      alerts?: Awaited<ReturnType<typeof getActiveAlerts>>;
+      budgetStatus?: {
+        current: typeof DEFAULT_BUDGET_CONFIG;
+        usage: {
+          daily: { spent: number; percentage: number };
+          weekly: { spent: number; percentage: number };
+          monthly: { spent: number; percentage: number };
+        };
+      } | null;
+    } = {};
 
     if (type === 'user') {
       // Get user-specific analytics

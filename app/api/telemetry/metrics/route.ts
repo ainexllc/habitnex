@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     
     const metricsData = {
       timestamp,
-      service: 'nextvibe',
+      service: 'habitnex',
       version: process.env.npm_package_version || '1.0.0',
       environment: process.env.NODE_ENV,
       category,
@@ -131,62 +131,80 @@ export async function GET(req: NextRequest) {
 /**
  * Format metrics for Prometheus
  */
-function formatPrometheusMetrics(data: any): string {
+function formatPrometheusMetrics(data: {
+  version: string;
+  environment: string | undefined;
+  metrics: {
+    habitCompletionRate?: number;
+    moodEntriesPerDay?: number;
+    aiFeatureAdoption?: number;
+    errorRate?: number;
+    claudeApiCost?: number;
+  };
+  system: {
+    uptime: number;
+    memory: {
+      heapUsed: number;
+      heapTotal: number;
+      rss: number;
+    };
+  };
+}): string {
   const lines: string[] = [];
   
   // Add metadata
-  lines.push(`# HELP nextvibe_info Service information`);
-  lines.push(`# TYPE nextvibe_info gauge`);
-  lines.push(`nextvibe_info{version="${data.version}",environment="${data.environment}"} 1`);
+  lines.push(`# HELP habitnex_info Service information`);
+  lines.push(`# TYPE habitnex_info gauge`);
+  lines.push(`habitnex_info{version="${data.version}",environment="${data.environment}"} 1`);
   lines.push('');
   
   // Business metrics
   if (data.metrics.habitCompletionRate !== undefined) {
-    lines.push(`# HELP nextvibe_habit_completion_rate Habit completion rate percentage`);
-    lines.push(`# TYPE nextvibe_habit_completion_rate gauge`);
-    lines.push(`nextvibe_habit_completion_rate ${data.metrics.habitCompletionRate}`);
+    lines.push(`# HELP habitnex_habit_completion_rate Habit completion rate percentage`);
+    lines.push(`# TYPE habitnex_habit_completion_rate gauge`);
+    lines.push(`habitnex_habit_completion_rate ${data.metrics.habitCompletionRate}`);
     lines.push('');
   }
   
   if (data.metrics.moodEntriesPerDay !== undefined) {
-    lines.push(`# HELP nextvibe_mood_entries_per_day Average mood entries per day`);
-    lines.push(`# TYPE nextvibe_mood_entries_per_day gauge`);
-    lines.push(`nextvibe_mood_entries_per_day ${data.metrics.moodEntriesPerDay}`);
+    lines.push(`# HELP habitnex_mood_entries_per_day Average mood entries per day`);
+    lines.push(`# TYPE habitnex_mood_entries_per_day gauge`);
+    lines.push(`habitnex_mood_entries_per_day ${data.metrics.moodEntriesPerDay}`);
     lines.push('');
   }
   
   if (data.metrics.aiFeatureAdoption !== undefined) {
-    lines.push(`# HELP nextvibe_ai_feature_adoption AI feature adoption rate percentage`);
-    lines.push(`# TYPE nextvibe_ai_feature_adoption gauge`);
-    lines.push(`nextvibe_ai_feature_adoption ${data.metrics.aiFeatureAdoption}`);
+    lines.push(`# HELP habitnex_ai_feature_adoption AI feature adoption rate percentage`);
+    lines.push(`# TYPE habitnex_ai_feature_adoption gauge`);
+    lines.push(`habitnex_ai_feature_adoption ${data.metrics.aiFeatureAdoption}`);
     lines.push('');
   }
   
   if (data.metrics.errorRate !== undefined) {
-    lines.push(`# HELP nextvibe_error_rate Error rate percentage`);
-    lines.push(`# TYPE nextvibe_error_rate gauge`);
-    lines.push(`nextvibe_error_rate ${data.metrics.errorRate}`);
+    lines.push(`# HELP habitnex_error_rate Error rate percentage`);
+    lines.push(`# TYPE habitnex_error_rate gauge`);
+    lines.push(`habitnex_error_rate ${data.metrics.errorRate}`);
     lines.push('');
   }
   
   if (data.metrics.claudeApiCost !== undefined) {
-    lines.push(`# HELP nextvibe_claude_api_cost_usd Claude API cost in USD`);
-    lines.push(`# TYPE nextvibe_claude_api_cost_usd gauge`);
-    lines.push(`nextvibe_claude_api_cost_usd ${data.metrics.claudeApiCost}`);
+    lines.push(`# HELP habitnex_claude_api_cost_usd Claude API cost in USD`);
+    lines.push(`# TYPE habitnex_claude_api_cost_usd gauge`);
+    lines.push(`habitnex_claude_api_cost_usd ${data.metrics.claudeApiCost}`);
     lines.push('');
   }
   
   // System metrics
-  lines.push(`# HELP nextvibe_uptime_seconds Service uptime in seconds`);
-  lines.push(`# TYPE nextvibe_uptime_seconds gauge`);
-  lines.push(`nextvibe_uptime_seconds ${data.system.uptime}`);
+  lines.push(`# HELP habitnex_uptime_seconds Service uptime in seconds`);
+  lines.push(`# TYPE habitnex_uptime_seconds gauge`);
+  lines.push(`habitnex_uptime_seconds ${data.system.uptime}`);
   lines.push('');
   
-  lines.push(`# HELP nextvibe_memory_usage_bytes Memory usage in bytes`);
-  lines.push(`# TYPE nextvibe_memory_usage_bytes gauge`);
-  lines.push(`nextvibe_memory_usage_bytes{type="heap_used"} ${data.system.memory.heapUsed}`);
-  lines.push(`nextvibe_memory_usage_bytes{type="heap_total"} ${data.system.memory.heapTotal}`);
-  lines.push(`nextvibe_memory_usage_bytes{type="rss"} ${data.system.memory.rss}`);
+  lines.push(`# HELP habitnex_memory_usage_bytes Memory usage in bytes`);
+  lines.push(`# TYPE habitnex_memory_usage_bytes gauge`);
+  lines.push(`habitnex_memory_usage_bytes{type="heap_used"} ${data.system.memory.heapUsed}`);
+  lines.push(`habitnex_memory_usage_bytes{type="heap_total"} ${data.system.memory.heapTotal}`);
+  lines.push(`habitnex_memory_usage_bytes{type="rss"} ${data.system.memory.rss}`);
   lines.push('');
   
   return lines.join('\n');
@@ -235,7 +253,8 @@ export async function POST(req: NextRequest) {
       { status: 503 }
     );
     
-  } catch (error) {
+  } catch (recordError) {
+    console.error('[Telemetry Metrics] Record error:', recordError);
     return NextResponse.json(
       { error: 'Failed to record custom metric' },
       { status: 400 }
