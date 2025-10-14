@@ -1,4 +1,5 @@
 export type ThemeMode = 'light' | 'dark';
+export type ThemeAppearance = 'light' | 'dark';
 
 export type ThemePresetId =
   | 'solstice'
@@ -53,6 +54,7 @@ export interface ThemePresetDefinition {
   name: string;
   description: string;
   previewGradient: string;
+  appearance: ThemeAppearance;
   palettes: Record<ThemeMode, ThemePalette>;
 }
 
@@ -123,6 +125,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Solstice Glass',
     description: 'Sunrise neutrals, frosted glass cards, and warm streak celebrations.',
     previewGradient: 'linear-gradient(135deg, #ffb174 0%, #ff7a18 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#fff7f0',
@@ -181,6 +184,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Tidal Breeze',
     description: 'Coastal gradients, pill controls, and frothy dividers.',
     previewGradient: 'linear-gradient(135deg, #5eead4 0%, #0ea5e9 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#f3f8fb',
@@ -239,6 +243,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Ember Lounge',
     description: 'Charcoal panels with neon streak celebrations.',
     previewGradient: 'linear-gradient(135deg, #ff7a18 0%, #8b5cf6 100%)',
+    appearance: 'dark',
     palettes: {
       light: createPalette({
         background: '#f6f5f9',
@@ -297,6 +302,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Evergreen Atlas',
     description: 'Organic textures and botanical gradients for holistic families.',
     previewGradient: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#f2f7f3',
@@ -355,6 +361,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Nova Circuit',
     description: 'Futuristic HUD styling with telemetry overlays.',
     previewGradient: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#f4f6ff',
@@ -413,6 +420,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Ember Kanban',
     description: 'Drag-and-drop lanes with tactile tiles and traffic-light states.',
     previewGradient: 'linear-gradient(135deg, #f97316 0%, #fb7185 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#fff6ed',
@@ -471,6 +479,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Midnight Orbit',
     description: 'Radial dashboards with orbiting avatars and cobalt gradients.',
     previewGradient: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
+    appearance: 'dark',
     palettes: {
       light: createPalette({
         background: '#eef2ff',
@@ -529,6 +538,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Pastel Parade',
     description: 'Rounded tiles, confetti textures, and playful gradients.',
     previewGradient: 'linear-gradient(135deg, #f472b6 0%, #60a5fa 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#fdf2fb',
@@ -587,6 +597,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Zen Lattice',
     description: 'Calm lattice grid with typographic focus.',
     previewGradient: 'linear-gradient(135deg, #647dee 0%, #5fc6ff 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#eef2f8',
@@ -645,6 +656,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Lumen Lab',
     description: 'Metrics-first tiles with glowing telemetry beams.',
     previewGradient: 'linear-gradient(135deg, #14b8a6 0%, #3b82f6 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#f3f8ff',
@@ -703,6 +715,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Classic HabitNex',
     description: 'Cobalt blues, clean surfaces, and subtle glass shadows.',
     previewGradient: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#eef3ff',
@@ -761,6 +774,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Aurora Horizon',
     description: 'Luminous polar gradients with glass panels and teal-violet highlights.',
     previewGradient: 'linear-gradient(135deg, #14b8a6 0%, #818cf8 50%, #a855f7 100%)',
+    appearance: 'dark',
     palettes: {
       light: createPalette({
         background: '#f3f7ff',
@@ -819,6 +833,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Calm Canvas',
     description: 'Soft foggy neutrals and gentle motion for focus-first dashboards.',
     previewGradient: 'linear-gradient(135deg, #93c5fd 0%, #a7f3d0 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#f5f7fa',
@@ -877,6 +892,7 @@ export const themePresets: Record<ThemePresetId, ThemePresetDefinition> = {
     name: 'Vibrant Festival',
     description: 'Playful candy gradients and high-energy accent colors.',
     previewGradient: 'linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #6366f1 100%)',
+    appearance: 'light',
     palettes: {
       light: createPalette({
         background: '#fff6f0',
@@ -1029,23 +1045,24 @@ export const themeFonts = fontCatalog;
 export const fontList = Object.values(themeFonts);
 
 export const defaultThemePreference: ThemePreference = {
-  mode: 'light',
   preset: 'classic',
   font: 'plusJakarta',
+  mode: themePresets.classic.appearance,
 };
 
 export const themePresetIds = Object.keys(themePresets) as ThemePresetId[];
 
 export const themeList = themePresetIds.map((id) => {
-  const { name, description, previewGradient } = themePresets[id];
-  return { id, name, description, previewGradient };
+  const { name, description, previewGradient, appearance } = themePresets[id];
+  return { id, name, description, previewGradient, appearance };
 });
 
-export const resolvePalette = (preset: ThemePresetId, mode: ThemeMode): ThemePalette => {
+export const resolvePalette = (preset: ThemePresetId, overrideMode?: ThemeMode): ThemePalette => {
   const fallbackTheme = themePresets[defaultThemePreference.preset];
   const selected = themePresets[preset] ?? fallbackTheme;
-  const palette = selected.palettes[mode] ?? selected.palettes[defaultThemePreference.mode];
-  return palette ?? fallbackTheme.palettes.light;
+  const targetMode = overrideMode ?? selected.appearance ?? defaultThemePreference.mode;
+  const palette = selected.palettes[targetMode] ?? selected.palettes[selected.appearance] ?? selected.palettes.light;
+  return palette ?? fallbackTheme.palettes[fallbackTheme.appearance];
 };
 
 export const resolveFont = (font: FontId): FontDefinition => {

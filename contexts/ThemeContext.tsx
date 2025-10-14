@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, ReactNode } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { getUserProfile, updateUserTheme } from '@/lib/db';
@@ -23,8 +23,6 @@ interface ThemeContextType {
   preference: ThemePreference;
   palette: ReturnType<typeof resolvePalette>;
   availableThemes: typeof themeList;
-  setMode: (mode: ThemeMode) => void;
-  toggleMode: () => void;
   setPreset: (preset: ThemePresetId) => void;
   setPreference: (preference: ThemePreference) => void;
   syncWithFirebase: () => Promise<void>;
@@ -42,9 +40,13 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [userId, setUserId] = useState<string | null>(null);
   const palette = useMemo(
     () => resolvePalette(preference.preset, preference.mode),
-    [preference.mode, preference.preset]
+    [preference.preset, preference.mode]
   );
   const storageKey = 'habitnex:theme-preference';
+
+  const deriveMode = useCallback((preset: ThemePresetId): ThemeMode => {
+    return themePresets[preset]?.appearance ?? 'light';
+  }, []);
 
   // Listen for auth state changes
   useEffect(() => {
@@ -55,81 +57,98 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     return unsubscribe;
   }, []);
 
-  // Load theme on mount and when user changes
-  useEffect(() => {
-    setMounted(true);
-    // Only load theme after mounting (client-side only)
-    if (typeof window !== 'undefined') {
-      loadTheme();
-    } else {
-      setPreferenceState(defaultThemePreference);
-    }
-  }, [userId]);
+  const applyPreference = useCallback(
+    (incoming: ThemePreference) => {
+      const normalizedPreset = incoming.preset && incoming.preset in themePresets ? incoming.preset : defaultThemePreference.preset;
+      const normalizedFont = incoming.font && incoming.font in themeFonts ? incoming.font : defaultThemePreference.font;
+      const resolvedMode = deriveMode(normalizedPreset);
+      const normalizedPreference: ThemePreference = {
+        preset: normalizedPreset,
+      font: normalizedFont,
+      mode: resolvedMode,
+    };
+      setPreferenceState(normalizedPreference);
 
-  const applyPreference = (newPreference: ThemePreference) => {
-    setPreferenceState(newPreference);
+      if (typeof window === 'undefined') {
+        return;
+      }
 
-    if (typeof window === 'undefined') {
-      return;
-    }
+      localStorage.setItem(storageKey, JSON.stringify(normalizedPreference));
+      localStorage.setItem('theme', resolvedMode);
+      const root = window.document.documentElement;
+      const body = window.document.body;
+      const paletteTokens = resolvePalette(normalizedPreference.preset, resolvedMode);
+      const fontTokens = resolveFont(normalizedPreference.font);
 
-    localStorage.setItem(storageKey, JSON.stringify(newPreference));
-    localStorage.setItem('theme', newPreference.mode);
-    const root = window.document.documentElement;
-    const body = window.document.body;
-    const paletteTokens = resolvePalette(newPreference.preset, newPreference.mode);
-    const fontTokens = resolveFont(newPreference.font);
+      root.classList.remove('light', 'dark');
+      root.classList.add(resolvedMode);
+      root.dataset.themePreset = normalizedPreference.preset;
+      root.dataset.themeMode = resolvedMode;
+      root.dataset.themeFont = normalizedPreference.font;
+      root.setAttribute('data-theme', resolvedMode);
 
-    root.classList.remove('light', 'dark');
-    root.classList.add(newPreference.mode);
-    root.dataset.themePreset = newPreference.preset;
-    root.dataset.themeMode = newPreference.mode;
-    root.dataset.themeFont = newPreference.font;
-    root.setAttribute('data-theme', newPreference.mode);
+      Object.entries(paletteTokens).forEach(([token, value]) => {
+        root.style.setProperty(`--hn-${token}`, value);
+      });
 
-    Object.entries(paletteTokens).forEach(([token, value]) => {
-      root.style.setProperty(`--hn-${token}`, value);
-    });
+      root.style.setProperty('--hn-font-body', fontTokens.body);
+      root.style.setProperty('--hn-font-display', fontTokens.display);
+      root.style.setProperty('--hn-font-sample', fontTokens.sample);
 
-    root.style.setProperty('--hn-font-body', fontTokens.body);
-    root.style.setProperty('--hn-font-display', fontTokens.display);
-    root.style.setProperty('--hn-font-sample', fontTokens.sample);
+      const linkKey = `theme-font-${fontTokens.id}`;
+      if (typeof document !== 'undefined' && !document.querySelector(`link[data-theme-font="${linkKey}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = fontTokens.importUrl;
+        link.dataset.themeFont = linkKey;
+        document.head.appendChild(link);
+      }
 
-    const linkKey = `theme-font-${fontTokens.id}`;
-    if (typeof document !== 'undefined' && !document.querySelector(`link[data-theme-font="${linkKey}"]`)) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = fontTokens.importUrl;
-      link.dataset.themeFont = linkKey;
-      document.head.appendChild(link);
-    }
+      body.style.background = paletteTokens.background;
+      body.style.color = paletteTokens.textPrimary;
+      body.style.fontFamily = fontTokens.body;
+    },
+    [deriveMode]
+  );
 
-    body.style.background = paletteTokens.background;
-    body.style.color = paletteTokens.textPrimary;
-    body.style.fontFamily = fontTokens.body;
-  };
+  const sanitizePreference = useCallback(
+    (value: unknown): ThemePreference => {
+      if (!value) {
+        return defaultThemePreference;
+      }
 
-  const sanitizePreference = (value: any): ThemePreference => {
-    if (!value) {
+      if (typeof value === 'string') {
+        const presetFromMode = value === 'dark' ? 'aurora' : defaultThemePreference.preset;
+        const resolvedMode = deriveMode(presetFromMode as ThemePresetId);
+        return {
+          mode: resolvedMode,
+          preset: presetFromMode as ThemePresetId,
+          font: defaultThemePreference.font,
+        };
+      }
+
+      if (typeof value === 'object') {
+        const record = value as Partial<{ mode: ThemeMode; preset: ThemePresetId; font: FontId }>;
+        let preset: ThemePresetId = defaultThemePreference.preset;
+        if (typeof record.preset === 'string' && record.preset in themePresets) {
+          preset = record.preset as ThemePresetId;
+        } else if (record.mode) {
+          preset = record.mode === 'dark' ? 'aurora' : defaultThemePreference.preset;
+        }
+
+        const font: FontId =
+          record.font && record.font in themeFonts ? (record.font as FontId) : defaultThemePreference.font;
+        const resolvedMode = deriveMode(preset);
+
+        return { mode: resolvedMode, preset, font };
+      }
+
       return defaultThemePreference;
-    }
+    },
+    [deriveMode]
+  );
 
-    if (typeof value === 'string') {
-      return {
-        mode: value === 'dark' ? 'dark' : 'light',
-        preset: defaultThemePreference.preset,
-        font: defaultThemePreference.font,
-      };
-    }
-
-    const mode: ThemeMode = value.mode === 'dark' ? 'dark' : 'light';
-    const preset: ThemePresetId = value.preset && value.preset in themePresets ? value.preset : defaultThemePreference.preset;
-    const font: FontId = value.font && value.font in themeFonts ? value.font : defaultThemePreference.font;
-
-    return { mode, preset, font };
-  };
-
-  const loadTheme = async () => {
+  const loadTheme = useCallback(async () => {
     // Check if we're in the browser
     if (typeof window === 'undefined') {
       return;
@@ -156,20 +175,22 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           // If no theme in Firebase, check localStorage
           const legacyTheme = localStorage.getItem('theme') as ThemeMode | null;
           const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          const mappedPreset = (legacyTheme || systemTheme) === 'dark' ? 'aurora' : defaultThemePreference.preset;
           initialPreference = {
-            mode: legacyTheme || systemTheme,
-            preset: defaultThemePreference.preset,
+            mode: deriveMode(mappedPreset),
+            preset: mappedPreset,
             font: defaultThemePreference.font,
           };
           await updateUserTheme(userId, initialPreference);
         }
-      } catch (error) {
+      } catch {
         // Error loading theme from Firebase - fall back to localStorage
         const legacyTheme = localStorage.getItem('theme') as ThemeMode | null;
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const mappedPreset = (legacyTheme || systemTheme) === 'dark' ? 'aurora' : defaultThemePreference.preset;
         initialPreference = {
-          mode: legacyTheme || systemTheme,
-          preset: defaultThemePreference.preset,
+          mode: deriveMode(mappedPreset),
+          preset: mappedPreset,
           font: defaultThemePreference.font,
         };
       }
@@ -177,15 +198,26 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       // Not logged in - use localStorage or system preference
       const legacyTheme = localStorage.getItem('theme') as ThemeMode | null;
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const mappedPreset = (legacyTheme || systemTheme) === 'dark' ? 'aurora' : initialPreference.preset;
       initialPreference = {
-        mode: legacyTheme || systemTheme,
-        preset: initialPreference.preset,
+        mode: deriveMode(mappedPreset),
+        preset: mappedPreset,
         font: initialPreference.font ?? defaultThemePreference.font,
       };
     }
 
-    applyPreference(sanitizePreference(initialPreference));
-  };
+    applyPreference(initialPreference);
+  }, [applyPreference, deriveMode, sanitizePreference, userId]);
+
+  // Load theme on mount and when user changes
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      loadTheme().catch(() => {});
+    } else {
+      setPreferenceState(defaultThemePreference);
+    }
+  }, [loadTheme]);
 
   const syncWithFirebase = async () => {
     if (userId) {
@@ -197,18 +229,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   if (!mounted) {
     return <>{children}</>;
   }
-
-  const setMode = (mode: ThemeMode) => {
-    const nextPreference = { ...preference, mode };
-    applyPreference(nextPreference);
-    if (userId) {
-      updateUserTheme(userId, nextPreference).catch(() => {});
-    }
-  };
-
-  const toggleMode = () => {
-    setMode(preference.mode === 'light' ? 'dark' : 'light');
-  };
 
   const setPreset = (preset: ThemePresetId) => {
     const nextPreference = { ...preference, preset };
@@ -232,8 +252,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     preference,
     palette,
     availableThemes: themeList,
-    setMode,
-    toggleMode,
     setPreset,
     setPreference,
     syncWithFirebase,
@@ -254,8 +272,6 @@ export function useTheme() {
       preference: defaultThemePreference,
       palette: fallbackPalette,
       availableThemes: themeList,
-      setMode: () => {},
-      toggleMode: () => {},
       setPreset: () => {},
       setPreference: () => {},
       syncWithFirebase: async () => {},

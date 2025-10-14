@@ -12,7 +12,8 @@ import { User, Moon, Sun, Bell, Globe } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, userProfile } = useAuth();
-  const { mode, setMode, preset, setPreset, availableThemes } = useTheme();
+  const { mode, preset, setPreset, availableThemes } = useTheme();
+  const themeGroups: Array<'light' | 'dark'> = ['light', 'dark'];
   const [loading] = useState(false);
 
   return (
@@ -76,81 +77,55 @@ export default function ProfilePage() {
             {/* Theme Settings */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  {mode === 'light' ? (
-                    <Sun className="w-5 h-5 mr-2" />
-                  ) : (
-                    <Moon className="w-5 h-5 mr-2" />
-                  )}
-                  Appearance
+                <CardTitle className="flex items-center gap-2">
+                  {mode === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                  Theme & Appearance
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
-                      Theme
-                    </label>
-                    <div className="flex items-center space-x-4">
-                      <Button
-                        variant={mode === 'light' ? 'primary' : 'outline'}
-                        size="sm"
-                        onClick={() => setMode('light')}
-                      >
-                        <Sun className="w-4 h-4 mr-1" />
-                        Light
-                      </Button>
-                      <Button
-                        variant={mode === 'dark' ? 'primary' : 'outline'}
-                        size="sm"
-                        onClick={() => setMode('dark')}
-                      >
-                        <Moon className="w-4 h-4 mr-1" />
-                        Dark
-                      </Button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark mb-2">
-                      Theme Pack
-                    </label>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {availableThemes?.map((theme) => (
-                        <button
-                          key={theme.id}
-                          onClick={() => setPreset(theme.id)}
-                          className={`relative overflow-hidden rounded-xl border-2 transition-all text-left ${
-                            preset === theme.id
-                              ? 'border-blue-500 shadow-lg shadow-blue-500/20'
-                              : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
-                          }`}
-                        >
-                          <div
-                            className="h-20 w-full rounded-lg m-3"
-                            style={{ backgroundImage: theme.previewGradient }}
-                          />
-                          <div className="px-4 pb-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">
-                                {theme.name}
-                              </span>
-                              {preset === theme.id && (
-                                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                                  Active
-                                </span>
-                              )}
-                            </div>
-                            <p className="mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                              {theme.description}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <CardContent className="space-y-5">
+                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                  Pick a preset to restyle your dashboard. Themes bundle colors, glass, and depth so everything stays cohesive.
+                </p>
+                <div className="space-y-6">
+                  {themeGroups.map((group) => {
+                    const themesForGroup = availableThemes.filter((theme) => theme.appearance === group);
+                    if (!themesForGroup.length) return null;
+                    return (
+                      <div key={group} className="space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-text-secondary-light dark:text-text-secondary-dark">
+                          {group === 'light' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                          <span>{group === 'light' ? 'Daylight themes' : 'Midnight themes'}</span>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {themesForGroup.map((theme) => (
+                            <button
+                              key={theme.id}
+                              onClick={() => setPreset(theme.id)}
+                              className={`relative overflow-hidden rounded-xl border-2 transition-all text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${preset === theme.id ? 'border-blue-500 shadow-lg shadow-blue-500/20' : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'}`}
+                              style={{ backgroundImage: theme.previewGradient }}
+                            >
+                              <div className="absolute inset-0 bg-black/10 dark:bg-black/20 mix-blend-soft-light" />
+                              <div className="relative px-4 pb-4 pt-14 text-white drop-shadow-md">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-semibold uppercase tracking-wide opacity-90">
+                                    {theme.name}
+                                  </span>
+                                  {preset === theme.id && (
+                                    <span className="text-xs font-semibold text-white/80">Active</span>
+                                  )}
+                                </div>
+                                <p className="mt-2 text-xs opacity-80">{theme.description}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
+
 
             {/* Preferences */}
             <Card>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { defaultThemePreference, themePresets, themeFonts, type ThemePreference, type ThemeMode, type ThemePresetId, type FontId } from '@/lib/theme-presets';
+import { defaultThemePreference, themePresets, themeFonts, type ThemePreference, type ThemePresetId, type FontId } from '@/lib/theme-presets';
 
 interface UserPreferences {
   timeFormat: '12h' | '24h';
@@ -38,18 +38,29 @@ export function useUserPreferences() {
   const sanitize = (incoming: Partial<UserPreferences>): Partial<UserPreferences> => {
     const updates: Partial<UserPreferences> = { ...incoming };
     if (incoming.theme) {
-      const raw = incoming.theme as any;
+      const raw = incoming.theme as unknown;
       if (typeof raw === 'string') {
+        const preset = raw === 'dark' ? 'aurora' : defaultThemePreference.preset;
         updates.theme = {
-          mode: raw === 'dark' ? 'dark' : 'light',
-          preset: defaultThemePreference.preset,
+          preset,
           font: defaultThemePreference.font,
+          mode: themePresets[preset]?.appearance ?? 'light',
         };
-      } else if (raw.mode && raw.preset && raw.preset in themePresets) {
-        const mode: ThemeMode = raw.mode === 'dark' ? 'dark' : 'light';
-        const preset: ThemePresetId = raw.preset in themePresets ? raw.preset : defaultThemePreference.preset;
-        const font: FontId = raw.font && raw.font in themeFonts ? raw.font : defaultThemePreference.font;
-        updates.theme = { mode, preset, font };
+      } else if (typeof raw === 'object' && raw) {
+        const candidate = raw as Partial<{ preset: ThemePresetId; font: FontId; mode: string }>;
+        let preset: ThemePresetId = defaultThemePreference.preset;
+        if (candidate.preset && candidate.preset in themePresets) {
+          preset = candidate.preset;
+        } else if (candidate.mode) {
+          preset = candidate.mode === 'dark' ? 'aurora' : defaultThemePreference.preset;
+        }
+        const font: FontId =
+          candidate.font && candidate.font in themeFonts ? candidate.font : defaultThemePreference.font;
+        updates.theme = {
+          preset,
+          font,
+          mode: themePresets[preset]?.appearance ?? 'light',
+        };
       } else {
         updates.theme = defaultThemePreference;
       }

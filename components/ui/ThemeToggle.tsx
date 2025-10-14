@@ -1,34 +1,38 @@
 'use client';
 
-import { useTheme } from '../../contexts/ThemeContext';
+import { useMemo } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
-import { theme } from '@/lib/theme';
 
 export function ThemeToggle() {
-  const { theme: currentTheme, toggleTheme } = useTheme();
+  const { availableThemes, preset, setPreset } = useTheme();
+
+  const { appearance, label } = useMemo(() => {
+    const current = availableThemes.find((theme) => theme.id === preset);
+    return {
+      appearance: current?.appearance ?? 'light',
+      label: current?.name ?? 'Classic',
+    };
+  }, [availableThemes, preset]);
+
+  const handleClick = () => {
+    if (!availableThemes.length) return;
+    const currentIndex = availableThemes.findIndex((theme) => theme.id === preset);
+    const nextPreset = availableThemes[(currentIndex + 1) % availableThemes.length].id;
+    setPreset(nextPreset);
+  };
+
+  const Icon = appearance === 'dark' ? Moon : Sun;
 
   return (
     <button
-      onClick={toggleTheme}
-      className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-      aria-label={`Switch to ${currentTheme === 'light' ? 'dark' : 'light'} mode`}
+      onClick={handleClick}
+      className="relative flex items-center gap-2 rounded-lg border border-transparent bg-black/10 px-3 py-2 text-sm font-medium text-white transition-all duration-200 backdrop-blur hover:bg-black/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+      aria-label="Cycle theme"
+      title={`Theme: ${label}. Click to switch.`}
     >
-      <div className="relative w-5 h-5">
-        <Sun
-          className={`
-            absolute inset-0 w-5 h-5 text-yellow-500
-            transition-all duration-300 ease-in-out
-            ${currentTheme === 'light' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'}
-          `}
-        />
-        <Moon
-          className={`
-            absolute inset-0 w-5 h-5 text-blue-500
-            transition-all duration-300 ease-in-out
-            ${currentTheme === 'dark' ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}
-          `}
-        />
-      </div>
+      <Icon className="h-4 w-4" />
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 }

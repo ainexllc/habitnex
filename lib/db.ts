@@ -83,23 +83,24 @@ export const clearUserSelectedFamily = async (userId: string) => {
   }
 };
 
-import { defaultThemePreference, themePresets, themeFonts, type ThemePreference } from '@/lib/theme-presets';
+import { defaultThemePreference, themePresets, themeFonts, type ThemePreference, type ThemePresetId, type FontId } from '@/lib/theme-presets';
 
 export const updateUserTheme = async (userId: string, theme: ThemePreference | 'light' | 'dark') => {
   try {
     const userRef = doc(db, 'users', userId);
+    const normalize = (preset: ThemePresetId, font?: FontId): ThemePreference => ({
+      preset,
+      font: font && font in themeFonts ? font : defaultThemePreference.font,
+      mode: themePresets[preset]?.appearance ?? 'light',
+    });
+
     const themeValue: ThemePreference =
       typeof theme === 'string'
-        ? {
-            mode: theme === 'dark' ? 'dark' : 'light',
-            preset: defaultThemePreference.preset,
-            font: defaultThemePreference.font,
-          }
-        : {
-            mode: theme.mode === 'dark' ? 'dark' : 'light',
-            preset: theme.preset && theme.preset in themePresets ? theme.preset : defaultThemePreference.preset,
-            font: theme.font && theme.font in themeFonts ? theme.font : defaultThemePreference.font,
-          };
+        ? normalize(theme === 'dark' ? 'aurora' : defaultThemePreference.preset)
+        : normalize(
+            theme.preset && theme.preset in themePresets ? theme.preset : defaultThemePreference.preset,
+            theme.font
+          );
     await updateDoc(userRef, {
       'preferences.theme': themeValue,
       updatedAt: Timestamp.now()

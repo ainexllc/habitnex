@@ -7,13 +7,12 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
 import { FeedbackDisplay } from '@/components/feedback/FeedbackDisplay';
-import { detectSystemTimeFormat } from '@/lib/timeUtils';
-import { Settings, Clock, Globe, Bell, Palette, Users, Moon, Sun, Monitor, Edit2, Save, Shield, Mail, Activity } from 'lucide-react';
+import { Clock, Bell, Palette, Users, Moon, Sun, Monitor, Edit2, Save, Shield, Mail, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function FamilySettingsTab() {
-  const { currentFamily, currentMember, isParent, loading, updateFamilySettings, updateFamilyName } = useFamily();
-  const { theme, setTheme } = useTheme();
+  const { currentFamily, currentMember, isParent, updateFamilySettings, updateFamilyName } = useFamily();
+  const { mode, preset, setPreset, availableThemes } = useTheme();
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [familyName, setFamilyName] = useState('');
@@ -22,11 +21,13 @@ export function FamilySettingsTab() {
   // Local state for family settings
   const [touchScreenMode, setTouchScreenMode] = useState(false);
   const [autoTimeout, setAutoTimeout] = useState(5);
+  const [weatherZip, setWeatherZip] = useState('');
   const [notifications, setNotifications] = useState({
     dailyReminders: true,
     weeklyReports: true,
     rewardAlerts: true
   });
+  const themeGroups: Array<'light' | 'dark'> = ['light', 'dark'];
 
   // Initialize form with current family settings
   useEffect(() => {
@@ -35,6 +36,7 @@ export function FamilySettingsTab() {
       if (currentFamily.settings) {
         setTouchScreenMode(currentFamily.settings.touchScreenMode || false);
         setAutoTimeout(currentFamily.settings.autoTimeout || 5);
+        setWeatherZip(currentFamily.settings.weatherZip || '');
         setNotifications(currentFamily.settings.notifications || {
           dailyReminders: true,
           weeklyReports: true,
@@ -48,10 +50,14 @@ export function FamilySettingsTab() {
     try {
       setSaving(true);
 
+      const sanitizedZip = weatherZip.replace(/[^0-9]/g, '').slice(0, 5);
+
       const settings = {
+        ...currentFamily.settings,
         touchScreenMode,
         autoTimeout,
-        notifications
+        notifications,
+        weatherZip: sanitizedZip,
       };
 
       await updateFamilySettings(settings);
@@ -93,7 +99,7 @@ export function FamilySettingsTab() {
             {currentFamily.members.filter(m => m.isActive).length} Active Members
           </span>
           <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-            {theme === 'system' ? 'System' : theme === 'dark' ? 'Dark' : 'Light'} Theme
+            {mode === 'dark' ? 'Dark mode' : 'Light mode'} · {availableThemes.find((t) => t.id === preset)?.name ?? 'Classic'}
           </span>
         </div>
 
@@ -195,6 +201,33 @@ export function FamilySettingsTab() {
                 </span>
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Weather ZIP Code
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={5}
+                value={weatherZip}
+                onChange={(event) => setWeatherZip(event.target.value.replace(/[^0-9]/g, '').slice(0, 5))}
+                placeholder="e.g. 30301"
+                disabled={!isParent}
+                className={cn(
+                  "w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700",
+                  "text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                  "border-gray-300 dark:border-gray-600",
+                  !isParent && "opacity-60 cursor-not-allowed"
+                )}
+              />
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                We’ll use this ZIP code to show the local forecast in the dashboard banner. Leave blank to fall back to
+                the device location.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -207,77 +240,57 @@ export function FamilySettingsTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 pt-0">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                Theme Mode
-              </label>
-              <div className="grid grid-cols-3 gap-4">
-                <button
-                  onClick={() => setTheme('light')}
-                  className={cn(
-                    "flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all",
-                    theme === 'light'
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
-                  )}
-                >
-                  <Sun className={cn(
-                    "w-6 h-6 mb-2",
-                    theme === 'light' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                  )} />
-                  <span className={cn(
-                    "text-sm font-medium",
-                    theme === 'light' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                  )}>
-                    Light
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setTheme('dark')}
-                  className={cn(
-                    "flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all",
-                    theme === 'dark'
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
-                  )}
-                >
-                  <Moon className={cn(
-                    "w-6 h-6 mb-2",
-                    theme === 'dark' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                  )} />
-                  <span className={cn(
-                    "text-sm font-medium",
-                    theme === 'dark' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                  )}>
-                    Dark
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setTheme('system')}
-                  className={cn(
-                    "flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all",
-                    theme === 'system'
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
-                  )}
-                >
-                  <Monitor className={cn(
-                    "w-6 h-6 mb-2",
-                    theme === 'system' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                  )} />
-                  <span className={cn(
-                    "text-sm font-medium",
-                    theme === 'system' ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                  )}>
-                    System
-                  </span>
-                </button>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                  Theme Presets
+                </label>
+                <div className="space-y-6">
+                  {themeGroups.map((group) => {
+                    const themesForGroup = availableThemes.filter((theme) => theme.appearance === group);
+                    if (!themesForGroup.length) {
+                      return null;
+                    }
+                    return (
+                      <div key={group} className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                          {group === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                          <span>{group === 'light' ? 'Daylight themes' : 'Midnight themes'}</span>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {themesForGroup.map((themeOption) => (
+                            <button
+                              key={themeOption.id}
+                              type="button"
+                              onClick={() => setPreset(themeOption.id)}
+                              className={cn(
+                                "relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                                preset === themeOption.id
+                                  ? "border-blue-500 shadow-lg"
+                                  : "border-transparent hover:border-blue-300 dark:hover:border-blue-500/40"
+                              )}
+                              style={{ background: themeOption.previewGradient }}
+                            >
+                              <div className="absolute inset-0 bg-black/10 dark:bg-black/20 mix-blend-soft-light" />
+                              <div className="relative flex flex-col gap-2 text-white drop-shadow-md">
+                                <span className="text-sm font-semibold uppercase tracking-wide opacity-80">
+                                  {themeOption.name}
+                                </span>
+                                <span className="text-xs opacity-75">
+                                  {themeOption.description}
+                                </span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                  Each preset delivers a complete experience, including colors, surfaces, and depth. Choose the vibe that fits your family.
+                </p>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-                Choose how NextVibe appears on your device
-              </p>
             </div>
           </CardContent>
         </Card>
