@@ -196,7 +196,7 @@ export default function LoginPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                      &quot;NextVibe transformed my daily routine. The AI suggestions are spot-on, and I&apos;ve maintained my longest streak ever!&quot;
+                      &quot;HabitNex transformed my daily routine. The AI suggestions are spot-on, and I&apos;ve maintained my longest streak ever!&quot;
                     </p>
                     <div className="mt-2">
                       <div className="text-xs font-semibold text-gray-900 dark:text-white">Jane Doe</div>

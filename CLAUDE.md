@@ -31,7 +31,7 @@ This file contains important configuration and setup information for this projec
 
 ### Available Repositories
 - ainexllc/nexttask (private)
-- ainexllc/habitnex (public) - **Current Project** (formerly NextVibe, originally habittracker-nextjs)
+- ainexllc/habitnex (public) - **Current Project** (originally habittracker-nextjs)
 - ainexllc/homekeep (private)
 - ainexllc/journal (private)
 - ainexllc/ainex (private)
@@ -353,7 +353,7 @@ When working on this project, Claude Code can:
 
 **Project Details:**
 - **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
-- **Project Name**: HabitNex (Vercel project name updated from NextVibe)
+- **Project Name**: HabitNex (Vercel project name aligned with current branding)
 - **Production URL**: https://habitnex.app
 - **Repository**: https://github.com/ainexllc/habitnex
 - **Vercel CLI Version**: 46.0.2
@@ -761,7 +761,7 @@ vercel rollback <url>    # Rollback deployment
 
 **This Project Configuration:**
 - **Project ID**: prj_Q5kEz6FMiQI0Tq4GgBICYrlWqnu9
-- **Project Name**: HabitNex (Vercel project name updated from NextVibe)
+- **Project Name**: HabitNex (Vercel project name aligned with current branding)
 - **Production URL**: https://habitnex.app
 - **Repository**: https://github.com/ainexllc/habitnex
 - **Auto-deployment**: ✅ Enabled on main branch

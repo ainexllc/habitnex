@@ -1,6 +1,6 @@
-# NextVibe Feedback System
+# HabitNex Feedback System
 
-A comprehensive feedback collection system for the NextVibe family dashboard, allowing family members to submit bug reports, feature requests, suggestions, compliments, and general feedback.
+A comprehensive feedback collection system for the HabitNex family dashboard, allowing family members to submit bug reports, feature requests, suggestions, compliments, and general feedback.
 
 ## Features
 

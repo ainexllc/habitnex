@@ -59,7 +59,7 @@ export function InviteCodeDisplay({
   const handleCopyInviteMessage = async () => {
     if (!inviteCode) return;
     
-    const message = `Hey! Join our "${familyName}" family on NextVibe - our habit tracking app! 
+    const message = `Hey! Join our "${familyName}" family on HabitNex - our habit tracking app! 
 
 Use this invite code: ${inviteCode}
 
@@ -95,8 +95,8 @@ Download the app and enter the code to start tracking habits together! 🎯`;
       description: 'Open email app',
       icon: <Mail className="w-5 h-5 text-green-600" />,
       action: () => {
-        const subject = encodeURIComponent(`Join "${familyName}" on NextVibe`);
-        const body = encodeURIComponent(`Hey! Join our "${familyName}" family on NextVibe - our habit tracking app! 
+        const subject = encodeURIComponent(`Join "${familyName}" on HabitNex`);
+        const body = encodeURIComponent(`Hey! Join our "${familyName}" family on HabitNex - our habit tracking app! 
 
 Use this invite code: ${inviteCode}
 
@@ -110,7 +110,7 @@ Download the app and enter the code to start tracking habits together! 🎯`);
       description: 'Open messaging app',
       icon: <MessageSquare className="w-5 h-5 text-blue-600" />,
       action: () => {
-        const message = encodeURIComponent(`Join our "${familyName}" family on NextVibe! Use invite code: ${inviteCode}`);
+        const message = encodeURIComponent(`Join our "${familyName}" family on HabitNex! Use invite code: ${inviteCode}`);
         window.open(`sms:?body=${message}`);
       }
     }
@@ -273,7 +273,7 @@ Download the app and enter the code to start tracking habits together! 🎯`);
                 </li>
                 <li className="flex items-start">
                   <span className="inline-block w-5 text-primary-500 font-medium">2.</span>
-                  <span>They create an account on NextVibe</span>
+                  <span>They create an account on HabitNex</span>
                 </li>
                 <li className="flex items-start">
                   <span className="inline-block w-5 text-primary-500 font-medium">3.</span>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, type CSSProperties } from 'react';
 import { FamilyMember, FamilyHabit, FamilyHabitCompletion } from '@/types/family';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
@@ -15,6 +15,25 @@ import { MemberHistoryModal } from './MemberHistoryModal';
 import { OpenMoji } from '@/components/ui/OpenMoji';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { theme } from '@/lib/theme';
+
+const parseHexColor = (hexColor: string) => {
+  let hex = hexColor.replace('#', '');
+  if (hex.length === 3) {
+    hex = hex.split('').map((char) => char + char).join('');
+  }
+  return {
+    r: parseInt(hex.substring(0, 2), 16),
+    g: parseInt(hex.substring(2, 4), 16),
+    b: parseInt(hex.substring(4, 6), 16)
+  };
+};
+
+const colorToRgba = (hexColor: string, alpha: number) => {
+  const { r, g, b } = parseHexColor(hexColor);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+const svgToDataUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
 interface FamilyMemberZoneProps {
   member: FamilyMember;
@@ -52,6 +71,7 @@ export function FamilyMemberZone({
   const [previousStats, setPreviousStats] = useState(member.stats);
   const [benefitsModalHabit, setBenefitsModalHabit] = useState<FamilyHabit | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Get today's date for completion checking
   const today = getTodayDateString();
@@ -199,45 +219,127 @@ export function FamilyMemberZone({
   const textColor = isLight ? 'text-gray-900' : 'text-white';
   const mutedTextColor = isLight ? 'text-gray-700' : 'text-gray-200';
   const borderColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
-  
-  // No complex avatar options needed - using simple ProfileImage
-  
-  // Check if we're in dark mode - improved detection
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
+  const accentFade = colorToRgba(member.color, isLight ? 0.18 : 0.28);
+  const accentLine = colorToRgba(member.color, isLight ? 0.35 : 0.45);
+  const neutralSoft = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.12)';
+  const neutralBold = isLight ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.18)';
+  const neutralHighlight = isLight ? 'rgba(15,23,42,0.04)' : 'rgba(255,255,255,0.08)';
+  const gradientLayer = `linear-gradient(to bottom, ${member.color}E6 0%, ${member.color}99 40%, ${member.color}4D 70%, ${member.color}1A 90%, transparent 100%)`;
+
+  // Keep the cards in sync with system theme toggles
   useEffect(() => {
-    // Check for dark mode class on document or body
     const checkDarkMode = () => {
-      if (typeof window !== 'undefined') {
-        const htmlElement = document.documentElement;
-        const bodyElement = document.body;
-        const hasDarkClass = htmlElement.classList.contains('dark') || bodyElement.classList.contains('dark');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setIsDarkMode(hasDarkClass || prefersDark);
-      }
+      if (typeof window === 'undefined') return;
+      const htmlElement = document.documentElement;
+      const bodyElement = document.body;
+      const hasDarkClass = htmlElement.classList.contains('dark') || bodyElement.classList.contains('dark');
+      const prefersDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
+      setIsDarkMode(hasDarkClass || prefersDark);
     };
 
     checkDarkMode();
-    console.log('🎨 FamilyMemberZone Dark Mode Detection:', { isDarkMode, memberName: member.displayName, memberColor: member.color, isLight });
-    
-    // Listen for theme changes
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const observer = new MutationObserver(checkDarkMode);
-      
-      mediaQuery.addListener(checkDarkMode);
-      observer.observe(document.documentElement, { 
-        attributes: true, 
-        attributeFilter: ['class'] 
-      });
-      
-      return () => {
-        mediaQuery.removeListener(checkDarkMode);
-        observer.disconnect();
-      };
-    }
-  }, []);
 
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🎨 FamilyMemberZone Dark Mode Detection:', {
+        memberName: member.displayName,
+        memberColor: member.color,
+        isLightMode: isLight
+      });
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => checkDarkMode();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+      observer.disconnect();
+    };
+  }, [isLight, member.displayName, member.color]);
+
+  const textureLayers = useMemo(() => {
+    const dottedHalo = svgToDataUrl(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+        <defs>
+          <pattern id="dot-grid" width="18" height="18" patternUnits="userSpaceOnUse">
+            <circle cx="1.5" cy="1.5" r="1.5" fill="${neutralSoft}"/>
+          </pattern>
+        </defs>
+        <rect width="160" height="160" fill="url(#dot-grid)"/>
+        <circle cx="80" cy="80" r="70" fill="none" stroke="${accentFade}" stroke-width="0.8" stroke-dasharray="6 10" opacity="0.4"/>
+        <circle cx="80" cy="80" r="54" fill="none" stroke="${neutralBold}" stroke-width="0.6" stroke-dasharray="4 12" opacity="0.25"/>
+      </svg>
+    `);
+
+    const diagonalWaves = svgToDataUrl(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+        <defs>
+          <pattern id="diagonal-stripes" patternUnits="userSpaceOnUse" width="36" height="36" patternTransform="rotate(12)">
+            <rect width="18" height="36" fill="${neutralHighlight}"/>
+            <rect x="18" width="4" height="36" fill="${accentFade}"/>
+          </pattern>
+        </defs>
+        <rect width="180" height="180" fill="url(#diagonal-stripes)" opacity="0.95"/>
+        <path d="M-40 140 Q 50 40 140 140 T 320 140" fill="none" stroke="${accentLine}" stroke-width="1.2" stroke-dasharray="20 16" opacity="0.3"/>
+      </svg>
+    `);
+
+    const geometricMesh = svgToDataUrl(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+        <defs>
+          <pattern id="mesh" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M0 40 L40 0 M-10 30 L10 50 M30 -10 L50 10" stroke="${neutralHighlight}" stroke-width="1.2" opacity="0.8"/>
+          </pattern>
+        </defs>
+        <rect width="200" height="200" fill="url(#mesh)"/>
+        <path d="M20 160 C80 120 120 200 180 160" fill="none" stroke="${accentFade}" stroke-width="1.1" stroke-dasharray="14 12" opacity="0.35"/>
+        <path d="M10 40 C60 90 140 -10 190 40" fill="none" stroke="${neutralBold}" stroke-width="0.9" stroke-dasharray="10 10" opacity="0.25"/>
+      </svg>
+    `);
+
+    return [dottedHalo, diagonalWaves, geometricMesh];
+  }, [accentFade, accentLine, neutralBold, neutralHighlight, neutralSoft]);
+
+  const textureIndex = useMemo(() => {
+    if (!textureLayers.length) return 0;
+    const hash = Array.from(member.id ?? member.displayName ?? 'member').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return hash % textureLayers.length;
+  }, [member.id, member.displayName, textureLayers.length]);
+
+  const selectedTexture = textureLayers[textureIndex];
+
+  const cardStyle = useMemo<CSSProperties>(() => ({
+    backgroundImage: selectedTexture ? `${selectedTexture}, ${gradientLayer}` : gradientLayer,
+    backgroundColor: 'transparent',
+    border: `2px solid ${borderColor}`,
+    backdropFilter: isDarkMode && !isLight ? 'blur(12px)' : 'none',
+    backgroundBlendMode: selectedTexture ? 'overlay, normal' : undefined,
+    backgroundSize: selectedTexture ? '220px 220px, cover' : undefined,
+    backgroundRepeat: selectedTexture ? 'repeat, no-repeat' : undefined,
+    backgroundPosition: selectedTexture ? 'center, center' : undefined
+  }), [selectedTexture, gradientLayer, borderColor, isDarkMode, isLight]);
+  
+  // No complex avatar options needed - using simple ProfileImage
+ 
   return (
     <>
       <Card 
@@ -248,12 +350,7 @@ export function FamilyMemberZone({
         "rounded-3xl",
         className
       )}
-      style={{ 
-        backgroundImage: `linear-gradient(to bottom, ${member.color}E6 0%, ${member.color}99 40%, ${member.color}4D 70%, ${member.color}1A 90%, transparent 100%)`,
-        backgroundColor: 'transparent',
-        border: `2px solid ${borderColor}`,
-        backdropFilter: isDarkMode && !isLight ? 'blur(12px)' : 'none'
-      }}
+      style={cardStyle}
       onClick={touchMode && onExpand ? onExpand : undefined}
     >
       {/* Member Header - Extra Compact */}

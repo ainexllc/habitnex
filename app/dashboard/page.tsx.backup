@@ -294,7 +294,7 @@ export default function DashboardPage() {
                   <Target className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h3 className={`text-xl font-semibold ${theme.text.primary} mb-3`}>
-                  Welcome to NextVibe!
+                  Welcome to HabitNex!
                 </h3>
                 <p className={`${theme.text.secondary} mb-6 max-w-md mx-auto`}>
                   Start your journey to better habits. Create your first habit and begin tracking your progress with our intelligent insights.

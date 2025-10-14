@@ -54,7 +54,7 @@ export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<voi
         root.dataset.themeMode = targetTheme;
         root.setAttribute('data-theme', targetTheme);
 
-        const stored = JSON.stringify({ mode: targetTheme, preset: 'classic' });
+        const stored = JSON.stringify({ mode: targetTheme, preset: 'tidal' });
         localStorage.setItem('habitnex:theme-preference', stored);
         localStorage.setItem('theme', targetTheme);
         window.dispatchEvent(new StorageEvent('storage', { key: 'habitnex:theme-preference', newValue: stored }));

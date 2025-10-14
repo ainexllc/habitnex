@@ -17,7 +17,7 @@ const squadaOne = Squada_One({
 })
 
 export const metadata: Metadata = {
-  title: 'NextVibe - Build Better Habits',
+  title: 'HabitNex - Build Better Habits',
   description: 'Track your daily habits and build a better you',
 }
 
