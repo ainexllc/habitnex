@@ -264,15 +264,27 @@ export function ModernFamilyHeader({
     }
   };
 
-  const weatherIconColor = mode === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(17,24,39,0.8)';
-  const weatherPrimaryText = mode === 'dark' ? palette.accentContrast : palette.textPrimary;
-  const weatherSecondaryText = mode === 'dark' ? 'rgba(226,232,255,0.7)' : 'rgba(15,23,42,0.65)';
-  const actionButtonText = mode === 'dark' ? palette.accentContrast : palette.textPrimary;
-  const actionButtonBorder = toRgba(palette.borderMuted, mode === 'dark' ? 0.2 : 0.35);
-  const actionButtonBackground =
+  const weatherIconColor = mode === 'dark' ? 'rgba(255,255,255,0.92)' : 'rgba(17,24,39,0.82)';
+  const weatherPrimaryText = mode === 'dark' ? 'rgba(255,255,255,0.96)' : palette.textPrimary;
+  const weatherSecondaryText = mode === 'dark' ? 'rgba(226,232,255,0.78)' : 'rgba(15,23,42,0.65)';
+  const actionButtonText = mode === 'dark' ? 'rgba(248,250,252,0.95)' : palette.textPrimary;
+  const individualButtonBackground =
     mode === 'dark'
-      ? toRgba(palette.glass, 0.65)
-      : `linear-gradient(130deg, ${toRgba(palette.surfaceMuted, 0.92)}, ${toRgba(palette.backgroundAlt, 0.82)})`;
+      ? toRgba(palette.glass, 0.45)
+      : `linear-gradient(135deg, ${toRgba(palette.surfaceMuted, 0.95)}, ${toRgba(palette.backgroundAlt, 0.9)})`;
+  const individualButtonBorder = toRgba(palette.borderMuted, mode === 'dark' ? 0.35 : 0.4);
+  const weatherCardBackground =
+    mode === 'dark'
+      ? `linear-gradient(140deg, ${toRgba(palette.accent, 0.32)}, ${toRgba(palette.surface, 0.6)})`
+      : `linear-gradient(140deg, ${toRgba(palette.accentSoft, 0.36)}, ${toRgba(palette.surfaceMuted, 0.92)})`;
+  const weatherCardBorder = toRgba(palette.accentSoft, mode === 'dark' ? 0.45 : 0.35);
+  const actionClusterBackground =
+    mode === 'dark'
+      ? `linear-gradient(135deg, ${toRgba(palette.surface, 0.58)}, ${toRgba(palette.glass, 0.78)})`
+      : `linear-gradient(135deg, ${toRgba(palette.surfaceMuted, 0.92)}, ${toRgba(palette.backgroundAlt, 0.85)})`;
+  const actionClusterBorder = toRgba(palette.borderMuted, mode === 'dark' ? 0.4 : 0.5);
+  const actionDividerColor =
+    mode === 'dark' ? 'rgba(255,255,255,0.18)' : toRgba(palette.borderMuted, 0.33);
 
   return (
     <header className={cn('relative mb-10', className)}>
@@ -331,98 +343,117 @@ export function ModernFamilyHeader({
             </div>
 
             <div className="flex min-w-[240px] flex-col items-start gap-4 sm:items-end">
-              <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                 <div
-                  className="flex items-center gap-3 rounded-2xl border px-4 py-2"
+                  className="flex items-center gap-3 rounded-full border px-4 py-2 shadow-lg"
                   style={{
-                    background:
-                      mode === 'dark'
-                        ? toRgba(palette.glass, 0.7)
-                        : `linear-gradient(130deg, ${toRgba(palette.surfaceMuted, 0.88)}, ${toRgba(
-                            palette.backgroundAlt,
-                            0.85
-                          )})`,
-                    borderColor: toRgba(palette.borderMuted, mode === 'dark' ? 0.4 : 0.6),
+                    background: weatherCardBackground,
+                    borderColor: weatherCardBorder,
                     color: weatherPrimaryText,
+                    boxShadow: '0 18px 40px -24px rgba(15,23,42,0.55)',
                   }}
                 >
                   {weather ? (
                     <>
                       <div className="flex items-center gap-2">
                         {resolveWeatherIcon(weather.condition, weatherIconColor)}
-                        <div className="flex flex-col">
-                          <span className="text-base font-semibold" style={{ color: weatherPrimaryText }}>
+                        <div className="flex flex-col leading-tight">
+                          <span
+                            className="text-sm font-semibold sm:text-base"
+                            style={{ color: weatherPrimaryText }}
+                          >
                             {Math.round(weather.temperature)}°F
                           </span>
-                          <span className="text-xs uppercase tracking-wide" style={{ color: weatherSecondaryText }}>
+                          <span
+                            className="text-[11px] uppercase tracking-wide"
+                            style={{ color: weatherSecondaryText }}
+                          >
                             {weather.condition}
                           </span>
                         </div>
                       </div>
-                      <div
-                        className="hidden flex-col items-end text-[11px] opacity-80 sm:flex"
-                        style={{ color: weatherSecondaryText }}
-                      >
-                        <span>{weather.location}</span>
-                        <span className="flex items-center gap-1">
+                      <div className="hidden min-w-[140px] flex-col sm:flex">
+                        <span className="text-[11px] font-medium" style={{ color: weatherPrimaryText }}>
+                          {weather.location}
+                        </span>
+                        <span
+                          className="mt-0.5 inline-flex items-center gap-1 text-[11px]"
+                          style={{ color: weatherSecondaryText }}
+                        >
                           <Wind className="h-3 w-3" />
                           {Math.round(weather.windSpeed)} mph
                         </span>
                       </div>
                     </>
                   ) : weatherLoading ? (
-                    <span className="text-sm opacity-80" style={{ color: weatherSecondaryText }}>
+                    <span className="text-xs sm:text-sm" style={{ color: weatherSecondaryText }}>
                       Fetching weather…
                     </span>
                   ) : weatherError ? (
-                    <span className="text-sm opacity-80" style={{ color: weatherSecondaryText }}>
+                    <span className="text-xs sm:text-sm" style={{ color: weatherSecondaryText }}>
                       Weather unavailable
                     </span>
                   ) : (
                     <>
                       {resolveWeatherIcon('clear', weatherIconColor)}
-                      <span className="text-sm opacity-80" style={{ color: weatherSecondaryText }}>
+                      <span className="text-xs sm:text-sm" style={{ color: weatherSecondaryText }}>
                         Add weather in settings
                       </span>
                     </>
                   )}
                 </div>
 
-                <ThemeToggle />
-
-                <Button
-                  variant="ghost"
-                  size={touchMode ? 'default' : 'sm'}
-                  onClick={toggleFullscreen}
-                  title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                  aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                  className="border border-transparent backdrop-blur transition-all duration-200"
+                <div
+                  className="flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[0.75rem] font-semibold shadow-lg"
                   style={{
-                    background: actionButtonBackground,
+                    background: actionClusterBackground,
+                    borderColor: actionClusterBorder,
                     color: actionButtonText,
-                    borderColor: actionButtonBorder,
+                    boxShadow: '0 18px 40px -24px rgba(15,23,42,0.5)',
                   }}
                 >
-                  {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size={touchMode ? 'default' : 'sm'}
-                  onClick={handleSignOut}
-                  disabled={signingOut}
-                  className="border border-transparent backdrop-blur transition-all duration-200"
-                  style={{
-                    background: actionButtonBackground,
-                    color: actionButtonText,
-                    borderColor: actionButtonBorder,
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    <span className="text-sm font-medium">{signingOut ? 'Signing out…' : 'Sign out'}</span>
-                  </div>
-                </Button>
+                  <ThemeToggle
+                    compact
+                    className="!bg-transparent !border-none !px-2 !py-1 text-inherit hover:!bg-white/10 focus-visible:ring-offset-0"
+                  />
+                  <span
+                    className="hidden h-4 w-px sm:block"
+                    style={{ background: actionDividerColor }}
+                    aria-hidden
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.7rem] font-semibold transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+                    style={{
+                      background: individualButtonBackground,
+                      color: actionButtonText,
+                      border: `1px solid ${individualButtonBorder}`,
+                      boxShadow: '0 8px 24px -16px rgba(15,23,42,0.45)',
+                    }}
+                  >
+                    {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{isFullscreen ? 'Exit' : 'Fullscreen'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    disabled={signingOut}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.7rem] font-semibold transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+                    style={{
+                      background: individualButtonBackground,
+                      color: actionButtonText,
+                      border: `1px solid ${individualButtonBorder}`,
+                      boxShadow: '0 8px 24px -16px rgba(15,23,42,0.45)',
+                      opacity: signingOut ? 0.6 : 1,
+                    }}
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{signingOut ? 'Signing out…' : 'Sign out'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

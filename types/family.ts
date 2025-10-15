@@ -18,6 +18,7 @@ export interface FamilySettings {
   weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   theme: 'light' | 'dark';
   avatarStyle: 'fun-emoji' | 'bottts' | 'personas' | 'adventurer';  // Consistent avatar style for whole family
+  cardTexture?: 'sparkle-bubbles' | 'minimalist-dots' | 'playful-mix' | 'fall' | 'halloween' | 'winter' | 'christmas'; // Member card background texture
   touchScreenMode: boolean;    // Optimized for wall mount displays
   voiceFeedback: boolean;      // Audio confirmations
   autoTimeout: number;         // Minutes before returning to main screen

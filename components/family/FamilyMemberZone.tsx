@@ -15,6 +15,7 @@ import { MemberHistoryModal } from './MemberHistoryModal';
 import { OpenMoji } from '@/components/ui/OpenMoji';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { theme } from '@/lib/theme';
+import { getTextureDataUrl, defaultTexturePattern, type TexturePatternId } from '@/lib/familyTextures';
 
 const parseHexColor = (hexColor: string) => {
   let hex = hexColor.replace('#', '');
@@ -47,6 +48,7 @@ interface FamilyMemberZoneProps {
   };
   toggleCompletion: (habitId: string, memberId: string, currentCompleted: boolean, date?: string) => Promise<void>;
   getHabitCompletion: (habitId: string, date: string, memberId?: string) => FamilyHabitCompletion | null;
+  texturePattern?: TexturePatternId;
   touchMode?: boolean;
   isExpanded?: boolean;
   onExpand?: () => void;
@@ -59,6 +61,7 @@ export function FamilyMemberZone({
   stats,
   toggleCompletion,
   getHabitCompletion,
+  texturePattern = defaultTexturePattern,
   touchMode = false,
   isExpanded = false,
   onExpand,
@@ -276,56 +279,10 @@ export function FamilyMemberZone({
     };
   }, [isLight, member.displayName, member.color]);
 
-  const textureLayers = useMemo(() => {
-    const dottedHalo = svgToDataUrl(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
-        <defs>
-          <pattern id="dot-grid" width="18" height="18" patternUnits="userSpaceOnUse">
-            <circle cx="1.5" cy="1.5" r="1.5" fill="${neutralSoft}"/>
-          </pattern>
-        </defs>
-        <rect width="160" height="160" fill="url(#dot-grid)"/>
-        <circle cx="80" cy="80" r="70" fill="none" stroke="${accentFade}" stroke-width="0.8" stroke-dasharray="6 10" opacity="0.4"/>
-        <circle cx="80" cy="80" r="54" fill="none" stroke="${neutralBold}" stroke-width="0.6" stroke-dasharray="4 12" opacity="0.25"/>
-      </svg>
-    `);
-
-    const diagonalWaves = svgToDataUrl(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
-        <defs>
-          <pattern id="diagonal-stripes" patternUnits="userSpaceOnUse" width="36" height="36" patternTransform="rotate(12)">
-            <rect width="18" height="36" fill="${neutralHighlight}"/>
-            <rect x="18" width="4" height="36" fill="${accentFade}"/>
-          </pattern>
-        </defs>
-        <rect width="180" height="180" fill="url(#diagonal-stripes)" opacity="0.95"/>
-        <path d="M-40 140 Q 50 40 140 140 T 320 140" fill="none" stroke="${accentLine}" stroke-width="1.2" stroke-dasharray="20 16" opacity="0.3"/>
-      </svg>
-    `);
-
-    const geometricMesh = svgToDataUrl(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-        <defs>
-          <pattern id="mesh" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M0 40 L40 0 M-10 30 L10 50 M30 -10 L50 10" stroke="${neutralHighlight}" stroke-width="1.2" opacity="0.8"/>
-          </pattern>
-        </defs>
-        <rect width="200" height="200" fill="url(#mesh)"/>
-        <path d="M20 160 C80 120 120 200 180 160" fill="none" stroke="${accentFade}" stroke-width="1.1" stroke-dasharray="14 12" opacity="0.35"/>
-        <path d="M10 40 C60 90 140 -10 190 40" fill="none" stroke="${neutralBold}" stroke-width="0.9" stroke-dasharray="10 10" opacity="0.25"/>
-      </svg>
-    `);
-
-    return [dottedHalo, diagonalWaves, geometricMesh];
-  }, [accentFade, accentLine, neutralBold, neutralHighlight, neutralSoft]);
-
-  const textureIndex = useMemo(() => {
-    if (!textureLayers.length) return 0;
-    const hash = Array.from(member.id ?? member.displayName ?? 'member').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return hash % textureLayers.length;
-  }, [member.id, member.displayName, textureLayers.length]);
-
-  const selectedTexture = textureLayers[textureIndex];
+  // Use the selected texture pattern from family settings
+  const selectedTexture = useMemo(() => {
+    return getTextureDataUrl(texturePattern, accentFade, neutralSoft, neutralBold);
+  }, [texturePattern, accentFade, neutralSoft, neutralBold]);
 
   const cardStyle = useMemo<CSSProperties>(() => ({
     backgroundImage: selectedTexture ? `${selectedTexture}, ${gradientLayer}` : gradientLayer,

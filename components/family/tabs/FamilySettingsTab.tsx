@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { InviteCodeDisplay } from '@/components/family/InviteCodeDisplay';
 import { FeedbackDisplay } from '@/components/feedback/FeedbackDisplay';
-import { Clock, Bell, Palette, Users, Moon, Sun, Monitor, Edit2, Save, Shield, Mail, Activity } from 'lucide-react';
+import { Clock, Bell, Palette, Users, Moon, Sun, Monitor, Edit2, Save, Shield, Mail, Activity, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { texturePatterns, type TexturePatternId } from '@/lib/familyTextures';
 
 export function FamilySettingsTab() {
   const { currentFamily, currentMember, isParent, updateFamilySettings, updateFamilyName } = useFamily();
@@ -22,6 +23,7 @@ export function FamilySettingsTab() {
   const [touchScreenMode, setTouchScreenMode] = useState(false);
   const [autoTimeout, setAutoTimeout] = useState(5);
   const [weatherZip, setWeatherZip] = useState('');
+  const [cardTexture, setCardTexture] = useState<TexturePatternId>('sparkle-bubbles');
   const [notifications, setNotifications] = useState({
     dailyReminders: true,
     weeklyReports: true,
@@ -37,6 +39,7 @@ export function FamilySettingsTab() {
         setTouchScreenMode(currentFamily.settings.touchScreenMode || false);
         setAutoTimeout(currentFamily.settings.autoTimeout || 5);
         setWeatherZip(currentFamily.settings.weatherZip || '');
+        setCardTexture(currentFamily.settings.cardTexture || 'sparkle-bubbles');
         setNotifications(currentFamily.settings.notifications || {
           dailyReminders: true,
           weeklyReports: true,
@@ -58,6 +61,7 @@ export function FamilySettingsTab() {
         autoTimeout,
         notifications,
         weatherZip: sanitizedZip,
+        cardTexture,
       };
 
       await updateFamilySettings(settings);
@@ -289,6 +293,61 @@ export function FamilySettingsTab() {
                 </div>
                 <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
                   Each preset delivers a complete experience, including colors, surfaces, and depth. Choose the vibe that fits your family.
+                </p>
+              </div>
+
+              {/* Member Card Texture Selection */}
+              <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span>Member Card Texture</span>
+                  </div>
+                </label>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {Object.values(texturePatterns).map((pattern) => (
+                    <button
+                      key={pattern.id}
+                      type="button"
+                      onClick={() => setCardTexture(pattern.id)}
+                      disabled={!isParent}
+                      className={cn(
+                        "relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
+                        cardTexture === pattern.id
+                          ? "border-purple-500 shadow-lg"
+                          : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500/40",
+                        !isParent && "opacity-60 cursor-not-allowed"
+                      )}
+                    >
+                      {/* Texture Preview Background */}
+                      <div
+                        className="absolute inset-0 opacity-30"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
+                            pattern.getSvg('#8B5CF6', '#D1D5DB', '#6B7280')
+                          )}")`,
+                          backgroundSize: '200px 200px',
+                          backgroundRepeat: 'repeat'
+                        }}
+                      />
+
+                      {/* Content */}
+                      <div className="relative flex flex-col gap-2">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {pattern.name}
+                        </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          {pattern.description}
+                        </span>
+                        <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                          {pattern.vibe}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                  This texture will be applied to member cards on the Overview tab. Each pattern adapts to your chosen member colors.
                 </p>
               </div>
             </div>

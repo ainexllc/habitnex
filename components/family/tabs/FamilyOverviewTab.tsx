@@ -103,6 +103,7 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
             stats={getMemberStats(member.id)}
             toggleCompletion={toggleMemberCompletion}
             getHabitCompletion={getHabitCompletion}
+            texturePattern={currentFamily.settings.cardTexture}
             touchMode={touchMode}
             isExpanded={selectedMember === member.id}
             onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
