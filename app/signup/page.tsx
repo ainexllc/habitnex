@@ -59,9 +59,9 @@ export default function SignUpPage() {
 
   const handleGoogleSignIn = async () => {
     // Auto-detect best method based on environment
-    const isLocalhost = typeof window !== 'undefined' && 
+    const isLocalhost = typeof window !== 'undefined' &&
       (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const usePopup = !isLocalhost;
+    const usePopup = isLocalhost; // Use popup on localhost, redirect on production
     try {
       setLoading(true);
       setError('');

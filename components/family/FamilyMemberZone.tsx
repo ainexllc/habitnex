@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo, type CSSProperties } from 'react';
+import { useState, useCallback, useEffect, useMemo, type CSSProperties, type ReactNode } from 'react';
 import { FamilyMember, FamilyHabit, FamilyHabitCompletion } from '@/types/family';
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
@@ -35,6 +35,52 @@ const colorToRgba = (hexColor: string, alpha: number) => {
 };
 
 const svgToDataUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+
+interface TowerButtonProps {
+  onClick: () => void;
+  disabled?: boolean;
+  variant: 'success' | 'failure';
+  label: string;
+  icon: ReactNode;
+}
+
+const TowerButton = ({ onClick, disabled, variant, label, icon }: TowerButtonProps) => {
+  const isSuccess = variant === 'success';
+  const baseGradient = isSuccess
+    ? 'from-emerald-400 via-emerald-500 to-lime-500'
+    : 'from-rose-400 via-rose-500 to-orange-400';
+  const glowShadow = isSuccess ? 'shadow-emerald-500/40' : 'shadow-rose-500/40';
+  const borderColor = isSuccess ? 'border-emerald-300/60' : 'border-rose-300/60';
+  const textTone = isSuccess ? 'text-emerald-200' : 'text-rose-200';
+  const labelTone = isSuccess ? 'text-emerald-100' : 'text-rose-100';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        'group inline-flex w-[88px] flex-col items-center gap-1.5 rounded-2xl border bg-white/5 px-3 py-2 text-xs font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40',
+        borderColor,
+        textTone,
+        disabled && 'cursor-not-allowed opacity-60'
+      )}
+      aria-label={label}
+      title={label}
+    >
+      <span
+        className={cn(
+          'flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-slate-900 shadow-lg transition-transform duration-200 group-hover:scale-105',
+          baseGradient,
+          glowShadow
+        )}
+      >
+        {icon}
+      </span>
+      <span className={cn('text-[10px] uppercase tracking-wide', labelTone)}>{label}</span>
+    </button>
+  );
+};
 
 interface FamilyMemberZoneProps {
   member: FamilyMember;
@@ -545,26 +591,22 @@ export function FamilyMemberZone({
                         </Button>
                       </>
                     ) : (
-                      <>
-                        <Button
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <TowerButton
                           onClick={() => handleHabitCompletion(habit.id, true)}
-                          loading={loading}
-                          size="sm"
-                          className="w-7 h-7 p-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
-                          title="Mark as completed"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
+                          disabled={loading}
+                          variant="success"
+                          label="Complete"
+                          icon={<Check className="h-5 w-5" />}
+                        />
+                        <TowerButton
                           onClick={() => handleHabitCompletion(habit.id, false)}
-                          loading={loading}
-                          size="sm"
-                          className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-md transition-all duration-200 hover:scale-110 rounded-full flex-shrink-0"
-                          title="Mark as failed"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </Button>
-                      </>
+                          disabled={loading}
+                          variant="failure"
+                          label="Skip"
+                          icon={<X className="h-5 w-5" />}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
