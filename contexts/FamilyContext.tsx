@@ -110,7 +110,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user || authLoading) return;
     
-    const isFamilyRoute = pathname.startsWith('/family') || pathname.startsWith('/dashboard/family');
+    const isFamilyRoute = pathname.startsWith('/family') || pathname === '/';
     
     const loadUserFamily = async () => {
       try {

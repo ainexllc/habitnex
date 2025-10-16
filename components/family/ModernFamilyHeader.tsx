@@ -1,31 +1,27 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button } from '@/components/ui/Button';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useWeather } from '@/hooks/useWeather';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
+import { resolveMode, MODE_CONFIGS, TAB_META } from '@/lib/modes';
+import type { HabitNexModeId, FamilyTabId } from '@/types/family';
 import {
-  Users,
-  Target,
-  Trophy,
-  Gift,
-  BarChart3,
-  Home,
-  Settings,
-  Maximize,
-  Minimize,
-  LogOut,
-  Sun,
+  ArrowRight,
   Cloud,
   CloudRain,
   CloudSnow,
   CloudLightning,
-  Wind,
+  Maximize,
+  Minimize,
+  LogOut,
+  Sun,
+  Loader2,
+  Settings
 } from 'lucide-react';
 
 interface ModernFamilyHeaderProps {
@@ -34,114 +30,58 @@ interface ModernFamilyHeaderProps {
   touchMode?: boolean;
   isParent?: boolean;
   className?: string;
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
+  activeTab?: FamilyTabId;
+  onTabChange?: (tab: FamilyTabId) => void;
 }
 
-const navigationLinks = [
-  { id: 'overview', label: 'Overview', icon: Home },
-  { id: 'members', label: 'Members', icon: Users },
-  { id: 'habits', label: 'Habits', icon: Target },
-  { id: 'challenges', label: 'Challenges', icon: Trophy },
-  { id: 'rewards', label: 'Rewards', icon: Gift },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'settings', label: 'Settings', icon: Settings },
-] as const;
+const WEATHER_ICON_SIZE = 18;
 
-type VendorFullscreenElement = HTMLElement & {
-  webkitRequestFullscreen?: () => Promise<void>;
-  mozRequestFullScreen?: () => Promise<void>;
-  msRequestFullscreen?: () => Promise<void>;
-};
-
-type VendorFullscreenDocument = Document & {
-  webkitExitFullscreen?: () => Promise<void>;
-  mozCancelFullScreen?: () => Promise<void>;
-  msExitFullscreen?: () => Promise<void>;
-};
-
-const resolveWeatherIcon = (condition: string, color: string) => {
-  const normalized = condition.toLowerCase();
-  const baseClass = 'w-5 h-5';
-
+const getWeatherIcon = (condition: string | null) => {
+  const normalized = condition?.toLowerCase() ?? '';
   switch (normalized) {
     case 'rain':
     case 'drizzle':
-      return <CloudRain className={baseClass} style={{ color }} />;
+      return CloudRain;
     case 'snow':
-      return <CloudSnow className={baseClass} style={{ color }} />;
+      return CloudSnow;
     case 'thunderstorm':
-      return <CloudLightning className={baseClass} style={{ color }} />;
+      return CloudLightning;
     case 'clouds':
-      return <Cloud className={baseClass} style={{ color }} />;
+      return Cloud;
     case 'clear':
     default:
-      return <Sun className={baseClass} style={{ color }} />;
-  }
-};
-
-const buildWeatherOverlay = (
-  condition: string | null,
-  palette: ReturnType<typeof useTheme>['palette'],
-  toRgba: (color: string | undefined, alpha: number) => string,
-  mode: 'light' | 'dark'
-) => {
-  const accentLayer = toRgba(palette.accentSoft, mode === 'dark' ? 0.28 : 0.2);
-
-  switch (condition) {
-    case 'rain':
-    case 'drizzle':
-      return [
-        `radial-gradient(circle at 10% 10%, rgba(14,165,233,0.25), transparent 60%)`,
-        `radial-gradient(circle at 80% 80%, rgba(56,189,248,0.18), transparent 55%)`,
-        `linear-gradient(135deg, ${accentLayer}, transparent 70%)`,
-      ].join(',');
-    case 'snow':
-      return [
-        `radial-gradient(circle at 15% 25%, rgba(241,245,249,0.35), transparent 55%)`,
-        `radial-gradient(circle at 85% 65%, rgba(148,163,184,0.22), transparent 60%)`,
-        `linear-gradient(135deg, ${accentLayer}, transparent 70%)`,
-      ].join(',');
-    case 'thunderstorm':
-      return [
-        `radial-gradient(circle at 25% 20%, rgba(147,51,234,0.24), transparent 60%)`,
-        `radial-gradient(circle at 80% 45%, rgba(79,70,229,0.2), transparent 55%)`,
-        `linear-gradient(135deg, ${accentLayer}, transparent 70%)`,
-      ].join(',');
-    case 'clouds':
-      return [
-        `linear-gradient(160deg, rgba(148,163,184,0.15), transparent 55%)`,
-        `linear-gradient(320deg, rgba(148,163,184,0.1), transparent 60%)`,
-        `linear-gradient(135deg, ${accentLayer}, transparent 70%)`,
-      ].join(',');
-    case 'clear':
-      return [
-        `radial-gradient(circle at 85% 20%, rgba(253,224,71,0.22), transparent 55%)`,
-        `linear-gradient(135deg, ${accentLayer}, transparent 70%)`,
-      ].join(',');
-    default:
-      return `linear-gradient(135deg, ${accentLayer}, transparent 70%)`;
+      return Sun;
   }
 };
 
 export function ModernFamilyHeader({
   familyName,
   date,
-  touchMode = false,
   className,
   activeTab = 'overview',
   onTabChange,
 }: ModernFamilyHeaderProps) {
+  const router = useRouter();
   const { palette, mode } = useTheme();
   const { currentFamily, currentMember } = useFamily();
   const { userProfile, user, signOut } = useAuth();
-  const router = useRouter();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   const memberCount = currentFamily?.members?.length ?? 0;
-  const isSoloFamily = memberCount <= 1;
+  const inferredMode: HabitNexModeId = resolveMode(
+    (currentFamily?.settings?.mode as HabitNexModeId | undefined) ?? null,
+    {
+      isPersonal: currentFamily?.isPersonal,
+      memberCount,
+    }
+  );
+  const modeConfig = MODE_CONFIGS[inferredMode];
+
+  const familyWeatherZip = currentFamily?.settings?.weatherZip?.trim() || null;
+  const { weather, loading: weatherLoading } = useWeather(familyWeatherZip);
+  const WeatherIcon = getWeatherIcon(weather?.condition ?? null);
 
   const displayName =
     currentMember?.displayName ||
@@ -149,60 +89,8 @@ export function ModernFamilyHeader({
     user?.email?.split('@')[0] ||
     'HabitNex Hero';
 
-  const headline = isSoloFamily ? `Welcome back, ${displayName}` : currentFamily?.name ?? familyName;
-  const supportingLine = isSoloFamily
-    ? 'Here’s your day at a glance'
-    : `${memberCount} ${memberCount === 1 ? 'member' : 'members'} • ${date}`;
-
-  const familyWeatherZip = currentFamily?.settings?.weatherZip?.trim() || null;
-  const { weather, loading: weatherLoading, error: weatherError } = useWeather(familyWeatherZip);
-  const weatherCondition = weather?.condition?.toLowerCase() ?? null;
-
-  const toRgba = useCallback(
-    (color: string | undefined, alpha: number) => {
-      if (!color) return `rgba(59,130,246,${alpha})`;
-
-      if (color.startsWith('rgba')) {
-        const parts = color.match(/[\d.]+/g);
-        if (parts && parts.length >= 3) {
-          return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
-        }
-      }
-
-      if (color.startsWith('rgb')) {
-        const parts = color.match(/[\d.]+/g);
-        if (parts && parts.length >= 3) {
-          return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
-        }
-      }
-
-      if (color.startsWith('#')) {
-        const hex = color.replace('#', '');
-        const expanded = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
-        const r = parseInt(expanded.substring(0, 2), 16);
-        const g = parseInt(expanded.substring(2, 4), 16);
-        const b = parseInt(expanded.substring(4, 6), 16);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-      }
-
-      return color;
-    },
-    []
-  );
-
-  const bannerBackground = useMemo(() => {
-    const baseGradient = `linear-gradient(130deg, ${toRgba(
-      palette.surface,
-      mode === 'dark' ? 0.98 : 0.96
-    )} 0%, ${toRgba(palette.surfaceMuted, mode === 'dark' ? 0.78 : 0.88)} 55%, ${toRgba(
-      palette.accentSoft,
-      mode === 'dark' ? 0.26 : 0.18
-    )} 100%)`;
-
-    if (!weatherCondition) return baseGradient;
-    const overlay = buildWeatherOverlay(weatherCondition, palette, toRgba, mode);
-    return `${baseGradient}, ${overlay}`;
-  }, [palette, mode, weatherCondition, toRgba]);
+  const heroHeadline = memberCount <= 1 ? `Welcome back, ${displayName}` : familyName;
+  const heroSupporting = memberCount <= 1 ? `It’s ${date} · Keep your pulse steady` : `${memberCount} members · ${date}`;
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -222,33 +110,15 @@ export function ModernFamilyHeader({
     };
   }, []);
 
-  const toggleFullscreen = async () => {
+  const handleFullscreenToggle = async () => {
     try {
       if (!document.fullscreenElement) {
-        const element = document.documentElement as VendorFullscreenElement;
-        if (element.requestFullscreen) {
-          await element.requestFullscreen();
-        } else if (element.webkitRequestFullscreen) {
-          await element.webkitRequestFullscreen();
-        } else if (element.mozRequestFullScreen) {
-          await element.mozRequestFullScreen();
-        } else if (element.msRequestFullscreen) {
-          await element.msRequestFullscreen();
-        }
+        await document.documentElement.requestFullscreen();
       } else {
-        const extendedDoc = document as VendorFullscreenDocument;
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if (extendedDoc.webkitExitFullscreen) {
-          await extendedDoc.webkitExitFullscreen();
-        } else if (extendedDoc.mozCancelFullScreen) {
-          await extendedDoc.mozCancelFullScreen();
-        } else if (extendedDoc.msExitFullscreen) {
-          await extendedDoc.msExitFullscreen();
-        }
+        await document.exitFullscreen();
       }
     } catch {
-      // no-op
+      // ignore fullscreen errors
     }
   };
 
@@ -264,236 +134,115 @@ export function ModernFamilyHeader({
     }
   };
 
-  const weatherIconColor = mode === 'dark' ? 'rgba(255,255,255,0.92)' : 'rgba(17,24,39,0.82)';
-  const weatherPrimaryText = mode === 'dark' ? 'rgba(255,255,255,0.96)' : palette.textPrimary;
-  const weatherSecondaryText = mode === 'dark' ? 'rgba(226,232,255,0.78)' : 'rgba(15,23,42,0.65)';
-  const actionButtonText = mode === 'dark' ? 'rgba(248,250,252,0.95)' : palette.textPrimary;
-  const individualButtonBackground =
-    mode === 'dark'
-      ? toRgba(palette.glass, 0.45)
-      : `linear-gradient(135deg, ${toRgba(palette.surfaceMuted, 0.95)}, ${toRgba(palette.backgroundAlt, 0.9)})`;
-  const individualButtonBorder = toRgba(palette.borderMuted, mode === 'dark' ? 0.35 : 0.4);
-  const weatherCardBackground =
-    mode === 'dark'
-      ? `linear-gradient(140deg, ${toRgba(palette.accent, 0.32)}, ${toRgba(palette.surface, 0.6)})`
-      : `linear-gradient(140deg, ${toRgba(palette.accentSoft, 0.36)}, ${toRgba(palette.surfaceMuted, 0.92)})`;
-  const weatherCardBorder = toRgba(palette.accentSoft, mode === 'dark' ? 0.45 : 0.35);
-  const actionClusterBackground =
-    mode === 'dark'
-      ? `linear-gradient(135deg, ${toRgba(palette.surface, 0.58)}, ${toRgba(palette.glass, 0.78)})`
-      : `linear-gradient(135deg, ${toRgba(palette.surfaceMuted, 0.92)}, ${toRgba(palette.backgroundAlt, 0.85)})`;
-  const actionClusterBorder = toRgba(palette.borderMuted, mode === 'dark' ? 0.4 : 0.5);
-  const actionDividerColor =
-    mode === 'dark' ? 'rgba(255,255,255,0.18)' : toRgba(palette.borderMuted, 0.33);
+  const primaryNav = useMemo(() => {
+    const list = modeConfig.navigation.primary;
+    return list.filter((tab) => TAB_META[tab]);
+  }, [modeConfig.navigation.primary]);
+
+  const secondaryNav = useMemo(() => {
+    const list = modeConfig.navigation.secondary ?? [];
+    return list.filter((tab) => TAB_META[tab]);
+  }, [modeConfig.navigation.secondary]);
+
+  const renderNav = (tabs: FamilyTabId[], variant: 'primary' | 'secondary') => {
+    if (!tabs.length) return null;
+
+    return (
+      <nav
+        className={cn(
+          'flex items-center gap-2 overflow-x-auto rounded-full border border-white/5 bg-white/5 p-1 backdrop-blur',
+          variant === 'secondary' && 'border-dashed bg-white/2'
+        )}
+      >
+        {tabs.map((tab) => {
+          const meta = TAB_META[tab];
+          if (!meta) return null;
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => onTabChange?.(tab)}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+                isActive
+                  ? 'shadow-lg shadow-black/20'
+                  : 'text-white/70 hover:text-white'
+              )}
+              style={
+                isActive
+                  ? { background: modeConfig.accent, color: modeConfig.onAccent }
+                  : undefined
+              }
+            >
+              <meta.icon className="h-4 w-4" />
+              <span className="whitespace-nowrap">{meta.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    );
+  };
 
   return (
-    <header className={cn('relative mb-10', className)}>
-      <div
-        className="relative overflow-hidden border-b backdrop-blur-sm"
-        style={{
-          backgroundImage: bannerBackground,
-          borderColor: toRgba(palette.border, mode === 'dark' ? 0.35 : 0.18),
-          boxShadow: palette.shadow,
-        }}
-      >
-        <div className="relative z-10 flex flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <span
-                  className="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-                  style={{
-                    background:
-                      mode === 'dark'
-                        ? toRgba(palette.glass, 0.6)
-                        : `linear-gradient(120deg, ${toRgba(palette.accentSoft, 0.2)}, ${toRgba(
-                            palette.surfaceMuted,
-                            0.85
-                          )})`,
-                    color: mode === 'dark' ? palette.accentContrast : palette.textSecondary,
-                    border: `1px solid ${toRgba(palette.borderMuted, mode === 'dark' ? 0.2 : 0.35)}`,
-                  }}
-                >
-                  {isSoloFamily ? 'Solo mode' : 'Family command center'}
-                </span>
-                {!isSoloFamily && (
-                  <span className="text-sm font-medium" style={{ color: palette.textSecondary }}>
-                    {memberCount} {memberCount === 1 ? 'member' : 'members'}
-                  </span>
-                )}
-              </div>
-
-              <h1
-                className={cn(
-                  'text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl',
-                  touchMode && 'text-4xl sm:text-5xl'
-                )}
-                style={{ color: palette.textPrimary }}
-              >
-                {headline}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-3 text-sm" style={{ color: palette.textSecondary }}>
-                <span>{supportingLine}</span>
-                <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wide">
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: palette.accent }} />
-                  {date}
-                </span>
+    <header className={cn('relative border-b border-white/10 bg-[#050607]/80 backdrop-blur-md', className)}>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <p className="text-[11px] uppercase tracking-[0.4em] text-[#ff7a1c]">{modeConfig.name}</p>
+            <h1 className="text-2xl font-semibold text-white sm:text-[28px]">{heroHeadline}</h1>
+            <p className="text-sm text-white/70">{heroSupporting}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80">
+              {weatherLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <WeatherIcon size={WEATHER_ICON_SIZE} className="text-white" />
+              )}
+              <div className="leading-tight">
+                <p className="font-medium text-white/90">
+                  {weather?.temperature ? `${Math.round(weather.temperature)}°F` : '—'}
+                </p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/60">
+                  {weather?.location ? weather.location : weather?.condition ?? 'Weather'}
+                </p>
               </div>
             </div>
-
-            <div className="flex min-w-[240px] flex-col items-start gap-4 sm:items-end">
-              <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                <div
-                  className="flex items-center gap-3 rounded-full border px-4 py-2 shadow-lg"
-                  style={{
-                    background: weatherCardBackground,
-                    borderColor: weatherCardBorder,
-                    color: weatherPrimaryText,
-                    boxShadow: '0 18px 40px -24px rgba(15,23,42,0.55)',
-                  }}
-                >
-                  {weather ? (
-                    <>
-                      <div className="flex items-center gap-2">
-                        {resolveWeatherIcon(weather.condition, weatherIconColor)}
-                        <div className="flex flex-col leading-tight">
-                          <span
-                            className="text-sm font-semibold sm:text-base"
-                            style={{ color: weatherPrimaryText }}
-                          >
-                            {Math.round(weather.temperature)}°F
-                          </span>
-                          <span
-                            className="text-[11px] uppercase tracking-wide"
-                            style={{ color: weatherSecondaryText }}
-                          >
-                            {weather.condition}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="hidden min-w-[140px] flex-col sm:flex">
-                        <span className="text-[11px] font-medium" style={{ color: weatherPrimaryText }}>
-                          {weather.location}
-                        </span>
-                        <span
-                          className="mt-0.5 inline-flex items-center gap-1 text-[11px]"
-                          style={{ color: weatherSecondaryText }}
-                        >
-                          <Wind className="h-3 w-3" />
-                          {Math.round(weather.windSpeed)} mph
-                        </span>
-                      </div>
-                    </>
-                  ) : weatherLoading ? (
-                    <span className="text-xs sm:text-sm" style={{ color: weatherSecondaryText }}>
-                      Fetching weather…
-                    </span>
-                  ) : weatherError ? (
-                    <span className="text-xs sm:text-sm" style={{ color: weatherSecondaryText }}>
-                      Weather unavailable
-                    </span>
-                  ) : (
-                    <>
-                      {resolveWeatherIcon('clear', weatherIconColor)}
-                      <span className="text-xs sm:text-sm" style={{ color: weatherSecondaryText }}>
-                        Add weather in settings
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                <div
-                  className="flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[0.75rem] font-semibold shadow-lg"
-                  style={{
-                    background: actionClusterBackground,
-                    borderColor: actionClusterBorder,
-                    color: actionButtonText,
-                    boxShadow: '0 18px 40px -24px rgba(15,23,42,0.5)',
-                  }}
-                >
-                  <ThemeToggle
-                    compact
-                    className="!bg-transparent !border-none !px-2 !py-1 text-inherit hover:!bg-white/10 focus-visible:ring-offset-0"
-                  />
-                  <span
-                    className="hidden h-4 w-px sm:block"
-                    style={{ background: actionDividerColor }}
-                    aria-hidden
-                  />
-                  <button
-                    type="button"
-                    onClick={toggleFullscreen}
-                    title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.7rem] font-semibold transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-                    style={{
-                      background: individualButtonBackground,
-                      color: actionButtonText,
-                      border: `1px solid ${individualButtonBorder}`,
-                      boxShadow: '0 8px 24px -16px rgba(15,23,42,0.45)',
-                    }}
-                  >
-                    {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
-                    <span className="hidden sm:inline">{isFullscreen ? 'Exit' : 'Fullscreen'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    disabled={signingOut}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.7rem] font-semibold transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-                    style={{
-                      background: individualButtonBackground,
-                      color: actionButtonText,
-                      border: `1px solid ${individualButtonBorder}`,
-                      boxShadow: '0 8px 24px -16px rgba(15,23,42,0.45)',
-                      opacity: signingOut ? 0.6 : 1,
-                    }}
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{signingOut ? 'Signing out…' : 'Sign out'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ThemeToggle compact className="bg-white/10 hover:bg-white/15" showLabel={false} />
+            <button
+              type="button"
+              onClick={() => onTabChange?.('settings')}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 transition",
+                activeTab === 'settings' ? "bg-[#ff7a1c] text-white" : "bg-white/5 hover:bg-white/10 hover:text-white"
+              )}
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleFullscreenToggle}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition hover:text-white"
+              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            >
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              disabled={signingOut}
+              onClick={handleSignOut}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r from-[#ff7a1c] to-[#ff9966] px-3 py-2 text-xs font-semibold text-black transition disabled:opacity-60"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
-        <div
-          className="border-t"
-          style={{
-            borderColor: toRgba(palette.borderMuted, mode === 'dark' ? 0.4 : 0.25),
-            background: toRgba(palette.glass, 0.65),
-          }}
-        >
-          <nav className="w-full">
-            <div className="flex flex-wrap gap-2 px-4 py-3 sm:px-6 sm:py-4">
-              {navigationLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = activeTab === link.id;
-                return (
-                  <button
-                    key={link.id}
-                    type="button"
-                    onClick={() => onTabChange?.(link.id)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
-                      isActive ? 'shadow-lg' : 'hover:-translate-y-0.5 hover:shadow-md'
-                    )}
-                    style={{
-                      background: isActive ? palette.accentGradient : toRgba(palette.glass, isActive ? 0.9 : 0.55),
-                      color: isActive ? palette.accentContrast : palette.textSecondary,
-                      border: `1px solid ${toRgba(palette.borderMuted, isActive ? 0.2 : 0.15)}`,
-                    }}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{link.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-        </div>
+        {renderNav(primaryNav, 'primary')}
+        {renderNav(secondaryNav, 'secondary')}
       </div>
     </header>
   );
