@@ -1,330 +1,385 @@
 'use client';
 
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import {
   Check,
   X,
+  Circle,
+  Sparkles,
+  ShieldCheck,
+  AlertTriangle,
+  Flame,
+  Pause,
   Smile,
   Frown,
-  ShieldCheck,
-  AlertOctagon,
-  ChevronRight,
-  ChevronLeft,
-  Power,
   Zap,
-  Circle,
-  Pause,
-  Clock,
+  Plus,
+  Minus,
+  Star,
+  Square,
+  ChevronUp,
+  ChevronDown,
+  Slash,
+  Dot,
+  Power,
   RefreshCcw,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-type HabitState = 'neutral' | 'done' | 'missed';
+type HabitState = 'none' | 'done' | 'missed';
 
-const variants = [
+interface ButtonStyle {
+  base: string;
+  active: string;
+  icon: JSX.Element;
+  ariaLabel: string;
+}
+
+interface Design {
+  title: string;
+  description: string;
+  complete: ButtonStyle;
+  missed: ButtonStyle;
+}
+
+const iconSize = 'h-3.5 w-3.5';
+const buttonBase =
+  'inline-flex items-center justify-center transition duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40';
+
+const designs: Design[] = [
   {
-    title: 'Icon Pill Duo',
-    description: 'Compact pill with icon + badge count.',
-    render: (
-      state: HabitState,
-      setState: (value: HabitState) => void
-    ) => (
-      <div className="inline-flex rounded-full border border-white/15 bg-white/5 p-1 shadow-sm shadow-black/30">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition',
-            state === 'done'
-              ? 'bg-emerald-400 text-emerald-950 shadow shadow-emerald-500/40'
-              : 'text-slate-200 hover:text-white'
-          )}
-        >
-          <Check className="h-3.5 w-3.5" />
-          Done
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition',
-            state === 'missed'
-              ? 'bg-rose-400 text-rose-950 shadow shadow-rose-500/40'
-              : 'text-slate-200 hover:text-white'
-          )}
-        >
-          <X className="h-3.5 w-3.5" />
-          Miss
-        </button>
-      </div>
-    ),
+    title: '1 · Solid Glow',
+    description: 'Simple neon pill with warm glow.',
+    complete: {
+      base: `${buttonBase} h-6 w-7 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-500/40`,
+      active: 'bg-emerald-400 text-emerald-950 shadow-lg shadow-emerald-500/40',
+      icon: <Check className={iconSize} />,
+      ariaLabel: 'Mark habit complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-7 rounded-full bg-rose-500/20 text-rose-200 border border-rose-400/40`,
+      active: 'bg-rose-400 text-rose-950 shadow-lg shadow-rose-500/40',
+      icon: <X className={iconSize} />,
+      ariaLabel: 'Mark habit missed',
+    },
   },
   {
-    title: 'Stacked Icon Buttons',
-    description: 'Tiny circular buttons with labels underneath.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-full border border-emerald-400/50 text-emerald-200 transition hover:scale-105',
-            state === 'done' && 'bg-emerald-400/20 text-emerald-100'
-          )}
-          title="Complete"
-        >
-          <Smile className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-full border border-rose-400/50 text-rose-200 transition hover:scale-105',
-            state === 'missed' && 'bg-rose-400/20 text-rose-100'
-          )}
-          title="Missed"
-        >
-          <Frown className="h-4 w-4" />
-        </button>
-      </div>
-    ),
+    title: '2 · Ring Outline',
+    description: 'Lightweight ring with colored core.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full border-2 border-emerald-400/70 text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950 shadow-[0_0_8px_rgba(16,185,129,0.55)]',
+      icon: <Circle className={iconSize} />,
+      ariaLabel: 'Complete habit',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full border-2 border-amber-300/70 text-amber-200`,
+      active: 'bg-amber-400 text-amber-950 shadow-[0_0_8px_rgba(251,191,36,0.55)]',
+      icon: <Slash className={iconSize} />,
+      ariaLabel: 'Skip habit',
+    },
   },
   {
-    title: 'Compact Toggle',
-    description: 'Single slider with colored background.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="relative flex h-9 w-48 items-center rounded-full border border-white/15 bg-white/5 p-0.5 text-xs font-semibold uppercase tracking-wide">
-        <div
-          className={cn(
-            'absolute inset-y-1 w-[73px] rounded-full transition-transform duration-200 ease-out shadow-lg',
-            state === 'done'
-              ? 'translate-x-1 bg-emerald-400 shadow-emerald-500/40'
-              : state === 'missed'
-              ? 'translate-x-[74px] bg-rose-400 shadow-rose-500/40'
-              : 'translate-x-[37px] bg-slate-500/40 shadow-slate-900/30'
-          )}
-        />
-        <button
-          onClick={() => setState('done')}
-          className="relative z-10 flex-1 text-emerald-200"
-        >
-          Done
-        </button>
-        <div className="relative z-10 flex-1 text-center text-[10px] text-slate-400">
-          |
-        </div>
-        <button
-          onClick={() => setState('missed')}
-          className="relative z-10 flex-1 text-rose-200"
-        >
-          Miss
-        </button>
-      </div>
-    ),
+    title: '3 · Glass Chips',
+    description: 'Frosted squares with subtle lighting.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-md border border-white/20 bg-white/10 text-emerald-200`,
+      active: 'border-emerald-300 bg-emerald-400/20 text-emerald-100',
+      icon: <ShieldCheck className={iconSize} />,
+      ariaLabel: 'Completed',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-md border border-white/20 bg-white/10 text-rose-200`,
+      active: 'border-rose-300 bg-rose-400/20 text-rose-100',
+      icon: <AlertTriangle className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
   },
   {
-    title: 'Arrow Tabs',
-    description: 'Direction arrows emphasise change.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="inline-flex overflow-hidden rounded-lg border border-white/10 bg-white/5 text-xs font-semibold text-white/70">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'flex items-center gap-1 px-3 py-1 transition',
-            state === 'done' && 'bg-emerald-500 text-emerald-950'
-          )}
-        >
-          <ChevronLeft className="h-3 w-3" />
-          Done
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'flex items-center gap-1 px-3 py-1 transition',
-            state === 'missed' && 'bg-rose-500 text-rose-950'
-          )}
-        >
-          Miss
-          <ChevronRight className="h-3 w-3" />
-        </button>
-      </div>
-    ),
+    title: '4 · Gradient Slivers',
+    description: 'Slender capsules for tight grids.',
+    complete: {
+      base: `${buttonBase} h-6 w-8 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-200 border border-emerald-500/30`,
+      active: 'from-emerald-400 to-teal-400 text-emerald-950 shadow-md shadow-emerald-500/30',
+      icon: <Sparkles className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-8 rounded-full bg-gradient-to-r from-rose-500/20 to-orange-500/20 text-rose-200 border border-rose-400/30`,
+      active: 'from-rose-400 to-orange-400 text-rose-950 shadow-md shadow-rose-500/30',
+      icon: <Flame className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
   },
   {
-    title: 'Badge Pair',
-    description: 'Thick badges with subtle gradients.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="inline-flex gap-2">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-100 transition hover:border-emerald-400',
-            state === 'done' && 'bg-emerald-500 text-emerald-950'
-          )}
-        >
-          <ShieldCheck className="h-3.5 w-3.5" />
-          Done
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-100 transition hover:border-amber-400',
-            state === 'missed' && 'bg-amber-500 text-amber-950'
-          )}
-        >
-          <AlertOctagon className="h-3.5 w-3.5" />
-          Miss
-        </button>
-      </div>
-    ),
+    title: '5 · Pixel Dots',
+    description: 'Square dot with saturated center.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-sm border border-emerald-500/40 bg-emerald-500/10 text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950 shadow-[0_0_6px_rgba(16,185,129,0.65)]',
+      icon: <Dot className={iconSize} />,
+      ariaLabel: 'Complete habit',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-sm border border-rose-500/40 bg-rose-500/10 text-rose-200`,
+      active: 'bg-rose-400 text-rose-950 shadow-[0_0_6px_rgba(244,63,94,0.65)]',
+      icon: <Minus className={iconSize} />,
+      ariaLabel: 'Skip habit',
+    },
   },
   {
-    title: 'Corner Buttons',
-    description: 'Square buttons for grid alignment.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="inline-grid grid-cols-2 gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg text-emerald-200 transition hover:bg-emerald-500/20',
-            state === 'done' && 'bg-emerald-500 text-emerald-950'
-          )}
-        >
-          <Power className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg text-rose-200 transition hover:bg-rose-500/20',
-            state === 'missed' && 'bg-rose-500 text-rose-950'
-          )}
-        >
-          <Pause className="h-4 w-4" />
-        </button>
-      </div>
-    ),
+    title: '6 · Soft Halo',
+    description: 'Filled icons with translucent halo ring.',
+    complete: {
+      base: `${buttonBase} relative h-6 w-6 rounded-full bg-emerald-500/25 text-emerald-100`,
+      active:
+        'bg-emerald-500 text-emerald-950 after:absolute after:-inset-1 after:rounded-full after:bg-emerald-500/15',
+      icon: <Smile className={iconSize} />,
+      ariaLabel: 'Done',
+    },
+    missed: {
+      base: `${buttonBase} relative h-6 w-6 rounded-full bg-rose-500/25 text-rose-100`,
+      active:
+        'bg-rose-500 text-rose-950 after:absolute after:-inset-1 after:rounded-full after:bg-rose-500/15',
+      icon: <Frown className={iconSize} />,
+      ariaLabel: 'Miss',
+    },
   },
   {
-    title: 'Chip Toggle',
-    description: 'Chips with indicator dot.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="inline-flex items-center gap-2">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-slate-200 transition hover:border-emerald-400/60',
-            state === 'done' && 'border-emerald-400 bg-emerald-400/20 text-emerald-100'
-          )}
-        >
-          <span className="h-2 w-2 rounded-full bg-emerald-400" />
-          Done
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-slate-200 transition hover:border-rose-400/60',
-            state === 'missed' && 'border-rose-400 bg-rose-400/20 text-rose-100'
-          )}
-        >
-          <span className="h-2 w-2 rounded-full bg-rose-400" />
-          Miss
-        </button>
-      </div>
-    ),
+    title: '7 · Duo Tone',
+    description: 'Thin border with two-color fill when active.',
+    complete: {
+      base: `${buttonBase} h-6 w-8 rounded-full border border-emerald-400/40 text-emerald-200`,
+      active: 'bg-gradient-to-r from-emerald-500 to-teal-400 text-emerald-950',
+      icon: <ChevronUp className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-8 rounded-full border border-rose-400/40 text-rose-200`,
+      active: 'bg-gradient-to-r from-rose-500 to-amber-400 text-rose-950',
+      icon: <ChevronDown className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
   },
   {
-    title: 'Pulse Buttons',
-    description: 'Glowing border when active.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="inline-flex gap-2">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-full border border-emerald-400/30 text-emerald-200 transition',
-            state === 'done' && 'border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.7)] text-emerald-100'
-          )}
-        >
-          <Zap className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-full border border-slate-400/30 text-slate-300 transition',
-            state === 'missed' && 'border-rose-300 shadow-[0_0_12px_rgba(248,113,113,0.55)] text-rose-200'
-          )}
-        >
-          <Circle className="h-4 w-4" />
-        </button>
-      </div>
-    ),
+    title: '8 · Glimmer Squares',
+    description: 'Creates a metallic tap target.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-lg border border-white/15 bg-white/10 text-emerald-200`,
+      active:
+        'bg-gradient-to-br from-emerald-500 to-cyan-400 text-emerald-950 shadow-lg shadow-emerald-500/40',
+      icon: <Check className={iconSize} />,
+      ariaLabel: 'Done',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-lg border border-white/15 bg-white/10 text-rose-200`,
+      active:
+        'bg-gradient-to-br from-rose-500 to-orange-400 text-rose-950 shadow-lg shadow-rose-500/40',
+      icon: <X className={iconSize} />,
+      ariaLabel: 'Skip',
+    },
   },
   {
-    title: 'Micro Drawer',
-    description: 'Tiny drawer reveals actions on hover.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="relative inline-flex overflow-hidden rounded-full border border-white/10 bg-white/10">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'flex items-center gap-1 px-3 py-1 text-xs text-slate-200 transition hover:bg-emerald-500/20',
-            state === 'done' && 'bg-emerald-500 text-emerald-950'
-          )}
-        >
-          <Clock className="h-3 w-3" />
-          Done
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'flex items-center gap-1 px-3 py-1 text-xs text-slate-200 transition hover:bg-rose-500/20',
-            state === 'missed' && 'bg-rose-500 text-rose-950'
-          )}
-        >
-          Skip
-        </button>
-      </div>
-    ),
+    title: '9 · Minimal Lines',
+    description: 'Bare outline with icon swap.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-emerald-400/60 text-emerald-200`,
+      active: 'bg-emerald-500 text-emerald-950',
+      icon: <Plus className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-slate-400/60 text-slate-200`,
+      active: 'bg-rose-500 text-rose-950',
+      icon: <Minus className={iconSize} />,
+      ariaLabel: 'Miss',
+    },
   },
   {
-    title: 'Reset Trio',
-    description: 'Two decisions plus reset in one cluster.',
-    render: (state: HabitState, setState: (value: HabitState) => void) => (
-      <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 p-1 text-xs">
-        <button
-          onClick={() => setState('done')}
-          className={cn(
-            'inline-flex h-7 w-7 items-center justify-center rounded-full text-emerald-200 transition hover:bg-emerald-500/20',
-            state === 'done' && 'bg-emerald-500 text-emerald-950'
-          )}
-        >
-          <Check className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => setState('neutral')}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-300 transition hover:bg-white/15"
-          title="Reset"
-        >
-          <RefreshCcw className="h-3.5 w-3.5" />
-        </button>
-        <button
-          onClick={() => setState('missed')}
-          className={cn(
-            'inline-flex h-7 w-7 items-center justify-center rounded-full text-rose-200 transition hover:bg-rose-500/20',
-            state === 'missed' && 'bg-rose-500 text-rose-950'
-          )}
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    ),
+    title: '10 · Split Tiles',
+    description: 'Semi-rounded rectangle combo.',
+    complete: {
+      base: `${buttonBase} h-6 w-8 rounded-l-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950',
+      icon: <Star className={iconSize} />,
+      ariaLabel: 'Done',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-8 rounded-r-lg border border-rose-500/30 bg-rose-500/10 text-rose-200`,
+      active: 'bg-rose-400 text-rose-950',
+      icon: <Square className={iconSize} />,
+      ariaLabel: 'Miss',
+    },
+  },
+  {
+    title: '11 · Glass Ring',
+    description: 'Transparent ring with crisp fill when active.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-emerald-400/40 bg-transparent text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950 ring-2 ring-emerald-300/70',
+      icon: <Dot className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-rose-400/40 bg-transparent text-rose-200`,
+      active: 'bg-rose-400 text-rose-950 ring-2 ring-rose-300/70',
+      icon: <Dot className={iconSize} />,
+      ariaLabel: 'Miss',
+    },
+  },
+  {
+    title: '12 · Micro Switch',
+    description: 'Tiny switcher with indicator bar.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full bg-slate-900 text-slate-400 border border-slate-600`,
+      active: 'bg-emerald-500 text-emerald-950',
+      icon: <Power className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full bg-slate-900 text-slate-400 border border-slate-600`,
+      active: 'bg-rose-500 text-rose-950',
+      icon: <Pause className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
+  },
+  {
+    title: '13 · Soft Shadow',
+    description: 'Drop-shadow circle with color rim.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-emerald-400/40 bg-slate-900 text-emerald-200`,
+      active: 'bg-emerald-500 text-emerald-950 shadow-md shadow-emerald-500/50',
+      icon: <Zap className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-amber-400/40 bg-slate-900 text-amber-200`,
+      active: 'bg-amber-500 text-amber-950 shadow-md shadow-amber-500/50',
+      icon: <AlertTriangle className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
+  },
+  {
+    title: '14 · Frosted Pixel',
+    description: 'Squared edges with subtle texture.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-[6px] border border-emerald-300/40 bg-white/10 text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950',
+      icon: <Check className={iconSize} />,
+      ariaLabel: 'Done',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-[6px] border border-rose-300/40 bg-white/10 text-rose-200`,
+      active: 'bg-rose-400 text-rose-950',
+      icon: <X className={iconSize} />,
+      ariaLabel: 'Skip',
+    },
+  },
+  {
+    title: '15 · Mini Bars',
+    description: 'Slim rectangular bars for dense lists.',
+    complete: {
+      base: `${buttonBase} h-6 w-8 rounded-full border border-emerald-400/40 bg-slate-900 text-emerald-200`,
+      active: 'bg-emerald-500 text-emerald-950',
+      icon: <ChevronUp className={iconSize} />,
+      ariaLabel: 'Complete habit',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-8 rounded-full border border-rose-400/40 bg-slate-900 text-rose-200`,
+      active: 'bg-rose-500 text-rose-950',
+      icon: <ChevronDown className={iconSize} />,
+      ariaLabel: 'Missed habit',
+    },
+  },
+  {
+    title: '16 · Light Tiles',
+    description: 'Subtle inset lighting for neutral lists.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-lg border border-white/15 bg-white/6 text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950 shadow-inner shadow-emerald-500/30',
+      icon: <Smile className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-lg border border-white/15 bg-white/6 text-rose-200`,
+      active: 'bg-rose-400 text-rose-950 shadow-inner shadow-rose-500/30',
+      icon: <Frown className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
+  },
+  {
+    title: '17 · Gradient Ring',
+    description: 'Gradient outline with transparent center.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full bg-transparent text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950',
+      icon: <Circle className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full bg-transparent text-rose-200`,
+      active: 'bg-rose-400 text-rose-950',
+      icon: <Circle className={iconSize} />,
+      ariaLabel: 'Missed',
+    },
+  },
+  {
+    title: '18 · Micro Arrows',
+    description: 'Directional cues for success/fail.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-emerald-400/40 bg-slate-900 text-emerald-200`,
+      active: 'bg-emerald-500 text-emerald-950 shadow shadow-emerald-500/40',
+      icon: <ChevronUp className={iconSize} />,
+      ariaLabel: 'Mark as done',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full border border-rose-400/40 bg-slate-900 text-rose-200`,
+      active: 'bg-rose-500 text-rose-950 shadow shadow-rose-500/40',
+      icon: <ChevronDown className={iconSize} />,
+      ariaLabel: 'Mark as missed',
+    },
+  },
+  {
+    title: '19 · Soft Toggle',
+    description: 'Two-button cluster with neutral reset.',
+    complete: {
+      base: `${buttonBase} h-6 w-7 rounded-full bg-emerald-500/15 text-emerald-200 border border-emerald-500/30`,
+      active: 'bg-emerald-500 text-emerald-950',
+      icon: <Check className={iconSize} />,
+      ariaLabel: 'Complete habit',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-7 rounded-full bg-slate-600/20 text-slate-200 border border-slate-500/30`,
+      active: 'bg-rose-500 text-rose-950',
+      icon: <Pause className={iconSize} />,
+      ariaLabel: 'Mark missed',
+    },
+  },
+  {
+    title: '20 · Reset Trio Mini',
+    description: 'Complete, reset, miss icons all at 24px.',
+    complete: {
+      base: `${buttonBase} h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-200`,
+      active: 'bg-emerald-400 text-emerald-950',
+      icon: <Check className={iconSize} />,
+      ariaLabel: 'Complete',
+    },
+    missed: {
+      base: `${buttonBase} h-6 w-6 rounded-full bg-rose-500/20 text-rose-200`,
+      active: 'bg-rose-400 text-rose-950',
+      icon: <X className={iconSize} />,
+      ariaLabel: 'Miss',
+    },
   },
 ];
 
-export default function CompactHabitButtonsShowcase() {
-  const [states, setStates] = useState<HabitState[]>(() =>
-    Array(variants.length).fill('neutral')
-  );
+export default function HabitButtonShowcase() {
+  const [states, setStates] = useState<HabitState[]>(Array(designs.length).fill('none'));
 
-  const updateState = (index: number, value: HabitState) => {
+  const toggleState = (index: number, target: HabitState) => {
     setStates((prev) => {
       const next = [...prev];
-      next[index] = value;
+      next[index] = prev[index] === target ? 'none' : target;
       return next;
     });
   };
@@ -334,62 +389,83 @@ export default function CompactHabitButtonsShowcase() {
       className="min-h-screen w-full bg-slate-950/95 p-6 text-slate-100 sm:p-8"
       style={{
         background:
-          'radial-gradient(circle at top, rgba(59,130,246,0.25), transparent 45%), radial-gradient(circle at bottom, rgba(29,78,216,0.18), transparent 55%), #020617',
+          'radial-gradient(circle at top, rgba(59,130,246,0.25), transparent 45%), radial-gradient(circle at bottom, rgba(15,118,110,0.2), transparent 55%), #020617',
       }}
     >
-      <div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="mx-auto w-full max-w-5xl space-y-6">
         <header className="space-y-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/70">
             HabitNex UI Lab
           </span>
-          <h1 className="text-2xl font-bold text-white sm:text-3xl">
-            Compact Complete / Missed Controls
-          </h1>
+          <h1 className="text-2xl font-bold text-white sm:text-3xl">20 Compact Complete / Missed Options</h1>
           <p className="text-sm text-slate-300">
-            Quick ideas for smaller surfaces—each tile shows a pair of buttons you can tap to simulate the state.
+            Every button below stays under 25px tall and 35px wide—ideal for dense member habit lists on touch or wall displays.
+            Tap to preview the active state.
           </p>
         </header>
 
-        <div className="grid gap-4">
-          {variants.map((variant, index) => (
-            <section
-              key={variant.title}
-              className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/40 backdrop-blur-lg"
-            >
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-semibold text-white">
-                    {variant.title}
-                  </h2>
-                  <p className="text-xs text-slate-300">
-                    {variant.description}
-                  </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {designs.map((design, index) => {
+            const state = states[index];
+
+            return (
+              <section
+                key={design.title}
+                className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/40 backdrop-blur-lg"
+              >
+                <header className="mb-3 flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">{design.title}</h2>
+                    <p className="text-xs text-slate-300">{design.description}</p>
+                  </div>
+                  <span
+                    className={cn(
+                      'text-[11px] uppercase tracking-wide',
+                      state === 'done'
+                        ? 'text-emerald-300'
+                        : state === 'missed'
+                        ? 'text-rose-300'
+                        : 'text-slate-400'
+                    )}
+                  >
+                    {state === 'done' ? 'Complete' : state === 'missed' ? 'Missed' : 'Idle'}
+                  </span>
+                </header>
+
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-slate-200">Sample Habit</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      aria-label={design.complete.ariaLabel}
+                      className={cn(design.complete.base, state === 'done' && design.complete.active)}
+                      onClick={() => toggleState(index, 'done')}
+                    >
+                      {design.complete.icon}
+                    </button>
+                    {design.title === '20 · Reset Trio Mini' && (
+                      <button
+                        type="button"
+                        aria-label="Reset habit state"
+                        className={`${buttonBase} h-6 w-6 rounded-full bg-white/10 text-slate-200 hover:bg-white/15`}
+                        onClick={() => toggleState(index, 'none')}
+                      >
+                        <RefreshCcw className={iconSize} />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      aria-label={design.missed.ariaLabel}
+                      className={cn(design.missed.base, state === 'missed' && design.missed.active)}
+                      onClick={() => toggleState(index, 'missed')}
+                    >
+                      {design.missed.icon}
+                    </button>
+                  </div>
                 </div>
-                <span
-                  className={cn(
-                    'text-[11px] uppercase tracking-wide',
-                    states[index] === 'done'
-                      ? 'text-emerald-300'
-                      : states[index] === 'missed'
-                      ? 'text-rose-300'
-                      : 'text-slate-400'
-                  )}
-                >
-                  {states[index] === 'done'
-                    ? 'Completed'
-                    : states[index] === 'missed'
-                    ? 'Missed'
-                    : 'Awaiting'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-200">
-                  Log hydration habit
-                </span>
-                {variant.render(states[index], (value) => updateState(index, value))}
-              </div>
-            </section>
-          ))}
+              </section>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Heart, Users, Mail, Lock, Eye, EyeOff, User, ArrowRight, Rocket, Trophy, Star, CheckCircle2 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';

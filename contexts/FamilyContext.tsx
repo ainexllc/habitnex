@@ -8,7 +8,8 @@ import {
   FamilyMember, 
   FamilyDashboardData,
   CreateFamilyRequest,
-  JoinFamilyRequest 
+  JoinFamilyRequest,
+  MemberRewardProfile 
 } from '@/types/family';
 import { 
   createFamily, 
@@ -319,6 +320,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     earringsProbability?: number;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
+    rewardProfile?: MemberRewardProfile | null;
   }) => {
     if (!user) throw new Error('User must be logged in');
     if (!currentFamily) throw new Error('No family selected');

@@ -58,6 +58,7 @@ export interface FamilyMember {
   isActive: boolean;
   joinedAt: Timestamp;
   preferences: MemberPreferences;
+  rewardProfile?: MemberRewardProfile;
   stats: MemberStats;
 }
 
@@ -66,6 +67,13 @@ export interface MemberPreferences {
   reminderTime?: string;       // Time for daily reminders
   difficulty: 'easy' | 'normal' | 'challenging';
   motivationStyle: 'rewards' | 'progress' | 'competition';
+}
+
+export interface MemberRewardProfile {
+  dailyFocusHabitIds: string[];
+  weeklyGoal?: number;
+  tokenBalance?: number;
+  lastUpdated?: Timestamp;
 }
 
 export interface MemberStats {

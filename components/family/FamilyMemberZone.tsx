@@ -5,9 +5,7 @@ import { FamilyMember, FamilyHabit, FamilyHabitCompletion } from '@/types/family
 import { useFamilyHabits } from '@/hooks/useFamilyHabits';
 import { useCelebrationTriggers } from '@/hooks/useCelebrationTriggers';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { VisualFeedback, FeedbackButton } from '@/components/celebration/VisualFeedback';
-import { CheckCircle2, Circle, Star, Trophy, Zap, Users, Check, X, Undo2 } from 'lucide-react';
+import { Circle, Star, Trophy, Zap, Check, X, RefreshCcw, Sparkles } from 'lucide-react';
 import { cn, getTodayDateString } from '@/lib/utils';
 import { ProfileImage } from '@/components/ui/ProfileImage';
 import { HabitBenefitsModal } from './HabitBenefitsModal';
@@ -16,6 +14,7 @@ import { OpenMoji } from '@/components/ui/OpenMoji';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { getTextureDataUrl, defaultTexturePattern, type TexturePatternId } from '@/lib/familyTextures';
+import type { MemberRewardProgress } from '@/hooks/useRewardMomentum';
 
 const parseHexColor = (hexColor: string) => {
   let hex = hexColor.replace('#', '');
@@ -36,48 +35,44 @@ const colorToRgba = (hexColor: string, alpha: number) => {
 
 const svgToDataUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
-interface TowerButtonProps {
+type SolidGlowVariant = 'success' | 'failure' | 'reset';
+
+const solidGlowStyles: Record<SolidGlowVariant, string> = {
+  success:
+    'border-emerald-500/40 bg-gradient-to-r from-emerald-400 to-lime-400 text-emerald-950 shadow-[0_0_12px_rgba(16,185,129,0.35)] hover:brightness-105',
+  failure:
+    'border-rose-500/40 bg-gradient-to-r from-rose-400 to-orange-400 text-rose-950 shadow-[0_0_12px_rgba(244,63,94,0.35)] hover:brightness-105',
+  reset:
+    'border-slate-500/40 bg-slate-800/70 text-slate-200 hover:bg-slate-700/70 hover:text-white',
+};
+
+const SolidGlowButton = ({
+  variant,
+  onClick,
+  disabled,
+  title,
+  icon,
+}: {
+  variant: SolidGlowVariant;
   onClick: () => void;
   disabled?: boolean;
-  variant: 'success' | 'failure';
-  label: string;
+  title: string;
   icon: ReactNode;
-}
-
-const TowerButton = ({ onClick, disabled, variant, label, icon }: TowerButtonProps) => {
-  const isSuccess = variant === 'success';
-  const baseGradient = isSuccess
-    ? 'from-emerald-400 via-emerald-500 to-lime-500'
-    : 'from-rose-400 via-rose-500 to-orange-400';
-  const glowShadow = isSuccess ? 'shadow-emerald-500/40' : 'shadow-rose-500/40';
-  const borderColor = isSuccess ? 'border-emerald-300/60' : 'border-rose-300/60';
-  const textTone = isSuccess ? 'text-emerald-200' : 'text-rose-200';
-  const labelTone = isSuccess ? 'text-emerald-100' : 'text-rose-100';
-
+}) => {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      title={title}
+      aria-label={title}
       className={cn(
-        'group inline-flex w-[88px] flex-col items-center gap-1.5 rounded-2xl border bg-white/5 px-3 py-2 text-xs font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40',
-        borderColor,
-        textTone,
-        disabled && 'cursor-not-allowed opacity-60'
+        'inline-flex h-6 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40',
+        solidGlowStyles[variant],
+        disabled && 'cursor-not-allowed opacity-50 hover:brightness-100'
       )}
-      aria-label={label}
-      title={label}
     >
-      <span
-        className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-slate-900 shadow-lg transition-transform duration-200 group-hover:scale-105',
-          baseGradient,
-          glowShadow
-        )}
-      >
-        {icon}
-      </span>
-      <span className={cn('text-[10px] uppercase tracking-wide', labelTone)}>{label}</span>
+      {icon}
     </button>
   );
 };
@@ -96,6 +91,7 @@ interface FamilyMemberZoneProps {
   getHabitCompletion: (habitId: string, date: string, memberId?: string) => FamilyHabitCompletion | null;
   texturePattern?: TexturePatternId;
   touchMode?: boolean;
+  rewardProgress?: MemberRewardProgress;
   isExpanded?: boolean;
   onExpand?: () => void;
   className?: string;
@@ -109,13 +105,14 @@ export function FamilyMemberZone({
   getHabitCompletion,
   texturePattern = defaultTexturePattern,
   touchMode = false,
+  rewardProgress,
   isExpanded = false,
   onExpand,
   className
 }: FamilyMemberZoneProps) {
   // We still need loading state from the hook, but toggleCompletion and getHabitCompletion come from props
   const { loading } = useFamilyHabits(member.id);
-  const { celebrateHabitCompletion, celebrateStreakMilestone, celebratePerfectDay, celebrateFirstHabit } = useCelebrationTriggers();
+  const { celebratePerfectDay } = useCelebrationTriggers();
   const [celebratingHabitId, setCelebratingHabitId] = useState<string | null>(null);
   const [previousStats, setPreviousStats] = useState(member.stats);
   const [benefitsModalHabit, setBenefitsModalHabit] = useState<FamilyHabit | null>(null);
@@ -161,22 +158,6 @@ export function FamilyMemberZone({
         // Find the habit that was completed
         const completedHabit = habits.find(h => h.id === habitId);
         if (completedHabit) {
-          // Basic habit completion celebration
-          celebrateHabitCompletion({
-            member,
-            habit: completedHabit,
-            completion: {} // toggleCompletion doesn't return completion data
-          });
-
-          // Check for streak milestones - result doesn't contain streakCount, skip for now
-          // TODO: Calculate streak from updated data after loadData() completes
-
-          // Check for first habit completion
-          if (member.stats.habitsCompleted === 0) {
-            celebrateFirstHabit(member, completedHabit);
-          }
-
-          // Check for perfect day (all habits completed)
           const completedToday = habits.filter(h => h.completed).length + 1; // +1 for the one just completed
           if (completedToday === habits.length) {
             celebratePerfectDay(member, habits.length);
@@ -211,16 +192,6 @@ export function FamilyMemberZone({
 
         const completedHabit = habits.find(h => h.id === habitId);
         if (completedHabit) {
-          celebrateHabitCompletion({
-            member,
-            habit: completedHabit,
-            completion: {}
-          });
-
-          if (member.stats.habitsCompleted === 0) {
-            celebrateFirstHabit(member, completedHabit);
-          }
-
           const completedToday = habits.filter(h => getTodaysCompletionStatus(h.id) !== null).length + 1;
           if (completedToday === habits.length) {
             celebratePerfectDay(member, habits.length);
@@ -230,7 +201,7 @@ export function FamilyMemberZone({
     } catch (error) {
       console.error('Error toggling completion:', error);
     }
-  }, [toggleCompletion, habits, member, celebrateHabitCompletion, celebrateFirstHabit, celebratePerfectDay, getTodaysCompletionStatus]);
+  }, [toggleCompletion, habits, member, celebratePerfectDay, getTodaysCompletionStatus]);
 
   const handleUndo = useCallback(async (habitId: string) => {
     try {
@@ -419,6 +390,33 @@ export function FamilyMemberZone({
       <CardContent className={cn(
         touchMode ? "p-3 pt-0" : "p-2 pt-0"
       )}>
+        {rewardProgress && rewardProgress.focusHabits.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-white/70">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide',
+                rewardProgress.today.tokenEarned
+                  ? 'bg-emerald-400 text-emerald-950'
+                  : 'bg-white/10 text-white/70'
+              )}>
+                {rewardProgress.today.tokenEarned ? <Check className="h-3 w-3" /> : <Circle className="h-3 w-3" />}
+                {rewardProgress.today.completed}/{rewardProgress.today.total} Today
+              </span>
+              {rewardProgress.today.missingHabitNames.length > 0 && (
+                <span className="text-[10px] text-white/60">Needs {rewardProgress.today.missingHabitNames[0]}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-200">
+                <Sparkles className="h-3 w-3" />
+                {rewardProgress.weekly.tokens}/{rewardProgress.weekly.goal} boosts
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/60">
+                {rewardProgress.focusHabits.map((habit) => habit.emoji).join(' ')}
+              </span>
+            </div>
+          </div>
+        )}
         <div className="space-y-1.5">
           {habits.length === 0 ? (
             <div className={`text-center py-4 ${theme.text.muted}`}>
@@ -567,44 +565,45 @@ export function FamilyMemberZone({
                         </span>
                       </div>
                     ) : isCompleted ? (
-                      <>
-                        <div className={cn(
-                          "px-1.5 py-1.5 rounded-md flex items-center justify-center",
-                          status === 'failure'
-                            ? 'bg-gradient-to-r from-gray-500 to-gray-600'
-                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
-                        )}>
-                          <OpenMoji
-                            emoji={status === 'success' ? '🎉' : status === 'failure' ? '😢' : '✅'}
-                            size={20}
-                            alt={status === 'success' ? 'Celebration' : status === 'failure' ? 'Sad' : 'Done'}
-                          />
-                        </div>
-                        <Button
-                          onClick={() => handleUndo(habit.id)}
-                          size="sm"
-                          variant="outline"
-                          className="h-7 px-2 hover:scale-105 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          title="Undo"
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={cn(
+                            'flex h-6 items-center gap-1 rounded-full px-2 text-[10px] font-semibold uppercase tracking-wide',
+                            status === 'failure'
+                              ? 'bg-gradient-to-r from-rose-500 to-orange-400 text-rose-950'
+                              : 'bg-gradient-to-r from-emerald-500 to-lime-400 text-emerald-950'
+                          )}
                         >
-                          <Undo2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </>
+                          {status === 'failure' ? (
+                            <X className="h-3.5 w-3.5" />
+                          ) : (
+                            <Check className="h-3.5 w-3.5" />
+                          )}
+                          <span>{status === 'failure' ? 'Missed' : 'Done'}</span>
+                        </div>
+                        <SolidGlowButton
+                          variant="reset"
+                          onClick={() => handleUndo(habit.id)}
+                          disabled={loading}
+                          title="Reset status"
+                          icon={<RefreshCcw className="h-3.5 w-3.5" />}
+                        />
+                      </div>
                     ) : (
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <TowerButton
+                      <div className="flex items-center gap-1.5">
+                        <SolidGlowButton
+                          variant="success"
                           onClick={() => handleHabitCompletion(habit.id, true)}
                           disabled={loading}
-                          variant="success"
-                          label="Complete"
-                          icon={<Check className="h-5 w-5" />}
+                          title="Mark as complete"
+                          icon={<Check className="h-3.5 w-3.5" />}
                         />
-                        <TowerButton
+                        <SolidGlowButton
+                          variant="failure"
                           onClick={() => handleHabitCompletion(habit.id, false)}
                           disabled={loading}
-                          variant="failure"
-                          label="Skip"
-                          icon={<X className="h-5 w-5" />}
+                          title="Mark as missed"
+                          icon={<X className="h-3.5 w-3.5" />}
                         />
                       </div>
                     )}

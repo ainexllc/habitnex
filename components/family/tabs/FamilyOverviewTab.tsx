@@ -5,15 +5,19 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { useAllFamilyHabits } from '@/hooks/useFamilyHabits';
 import { FamilyMemberZone } from '@/components/family/FamilyMemberZone';
 import { HabitDetailsModal } from '@/components/habits/HabitDetailsModal';
-import { FamilyHabit } from '@/types/family';
+import { FamilyHabit, MemberRewardProfile } from '@/types/family';
 import { cn } from '@/lib/utils';
+import { useRewardMomentum } from '@/hooks/useRewardMomentum';
+import { RewardMomentumStrip } from '@/components/family/RewardMomentumStrip';
+import { ManageFocusHabitsModal } from '@/components/family/modals/ManageFocusHabitsModal';
 
 interface FamilyOverviewTabProps {
 }
 
 export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
-  const { currentFamily, currentMember, isParent } = useFamily();
+  const { currentFamily, currentMember, isParent, updateFamilyMember } = useFamily();
   const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion, getHabitCompletion } = useAllFamilyHabits();
+  const { progressMap, defaultFocusMap } = useRewardMomentum();
 
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<(FamilyHabit & { completed: boolean }) | null>(null);
@@ -21,6 +25,8 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
   const [completingHabitId, setCompletingHabitId] = useState<string | null>(null);
   const [touchMode, setTouchMode] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
+  const [focusModalOpen, setFocusModalOpen] = useState(false);
+  const [savingFocus, setSavingFocus] = useState(false);
 
   // Touch screen optimization
   useEffect(() => {
@@ -78,6 +84,25 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
     }
   };
 
+  const handleSaveFocus = async (updates: Record<string, MemberRewardProfile | undefined>) => {
+    if (Object.keys(updates).length === 0) {
+      setFocusModalOpen(false);
+      return;
+    }
+    try {
+      setSavingFocus(true);
+      const entries = Object.entries(updates);
+      for (const [memberId, profile] of entries) {
+        await updateFamilyMember(memberId, { rewardProfile: profile ?? { dailyFocusHabitIds: [], weeklyGoal: 4 } });
+      }
+      setFocusModalOpen(false);
+    } catch (error) {
+      console.error('Failed to save focus habits:', error);
+    } finally {
+      setSavingFocus(false);
+    }
+  };
+
   if (!currentFamily || !currentMember) {
     return null;
   }
@@ -86,6 +111,13 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
 
   return (
     <div className="px-6">
+      <RewardMomentumStrip
+        members={members}
+        progressMap={progressMap}
+        onConfigure={isParent ? () => setFocusModalOpen(true) : undefined}
+        isParent={isParent}
+      />
+
       {/* Member Zones Grid - Compact spacing between cards */}
       <div className={cn(
         "grid gap-2 md:gap-3",
@@ -105,6 +137,7 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
             getHabitCompletion={getHabitCompletion}
             texturePattern={currentFamily.settings.cardTexture}
             touchMode={touchMode}
+            rewardProgress={progressMap[member.id]}
             isExpanded={selectedMember === member.id}
             onExpand={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
             className={cn(

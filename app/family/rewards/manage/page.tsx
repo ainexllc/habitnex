@@ -11,7 +11,6 @@ import {
 } from '@/lib/familyDb';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import {
@@ -20,12 +19,8 @@ import {
   CheckCircle,
   XCircle,
   Star,
-  Calendar,
-  User,
-  Gift,
   AlertTriangle,
   History,
-  ThumbsUp,
   MessageSquare,
   DollarSign,
   Trophy

@@ -167,6 +167,12 @@ export const createFamily = async (creatorUserId: string, request: CreateFamilyR
         difficulty: 'normal',
         motivationStyle: creatorProfile?.motivationStyle || 'progress'
       },
+      rewardProfile: {
+        dailyFocusHabitIds: [],
+        weeklyGoal: 4,
+        tokenBalance: 0,
+        lastUpdated: Timestamp.now()
+      },
       stats: {
         totalPoints: 0,
         currentStreak: 0,
@@ -444,6 +450,7 @@ export const updateFamilyMemberInDb = async (
     earringsProbability?: number;
     color?: string;
     role?: 'parent' | 'child' | 'teen' | 'adult';
+    rewardProfile?: any;
   }
 ): Promise<void> => {
   try {
@@ -456,6 +463,7 @@ export const updateFamilyMemberInDb = async (
     if (updates.avatarSeed !== undefined) updateData.avatarSeed = updates.avatarSeed;
     if (updates.color !== undefined) updateData.color = updates.color;
     if (updates.role !== undefined) updateData.role = updates.role;
+    if (updates.rewardProfile !== undefined) updateData.rewardProfile = updates.rewardProfile;
 
     // Handle avatar configuration - save all avatar options in avatarConfig
     // Prefer full avatarConfig if provided by UI

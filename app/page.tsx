@@ -620,7 +620,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 text-gray-400 text-sm">
             <div>
-              <Logo textSize="sm" />
+              <Logo textSize="sm" tone="light" />
               <p className="mt-2 text-xs text-gray-500">
                 © {new Date().getFullYear()} HabitNex. Build healthier routines—together.
               </p>
