@@ -1,0 +1,1 @@
+Read and display the contents of `.claude/agents/README.md` to show all available custom agents for this project and global agents. Include the trigger words, capabilities, and usage instructions. Format it in a clear, easy-to-read manner.
