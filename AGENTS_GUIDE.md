@@ -4,7 +4,11 @@ This project includes specialized AI agents that provide expert assistance for d
 
 ## Quick Start
 
-Type `/agents` in Claude Code to view all available agents.
+**Important**: These agents work through **natural language mentions**, not as slash commands. Simply mention the topic (analytics, Firebase, styling, etc.) in your message, and Claude will provide specialized expertise.
+
+**Quick Reference**: Type `/help` to see a quick guide.
+
+**Full Documentation**: The files in `.claude/agents/` contain detailed agent definitions that Claude references when providing help.
 
 ## Project-Specific Agents
 
@@ -126,30 +130,44 @@ Expert in Playwright E2E testing, unit tests, and integration testing.
 
 ## How to Use
 
-### 1. View All Agents
+### 1. Quick Help
 ```
-/agents
+/help
+```
+Shows a quick reference of all available expertise areas.
+
+### 2. Natural Language Requests
+Just mention what you need help with:
+
+**Examples**:
+```
+"Help me create analytics charts for habit completion"
+→ Claude provides Recharts + Firestore analytics expertise
+
+"I need Firebase security rules for family data access"
+→ Claude provides Firebase security rules expertise
+
+"How do I style this button with Tailwind CSS?"
+→ Claude provides Tailwind design system expertise
 ```
 
-### 2. Activate an Agent
-Include the trigger word in your message:
+### 3. Combine Multiple Areas
+Mention multiple topics for complex tasks:
 ```
-/analytics - show me habit completion trends for the last month
-```
-
-### 3. Combine Multiple Agents
-For complex tasks:
-```
-I need help with /firebase security rules and /typescript types for a new feature
+"I need to build a family leaderboard with Firestore queries,
+Recharts visualization, and Tailwind styling"
+→ Claude combines Firebase + Analytics + Tailwind expertise
 ```
 
-### 4. Ask Follow-up Questions
-Agents maintain context through the conversation:
-```
-/gamify - create a points system
-[agent responds]
-Now add weekly leaderboards that reset on Sundays
-```
+### 4. Reference Agent Files Directly
+Open agent files for detailed information:
+- `.claude/agents/habit-analytics.md`
+- `.claude/agents/family-features.md`
+- `.claude/agents/gamification.md`
+- `.claude/agents/ai-enhancement.md`
+- `~/.claude/agents/nextjs-expert.md`
+- `~/.claude/agents/firebase-master.md`
+- And more...
 
 ## Tips for Best Results
 
