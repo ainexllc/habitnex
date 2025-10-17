@@ -34,7 +34,7 @@ export default function SignUpPage() {
   // Redirect to dashboard if user is already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [user, authLoading, router]);
 
@@ -47,7 +47,7 @@ export default function SignUpPage() {
       setLoading(true);
       setError('');
       await signUp(data.email, data.password, data.displayName);
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || 'Failed to create account');
@@ -67,10 +67,10 @@ export default function SignUpPage() {
       clearAuthError();
       
       const result = await signInWithGoogle(usePopup);
-      
+
       // If using popup and we get a result immediately, navigate
       if (result) {
-        router.push('/');
+        router.push('/dashboard');
       } else if (!usePopup) {
         // If using redirect, the page will reload after auth
         // No need to navigate here
