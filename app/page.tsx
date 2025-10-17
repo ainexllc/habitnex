@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useFamily } from '@/contexts/FamilyContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Home, Users, Target, Trophy, Gift, BarChart3 } from 'lucide-react';
 import { FamilyMembersTab } from '@/components/family/tabs/FamilyMembersTab';
@@ -35,12 +36,21 @@ const FAMILY_TABS = [
 
 
 function FamilyDashboardContent() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { currentFamily, currentMember, loading, isParent } = useFamily();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<FamilyTab>('overview');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showCreateHabitModal, setShowCreateHabitModal] = useState(false);
   const [showCreateChallengeModal, setShowCreateChallengeModal] = useState(false);
+
+  // Redirect to welcome page if user is not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/welcome');
+    }
+  }, [authLoading, user, router]);
 
   // Format today's date for the header
   const today = new Date().toLocaleDateString('en-US', {
@@ -58,7 +68,7 @@ function FamilyDashboardContent() {
     }
   }, [searchParams]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
@@ -67,6 +77,11 @@ function FamilyDashboardContent() {
         </div>
       </div>
     );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!user) {
+    return null;
   }
 
   if (!currentFamily || !currentMember) {
