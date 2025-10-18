@@ -100,8 +100,8 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
     day: 'numeric',
   });
 
-  const handleNavigateToHabits = () => router.push('/dashboard?tab=habits');
-  const handleNavigateToAnalytics = () => router.push('/dashboard?tab=analytics');
+  const handleNavigateToHabits = () => router.push('/workspace?tab=habits');
+  const handleNavigateToAnalytics = () => router.push('/workspace?tab=analytics');
 
   const overviewContent = isSolo ? (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">

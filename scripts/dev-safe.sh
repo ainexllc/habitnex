@@ -46,7 +46,7 @@ sleep 5
 if check_server_health; then
     echo "✅ Development server is healthy and running!"
     echo "🌐 Visit: http://localhost:3001"
-    echo "📋 Dashboard: http://localhost:3001/dashboard"
+    echo "📋 Workspace: http://localhost:3001/workspace"
     echo "🎯 Habits: http://localhost:3001/habits"
     echo ""
     echo "💡 If you encounter a white screen:"

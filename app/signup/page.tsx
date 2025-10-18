@@ -31,10 +31,10 @@ export default function SignUpPage() {
   const { user, signUp, signInWithGoogle, authError, clearAuthError, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  // Redirect to dashboard if user is already authenticated
+  // Redirect to workspace if user is already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/dashboard');
+      router.push('/workspace');
     }
   }, [user, authLoading, router]);
 
@@ -47,7 +47,7 @@ export default function SignUpPage() {
       setLoading(true);
       setError('');
       await signUp(data.email, data.password, data.displayName);
-      router.push('/dashboard');
+      router.push('/workspace');
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || 'Failed to create account');
@@ -68,14 +68,14 @@ export default function SignUpPage() {
 
       // Store intended redirect path for OAuth redirect flow
       if (!usePopup && typeof window !== 'undefined') {
-        sessionStorage.setItem('habitnex:redirect-after-auth', '/dashboard');
+        sessionStorage.setItem('habitnex:redirect-after-auth', '/workspace');
       }
 
       const result = await signInWithGoogle(usePopup);
 
       // If using popup and we get a result immediately, navigate
       if (result) {
-        router.push('/dashboard');
+        router.push('/workspace');
       }
       // Redirect mode returns null and will be handled by AuthContext after redirect
     } catch (err) {

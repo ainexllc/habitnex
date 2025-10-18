@@ -23,7 +23,7 @@ HabitNex is a comprehensive habit tracking application designed for both individ
 ✅ **Public Homepage for Logged-Out Users**
 - Implemented authentication-based routing
 - Logged-out users → `/` (public landing + login form)
-- Authenticated users → `/dashboard` (workspace redirect after auth)
+- Authenticated users → `/workspace` (family workspace after auth)
 - Smooth transition between landing and dashboard
 - Deployed to production via Vercel
 
@@ -88,7 +88,7 @@ Unauthenticated User
     ↓
   Login
     ↓
-  Redirect to /dashboard
+  Redirect to /workspace
 ```
 
 **Features**:

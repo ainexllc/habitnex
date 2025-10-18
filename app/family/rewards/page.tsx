@@ -7,7 +7,7 @@ export default function FamilyRewardsPage() {
   const router = useRouter();
   
   useEffect(() => {
-    router.replace('/dashboard/family?tab=rewards');
+    router.replace('/workspace?tab=rewards');
   }, [router]);
 
   return null;

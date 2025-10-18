@@ -31,10 +31,10 @@ export function Header() {
 
           <nav className="hidden md:flex items-center space-x-6">
             <Link
-              href="/dashboard"
+              href="/workspace"
               className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
             >
-              Dashboard
+              Workspace
             </Link>
           </nav>
 
@@ -44,9 +44,9 @@ export function Header() {
             {/* Family Dashboard Icon */}
             {hasFamily && (
               <Link
-                href="/dashboard/family"
+                href="/workspace?tab=overview"
                 className={`group relative p-2 rounded-lg ${theme.surface.hover} transition-all duration-200 hover:scale-105`}
-                title={`Go to ${familyName} Family Dashboard`}
+                title={`Go to ${familyName} Workspace`}
               >
                 <div className="relative">
                   <Home className={`w-5 h-5 ${theme.text.secondary} group-hover:${theme.text.primary} transition-colors duration-200`} />

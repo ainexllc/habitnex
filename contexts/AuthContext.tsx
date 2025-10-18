@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (typeof window !== 'undefined') {
             const intendedPath = sessionStorage.getItem('habitnex:redirect-after-auth');
             sessionStorage.removeItem('habitnex:redirect-after-auth');
-            const targetPath = intendedPath || '/dashboard';
+            const targetPath = intendedPath || '/workspace';
             setPendingRedirect(targetPath);
           }
         }

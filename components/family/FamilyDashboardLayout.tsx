@@ -38,8 +38,8 @@ export function FamilyDashboardLayout({
   loadingMessage = 'Loading...',
   actionButton,
   backButton = {
-    href: '/dashboard/family',
-    label: 'Back to Dashboard'
+    href: '/workspace?tab=overview',
+    label: 'Back to Workspace'
   },
   maxWidth = '6xl',
   backgroundVariant = 'blue',
@@ -128,7 +128,7 @@ export function FamilyDashboardLayout({
         <div className="mb-8">
           {/* Back Button */}
           {showBackButton && (
-            <Link href={backButton.href || '/dashboard/family'}>
+            <Link href={backButton.href || '/workspace?tab=overview'}>
               <Button variant="ghost" size="sm" className="mb-4">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {backButton.label || 'Back to Dashboard'}
@@ -323,7 +323,7 @@ export function FamilyDashboardProtected({
   requireParent = false,
   title = "Access Denied",
   subtitle = "You don't have permission to view this page.",
-  backHref = "/dashboard/family",
+  backHref = "/workspace?tab=overview",
   backgroundVariant = 'blue'
 }: FamilyDashboardProtectedProps) {
   const { currentFamily, isParent } = useFamily();
@@ -333,7 +333,7 @@ export function FamilyDashboardProtected({
       <FamilyDashboardLayout
         title={title}
         subtitle={subtitle}
-        backButton={{ href: backHref, label: "Back to Dashboard" }}
+        backButton={{ href: backHref, label: "Back to Workspace" }}
         backgroundVariant={backgroundVariant}
       >
         <div className="text-center py-12">

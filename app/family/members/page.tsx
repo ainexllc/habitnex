@@ -7,7 +7,7 @@ export default function FamilyMembersPage() {
   const router = useRouter();
   
   useEffect(() => {
-    router.replace('/dashboard/family?tab=members');
+    router.replace('/workspace?tab=members');
   }, [router]);
 
   return null;

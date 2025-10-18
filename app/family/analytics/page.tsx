@@ -7,7 +7,7 @@ export default function FamilyAnalyticsPage() {
   const router = useRouter();
   
   useEffect(() => {
-    router.replace('/dashboard/family?tab=analytics');
+    router.replace('/workspace?tab=analytics');
   }, [router]);
 
   return null;

@@ -89,7 +89,7 @@ interface FamilyPageHeaderProps {
   subtitle?: string;
   
   /**
-   * URL path to navigate back to (defaults to /dashboard/family)
+   * URL path to navigate back to (defaults to /workspace?tab=overview)
    */
   backPath?: string;
   

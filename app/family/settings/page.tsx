@@ -7,8 +7,8 @@ export default function FamilySettingsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to family dashboard with settings tab
-    router.replace('/dashboard/family?tab=settings');
+    // Redirect to workspace dashboard with settings tab
+    router.replace('/workspace?tab=settings');
   }, [router]);
 
   return null;

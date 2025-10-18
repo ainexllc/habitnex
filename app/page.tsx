@@ -152,7 +152,7 @@ function PublicHomePage() {
       setLoading(true);
       setError('');
       await signIn(data.email, data.password);
-      router.replace('/dashboard');
+      router.replace('/workspace');
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || 'Failed to sign in');
@@ -174,13 +174,13 @@ function PublicHomePage() {
 
       // Store intended redirect path for OAuth redirect flow
       if (!usePopup && typeof window !== 'undefined') {
-        sessionStorage.setItem('habitnex:redirect-after-auth', '/dashboard');
+        sessionStorage.setItem('habitnex:redirect-after-auth', '/workspace');
       }
 
       const result = await signInWithGoogle(usePopup);
       if (result) {
         // Popup mode returns user immediately
-        router.replace('/dashboard');
+        router.replace('/workspace');
       }
       // Redirect mode returns null and will be handled by AuthContext after redirect
     } catch (err) {
@@ -639,7 +639,7 @@ function HomePageContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/dashboard');
+      router.replace('/workspace');
     }
   }, [isAuthenticated, router]);
 
