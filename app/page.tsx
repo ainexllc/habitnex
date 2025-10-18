@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,6 @@ import { useFamily } from '@/contexts/FamilyContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui/Button';
-import { Home, Gift, BarChart3 } from 'lucide-react';
 import { FamilyMembersTab } from '@/components/family/tabs/FamilyMembersTab';
 import { FamilyHabitsTab } from '@/components/family/tabs/FamilyHabitsTab';
 import { FamilyChallengesTab } from '@/components/family/tabs/FamilyChallengesTab';
@@ -28,6 +27,12 @@ import { ModernFamilyHeader } from '@/components/family/ModernFamilyHeader';
 import { FeedbackSystem } from '@/components/feedback';
 import type { FamilyTabId } from '@/types/family';
 import {
+  Home,
+  Users,
+  Target,
+  Trophy,
+  Gift,
+  BarChart3,
   Mail,
   Lock,
   Eye,
@@ -36,12 +41,8 @@ import {
   CheckCircle,
   TrendingUp,
   Shield,
-  Target,
   Zap,
-  Users,
-  Trophy,
   Sparkles,
-  User,
 } from 'lucide-react';
 
 const featureHighlights: Array<{
@@ -145,18 +146,7 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-const signUpSchema = z.object({
-  displayName: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type SignUpForm = z.infer<typeof signUpSchema>;
-type AuthMode = 'signin' | 'signup';
+type LoginForm = z.infer<typeof loginSchema>;
 
 // Authenticated Dashboard Component
 function FamilyDashboardContent() {
@@ -274,18 +264,19 @@ function FamilyDashboardContent() {
 
 // Unauthenticated Public Homepage Component
 function PublicHomePage() {
-  const [mode, setMode] = useState<AuthMode>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
+    user,
     signIn,
-    signUp,
     signInWithGoogle,
     authError,
     clearAuthError,
+    loading: authLoading,
   } = useAuth();
+  const router = useRouter();
+  const isAuthenticated = !authLoading && Boolean(user);
 
   const { preset, setPreset } = useTheme();
 
@@ -299,33 +290,19 @@ function PublicHomePage() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<SignUpForm>({
-    resolver: zodResolver(mode === 'signin' ? loginSchema : signUpSchema),
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
   });
 
-  // Reset form when mode changes
-  useEffect(() => {
-    reset();
-    setError('');
-    clearAuthError();
-  }, [mode, reset, clearAuthError]);
-
-  const onSubmit = async (data: SignUpForm) => {
+  const onSubmit = async (data: LoginForm) => {
     try {
       setLoading(true);
       setError('');
-
-      if (mode === 'signin') {
-        await signIn(data.email, data.password);
-      } else {
-        await signUp(data.email, data.password, data.displayName);
-      }
-
-      // No redirect needed - parent component will handle showing dashboard
+      await signIn(data.email, data.password);
+      router.replace('/');
     } catch (err) {
       const error = err as { message?: string };
-      setError(error.message || (mode === 'signin' ? 'Failed to sign in' : 'Failed to create account'));
+      setError(error.message || 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -342,8 +319,10 @@ function PublicHomePage() {
       setError('');
       clearAuthError();
 
-      await signInWithGoogle(usePopup);
-      // No redirect needed - parent component will handle showing dashboard
+      const result = await signInWithGoogle(usePopup);
+      if (result) {
+        router.replace('/');
+      }
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || 'Failed to sign in with Google');
@@ -351,6 +330,24 @@ function PublicHomePage() {
       setLoading(false);
     }
   };
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/');
+    }
+  }, [isAuthenticated, router]);
+
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-orange-400 font-medium">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-slate-100">
@@ -376,15 +373,12 @@ function PublicHomePage() {
             <a href="#how-it-works" className="text-sm font-medium text-gray-300 hover:text-orange-400 transition-colors">
               How It Works
             </a>
-            <button
-              onClick={() => {
-                setMode('signup');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+            <Link
+              href="/signup"
               className="px-6 py-2 rounded-full bg-orange-600 text-white text-sm font-semibold hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 focus:ring-offset-gray-950"
             >
               Get Started
-            </button>
+            </Link>
           </nav>
         </div>
       </header>
@@ -487,82 +481,17 @@ function PublicHomePage() {
 
           <div className="flex-shrink-0 w-full max-w-md">
             <div className="rounded-[32px] border border-[#1f1f1f] bg-[radial-gradient(circle_at_top,_#121212,_#050505)] px-8 py-9 shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
-              {/* Mode Toggle */}
-              <div className="mb-6 flex gap-2 p-1 bg-[#0a0a0c] rounded-full border border-[#1f1f1f]">
-                <button
-                  type="button"
-                  onClick={() => setMode('signin')}
-                  className={clsx(
-                    'flex-1 py-2.5 px-4 rounded-full text-sm font-medium transition-all duration-200',
-                    mode === 'signin'
-                      ? 'bg-gradient-to-r from-[#ff7a1c] to-[#ff5c00] text-black shadow-lg'
-                      : 'text-[#6e6e78] hover:text-white'
-                  )}
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode('signup')}
-                  className={clsx(
-                    'flex-1 py-2.5 px-4 rounded-full text-sm font-medium transition-all duration-200',
-                    mode === 'signup'
-                      ? 'bg-gradient-to-r from-[#ff7a1c] to-[#ff5c00] text-black shadow-lg'
-                      : 'text-[#6e6e78] hover:text-white'
-                  )}
-                >
-                  Sign Up
-                </button>
-              </div>
-
               <div className="mb-8">
                 <div className="flex items-center justify-between text-xs tracking-[0.4em] text-[#ff7a1c] uppercase">
-                  <span>{mode === 'signin' ? 'Access' : 'Create'}</span>
+                  <span>Access</span>
                   <Sparkles className="h-4 w-4 text-[#ff7a1c]" />
                 </div>
-                <h2 className="mt-4 text-3xl font-semibold text-white">
-                  {mode === 'signin' ? 'Get into your workspace' : 'Start your journey'}
-                </h2>
-                <p className="mt-3 text-sm text-[#a6a6a6]">
-                  {mode === 'signin'
-                    ? 'Enter your credentials to unlock HabitNex.'
-                    : 'Create an account to begin tracking habits.'}
-                </p>
+                <h2 className="mt-4 text-3xl font-semibold text-white">Get into your workspace</h2>
+                <p className="mt-3 text-sm text-[#a6a6a6]">Enter your credentials to unlock HabitNex.</p>
               </div>
 
               <div className="space-y-6">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Display Name Field (Signup Only) */}
-                  {mode === 'signup' && (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium uppercase tracking-[0.28em] text-[#ff7a1c]">
-                        Full Name
-                      </label>
-                      <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#6e6e78]">
-                          <User className="h-4 w-4" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="John Doe"
-                          className={clsx(
-                            'w-full rounded-full border border-[#222229] bg-[#101014] px-11 py-3.5 text-sm text-white shadow-[0_1px_0_rgba(255,255,255,0.05)] outline-none transition-colors duration-200',
-                            errors.displayName
-                              ? 'border-[#ff4d4f] focus:border-[#ff4d4f] focus:ring-2 focus:ring-[#ff4d4f]/40'
-                              : 'focus:border-[#ff7a1c] focus:ring-2 focus:ring-[#ff7a1c]/40'
-                          )}
-                          {...register('displayName')}
-                        />
-                      </div>
-                      {errors.displayName && (
-                        <p className="text-sm text-red-400 flex items-center gap-1 mt-1">
-                          <span className="text-xs">⚠</span> {errors.displayName.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Email Field */}
                   <div className="space-y-2">
                     <label className="block text-sm font-medium uppercase tracking-[0.28em] text-[#ff7a1c]">
                       Email
@@ -632,55 +561,16 @@ function PublicHomePage() {
                     )}
                   </div>
 
-                  {/* Confirm Password Field (Signup Only) */}
-                  {mode === 'signup' && (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium uppercase tracking-[0.28em] text-[#ff7a1c]">
-                        Confirm Password
-                      </label>
-                      <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#6e6e78]">
-                          <Lock className="h-4 w-4" />
-                        </div>
-                        <input
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          placeholder="••••••••"
-                          className={clsx(
-                            'w-full rounded-full border border-[#222229] bg-[#101014] px-11 py-3.5 text-sm text-white shadow-[0_1px_0_rgba(255,255,255,0.05)] outline-none transition-colors duration-200',
-                            errors.confirmPassword
-                              ? 'border-[#ff4d4f] focus:border-[#ff4d4f] focus:ring-2 focus:ring-[#ff4d4f]/40'
-                              : 'focus:border-[#ff7a1c] focus:ring-2 focus:ring-[#ff7a1c]/40'
-                          )}
-                          {...register('confirmPassword')}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute inset-y-0 right-4 flex items-center text-[#6e6e78] transition-colors duration-200 hover:text-white"
-                        >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                      {errors.confirmPassword && (
-                        <p className="text-sm text-red-400 flex items-center gap-1 mt-1">
-                          <span className="text-xs">⚠</span> {errors.confirmPassword.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {mode === 'signin' && (
-                    <div className="flex items-center justify-between text-xs text-[#6e6e78]">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-[#2a2a2f] bg-[#121217] text-[#ff7a1c] focus:ring-2 focus:ring-[#ff7a1c]/30"
-                        />
-                        <span>Remember me</span>
-                      </label>
-                      <span className="text-[#6e6e78]">Secured with 256-bit encryption</span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between text-xs text-[#6e6e78]">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-[#2a2a2f] bg-[#121217] text-[#ff7a1c] focus:ring-2 focus:ring-[#ff7a1c]/30"
+                      />
+                      <span>Remember me</span>
+                    </label>
+                    <span className="text-[#6e6e78]">Secured with 256-bit encryption</span>
+                  </div>
 
                   {(error || authError) && (
                     <div className="rounded-full border border-red-500/40 bg-red-500/10 px-4 py-3 text-center text-sm text-red-300">
@@ -699,11 +589,11 @@ function PublicHomePage() {
                     {loading ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>{mode === 'signin' ? 'Signing in...' : 'Creating account...'}</span>
+                        <span>Signing in...</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center gap-2">
-                        <span>{mode === 'signin' ? 'Sign in' : 'Create account'}</span>
+                        <span>Sign in</span>
                         <ArrowRight className="w-4 h-4" />
                       </div>
                     )}
@@ -746,6 +636,13 @@ function PublicHomePage() {
                     </svg>
                     <span>Continue with Google</span>
                   </button>
+                </div>
+
+                <div className="pt-6 text-center text-xs text-[#696973]">
+                  Need an account?{' '}
+                  <Link href="/signup" className="font-medium text-[#ff7a1c] hover:text-[#ff9243] transition-colors">
+                    Create one in seconds.
+                  </Link>
                 </div>
               </div>
             </div>

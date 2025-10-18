@@ -12,25 +12,32 @@ interface RewardMomentumStripProps {
   progressMap: Record<string, MemberRewardProgress>;
   onConfigure?: () => void;
   isParent: boolean;
+  className?: string;
 }
 
-export function RewardMomentumStrip({ members, progressMap, onConfigure, isParent }: RewardMomentumStripProps) {
+export function RewardMomentumStrip({ members, progressMap, onConfigure, isParent, className }: RewardMomentumStripProps) {
   if (!members.length) return null;
 
   return (
-    <section className="mb-6 space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Daily Boost Tracker</h2>
+    <section
+      className={cn(
+        'rounded-[24px] border border-white/10 bg-[#0d101c]/85 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.45)] backdrop-blur md:p-6',
+        className
+      )}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-[#ff7a1c]">Daily Boost</p>
+          <h2 className="text-xl font-semibold text-white sm:text-[22px]">Keep everyone’s focus habits aligned</h2>
           <p className="text-xs text-slate-300">
-            Earn a boost when focus habits are all completed. Collect boosts to unlock weekly rewards.
+            Earn a boost when each member finishes their focus habits. Collect boosts to unlock weekly rewards.
           </p>
         </div>
         {isParent && (
           <Button
             type="button"
             size="sm"
-            className="bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
+            className="rounded-full bg-[#ff7a1c] px-4 py-2 text-xs font-semibold text-black shadow-[0_10px_30px_rgba(255,122,28,0.3)] hover:bg-[#ff8a35]"
             onClick={onConfigure}
           >
             <Sparkles className="mr-2 h-4 w-4" />
@@ -38,7 +45,7 @@ export function RewardMomentumStrip({ members, progressMap, onConfigure, isParen
           </Button>
         )}
       </div>
-      <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {members.map((member) => {
           const progress = progressMap[member.id];
           if (!progress) return null;
@@ -46,9 +53,9 @@ export function RewardMomentumStrip({ members, progressMap, onConfigure, isParen
           return (
             <article
               key={member.id}
-              className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/40 backdrop-blur"
+              className="h-full rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-black/35 backdrop-blur"
             >
-              <header className="mb-3 flex items-center justify-between gap-2">
+              <header className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-white">{member.displayName}</h3>
                   <p className="text-[11px] text-slate-300">

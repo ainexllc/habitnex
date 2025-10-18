@@ -1,56 +1,74 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useFamily } from '@/contexts/FamilyContext';
 import { useFamilyRewards } from '@/hooks/useFamilyRewards';
 import { approveRedemption, denyRedemption } from '@/lib/familyDb';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ProfileImage } from '@/components/ui/ProfileImage';
 import { CreateFamilyRewardModal } from '@/components/family/CreateFamilyRewardModal';
 import { ManageFamilyRewardsModal } from '@/components/family/ManageFamilyRewardsModal';
-import { Gift, Plus, Star, Clock, Users, DollarSign, Crown, CheckCircle, XCircle, Settings } from 'lucide-react';
-import Link from 'next/link';
+import {
+  CheckCircle,
+  Clock,
+  Gift,
+  Lock,
+  Plus,
+  Settings,
+  Sparkles,
+  Star,
+  XCircle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function FamilyRewardsTab() {
   const { currentFamily, currentMember, isParent } = useFamily();
-  const { 
-    rewards, 
-    getAvailableRewards, 
-    getRewardsByCategory, 
-    redeemReward, 
-    getPendingRedemptions, 
-    loading 
+  const {
+    rewards,
+    getAvailableRewards,
+    getRewardsByCategory,
+    redeemReward,
+    getPendingRedemptions,
+    loading,
   } = useFamilyRewards();
-  
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [redeeming, setRedeeming] = useState<string | null>(null);
   const [processingApproval, setProcessingApproval] = useState<string | null>(null);
   const [showCreateRewardModal, setShowCreateRewardModal] = useState(false);
   const [showManageRewardsModal, setShowManageRewardsModal] = useState(false);
-  
+
   if (!currentFamily || !currentMember) {
     return null;
   }
-  
-  const categories = getRewardsByCategory();
-  const memberPoints = currentMember?.stats.totalPoints || 0;
+
+  const memberPoints = currentMember.stats?.totalPoints ?? 0;
   const availableRewards = getAvailableRewards(memberPoints);
+  const categories = getRewardsByCategory();
   const pendingRedemptions = getPendingRedemptions();
-  
+
+  const filteredRewards = selectedCategory
+    ? categories[selectedCategory] ?? []
+    : rewards;
+
+  const accentButtonClasses =
+    'rounded-full bg-[#ff7a1c] px-5 py-3 text-sm font-semibold text-black shadow-[0_12px_35px_rgba(255,122,28,0.35)] transition hover:bg-[#ff8a35] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff7a1c]/70';
+
+  const secondaryButtonClasses =
+    'rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40';
+
   const categoryIcons: Record<string, string> = {
     experience: '🎪',
     purchase: '🛍️',
     privilege: '👑',
     activity: '🎨',
-    time: '⏰'
+    time: '⏰',
   };
 
   const handleRedeem = async (rewardId: string) => {
     if (!currentMember) return;
-    
+
     try {
       setRedeeming(rewardId);
       await redeemReward(rewardId);
@@ -87,294 +105,306 @@ export function FamilyRewardsTab() {
     }
   };
 
-  return (
-    <div className="px-6">
-      {/* Stats and Actions Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <span className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-            {memberPoints} Points Available
-          </span>
-          <span className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-            {rewards.length} Rewards Available
-          </span>
-        </div>
-        
-        {isParent && (
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowManageRewardsModal(true)}
-            >
-              <Settings className="w-5 h-5 mr-2" />
-              Manage
-            </Button>
-            <Button onClick={() => setShowCreateRewardModal(true)}>
-              <Plus className="w-5 h-5 mr-2" />
-              Create Reward
-            </Button>
-          </div>
-        )}
-      </div>
-      
-      {/* Member Points Display */}
-      <Card className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                style={{ backgroundColor: currentMember.color }}
-              >
-                {currentMember.avatar}
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900 dark:text-white">{currentMember.displayName}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">Level {Math.floor(memberPoints / 100) + 1}</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Star className="w-6 h-6 text-yellow-500" />
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">{memberPoints}</span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">points</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+  const activeCategories = useMemo(
+    () =>
+      Object.entries(categories)
+        .filter(([, list]) => list.length > 0)
+        .map(([key, list]) => ({ key, label: key, count: list.length })),
+    [categories]
+  );
 
-      {/* Category Filter & Pending Approvals */}
-      {(isParent || rewards.length > 0) && (
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            {pendingRedemptions.length > 0 && (
-              <div className="flex items-center space-x-2 px-3 py-2 bg-orange-100 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                <span className="text-orange-800 dark:text-orange-200 text-sm font-medium">
-                  {pendingRedemptions.length} pending approval{pendingRedemptions.length !== 1 ? 's' : ''}
-                </span>
-              </div>
+  return (
+    <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 text-white">
+      <section className="rounded-[32px] border border-white/5 bg-[radial-gradient(circle_at_top,_rgba(255,122,28,0.14),transparent_60%),_rgba(12,13,22,0.9)] px-6 py-6 shadow-[0_35px_120px_rgba(0,0,0,0.45)] sm:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.48em] text-[#ff7a1c]">Reward orbit</p>
+            <h2 className="mt-3 text-3xl font-semibold sm:text-[36px]">Family rewards hub</h2>
+            <p className="mt-3 max-w-xl text-sm text-white/70">
+              {rewards.length
+                ? `You have ${rewards.length} reward${rewards.length === 1 ? '' : 's'} ready and ${availableRewards.length} within reach.`
+                : 'Design meaningful rewards to keep every habit win feeling celebratory.'}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            {isParent && (
+              <>
+                <Button
+                  onClick={() => setShowManageRewardsModal(true)}
+                  variant="ghost"
+                  className={secondaryButtonClasses}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Manage</span>
+                </Button>
+                <Button
+                  onClick={() => setShowCreateRewardModal(true)}
+                  variant="ghost"
+                  className={accentButtonClasses}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create reward</span>
+                </Button>
+              </>
             )}
           </div>
-          
-          {/* Category Filter */}
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-inner shadow-black/20">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">Points bank</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{memberPoints}</p>
+            <p className="text-sm text-white/60">Live balance for {currentMember.displayName}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-inner shadow-black/20">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">Within reach</p>
+            <p className="mt-2 text-2xl font-semibold text-[#7fe8c1]">{availableRewards.length}</p>
+            <p className="text-sm text-white/60">Rewards you can unlock right now</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-inner shadow-black/20">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">Pending requests</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{pendingRedemptions.length}</p>
+            <p className="text-sm text-white/60">Awaiting parent approval</p>
+          </div>
+        </div>
+      </section>
+
+      {(isParent || rewards.length > 0) && (
+        <section className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {pendingRedemptions.length > 0 ? (
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/80">
+              <Clock className="h-4 w-4 text-[#ffb876]" />
+              <span>
+                {pendingRedemptions.length} pending approval{pendingRedemptions.length === 1 ? '' : 's'}
+              </span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/60">
+              <Sparkles className="h-4 w-4 text-[#7fe8c1]" />
+              <span>Keep the streak alive with consistent rewards</span>
+            </div>
+          )}
+
           {rewards.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={selectedCategory === null ? "primary" : "outline"}
-                size="sm"
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
                 onClick={() => setSelectedCategory(null)}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm transition',
+                  selectedCategory === null ? 'bg-white/15 text-white shadow-[0_12px_30px_rgba(0,0,0,0.35)]' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                )}
               >
-                All
-              </Button>
-              {Object.entries(categories).map(([category, categoryRewards]) => (
-                categoryRewards.length > 0 && (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? "primary" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category)}
-                    className="flex items-center space-x-1"
-                  >
-                    <span>{categoryIcons[category]}</span>
-                    <span className="capitalize">{category}</span>
-                    <span className="text-xs">({categoryRewards.length})</span>
-                  </Button>
-                )
+                <span>All</span>
+                <span className="rounded-full border border-white/20 bg-white/10 px-2 text-xs font-semibold text-white/70">
+                  {rewards.length}
+                </span>
+              </button>
+              {activeCategories.map(({ key, count }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelectedCategory(key)}
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm transition',
+                    selectedCategory === key ? 'bg-white/15 text-white shadow-[0_12px_30px_rgba(0,0,0,0.35)]' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                  )}
+                >
+                  <span>{categoryIcons[key] ?? '🎁'}</span>
+                  <span className="capitalize">{key}</span>
+                  <span className="rounded-full border border-white/20 bg-white/10 px-2 text-xs font-semibold text-white/70">
+                    {count}
+                  </span>
+                </button>
               ))}
             </div>
           )}
-        </div>
+        </section>
       )}
-      
-      {/* Empty State */}
-      {rewards.length === 0 && (
-        <div className="text-center py-12">
-          <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Rewards Yet</h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            {isParent 
-              ? "Create your first family reward to get started!" 
-              : "Ask a parent to set up some rewards for the family."}
-          </p>
-          {isParent && (
-            <Button onClick={() => setShowCreateRewardModal(true)}>
-              <Plus className="w-5 h-5 mr-2" />
-              Create First Reward
-            </Button>
-          )}
-        </div>
-      )}
-      
-      {/* Rewards Grid */}
-      {rewards.length > 0 && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(selectedCategory 
-            ? categories[selectedCategory as keyof typeof categories] || []
-            : rewards
-          ).map((reward: any) => {
+
+      {rewards.length === 0 ? (
+        <section className="mt-8">
+          <div className="flex flex-col items-center rounded-[28px] border border-dashed border-white/15 bg-white/[0.04] px-10 py-16 text-center shadow-[0_35px_120px_rgba(0,0,0,0.45)]">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/10">
+              <Gift className="h-10 w-10 text-white/60" />
+            </div>
+            <h3 className="text-2xl font-semibold">No rewards yet</h3>
+            <p className="mt-2 max-w-md text-sm text-white/70">
+              {isParent
+                ? 'Create your first reward to motivate every streak and milestone.'
+                : 'Ask a parent to add rewards so you can turn points into celebrations.'}
+            </p>
+            {isParent && (
+              <Button
+                onClick={() => setShowCreateRewardModal(true)}
+                variant="ghost"
+                className={`mt-6 ${accentButtonClasses}`}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create first reward</span>
+              </Button>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredRewards.map((reward) => {
             const canAfford = memberPoints >= reward.pointsRequired;
-            const isAvailable = availableRewards.some(r => r.id === reward.id);
-            const isRedemptionPending = redeeming === reward.id;
-            
+            const isAvailable = availableRewards.some((item) => item.id === reward.id);
+            const isRedeeming = redeeming === reward.id;
+
             return (
-              <Card 
-                key={reward.id} 
+              <div
+                key={reward.id}
                 className={cn(
-                  "bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200 hover:shadow-lg",
-                  canAfford && isAvailable ? "border-2 border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600" : "opacity-75",
-                  isRedemptionPending && "animate-pulse"
+                  'flex h-full flex-col gap-4 rounded-3xl border border-white/8 bg-white/[0.05] p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] transition-transform duration-200 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_45px_140px_rgba(0,0,0,0.55)]',
+                  !canAfford && 'opacity-75'
                 )}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="text-3xl">{reward.emoji}</div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg leading-tight text-gray-900 dark:text-white">{reward.title}</CardTitle>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium capitalize">
-                            {reward.category}
-                          </div>
-                          {reward.requiresApproval && (
-                            <div className="px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 rounded-full text-xs font-medium">
-                              Approval Required
-                            </div>
-                          )}
-                        </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">{reward.emoji}</div>
+                    <div>
+                      <h3 className="text-lg font-semibold">{reward.title}</h3>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/70">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 capitalize">
+                          {categoryIcons[reward.category] ?? '🎁'}
+                          {reward.category}
+                        </span>
+                        {reward.requiresApproval && (
+                          <span className="inline-flex items-center gap-2 rounded-full border border-[#ffb876]/40 bg-[#ffb876]/10 px-3 py-1 text-[#ffdeb1]">
+                            <Lock className="h-3.5 w-3.5" />
+                            Approval required
+                          </span>
+                        )}
                       </div>
                     </div>
-                    
-                    {/* Points Badge */}
-                    <div className={cn(
-                      "flex items-center space-x-1 px-3 py-2 rounded-full font-bold text-sm",
-                      canAfford && isAvailable 
-                        ? "bg-blue-600 text-white" 
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                    )}>
-                      <Star className="w-4 h-4" />
-                      <span>{reward.pointsRequired}</span>
-                    </div>
                   </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  {reward.description && (
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                      {reward.description}
-                    </p>
-                  )}
-                  
-                  {/* Redeem Button */}
+                  <div className={cn(
+                    'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold',
+                    canAfford && isAvailable
+                      ? 'border-[#7fe8c1]/60 bg-[#7fe8c1]/15 text-[#7fe8c1]'
+                      : 'border-white/10 bg-white/10 text-white/60'
+                  )}>
+                    <Star className="h-4 w-4" />
+                    {reward.pointsRequired}
+                  </div>
+                </div>
+
+                {reward.description && (
+                  <p className="text-sm text-white/70 line-clamp-3">{reward.description}</p>
+                )}
+
+                <div className="mt-auto">
                   {!isParent ? (
                     <Button
                       onClick={() => handleRedeem(reward.id)}
-                      disabled={!canAfford || !isAvailable || isRedemptionPending || loading}
+                      disabled={!canAfford || !isAvailable || isRedeeming || loading}
+                      variant="ghost"
                       className={cn(
-                        "w-full",
-                        canAfford && isAvailable 
-                          ? "bg-blue-600 hover:bg-blue-700" 
-                          : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 cursor-not-allowed"
+                        'w-full rounded-full px-5 py-3 text-sm font-semibold transition',
+                        canAfford && isAvailable
+                          ? 'bg-[#7fe8c1]/80 text-[#04251a] hover:bg-[#7fe8c1] disabled:opacity-60'
+                          : 'bg-white/10 text-white/50 disabled:opacity-60'
                       )}
                     >
-                      {isRedemptionPending ? (
-                        "Redeeming..."
-                      ) : !canAfford ? (
-                        `Need ${reward.pointsRequired - memberPoints} more points`
-                      ) : !isAvailable ? (
-                        "Not Available"
-                      ) : (
-                        "Redeem Now"
-                      )}
+                      {isRedeeming
+                        ? 'Redeeming…'
+                        : !canAfford
+                          ? `Need ${reward.pointsRequired - memberPoints} more points`
+                          : !isAvailable
+                            ? 'Currently locked'
+                            : 'Redeem now'}
                     </Button>
                   ) : (
-                    <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                      Parent view - members can redeem this reward
+                    <div className="rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-center text-xs text-white/60">
+                      Members can redeem this reward when they reach {reward.pointsRequired} points.
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
-        </div>
-      )}
-      
-      {/* Pending Redemptions for Parents */}
-      {isParent && pendingRedemptions.length > 0 && (
-        <Card className="mt-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="flex items-center text-gray-900 dark:text-white">
-              <Clock className="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" />
-              Pending Approvals
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {pendingRedemptions.map((redemption) => {
-                const reward = rewards.find(r => r.id === redemption.rewardId);
-                const member = currentFamily.members.find(m => m.id === redemption.memberId);
-                
-                if (!reward || !member) return null;
-                
-                return (
-                  <div key={redemption.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <ProfileImage
-                        name={member.displayName}
-                        profileImageUrl={member.profileImageUrl}
-                        color={member.color}
-                        size={40}
-                        showBorder={true}
-                        borderColor="rgba(255,255,255,0.8)"
-                        className="shadow-sm"
-                      />
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {member.displayName} wants to redeem:
-                        </div>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-2xl">{reward.emoji}</span>
-                          <span className="font-medium text-gray-900 dark:text-white">{reward.title}</span>
-                          <div className="flex items-center space-x-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs">
-                            <Star className="w-3 h-3" />
-                            <span>{reward.pointsRequired} points</span>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          Requested {new Date(redemption.requestedAt.toDate()).toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700"
-                        onClick={() => handleApproveRedemption(redemption.id)}
-                        disabled={processingApproval === redemption.id}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        {processingApproval === redemption.id ? 'Approving...' : 'Approve'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 hover:text-red-700 hover:border-red-300"
-                        onClick={() => handleDenyRedemption(redemption.id, 'Not available at this time')}
-                        disabled={processingApproval === redemption.id}
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        {processingApproval === redemption.id ? 'Denying...' : 'Deny'}
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        </section>
       )}
 
-      {/* Modals */}
+      {isParent && pendingRedemptions.length > 0 && (
+        <section className="mt-10 rounded-[28px] border border-white/8 bg-white/[0.05] p-6 shadow-[0_35px_120px_rgba(0,0,0,0.45)]">
+          <header className="flex items-center gap-3 border-b border-white/10 pb-4 text-sm font-semibold uppercase tracking-[0.24em] text-white/60">
+            <Clock className="h-4 w-4 text-[#ffb876]" />
+            Pending approvals
+          </header>
+          <div className="mt-4 space-y-4">
+            {pendingRedemptions.map((redemption) => {
+              const reward = rewards.find((item) => item.id === redemption.rewardId);
+              const member = currentFamily.members.find((item) => item.id === redemption.memberId);
+              if (!reward || !member) {
+                return null;
+              }
+
+              const isProcessing = processingApproval === redemption.id;
+
+              return (
+                <div
+                  key={redemption.id}
+                  className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/8 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-start gap-4">
+                    <ProfileImage
+                      name={member.displayName}
+                      profileImageUrl={member.profileImageUrl}
+                      color={member.color}
+                      size={44}
+                      showBorder
+                      borderColor="rgba(255,255,255,0.25)"
+                      className="shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-white">
+                        {member.displayName} wants {reward.title}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/60">
+                        <span className="text-xl">{reward.emoji}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-1">
+                          <Star className="h-3 w-3" />
+                          {reward.pointsRequired} pts
+                        </span>
+                        <span>
+                          Requested {new Date(redemption.requestedAt.toDate()).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full bg-[#7fe8c1]/80 px-4 py-2 text-sm font-semibold text-[#04251a] hover:bg-[#7fe8c1] disabled:opacity-60"
+                      onClick={() => handleApproveRedemption(redemption.id)}
+                      disabled={isProcessing}
+                    >
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      {isProcessing ? 'Approving…' : 'Approve'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full border border-red-400/50 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/20 disabled:opacity-60"
+                      onClick={() => handleDenyRedemption(redemption.id, 'Not available right now')}
+                      disabled={isProcessing}
+                    >
+                      <XCircle className="mr-2 h-4 w-4" />
+                      {isProcessing ? 'Denying…' : 'Deny'}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <CreateFamilyRewardModal
         isOpen={showCreateRewardModal}
         onClose={() => setShowCreateRewardModal(false)}

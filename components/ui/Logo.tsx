@@ -1,68 +1,47 @@
 import Link from 'next/link'
 import { Kanit } from 'next/font/google'
-import { cn } from '@/lib/utils'
+import { clsx } from 'clsx'
 
 const habitNexLogoFont = Kanit({
   subsets: ['latin'],
   weight: ['600', '700'],
 })
 
-type LogoSize = 'sm' | 'md' | 'lg' | 'xl'
-type LogoTone = 'auto' | 'light' | 'dark'
-
 interface LogoProps {
   linkToHome?: boolean
   className?: string
-  textSize?: LogoSize
-  tone?: LogoTone
+  iconSize?: number
 }
 
-const sizeStyles: Record<LogoSize, string> = {
-  sm: 'text-[1.65rem]',
-  md: 'text-[2.1rem]',
-  lg: 'text-[2.6rem]',
-  xl: 'text-[3.25rem]',
-}
-
-const nexToneStyles: Record<LogoTone, string> = {
-  auto: 'text-gray-900 transition-colors duration-200 dark:text-white',
-  light: 'text-white',
-  dark: 'text-gray-900',
-}
-
-function LogoMark({
-  textSize,
-  tone,
-  className,
-}: {
-  textSize: LogoSize
-  tone: LogoTone
-  className?: string
-}) {
+function LogoWordmark({ className, iconSize = 87.2 }: { className?: string; iconSize?: number }) {
   return (
-    <span
-      className={cn(
-        'inline-flex select-none items-baseline font-semibold leading-none tracking-[-0.035em]',
+    <div
+      className={clsx(
+        'flex items-center text-[43.6px] font-semibold tracking-[-1.526px] font-[family-name:var(--font-kanit)]',
         habitNexLogoFont.className,
-        sizeStyles[textSize],
         className
       )}
     >
-      <span className="text-orange-500 drop-shadow-[0_10px_25px_rgba(249,115,22,0.28)]">
-        Habit
+      <span className="text-orange-500">Habit</span>
+      <span className="text-white">Ne</span>
+      <span className="relative inline-block -ml-[21px] translate-y-[7px]" style={{ width: iconSize, height: iconSize }}>
+        <svg viewBox="0 0 100 100" className="h-full w-full">
+          <rect x="10" y="10" width="15" height="15" fill="#f97316" />
+          <rect x="30" y="30" width="15" height="15" fill="#f97316" />
+          <rect x="50" y="50" width="15" height="15" fill="#f97316" />
+          <rect x="70" y="70" width="15" height="15" fill="#f97316" />
+          <rect x="70" y="10" width="15" height="15" fill="white" />
+          <rect x="50" y="30" width="15" height="15" fill="white" />
+          <rect x="30" y="50" width="15" height="15" fill="white" />
+          <rect x="10" y="70" width="15" height="15" fill="white" />
+        </svg>
       </span>
-      <span className={cn('ml-[0.015em]', nexToneStyles[tone])}>Nex</span>
-    </span>
+    </div>
   )
 }
 
-export function Logo({
-  linkToHome = true,
-  className,
-  textSize = 'lg',
-  tone = 'auto',
-}: LogoProps) {
-  const content = <LogoMark textSize={textSize} tone={tone} className={className} />
+export function Logo({ linkToHome = true, className, iconSize }: LogoProps) {
+  const content = <LogoWordmark className={className} iconSize={iconSize} />
 
   if (!linkToHome) {
     return content

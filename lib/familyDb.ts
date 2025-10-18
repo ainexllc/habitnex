@@ -33,8 +33,10 @@ import type {
   JoinFamilyRequest,
   CreateFamilyHabitRequest,
   CreateRewardRequest,
-  FamilyDashboardData
+  FamilyDashboardData,
+  HabitNexModeId
 } from '../types/family';
+import { resolveMode } from '@/lib/modes';
 
 // Get families that a user is a member of (simplified approach to avoid data pollution)
 export const getUserFamilies = async (userId: string): Promise<Array<{ familyId: string; familyName: string; member: FamilyMember }>> => {
@@ -106,10 +108,17 @@ export const getUserFamilies = async (userId: string): Promise<Array<{ familyId:
 export const createFamily = async (creatorUserId: string, request: CreateFamilyRequest): Promise<string> => {
   try {
     const batch = writeBatch(db);
-    
+
     // Generate unique invite code
     const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
+
+    const incomingSettings = request.settings ?? {};
+    const { mode: requestedMode, ...restSettings } = incomingSettings as Partial<FamilySettings> & { mode?: HabitNexModeId };
+    const initialMode = resolveMode(requestedMode, {
+      isPersonal: request.isPersonal,
+      memberCount: request.isPersonal ? 1 : undefined,
+    });
+
     // Create family document
     const familyRef = doc(collection(db, 'families'));
     const familyData: Omit<Family, 'id' | 'members'> = {
@@ -121,6 +130,7 @@ export const createFamily = async (creatorUserId: string, request: CreateFamilyR
       isActive: true,
       isPersonal: request.isPersonal || false,
       settings: {
+        mode: initialMode,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         weekStartsOn: 1, // Monday
         theme: 'light',
@@ -139,11 +149,11 @@ export const createFamily = async (creatorUserId: string, request: CreateFamilyR
           compactMode: false,
           animationSpeed: 'normal'
         },
-        ...request.settings
+        ...restSettings
       },
       members: [] // Will be populated by subcollection
     };
-    
+
     batch.set(familyRef, familyData);
     
     // Create creator as first family member (parent)
@@ -263,20 +273,30 @@ export const getFamily = async (familyId: string): Promise<Family | null> => {
       return null;
     }
     
+    const familyData = familySnap.data() as Omit<Family, 'id' | 'members'>;
+
     // Get family members
     const membersRef = collection(db, 'families', familyId, 'members');
     const membersQuery = query(membersRef, where('isActive', '==', true), orderBy('joinedAt', 'asc'));
     const membersSnap = await getDocs(membersQuery);
-    
     const members = membersSnap.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as FamilyMember[];
-    
+
+    const settingsWithMode: FamilySettings = {
+      ...familyData.settings,
+      mode: resolveMode(familyData.settings?.mode as HabitNexModeId | undefined, {
+        isPersonal: familyData.isPersonal,
+        memberCount: members.length,
+      }),
+    };
+
     return {
       id: familySnap.id,
-      ...familySnap.data(),
-      members
+      ...familyData,
+      settings: settingsWithMode,
+      members,
     } as Family;
   } catch (error) {
     throw error;

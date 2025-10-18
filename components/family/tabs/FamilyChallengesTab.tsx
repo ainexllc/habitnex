@@ -66,32 +66,62 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
     return null;
   }
 
-  const challengeTypeData: Record<ChallengeType, { icon: React.ReactNode; color: string; bgGradient: string; label: string }> = {
+  const challengeTypeData: Record<
+    ChallengeType,
+    { icon: React.ReactNode; glow: string; badgeGradient: string; label: string }
+  > = {
     streak: {
       icon: <Flame className="w-5 h-5" />,
-      color: 'text-orange-600 dark:text-orange-400',
-      bgGradient: 'from-orange-500 to-red-500',
-      label: 'Streak'
+      glow: 'rgba(255,122,28,0.45)',
+      badgeGradient: 'from-[#ff7a1c] to-[#ff9f4a]',
+      label: 'Streak',
     },
     total: {
       icon: <Target className="w-5 h-5" />,
-      color: 'text-blue-600 dark:text-blue-400',
-      bgGradient: 'from-blue-500 to-indigo-500',
-      label: 'Total'
+      glow: 'rgba(73,197,255,0.45)',
+      badgeGradient: 'from-[#49c5ff] to-[#6a5cff]',
+      label: 'Total',
     },
     race: {
       icon: <Flag className="w-5 h-5" />,
-      color: 'text-purple-600 dark:text-purple-400',
-      bgGradient: 'from-purple-500 to-pink-500',
-      label: 'Race'
+      glow: 'rgba(226,147,255,0.45)',
+      badgeGradient: 'from-[#c46bff] to-[#ff6fb1]',
+      label: 'Race',
     },
     collaboration: {
       icon: <Users className="w-5 h-5" />,
-      color: 'text-green-600 dark:text-green-400',
-      bgGradient: 'from-green-500 to-teal-500',
-      label: 'Team'
-    }
+      glow: 'rgba(127,232,193,0.45)',
+      badgeGradient: 'from-[#7fe8c1] to-[#3cd8a0]',
+      label: 'Team',
+    },
   };
+
+  const accentButtonClasses =
+    'rounded-full bg-[#ff7a1c] px-5 py-3 text-sm font-semibold text-black shadow-[0_12px_35px_rgba(255,122,28,0.35)] transition hover:bg-[#ff8a35] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff7a1c]/70';
+
+  const tabs = [
+    {
+      key: 'active',
+      label: 'Active',
+      icon: <Zap className="h-4 w-4" />,
+      count: activeChallenges.length,
+      gradient: 'from-[#7fe8c1] to-[#3cd8a0]',
+    },
+    {
+      key: 'upcoming',
+      label: 'Upcoming',
+      icon: <Clock className="h-4 w-4" />,
+      count: upcomingChallenges.length,
+      gradient: 'from-[#49c5ff] to-[#6a5cff]',
+    },
+    {
+      key: 'completed',
+      label: 'Completed',
+      icon: <Trophy className="h-4 w-4" />,
+      count: completedChallenges.length,
+      gradient: 'from-[#ff7a1c] to-[#ff9f4a]',
+    },
+  ] as const;
 
   const getChallengeList = () => {
     switch (selectedTab) {
@@ -121,18 +151,21 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
     const progressPercentage = Math.min((totalProgress / challenge.target) * 100, 100);
 
     return (
-      <Card 
-        key={challenge.id} 
+      <Card
+        key={challenge.id}
         className={cn(
-          "group relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]",
-          isExpiring && challenge.status === 'active' && "ring-2 ring-orange-400 ring-offset-2 dark:ring-orange-500"
+          "group relative overflow-hidden rounded-[32px] !border-white/10 !bg-white/[0.06] text-white !shadow-[0_35px_120px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_45px_160px_rgba(0,0,0,0.55)]",
+          isExpiring && challenge.status === 'active' && "ring-2 ring-orange-400/80 ring-offset-2 ring-offset-[#0b0c16]"
         )}
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, ${challengeTypeData[challenge.type].color} 0%, transparent 50%)`,
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, ${challengeTypeData[challenge.type].glow} 0%, transparent 55%)`,
+            }}
+          />
         </div>
 
         {/* Status Ribbon */}
@@ -159,14 +192,16 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
                 
                 {/* Title and Type */}
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-relaxed">
+                  <h3 className="text-xl font-bold text-white leading-relaxed">
                     {challenge.name}
                   </h3>
                   <div className="flex items-center gap-3 mt-2">
-                    <span className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r text-white",
-                      challengeTypeData[challenge.type].bgGradient
-                    )}>
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold text-black shadow-[0_12px_30px_rgba(0,0,0,0.2)]',
+                        challengeTypeData[challenge.type].badgeGradient
+                      )}
+                    >
                       {challengeTypeData[challenge.type].icon}
                       {challengeTypeData[challenge.type].label}
                     </span>
@@ -180,16 +215,16 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
                 </div>
               </div>
 
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-loose mt-3">
+              <p className="text-white/70 text-sm leading-loose mt-3">
                 {challenge.description}
               </p>
             </div>
 
             {/* Points Badge */}
             {challenge.bonusPoints > 0 && (
-              <div className="flex flex-col items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white rounded-xl px-4 py-3 ml-4 shadow-lg flex-shrink-0">
-                <Award className="w-6 h-6 mb-2" />
-                <span className="text-sm font-bold">+{challenge.bonusPoints}</span>
+              <div className="ml-4 flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+                <Award className="mb-2 h-6 w-6 text-[#ffb876]" />
+                <span className="text-sm font-semibold text-[#ffb876]">+{challenge.bonusPoints}</span>
               </div>
             )}
           </div>
@@ -198,22 +233,22 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
         <CardContent className="p-6 pt-2 space-y-5">
           {/* Progress Section */}
           {challenge.status === 'active' && (
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5">
+            <div className="bg-white/8 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Activity className="w-4 h-4 text-white/60" />
+                  <span className="text-sm font-medium text-white/70">
                     Progress
                   </span>
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">
+                <span className="text-sm font-bold text-white">
                   {totalProgress}/{challenge.target}
                 </span>
               </div>
               
-              <Progress 
-                value={progressPercentage} 
-                className="h-3 bg-gray-200 dark:bg-gray-700"
+              <Progress
+                value={progressPercentage}
+                className="h-3 rounded-full bg-white/10"
                 style={{
                   background: `linear-gradient(to right, ${progressPercentage > 75 ? '#10b981' : progressPercentage > 50 ? '#3b82f6' : progressPercentage > 25 ? '#f59e0b' : '#ef4444'} ${progressPercentage}%, transparent ${progressPercentage}%)`
                 }}
@@ -224,12 +259,12 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-yellow-500" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Leader:</span>
+                    <span className="text-xs text-white/60">Leader:</span>
                     <span className="text-xs font-semibold" style={{ color: leader.color }}>
                       {leader.displayName}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-white/60">
                     {progress[leader.id] || 0} points
                   </span>
                 </div>
@@ -246,7 +281,7 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
                 return (
                   <div
                     key={participantId}
-                    className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-bold text-white shadow-sm"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 text-xs font-bold text-white shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
                     style={{ 
                       backgroundColor: participant.color,
                       zIndex: 5 - index
@@ -258,14 +293,14 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
                 );
               })}
               {challenge.participantIds.length > 5 && (
-                <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-200">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-xs font-bold text-white/80">
                   +{challenge.participantIds.length - 5}
                 </div>
               )}
             </div>
 
             {/* Challenge Info */}
-            <div className="flex items-center gap-5 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-5 text-xs text-white/60">
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 <span>{challenge.duration} days</span>
@@ -284,11 +319,12 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
               <Button
                 onClick={() => startChallenge(challenge.id)}
                 disabled={loading}
+                variant="ghost"
                 size="sm"
-                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex-1 rounded-full bg-[#7fe8c1]/80 px-4 py-2 text-sm font-semibold text-[#04251a] transition hover:bg-[#7fe8c1] disabled:opacity-60"
               >
-                <Play className="w-4 h-4 mr-1" />
-                Start Challenge
+                <Play className="mr-2 h-4 w-4" />
+                Start challenge
               </Button>
             )}
             
@@ -296,11 +332,12 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
               <Button
                 onClick={() => completeChallenge(challenge.id, leaderId || undefined)}
                 disabled={loading}
+                variant="ghost"
                 size="sm"
-                className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex-1 rounded-full bg-[#49c5ff]/80 px-4 py-2 text-sm font-semibold text-[#04192c] transition hover:bg-[#49c5ff] disabled:opacity-60"
               >
-                <CheckCircle className="w-4 h-4 mr-1" />
-                Complete Challenge
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Complete challenge
               </Button>
             )}
 
@@ -309,11 +346,12 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
               <Button
                 onClick={() => joinChallenge(challenge.id, currentMember.id)}
                 disabled={loading}
+                variant="ghost"
                 size="sm"
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex-1 rounded-full bg-[#c46bff]/80 px-4 py-2 text-sm font-semibold text-[#2b0a3d] transition hover:bg-[#c46bff] disabled:opacity-60"
               >
-                <UserCheck className="w-4 h-4 mr-1" />
-                Join Challenge
+                <UserCheck className="mr-2 h-4 w-4" />
+                Join challenge
               </Button>
             )}
 
@@ -321,11 +359,11 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
             <Button
               variant="outline"
               size="sm"
-              className="hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="rounded-full border-white/20 bg-white/10 text-white hover:bg-white/15"
               onClick={() => setOpenDrawerFor(challenge.id)}
             >
-              View Details
-              <ChevronRight className="w-4 h-4 ml-1" />
+              View details
+              <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
         </CardContent>
@@ -334,88 +372,102 @@ export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabPr
   };
 
   return (
-    <div className="px-6 pb-8">
-      {/* Stats and Actions Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-            {activeChallenges.length} Active Challenges
-          </span>
-          <span className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
-            {completedChallenges.length} Completed
-          </span>
+    <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 text-white">
+      <section className="mb-10 rounded-[32px] border border-white/5 bg-[radial-gradient(circle_at_top,_rgba(255,122,28,0.14),transparent_65%),_rgba(12,13,22,0.9)] px-6 py-6 shadow-[0_35px_120px_rgba(0,0,0,0.45)] sm:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.48em] text-[#ff7a1c]">Challenge arena</p>
+            <h2 className="mt-3 text-3xl font-semibold sm:text-[36px]">Family challenges</h2>
+            <p className="mt-3 max-w-xl text-sm text-white/70">
+              {activeChallenges.length
+                ? `Running ${activeChallenges.length} live challenge${activeChallenges.length === 1 ? '' : 's'} with ${completedChallenges.length} already conquered.`
+                : 'Launch a new challenge to spark friendly competition and keep everyone engaged.'}
+            </p>
+          </div>
+          {isParent && (
+            <Button onClick={onCreateChallenge} variant="ghost" className={accentButtonClasses}>
+              <Plus className="h-4 w-4" />
+              <span>Create challenge</span>
+            </Button>
+          )}
         </div>
-        
-        {isParent && (
-          <Button 
-            onClick={onCreateChallenge}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300"
-            size="lg"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Create Challenge
-          </Button>
-        )}
-      </div>
 
-      {/* Modern Tab Selector */}
-      <div className="flex p-2 mb-10 bg-gray-100 dark:bg-gray-800 rounded-2xl shadow-inner">
-        {[
-          { key: 'active', label: 'Active', icon: <Zap className="w-4 h-4" />, count: activeChallenges.length, color: 'from-green-500 to-emerald-500' },
-          { key: 'upcoming', label: 'Upcoming', icon: <Clock className="w-4 h-4" />, count: upcomingChallenges.length, color: 'from-blue-500 to-indigo-500' },
-          { key: 'completed', label: 'Completed', icon: <Trophy className="w-4 h-4" />, count: completedChallenges.length, color: 'from-yellow-500 to-orange-500' }
-        ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setSelectedTab(tab.key as any)}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold transition-all duration-300",
-              selectedTab === tab.key
-                ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-[1.02]`
-                : "text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md"
-            )}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-            <span className={cn(
-              "px-2.5 py-1 rounded-full text-xs",
-              selectedTab === tab.key 
-                ? "bg-white/20 text-white"
-                : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200"
-            )}>
-              {tab.count}
-            </span>
-          </button>
-        ))}
-      </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-inner shadow-black/20">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">Active</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{activeChallenges.length}</p>
+            <p className="text-sm text-white/60">In progress right now</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-inner shadow-black/20">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">Queued</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{upcomingChallenges.length}</p>
+            <p className="text-sm text-white/60">Scheduled to start</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-inner shadow-black/20">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-white/60">Victories</p>
+            <p className="mt-2 text-2xl font-semibold text-[#7fe8c1]">{completedChallenges.length}</p>
+            <p className="text-sm text-white/60">Completed challenges</p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setSelectedTab(tab.key)}
+              className={cn(
+                'inline-flex flex-1 min-w-[140px] items-center justify-between gap-3 rounded-full border border-white/10 bg-white/8 px-4 py-3 text-sm font-semibold text-white/70 transition hover:border-white/20 hover:bg-white/12 hover:text-white',
+                selectedTab === tab.key && 'bg-gradient-to-r text-black shadow-[0_12px_35px_rgba(0,0,0,0.35)]',
+                selectedTab === tab.key && tab.gradient
+              )}
+              type="button"
+            >
+              <span className="inline-flex items-center gap-2">
+                {tab.icon}
+                {tab.label}
+              </span>
+              <span
+                className={cn(
+                  'rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold',
+                  selectedTab === tab.key ? 'text-black/80' : 'text-white/60'
+                )}
+              >
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* Challenges Grid */}
       <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
         {getChallengeList().length === 0 ? (
-          <div className="col-span-full text-center py-16">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-full mb-6">
-              <Trophy className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+          <div className="col-span-full text-center">
+            <div className="mx-auto flex max-w-2xl flex-col items-center rounded-[28px] border border-dashed border-white/15 bg-white/[0.04] px-10 py-16 shadow-[0_35px_120px_rgba(0,0,0,0.45)]">
+              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/10">
+                <Trophy className="h-10 w-10 text-white/60" />
+              </div>
+              <h3 className="text-2xl font-semibold">
+                {selectedTab === 'active'
+                  ? 'No active challenges yet'
+                  : selectedTab === 'upcoming'
+                    ? 'Nothing queued up yet'
+                    : 'No victories logged yet'}
+              </h3>
+              <p className="mt-2 max-w-md text-sm text-white/70">
+                {selectedTab === 'active'
+                  ? 'Start a challenge to add a spark of friendly competition to your family routines.'
+                  : selectedTab === 'upcoming'
+                    ? 'Queue a challenge so the next big push is already on the calendar.'
+                    : 'Complete your first challenge to celebrate it here with the whole crew.'}
+              </p>
+              {isParent && selectedTab !== 'completed' && (
+                <Button onClick={onCreateChallenge} variant="ghost" className={`mt-6 ${accentButtonClasses}`}>
+                  <Sparkles className="h-4 w-4" />
+                  <span>Create your first challenge</span>
+                </Button>
+              )}
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-              {selectedTab === 'active' ? 'No Active Challenges' :
-               selectedTab === 'upcoming' ? 'No Upcoming Challenges' :
-               'No Completed Challenges Yet'}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
-              {selectedTab === 'active' ? 'Start a challenge to bring excitement and motivation to your family\'s habits!' :
-               selectedTab === 'upcoming' ? 'Create new challenges to keep the momentum going!' :
-               'Complete your first challenge to see it celebrated here!'}
-            </p>
-            {isParent && selectedTab !== 'completed' && (
-              <Button 
-                onClick={onCreateChallenge}
-                size="lg"
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Create Your First Challenge
-              </Button>
-            )}
           </div>
         ) : (
           getChallengeList().map(renderChallengeCard)

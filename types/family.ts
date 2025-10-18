@@ -1,5 +1,8 @@
 import { Timestamp } from 'firebase/firestore';
 
+export type HabitNexModeId = 'personalPulse' | 'partnerBoost' | 'householdHarmony' | 'familyOrbit';
+export type FamilyTabId = 'overview' | 'members' | 'habits' | 'challenges' | 'rewards' | 'analytics' | 'settings';
+
 export interface Family {
   id: string;
   name: string;
@@ -14,6 +17,7 @@ export interface Family {
 }
 
 export interface FamilySettings {
+  mode: HabitNexModeId;
   timezone: string;
   weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   theme: 'light' | 'dark';

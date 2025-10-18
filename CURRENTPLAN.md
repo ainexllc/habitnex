@@ -22,9 +22,9 @@ HabitNex is a comprehensive habit tracking application designed for both individ
 ### Authentication & User Experience (Oct 17, 2025)
 ✅ **Public Homepage for Logged-Out Users**
 - Implemented authentication-based routing
-- Logged-out users → `/welcome` (public landing page)
-- Authenticated users → `/` (family dashboard)
-- Smooth redirect flow with loading states
+- Logged-out users → `/` (public landing + login form)
+- Authenticated users → `/` (family dashboard after auth)
+- Smooth transition between landing and dashboard
 - Deployed to production via Vercel
 
 ### UI/UX Refinements (Oct 16-17, 2025)
@@ -82,13 +82,13 @@ Unauthenticated User
     ↓
   / (root)
     ↓
-Check auth state
+  Check auth state
     ↓
-  Redirect to /welcome
+  Logged out → render marketing + login
     ↓
-Login/Signup
+  Login
     ↓
-Redirect to / (dashboard)
+  Redirect to / (dashboard)
 ```
 
 **Features**:
@@ -365,8 +365,7 @@ User reviews and edits
 
 ```
 app/
-├── page.tsx                      # Main dashboard (root path)
-├── welcome/page.tsx              # Public landing page
+├── page.tsx                      # Root route (public landing + dashboard)
 ├── login/page.tsx                # Login page
 ├── signup/page.tsx               # Signup page
 ├── api/
