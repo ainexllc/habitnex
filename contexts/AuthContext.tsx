@@ -32,6 +32,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [userProfile, setUserProfile] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
   useEffect(() => {
     // Handle redirect result on app initialization
@@ -39,17 +40,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const redirectUser = await handleRedirectResult();
         if (redirectUser) {
-          // Auth state change will handle profile creation
-          // After successful OAuth redirect, navigate to dashboard
+          // Mark that we have a pending redirect after OAuth
+          // Don't redirect immediately - wait for auth state to be confirmed
           if (typeof window !== 'undefined') {
             const intendedPath = sessionStorage.getItem('habitnex:redirect-after-auth');
             sessionStorage.removeItem('habitnex:redirect-after-auth');
-
-            // Default to dashboard if no intended path
             const targetPath = intendedPath || '/dashboard';
-
-            // Use window.location for reliable redirect in all environments
-            window.location.href = targetPath;
+            setPendingRedirect(targetPath);
           }
         }
       } catch (error: any) {
@@ -156,6 +153,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return unsubscribe;
   }, []);
+
+  // Handle pending redirect after OAuth - only after user and profile are confirmed
+  useEffect(() => {
+    if (!loading && user && userProfile && pendingRedirect) {
+      // Auth state is confirmed, profile is created, now safe to redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = pendingRedirect;
+      }
+      setPendingRedirect(null);
+    }
+  }, [loading, user, userProfile, pendingRedirect]);
 
   const handleSignUp = async (email: string, password: string, displayName?: string) => {
     try {
