@@ -58,16 +58,19 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
       clearAuthError();
-      
+
+      // Store intended redirect path for OAuth redirect flow
+      if (!usePopup && typeof window !== 'undefined') {
+        sessionStorage.setItem('habitnex:redirect-after-auth', '/dashboard');
+      }
+
       const result = await signInWithGoogle(usePopup);
-      
+
       // If using popup and we get a result immediately, navigate
       if (result) {
         router.push('/dashboard');
-      } else if (!usePopup) {
-        // If using redirect, the page will reload after auth
-        // No need to navigate here
       }
+      // Redirect mode returns null and will be handled by AuthContext after redirect
     } catch (err: any) {
       setError(err.message || 'Failed to sign in with Google');
     } finally {

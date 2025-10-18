@@ -40,6 +40,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const redirectUser = await handleRedirectResult();
         if (redirectUser) {
           // Auth state change will handle profile creation
+          // After successful OAuth redirect, navigate to dashboard
+          if (typeof window !== 'undefined') {
+            const intendedPath = sessionStorage.getItem('habitnex:redirect-after-auth');
+            sessionStorage.removeItem('habitnex:redirect-after-auth');
+
+            // Default to dashboard if no intended path
+            const targetPath = intendedPath || '/dashboard';
+
+            // Use window.location for reliable redirect in all environments
+            window.location.href = targetPath;
+          }
         }
       } catch (error: any) {
         setAuthError(getAuthErrorMessage(error));
