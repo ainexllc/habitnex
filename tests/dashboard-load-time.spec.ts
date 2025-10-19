@@ -33,7 +33,7 @@ test.describe('Dashboard Load Time Analysis', () => {
     const submitButton = page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Login")');
     
     // Start navigation wait before clicking
-    const navigationPromise = page.waitForURL(/\/dashboard/, { timeout: 15000 });
+    const navigationPromise = page.waitForURL(/\/workspace/, { timeout: 15000 });
     await submitButton.click();
     await navigationPromise;
     
@@ -84,10 +84,10 @@ test.describe('Dashboard Load Time Analysis', () => {
 
     // Take final screenshot
     await page.screenshot({ 
-      path: 'tests/screenshots/dashboard-final.png',
+      path: 'tests/screenshots/workspace-final.png',
       fullPage: true 
     });
-    console.log('📸 Screenshot saved to tests/screenshots/dashboard-final.png\n');
+    console.log('📸 Screenshot saved to tests/screenshots/workspace-final.png\n');
   });
 
   test('measure individual component load times', async ({ page }) => {
@@ -101,7 +101,7 @@ test.describe('Dashboard Load Time Analysis', () => {
     await page.fill('input[type="email"], input[name="email"]', 'dinohorn9@gmail.com');
     await page.fill('input[type="password"], input[name="password"]', 'dinohorn');
     await page.click('button[type="submit"], button:has-text("Sign In")');
-    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+    await page.waitForURL(/\/workspace/, { timeout: 15000 });
 
     // Now measure individual elements
     console.log('📍 Measuring individual component load times...');

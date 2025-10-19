@@ -55,7 +55,7 @@ test.describe('Sign Out Functionality Test', () => {
         console.log('   📝 Currently on login page - user is signed out');
         
         // Try to navigate to dashboard to see what happens
-        await page.goto('http://localhost:3000/dashboard', { 
+        await page.goto('http://localhost:3000/workspace', { 
           waitUntil: 'domcontentloaded',
           timeout: 5000 
         });
@@ -71,7 +71,7 @@ test.describe('Sign Out Functionality Test', () => {
         
         // Take screenshot of dashboard
         await page.screenshot({ 
-          path: 'tests/screenshots/dashboard-state.png',
+          path: 'tests/screenshots/workspace-state.png',
           fullPage: true 
         });
         console.log('   📷 Dashboard screenshot saved');

@@ -36,7 +36,7 @@ test.describe('Sign Out Permission Error Fix Test', () => {
       await page.fill('input[type="password"]', 'dinohorn');
       
       // Submit and wait for dashboard
-      const navigationPromise = page.waitForURL(/dashboard/, { timeout: 20000 });
+      const navigationPromise = page.waitForURL(/workspace/, { timeout: 20000 });
       await page.click('button[type="submit"]');
       await navigationPromise;
       

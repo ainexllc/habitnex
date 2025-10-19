@@ -41,7 +41,7 @@ async function testMoodButtonsWithAuth() {
       
       // Wait for either dashboard or direct navigation to moods page
       try {
-        await page.waitForURL('**/dashboard', { timeout: 60000 });
+        await page.waitForURL('**/workspace', { timeout: 60000 });
         console.log('✅ Successfully authenticated - redirected to dashboard');
       } catch {
         // Check if we're still on login or if URL changed

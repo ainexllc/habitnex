@@ -51,7 +51,7 @@ test.describe('Simple Dashboard Performance Test', () => {
       
       // Start waiting for navigation
       const dashboardNavigationStart = Date.now();
-      const navigationPromise = page.waitForURL(/dashboard/, { timeout: 20000 });
+      const navigationPromise = page.waitForURL(/workspace/, { timeout: 20000 });
       
       await page.click(submitSelector);
       await navigationPromise;

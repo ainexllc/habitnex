@@ -112,7 +112,7 @@ npm run test:theme:visual
 4. **Performance Testing**:
 ```bash
 # Check dashboard performance
-npm run test tests/dashboard-performance.spec.ts
+npm run test tests/dashboard-performance.spec.ts  # Workspace performance checks
 ```
 
 ## Test Capabilities Ready to Use

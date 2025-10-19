@@ -12,7 +12,7 @@ test.describe('Edit Family Habit Functionality', () => {
 
   test('should be able to edit an existing family habit', async ({ page }) => {
     // Navigate to family dashboard
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     await page.waitForTimeout(2000);
 
     // Check if we're on the family dashboard
@@ -108,7 +108,7 @@ test.describe('Edit Family Habit Functionality', () => {
   });
 
   test('should handle edit form validation correctly', async ({ page }) => {
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     await page.waitForTimeout(2000);
 
     // Try to find an edit button
@@ -133,7 +133,7 @@ test.describe('Edit Family Habit Functionality', () => {
   });
 
   test('should cancel edit operation without saving', async ({ page }) => {
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     await page.waitForTimeout(2000);
 
     const editButton = page.locator('[data-testid="edit-habit-button"]').first();

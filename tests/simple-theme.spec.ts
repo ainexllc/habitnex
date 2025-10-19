@@ -48,7 +48,7 @@ test.describe('Simple Theme Tests', () => {
       expect(newTheme).not.toBe(initialTheme);
       
       // Navigate to family dashboard
-      await page.goto('/dashboard/family');
+      await page.goto('/workspace?tab=overview');
       await page.waitForLoadState('networkidle');
       
       // Check theme persisted
@@ -99,7 +99,7 @@ test.describe('Simple Theme Tests', () => {
     await page.waitForTimeout(2000);
     
     // Go to family dashboard
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     await page.waitForLoadState('networkidle');
     
     // Check navigation bar exists

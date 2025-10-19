@@ -96,7 +96,7 @@ async function testTypescriptFixes() {
     
     let authSuccess = false;
     
-    if (currentUrl.includes('/dashboard')) {
+    if (currentUrl.includes('/workspace')) {
       authSuccess = true;
       console.log('✅ Authentication successful - redirected to dashboard');
     } else {
@@ -110,18 +110,18 @@ async function testTypescriptFixes() {
       await page.click('button[type="submit"]');
       await page.waitForTimeout(3000);
       
-      if (page.url().includes('/dashboard')) {
+      if (page.url().includes('/workspace')) {
         authSuccess = true;
         console.log('✅ Login successful - redirected to dashboard');
       } else {
         // Try Google auth or create a mock authenticated state
         console.log('⚠️ Standard auth failed, attempting alternative approach...');
         // Navigate directly to dashboard and check for redirect
-        await page.goto('http://localhost:3000/dashboard');
+        await page.goto('http://localhost:3000/workspace');
         await page.waitForTimeout(2000);
         
         // If we're still on dashboard (not redirected), assume we can test components
-        if (page.url().includes('/dashboard')) {
+        if (page.url().includes('/workspace')) {
           authSuccess = true;
           console.log('📝 Direct dashboard access - testing components anyway');
         }

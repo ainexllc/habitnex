@@ -55,7 +55,7 @@ test.describe('Family Data Sync Test', () => {
     }
     
     // Wait for redirect to dashboard
-    await localPage.waitForURL(/dashboard/, { timeout: 10000 });
+    await localPage.waitForURL(/workspace/, { timeout: 10000 });
     
     // Get user ID from localStorage
     const localUserId = await localPage.evaluate(() => {
@@ -97,7 +97,7 @@ test.describe('Family Data Sync Test', () => {
     await prodPage.click('button:has-text("Continue with Google")');
     
     // Production uses redirect, so wait for auth redirect
-    await prodPage.waitForURL(/dashboard/, { timeout: 15000 });
+    await prodPage.waitForURL(/workspace/, { timeout: 15000 });
     
     // Get production user ID
     const prodUserId = await prodPage.evaluate(() => {

@@ -39,7 +39,7 @@ test.describe('Authentication Performance Analysis', () => {
     const authSubmitTime = Date.now();
     
     // Click and start monitoring
-    const navigationPromise = page.waitForURL(/dashboard/, { timeout: 30000 });
+    const navigationPromise = page.waitForURL(/workspace/, { timeout: 30000 });
     await page.click('button[type="submit"], button:has-text("Sign In")');
     
     console.log('   ⏳ Waiting for dashboard redirect...');

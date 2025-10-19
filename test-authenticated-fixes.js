@@ -54,7 +54,7 @@ async function testAuthenticatedFixes() {
       
       // Check if we're authenticated
       const currentUrl = page.url();
-      if (currentUrl.includes('/dashboard') || currentUrl.includes('/habits')) {
+      if (currentUrl.includes('/workspace') || currentUrl.includes('/habits')) {
         testResults.authSuccess = true;
         console.log('✅ Authentication successful with signup');
       }
@@ -82,7 +82,7 @@ async function testAuthenticatedFixes() {
     if (!testResults.authSuccess) {
       console.log('⚠️ Authentication failed, proceeding with component testing anyway...');
       // Go to dashboard anyway to see what loads
-      await page.goto('http://localhost:3000/dashboard', { waitUntil: 'networkidle' });
+      await page.goto('http://localhost:3000/workspace', { waitUntil: 'networkidle' });
       await page.waitForTimeout(3000);
     }
     

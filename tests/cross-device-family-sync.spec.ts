@@ -24,7 +24,7 @@ test.describe('Cross-Device Family Synchronization Test', () => {
       await page1.fill('input[type="email"]', testEmail);
       await page1.fill('input[type="password"]', testPassword);
       
-      const navigationPromise1 = page1.waitForURL(/dashboard/, { timeout: 20000 });
+      const navigationPromise1 = page1.waitForURL(/workspace/, { timeout: 20000 });
       await page1.click('button[type="submit"]');
       await navigationPromise1;
       
@@ -67,7 +67,7 @@ test.describe('Cross-Device Family Synchronization Test', () => {
       await page2.fill('input[type="email"]', testEmail);
       await page2.fill('input[type="password"]', testPassword);
       
-      const navigationPromise2 = page2.waitForURL(/dashboard/, { timeout: 20000 });
+      const navigationPromise2 = page2.waitForURL(/workspace/, { timeout: 20000 });
       await page2.click('button[type="submit"]');
       await navigationPromise2;
       
@@ -176,14 +176,14 @@ test.describe('Cross-Device Family Synchronization Test', () => {
       await page1.fill('input[type="email"]', testEmail);
       await page1.fill('input[type="password"]', testPassword);
       await page1.click('button[type="submit"]');
-      await page1.waitForURL(/dashboard/, { timeout: 20000 });
+      await page1.waitForURL(/workspace/, { timeout: 20000 });
       
       // Device 2 sign in  
       await page2.goto('http://localhost:3001/login');
       await page2.fill('input[type="email"]', testEmail);
       await page2.fill('input[type="password"]', testPassword);
       await page2.click('button[type="submit"]');
-      await page2.waitForURL(/dashboard/, { timeout: 20000 });
+      await page2.waitForURL(/workspace/, { timeout: 20000 });
       
       console.log('   ✅ Both devices signed in successfully');
       

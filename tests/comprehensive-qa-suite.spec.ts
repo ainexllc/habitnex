@@ -60,7 +60,7 @@ class DashboardPage {
   constructor(private page: Page) {}
 
   async navigateToDashboard() {
-    await this.page.goto('/dashboard');
+    await this.page.goto('/workspace');
     await this.page.waitForLoadState('networkidle');
   }
 
@@ -261,7 +261,7 @@ test.describe('HabitNex Comprehensive QA Test Suite', () => {
 
     test('Protected routes redirect to login', async ({ page }) => {
       // Try to access protected routes without authentication
-      const protectedRoutes = ['/dashboard', '/habits', '/habits/new', '/profile'];
+      const protectedRoutes = ['/workspace', '/habits', '/habits/new', '/profile'];
       
       for (const route of protectedRoutes) {
         await page.goto(route);
@@ -314,7 +314,7 @@ test.describe('HabitNex Comprehensive QA Test Suite', () => {
       
       expect(isDashboard || isLogin).toBe(true);
       
-      await page.screenshot({ path: 'test-results/dashboard-layout.png', fullPage: true });
+      await page.screenshot({ path: 'test-results/workspace-layout.png', fullPage: true });
     });
 
     test('AI Enhancement feature availability', async ({ page }) => {
@@ -407,7 +407,7 @@ test.describe('HabitNex Comprehensive QA Test Suite', () => {
   test.describe('5. Performance Testing', () => {
     
     test('Page load performance benchmarks', async ({ page }) => {
-      const routes = ['/', '/login', '/signup', '/dashboard'];
+      const routes = ['/', '/login', '/signup', '/workspace'];
       const performanceResults: Record<string, number> = {};
       
       for (const route of routes) {

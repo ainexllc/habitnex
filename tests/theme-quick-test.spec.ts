@@ -10,7 +10,7 @@ test.describe('Quick Theme Consistency Tests', () => {
     await page.click('button[type="submit"]');
     
     // Wait for dashboard
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/workspace', { timeout: 10000 });
   });
 
   test('theme toggle works correctly', async ({ page }) => {
@@ -32,7 +32,7 @@ test.describe('Quick Theme Consistency Tests', () => {
     await setTheme(page, 'dark');
     
     // Navigate to different pages
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     await verifyThemeConsistency(page, 'dark');
     
     await page.goto('/habits');
@@ -42,12 +42,12 @@ test.describe('Quick Theme Consistency Tests', () => {
     await verifyThemeConsistency(page, 'dark');
     
     // Go back to dashboard
-    await page.goto('/dashboard');
+    await page.goto('/workspace');
     await verifyThemeConsistency(page, 'dark');
   });
 
   test('family dashboard theme consistency', async ({ page }) => {
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     
     // Test in light mode
     await setTheme(page, 'light');
@@ -72,7 +72,7 @@ test.describe('Quick Theme Consistency Tests', () => {
   });
 
   test('buttons and interactive elements', async ({ page }) => {
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     
     // Test light theme
     await setTheme(page, 'light');
@@ -84,7 +84,7 @@ test.describe('Quick Theme Consistency Tests', () => {
   });
 
   test('modal theme consistency', async ({ page }) => {
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     
     // Test Add Member modal in both themes
     const addMemberButton = page.locator('button:has-text("Add Member")').first();
@@ -147,7 +147,7 @@ test.describe('Quick Theme Consistency Tests', () => {
     
     // Open new page in same context (simulating new tab)
     const newPage = await context.newPage();
-    await newPage.goto('/dashboard');
+    await newPage.goto('/workspace');
     
     // Theme should persist in new tab
     await verifyThemeConsistency(newPage, 'dark');
@@ -157,8 +157,8 @@ test.describe('Quick Theme Consistency Tests', () => {
 
   test('screenshots for visual comparison', async ({ page }) => {
     const pages = [
-      { url: '/dashboard', name: 'dashboard' },
-      { url: '/dashboard/family', name: 'family-dashboard' },
+      { url: '/workspace', name: 'dashboard' },
+      { url: '/workspace?tab=overview', name: 'family-dashboard' },
       { url: '/habits', name: 'habits' },
       { url: '/moods', name: 'moods' }
     ];

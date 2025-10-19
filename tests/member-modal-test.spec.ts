@@ -17,15 +17,15 @@ test.describe('Member Modal Edit Form', () => {
       await loginButton.click();
       
       // Wait for login to complete and redirect
-      await page.waitForURL(/.*\/dashboard.*/, { timeout: 10000 });
+      await page.waitForURL(/.*\/workspace.*/, { timeout: 10000 });
       console.log('✅ Logged in successfully');
       
       // Navigate to family dashboard
-      await page.goto('/dashboard/family');
+      await page.goto('/workspace?tab=overview');
       await page.waitForLoadState('networkidle');
     } else {
       // Maybe already logged in, try to go to family dashboard
-      await page.goto('/dashboard/family');
+      await page.goto('/workspace?tab=overview');
     }
     
     await page.waitForLoadState('networkidle');
@@ -33,7 +33,7 @@ test.describe('Member Modal Edit Form', () => {
 
   test('should test avatar preview real-time updates', async ({ page }) => {
     // Navigate to family dashboard
-    await page.goto('http://localhost:3000/dashboard/family/');
+    await page.goto('http://localhost:3000/workspace?tab=overview');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
@@ -234,7 +234,7 @@ test.describe('Member Modal Edit Form', () => {
 
   test('should open edit member modal and test preview functionality', async ({ page }) => {
     // Navigate directly to family dashboard
-    await page.goto('http://localhost:3000/dashboard/family/');
+    await page.goto('http://localhost:3000/workspace?tab=overview');
     await page.waitForLoadState('networkidle');
     
     // Wait for the dashboard to load
@@ -410,7 +410,7 @@ test.describe('Member Modal Edit Form', () => {
   
   test('should test avatar preview updates in real-time', async ({ page }) => {
     // This test specifically focuses on the avatar preview functionality
-    await page.goto('http://localhost:3000/dashboard/family/');
+    await page.goto('http://localhost:3000/workspace?tab=overview');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     

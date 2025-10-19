@@ -46,8 +46,8 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
     });
 
     const authenticatedPages = [
-      { path: '/dashboard', name: 'dashboard', description: 'Main dashboard with habits and stats' },
-      { path: '/dashboard/family', name: 'family-dashboard', description: 'Family dashboard with member zones' },
+      { path: '/workspace', name: 'dashboard', description: 'Main dashboard with habits and stats' },
+      { path: '/workspace?tab=overview', name: 'family-dashboard', description: 'Family dashboard with member zones' },
       { path: '/habits', name: 'habits-list', description: 'Habits list page' },
       { path: '/habits/new', name: 'habit-form', description: 'Habit creation form' },
       { path: '/moods', name: 'moods-list', description: 'Moods list page' },
@@ -142,7 +142,7 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
     });
 
     test('should capture navigation header', async ({ page }) => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
 
       // Look for header/navigation
@@ -166,7 +166,7 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
     });
 
     test('should capture theme toggle button', async ({ page }) => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
 
       const themeToggle = page.locator('[aria-label*="Switch to"]').first();
@@ -255,7 +255,7 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
     });
 
     test('should capture family member modals', async ({ page }) => {
-      await page.goto('/dashboard/family');
+      await page.goto('/workspace?tab=overview');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
@@ -374,7 +374,7 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
     });
 
     test('should capture button hover states', async ({ page }) => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
 
       const buttons = page.locator('button:visible');
@@ -418,7 +418,7 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
 
     test('should capture loading states', async ({ page }) => {
       // Navigate to a page that might show loading states
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       
       // Inject loading spinner if available
       const hasLoadingState = await page.evaluate(() => {
@@ -448,7 +448,7 @@ test.describe('Visual Regression Tests - Theme Consistency', () => {
         await ensureAuthenticated(page);
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         
-        await page.goto('/dashboard');
+        await page.goto('/workspace');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1000);
 

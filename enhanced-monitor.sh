@@ -36,17 +36,17 @@ while true; do
         await page.fill('input[type=\"password\"]', 'dinohorn');
         await page.click('button[type=\"submit\"]');
         
-        // Wait for redirect to dashboard
+        // Wait for redirect to workspace
         await page.waitForTimeout(2000);
         console.log('📍 Current URL:', page.url());
-        
-        // If not on dashboard, navigate there
-        if (!page.url().includes('/dashboard')) {
-          await page.goto('http://localhost:3001/dashboard');
+
+        // If not on workspace, navigate there
+        if (!page.url().includes('/workspace')) {
+          await page.goto('http://localhost:3001/workspace');
         }
-        
+
         // Wait longer for all family queries to execute
-        console.log('⏳ Waiting for dashboard to fully load...');
+        console.log('⏳ Waiting for workspace to fully load...');
         await page.waitForTimeout(8000);
         
         // Count different types of messages
@@ -60,7 +60,7 @@ while true; do
         }
         
       } catch (e) {
-        console.log('❌ Failed to check dashboard:', e.message);
+        console.log('❌ Failed to check workspace:', e.message);
       }
       
       await browser.close();

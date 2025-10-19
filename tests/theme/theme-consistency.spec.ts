@@ -132,8 +132,8 @@ test.describe('Theme Consistency Tests', () => {
     });
 
     const authenticatedPages = [
-      { path: '/dashboard', name: 'dashboard' },
-      { path: '/dashboard/family', name: 'family-dashboard' },
+      { path: '/workspace', name: 'dashboard' },
+      { path: '/workspace?tab=overview', name: 'family-dashboard' },
       { path: '/habits', name: 'habits' },
       { path: '/moods', name: 'moods' },
       { path: '/profile', name: 'profile' },
@@ -157,7 +157,7 @@ test.describe('Theme Consistency Tests', () => {
 
       test(`should persist theme when navigating to ${name}`, async () => {
         // Set dark theme on dashboard
-        await page.goto('/dashboard');
+        await page.goto('/workspace');
         await setTheme(page, 'dark');
         await verifyThemeConsistency(page, 'dark');
         
@@ -174,10 +174,10 @@ test.describe('Theme Consistency Tests', () => {
 
     test('should maintain theme across navigation flow', async () => {
       await testThemePersistence(page, 'dark', [
-        '/dashboard',
+        '/workspace',
         '/habits',
         '/moods',
-        '/dashboard/family',
+        '/workspace?tab=overview',
         '/profile'
       ]);
     });
@@ -285,7 +285,7 @@ test.describe('Theme Consistency Tests', () => {
     });
 
     test('should properly theme family member modals', async () => {
-      await page.goto('/dashboard/family');
+      await page.goto('/workspace?tab=overview');
       await page.waitForLoadState('networkidle');
       
       // Look for add member button
@@ -305,7 +305,7 @@ test.describe('Theme Consistency Tests', () => {
     });
 
     test('should properly theme navigation elements', async () => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
       
       // Test navigation in both themes
@@ -344,7 +344,7 @@ test.describe('Theme Consistency Tests', () => {
 
   test.describe('Theme Flash Prevention', () => {
     test('should not flash white/black during theme switches', async () => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
       
       await verifyNoThemeFlash(page);
@@ -354,7 +354,7 @@ test.describe('Theme Consistency Tests', () => {
       await ensureAuthenticated(page);
       
       // Set dark theme
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await setTheme(page, 'dark');
       
       // Navigate to different page and monitor for flashing
@@ -368,7 +368,7 @@ test.describe('Theme Consistency Tests', () => {
     });
 
     test('should sync theme with Firebase after login', async () => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
       
       // Set theme
@@ -386,7 +386,7 @@ test.describe('Theme Consistency Tests', () => {
     });
 
     test('should maintain theme after logout/login cycle', async () => {
-      await page.goto('/dashboard');
+      await page.goto('/workspace');
       await page.waitForLoadState('networkidle');
       
       // Set dark theme
@@ -402,7 +402,7 @@ test.describe('Theme Consistency Tests', () => {
       
       // Sign back in
       await signInUser(page);
-      await page.waitForURL('**/dashboard**', { timeout: 15000 });
+      await page.waitForURL('**/workspace**', { timeout: 15000 });
       await page.waitForTimeout(1000); // Wait for theme to load
       
       // Should restore dark theme

@@ -69,7 +69,7 @@ npx playwright test tests/theme/visual-regression.spec.ts --grep "Authenticated 
 
 ### Pages Tested
 - **Public**: `/`, `/login`, `/signup`, `/forgot-password`
-- **Authenticated**: `/dashboard`, `/dashboard/family`, `/habits`, `/habits/new`, `/moods`, `/moods/new`, `/profile`, `/settings`
+- **Authenticated**: `/workspace`, `/workspace?tab=overview`, `/habits`, `/habits/new`, `/moods`, `/moods/new`, `/profile`, `/settings`
 
 ### Components Tested  
 - Forms (habit creation, mood entry)

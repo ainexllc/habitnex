@@ -7,10 +7,10 @@ test.describe('Avatar Preview - Quick Test', () => {
     await page.locator('input[type="email"]').fill('dinohorn9@gmail.com');
     await page.locator('input[type="password"]').fill('dinohorn');
     await page.locator('button[type="submit"]:has-text("Sign In")').click();
-    await page.waitForURL(/.*\/dashboard.*/, { timeout: 10000 });
+    await page.waitForURL(/.*\/workspace.*/, { timeout: 10000 });
     
     // Go to family dashboard
-    await page.goto('/dashboard/family');
+    await page.goto('/workspace?tab=overview');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
     
