@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Simple Edit Habit Test', () => {
   test('should load the family dashboard', async ({ page }) => {
-    await page.goto('/workspace?tab=overview');
+    await page.goto('/?tab=overview');
 
     // Check that we can access the page
     await expect(page).toHaveURL(/.*dashboard\/family/);
@@ -15,7 +15,7 @@ test.describe('Simple Edit Habit Test', () => {
   });
 
   test('should show create habit button', async ({ page }) => {
-    await page.goto('/workspace?tab=overview');
+    await page.goto('/?tab=overview');
 
     // Look for create habit button
     const createButton = page.locator('button:has-text("Create"), button:has-text("Add"), button:has-text("New")').first();

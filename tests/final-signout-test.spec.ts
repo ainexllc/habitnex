@@ -20,7 +20,7 @@ test.describe('Final Sign Out Test', () => {
 
     // Navigate to dashboard to see current auth state
     console.log('\n📍 Step 2: Testing dashboard access...');
-    await page.goto('http://localhost:3000/workspace', { 
+    await page.goto('http://localhost:3000/?tab=overview', { 
       waitUntil: 'domcontentloaded',
       timeout: 10000 
     });

@@ -17,7 +17,7 @@ test.describe('Comprehensive Habit Form Update Testing', () => {
       await page.screenshot({ path: 'test-screenshots/02-login-required.png', fullPage: true });
       
       // For now, let's try to navigate directly to dashboard to see if we can bypass
-      await page.goto('http://localhost:3001/workspace');
+      await page.goto('http://localhost:3001/?tab=overview');
       await page.waitForLoadState('domcontentloaded');
       console.log('Dashboard URL:', page.url());
       
@@ -28,8 +28,8 @@ test.describe('Comprehensive Habit Form Update Testing', () => {
     }
     
     // Navigate to dashboard if not already there
-    if (!page.url().includes('/workspace')) {
-      await page.goto('http://localhost:3001/workspace');
+    if (!page.url().includes('/?tab=overview')) {
+      await page.goto('http://localhost:3001/?tab=overview');
       await page.waitForLoadState('domcontentloaded');
     }
     
@@ -222,7 +222,7 @@ test.describe('Comprehensive Habit Form Update Testing', () => {
               console.log('✅ Created test habit, now testing edit functionality...');
               
               // Now go back to dashboard and try to edit
-              await page.goto('http://localhost:3001/workspace');
+              await page.goto('http://localhost:3001/?tab=overview');
               await page.waitForTimeout(3000);
               
               // Try the edit test again
@@ -263,7 +263,7 @@ test.describe('Comprehensive Habit Form Update Testing', () => {
       }
     });
     
-    await page.goto('http://localhost:3001/workspace');
+    await page.goto('http://localhost:3001/?tab=overview');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000);
     

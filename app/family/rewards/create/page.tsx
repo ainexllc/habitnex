@@ -7,7 +7,7 @@ export default function CreateRewardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/workspace?tab=rewards');
+    router.replace('/?tab=rewards');
   }, [router]);
 
   return null;

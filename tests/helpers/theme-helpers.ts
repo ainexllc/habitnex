@@ -177,7 +177,7 @@ export async function checkColorContrast(
 export async function testThemePersistence(
   page: Page,
   startTheme: 'light' | 'dark',
-  pagesToTest: string[] = ['/workspace', '/habits', '/moods']
+  pagesToTest: string[] = ['/?tab=overview', '/habits', '/moods']
 ): Promise<void> {
   // Set initial theme
   await setTheme(page, startTheme);
@@ -333,7 +333,7 @@ export async function verifyNoThemeFlash(page: Page): Promise<void> {
   });
   
   // Navigate to a new page
-  await page.goto('/workspace');
+  await page.goto('/?tab=overview');
   await page.waitForLoadState('networkidle');
   
   // Check for background changes

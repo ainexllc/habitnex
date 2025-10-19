@@ -70,7 +70,7 @@ async function testComponentFixes() {
 
     // 3. Test Dashboard Page (CompactHabitCard fixes)
     console.log('\n📱 Step 3: Testing Dashboard (CompactHabitCard fixes)');
-    await page.goto('http://localhost:3000/workspace');
+    await page.goto('http://localhost:3000/?tab=overview');
     await page.waitForTimeout(2000);
     await page.screenshot({ 
       path: path.join(screenshotsDir, '03-dashboard.png'),

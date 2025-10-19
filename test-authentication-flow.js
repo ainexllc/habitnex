@@ -58,7 +58,7 @@ async function testHabitNexAuthentication() {
     
     let isAuthenticated = false;
     
-    if (currentUrl.includes('/workspace')) {
+    if (currentUrl.includes('/?tab=overview')) {
       console.log('✅ Successfully signed up and authenticated!');
       isAuthenticated = true;
     } else {
@@ -88,7 +88,7 @@ async function testHabitNexAuthentication() {
     // If we're not authenticated, let's manually navigate to dashboard to test UI components
     if (!isAuthenticated) {
       console.log('\n📱 Step 2c: Navigating directly to dashboard to test UI components');
-      await page.goto('http://localhost:3000/workspace');
+      await page.goto('http://localhost:3000/?tab=overview');
       await page.waitForTimeout(2000);
       
       // Check if we're redirected to login (which is expected)
@@ -136,8 +136,8 @@ async function testHabitNexAuthentication() {
       }
 
       // Test dashboard page - this has CompactHabitCard with fixed button variants
-      console.log('📊 Testing /workspace (CompactHabitCard button fixes)');
-      await page.goto('http://localhost:3000/workspace');
+      console.log('📊 Testing /?tab=overview (CompactHabitCard button fixes)');
+      await page.goto('http://localhost:3000/?tab=overview');
       await page.waitForTimeout(2000);
       await page.screenshot({ 
         path: path.join(screenshotsDir, '04-dashboard.png'),

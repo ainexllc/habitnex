@@ -7,7 +7,7 @@ export default function FamilyHabitsPage() {
   const router = useRouter();
   
   useEffect(() => {
-    router.replace('/workspace?tab=habits');
+    router.replace('/?tab=habits');
   }, [router]);
 
   return null;

@@ -15,7 +15,7 @@ setup('authenticate', async ({ page }) => {
   await page.click('button[type="submit"]');
   
   // Wait for navigation to dashboard
-  await page.waitForURL('**/workspace', { timeout: 10000 });
+  await page.waitForURL('**/?tab=overview', { timeout: 10000 });
   
   // Save authentication state
   await page.context().storageState({ path: authFile });

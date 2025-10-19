@@ -14,7 +14,7 @@ test.describe('Direct Sign Out Test', () => {
     try {
       // Go directly to dashboard
       console.log('📍 Step 1: Loading dashboard directly...');
-      await page.goto('http://localhost:3000/workspace', { 
+      await page.goto('http://localhost:3000/?tab=overview', { 
         waitUntil: 'domcontentloaded',
         timeout: 15000 
       });
@@ -24,7 +24,7 @@ test.describe('Direct Sign Out Test', () => {
       
       // Take screenshot
       await page.screenshot({ 
-        path: 'tests/screenshots/workspace-direct.png',
+        path: 'tests/screenshots/?tab=overview-direct.png',
         fullPage: true 
       });
       console.log('   📷 Dashboard screenshot saved');

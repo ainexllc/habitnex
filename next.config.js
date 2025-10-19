@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Basic configuration for API routes
+  // Standard build with API routes enabled (no static export)
   trailingSlash: true,
   images: {
     domains: ['lh3.googleusercontent.com'],

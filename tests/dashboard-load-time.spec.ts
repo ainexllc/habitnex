@@ -84,10 +84,10 @@ test.describe('Dashboard Load Time Analysis', () => {
 
     // Take final screenshot
     await page.screenshot({ 
-      path: 'tests/screenshots/workspace-final.png',
+      path: 'tests/screenshots/?tab=overview-final.png',
       fullPage: true 
     });
-    console.log('📸 Screenshot saved to tests/screenshots/workspace-final.png\n');
+    console.log('📸 Screenshot saved to tests/screenshots/?tab=overview-final.png\n');
   });
 
   test('measure individual component load times', async ({ page }) => {

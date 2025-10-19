@@ -67,7 +67,7 @@ test.describe('Basic Theme Tests', () => {
       
       // Take dashboard screenshot
       await page.screenshot({ 
-        path: 'tests/screenshots/workspace-initial.png', 
+        path: 'tests/screenshots/?tab=overview-initial.png', 
         fullPage: true 
       });
       
@@ -96,7 +96,7 @@ test.describe('Basic Theme Tests', () => {
           
           // Take screenshot after theme change
           await page.screenshot({ 
-            path: `tests/screenshots/workspace-${newTheme}.png`, 
+            path: `tests/screenshots/?tab=overview-${newTheme}.png`, 
             fullPage: true 
           });
           
@@ -121,7 +121,7 @@ test.describe('Basic Theme Tests', () => {
     await page.waitForTimeout(5000);
     
     // Now navigate to family dashboard
-    await page.goto('/workspace?tab=overview');
+    await page.goto('/?tab=overview');
     await page.waitForTimeout(3000);
     
     // Check we're on family dashboard

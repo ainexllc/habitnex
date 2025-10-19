@@ -94,7 +94,7 @@ async function testComponentsDirectly() {
     
     // STEP 4: Test Dashboard Page (CompactHabitCard button fixes)
     console.log('📊 Step 4: Testing Dashboard Page (button variant fixes)...');
-    await page.goto('http://localhost:3000/workspace', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/?tab=overview', { waitUntil: 'networkidle' });
     await page.waitForTimeout(3000);
     await page.screenshot({ path: path.join(screenshotsDir, '04-dashboard-page.png') });
     

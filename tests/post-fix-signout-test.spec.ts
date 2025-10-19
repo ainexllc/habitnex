@@ -7,7 +7,7 @@ test.describe('Post-Fix Sign Out Test', () => {
     try {
       // Test dashboard on correct port
       console.log('📍 Loading dashboard on port 3001...');
-      await page.goto('http://localhost:3001/workspace', { 
+      await page.goto('http://localhost:3001/?tab=overview', { 
         waitUntil: 'domcontentloaded',
         timeout: 15000 
       });

@@ -17,7 +17,7 @@ interface FamilyPageHeaderProps {
   subtitle?: string;
   
   /**
-   * URL path to navigate back to (defaults to /workspace?tab=overview)
+   * URL path to navigate back to (defaults to /?tab=overview)
    */
   backPath?: string;
   
@@ -44,7 +44,7 @@ interface FamilyPageHeaderProps {
 export function FamilyPageHeader({
   title,
   subtitle,
-  backPath = "/workspace?tab=overview",
+  backPath = "/?tab=overview",
   backText = "Back to Workspace",
   actions,
   className = ""

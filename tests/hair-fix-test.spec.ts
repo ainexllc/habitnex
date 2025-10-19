@@ -7,9 +7,9 @@ test.describe('Hair Fix Verification', () => {
     await page.locator('input[type="email"]').fill('dinohorn9@gmail.com');
     await page.locator('input[type="password"]').fill('dinohorn');
     await page.locator('button[type="submit"]:has-text("Sign In")').click();
-    await page.waitForURL(/.*\/workspace.*/, { timeout: 10000 });
+    await page.waitForURL(/.*\/?tab=overview.*/, { timeout: 10000 });
     
-    await page.goto('/workspace?tab=overview');
+    await page.goto('/?tab=overview');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
     

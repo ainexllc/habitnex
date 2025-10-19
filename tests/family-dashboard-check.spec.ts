@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Family Dashboard Task Status Check', () => {
   test('Check if tasks are showing as fresh (not completed)', async ({ page }) => {
     // Navigate to the family dashboard
-    await page.goto('http://localhost:3000/workspace?tab=overview', {
+    await page.goto('http://localhost:3000/?tab=overview', {
       waitUntil: 'networkidle'
     });
 

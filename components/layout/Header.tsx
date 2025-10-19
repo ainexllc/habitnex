@@ -31,7 +31,7 @@ export function Header() {
 
           <nav className="hidden md:flex items-center space-x-6">
             <Link
-              href="/workspace"
+              href="/"
               className={`${theme.components.nav.link} ${theme.animation.transition} px-3 py-2 rounded-md`}
             >
               Workspace
@@ -44,7 +44,7 @@ export function Header() {
             {/* Family Dashboard Icon */}
             {hasFamily && (
               <Link
-                href="/workspace?tab=overview"
+                href="/?tab=overview"
                 className={`group relative p-2 rounded-lg ${theme.surface.hover} transition-all duration-200 hover:scale-105`}
                 title={`Go to ${familyName} Workspace`}
               >

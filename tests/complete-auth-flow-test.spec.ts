@@ -74,7 +74,7 @@ test.describe('Complete Authentication Flow Test', () => {
     const authStart = Date.now();
     
     // Start waiting for navigation
-    const navigationPromise = page.waitForURL(/workspace|$/, { timeout: 20000 });
+    const navigationPromise = page.waitForURL(/?tab=overview|$/, { timeout: 20000 });
     
     // Try to click submit button
     try {
