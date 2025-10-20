@@ -229,7 +229,7 @@ test.describe('White Screen Diagnosis', () => {
   });
 
   test('diagnose dashboard page', async ({ page }) => {
-    const result = await diagnosePage(page, '/?tab=overview', 'dashboard-page');
+    const result = await diagnosePage(page, '/workspace?tab=overview', 'dashboard-page');
     
     console.log('\n=== DASHBOARD PAGE DIAGNOSIS SUMMARY ===');
     console.log(`Status: ${result.status}`);
@@ -248,7 +248,7 @@ test.describe('White Screen Diagnosis', () => {
   });
 
   test('diagnose dashboard page refresh behavior', async ({ page }) => {
-    const result = await testPageRefresh(page, '/?tab=overview', 'dashboard-refresh');
+    const result = await testPageRefresh(page, '/workspace?tab=overview', 'dashboard-refresh');
     
     console.log('\n=== DASHBOARD REFRESH DIAGNOSIS SUMMARY ===');
     console.log(`Initial Load Success: ${result.initialSuccess}`);
@@ -300,8 +300,8 @@ test.describe('White Screen Diagnosis', () => {
     console.log('\n=== TESTING AUTHENTICATION REDIRECT FLOW ===');
     
     // Try to access protected page directly
-    console.log('1. Accessing protected /?tab=overview page without authentication...');
-    await page.goto('/?tab=overview');
+    console.log('1. Accessing protected /workspace?tab=overview page without authentication...');
+    await page.goto('/workspace?tab=overview');
     await page.waitForTimeout(2000);
     
     const currentUrl = page.url();
@@ -310,7 +310,7 @@ test.describe('White Screen Diagnosis', () => {
     // Check if redirected to login
     if (currentUrl.includes('/login')) {
       console.log('✅ Correctly redirected to login page');
-    } else if (currentUrl.includes('/?tab=overview')) {
+    } else if (currentUrl.includes('/workspace?tab=overview')) {
       console.log('🤔 Stayed on dashboard - might be already authenticated or auth check failed');
     } else {
       console.log(`🚨 Unexpected redirect to: ${currentUrl}`);

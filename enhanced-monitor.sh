@@ -41,8 +41,8 @@ while true; do
         console.log('📍 Current URL:', page.url());
 
         // If not on workspace, navigate there
-        if (!page.url().includes('/?tab')) {
-          await page.goto('http://localhost:3001/?tab=overview');
+        if (!page.url().includes('/workspace')) {
+          await page.goto('http://localhost:3001/workspace?tab=overview');
         }
 
         // Wait longer for all family queries to execute

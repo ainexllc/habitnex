@@ -108,7 +108,7 @@ async function testAuthenticatedComponents() {
     
     // Test dashboard (CompactHabitCard button variants)
     console.log('📊 Testing dashboard (CompactHabitCard button fixes)');
-    await page.goto('http://localhost:3000/?tab=overview', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/workspace?tab=overview', { waitUntil: 'networkidle' });
     await page.waitForTimeout(3000);
     await page.screenshot({ 
       path: path.join(screenshotsDir, 'auth-05-dashboard.png'),

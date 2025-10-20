@@ -41,7 +41,7 @@ test.describe('Build and Module Validation', () => {
     // Test different pages for module loading issues
     const pagesToTest = [
       { url: '/', name: 'Landing Page' },
-      { url: '/?tab=overview', name: 'Dashboard' },
+      { url: '/workspace?tab=overview', name: 'Dashboard' },
       { url: '/moods/new', name: 'New Mood Form' },
       { url: '/habits/new', name: 'New Habit Form' },
       { url: '/login', name: 'Login Page' }
@@ -143,7 +143,7 @@ test.describe('Build and Module Validation', () => {
     
     // Load the main dashboard page (most complex)
     console.log('Loading dashboard page to test asset loading...');
-    await page.goto('/?tab=overview', { waitUntil: 'networkidle' });
+    await page.goto('/workspace?tab=overview', { waitUntil: 'networkidle' });
     await page.waitForTimeout(5000);
     
     console.log('\n=== ASSET LOADING SUMMARY ===');
@@ -188,7 +188,7 @@ test.describe('Build and Module Validation', () => {
     
     // Load dashboard and wait for hydration
     console.log('Loading dashboard and monitoring hydration...');
-    await page.goto('/?tab=overview');
+    await page.goto('/workspace?tab=overview');
     
     // Wait for hydration to complete
     await page.waitForTimeout(3000);

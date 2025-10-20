@@ -31,7 +31,7 @@ test.describe('Dashboard Debug Tests', () => {
     
     // Navigate to dashboard
     console.log('📍 Navigating to dashboard...');
-    await page.goto('http://localhost:3001/?tab=overview');
+    await page.goto('http://localhost:3001/workspace?tab=overview');
     await page.waitForLoadState('domcontentloaded');
     
     console.log('✅ Page URL:', page.url());
@@ -43,7 +43,7 @@ test.describe('Dashboard Debug Tests', () => {
     console.log('📍 Final URL after wait:', page.url());
     
     // Take screenshot
-    await page.screenshot({ path: 'test-screenshots/?tab=overview-debug.png', fullPage: true });
+    await page.screenshot({ path: 'test-screenshots/workspace-overview-debug.png', fullPage: true });
     
     // Check if we're on login page (authentication required)
     if (page.url().includes('/login')) {

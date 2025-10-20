@@ -22,7 +22,7 @@ test.describe('Dashboard Performance Analysis', () => {
     
     // Click submit and wait for navigation
     const submitPromise = page.click('button[type="submit"]');
-    const navigationPromise = page.waitForURL('**/?tab=overview**', { timeout: 30000 });
+    const navigationPromise = page.waitForURL('**/workspace?tab=overview**', { timeout: 30000 });
     
     await Promise.all([submitPromise, navigationPromise]);
     const authTime = Date.now() - authStartTime;
@@ -96,7 +96,7 @@ test.describe('Dashboard Performance Analysis', () => {
     }
 
     // Take a screenshot of the final state
-    await page.screenshot({ path: 'tests/screenshots/?tab=overview-performance-final.png' });
+    await page.screenshot({ path: 'tests/screenshots/workspace-overview-performance-final.png' });
     
     // Verify the dashboard actually loaded correctly
     await expect(page.getByText('Dashboard')).toBeVisible();
@@ -132,7 +132,7 @@ test.describe('Dashboard Performance Analysis', () => {
     await page.fill('input[type="email"]', 'dinohorn9@gmail.com');
     await page.fill('input[type="password"]', 'dinohorn');
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/?tab=overview**', { timeout: 30000 });
+    await page.waitForURL('**/workspace?tab=overview**', { timeout: 30000 });
     await page.waitForLoadState('networkidle', { timeout: 20000 });
 
     // Analyze the requests

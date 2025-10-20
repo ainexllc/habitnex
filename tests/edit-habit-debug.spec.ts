@@ -17,7 +17,7 @@ test.describe('Edit Habit End-to-End Test', () => {
     console.log('✅ Already authenticated');
 
     // Navigate to family dashboard
-    await page.goto('/?tab=overview');
+    await page.goto('/workspace?tab=overview');
     await page.waitForTimeout(3000);
 
     // Check if we're on the family dashboard

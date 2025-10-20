@@ -7,7 +7,7 @@ export default function FamilyChallengesPage() {
   const router = useRouter();
   
   useEffect(() => {
-    router.replace('/?tab=challenges');
+    router.replace('/workspace?tab=challenges');
   }, [router]);
 
   return null;

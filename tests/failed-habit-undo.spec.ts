@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Failed Habit Undo Functionality', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the dashboard
-    await page.goto('/?tab=overview');
+    await page.goto('/workspace?tab=overview');
     
     // Wait for the page to load
     await page.waitForLoadState('networkidle');

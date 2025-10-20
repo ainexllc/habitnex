@@ -19,7 +19,7 @@ test.describe('Manual Sign Out Test', () => {
     
     try {
       console.log('📍 Opening dashboard...');
-      await page.goto('http://localhost:3001/?tab=overview');
+      await page.goto('http://localhost:3001/workspace?tab=overview');
       
       console.log('⏳ Waiting for page to load...');
       await page.waitForTimeout(3000);

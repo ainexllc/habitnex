@@ -26,7 +26,7 @@ test.describe('Dark Mode Visual Tests', () => {
     });
     
     // Family dashboard
-    await page.goto('/?tab=overview');
+    await page.goto('/workspace?tab=overview');
     await page.waitForTimeout(3000);
     await page.screenshot({ 
       path: 'tests/screenshots/updated-dark-family.png', 

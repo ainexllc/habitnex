@@ -6,7 +6,7 @@ async function signIn(page) {
   await page.goto('/login');
   
   // Check if already signed in by looking for dashboard redirect
-  if (page.url().includes('/?tab=overview')) {
+  if (page.url().includes('/workspace?tab=overview')) {
     return; // Already signed in
   }
   
@@ -21,7 +21,7 @@ async function signIn(page) {
     await loginButton.click();
     
     // Wait for navigation to dashboard
-    await page.waitForURL('**/?tab=overview**', { timeout: 10000 });
+    await page.waitForURL('**/workspace?tab=overview**', { timeout: 10000 });
   }
 }
 

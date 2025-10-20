@@ -48,7 +48,7 @@ test.describe('Authenticated Habit Form Tests', () => {
       console.log('Please sign in manually in the browser, then press any key...');
       
       // Try dashboard first to verify auth
-      await page.goto('http://localhost:3001/?tab=overview');
+      await page.goto('http://localhost:3001/workspace?tab=overview');
       await page.waitForLoadState('domcontentloaded');
       console.log('Dashboard URL:', page.url());
       
@@ -150,7 +150,7 @@ test.describe('Authenticated Habit Form Tests', () => {
     console.log('Testing navigation from dashboard...');
     
     // Start from dashboard
-    await page.goto('http://localhost:3001/?tab=overview');
+    await page.goto('http://localhost:3001/workspace?tab=overview');
     await page.waitForLoadState('domcontentloaded');
     
     console.log('Dashboard URL:', page.url());

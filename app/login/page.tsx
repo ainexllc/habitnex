@@ -25,10 +25,10 @@ export default function LoginPage() {
   const { user, signIn, signInWithGoogle, authError, clearAuthError, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  // Redirect home if user is already authenticated
+  // Redirect to workspace if user is already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/');
+      router.push('/workspace?tab=overview');
     }
   }, [user, authLoading, router]);
 
@@ -41,7 +41,7 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
       await signIn(data.email, data.password);
-      router.push('/');
+      router.push('/workspace?tab=overview');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
@@ -61,14 +61,14 @@ export default function LoginPage() {
 
       // Store intended redirect path for OAuth redirect flow
       if (!usePopup && typeof window !== 'undefined') {
-        sessionStorage.setItem('habitnex:redirect-after-auth', '/');
+        sessionStorage.setItem('habitnex:redirect-after-auth', '/workspace?tab=overview');
       }
 
       const result = await signInWithGoogle(usePopup);
 
       // If using popup and we get a result immediately, navigate
       if (result) {
-        router.push('/');
+        router.push('/workspace?tab=overview');
       }
       // Redirect mode returns null and will be handled by AuthContext after redirect
     } catch (err: any) {

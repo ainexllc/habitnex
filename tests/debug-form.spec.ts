@@ -62,7 +62,7 @@ test.describe('Debug Habit Form Issues', () => {
   
   test('check app structure and routes', async ({ page }) => {
     // Test different routes to understand the app structure
-    const routes = ['/', '/login', '/signup', '/?tab=overview', '/habits', '/habits/new'];
+    const routes = ['/', '/login', '/signup', '/workspace?tab=overview', '/habits', '/habits/new'];
     
     for (const route of routes) {
       try {

@@ -23,13 +23,13 @@ export function FamilyNameBlock({ className }: { className?: string }) {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Link href="/?tab=overview">
+          <Link href="/workspace?tab=overview">
             <Button variant="outline" size="sm">
               <Home className="w-4 h-4 mr-1" />
               Overview
             </Button>
           </Link>
-          <Link href="/?tab=members">
+          <Link href="/workspace?tab=members">
             <Button variant="outline" size="sm">
               <Users className="w-4 h-4 mr-1" />
               Members

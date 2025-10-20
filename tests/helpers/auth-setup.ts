@@ -42,8 +42,8 @@ export async function navigateToFamilyDashboard(page: Page) {
   console.log('🏠 Navigating to family dashboard...');
 
   const currentUrl = page.url();
-  if (!currentUrl.includes('/?tab=overview')) {
-    await page.goto('/?tab=overview');
+  if (!currentUrl.includes('/workspace?tab=overview')) {
+    await page.goto('/workspace?tab=overview');
   }
 
   await page.waitForTimeout(3000);

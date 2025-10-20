@@ -99,7 +99,7 @@ async function testComponentFixesDirect() {
 
     // Try dashboard
     console.log('🏠 Testing dashboard route');
-    await page.goto('http://localhost:3000/?tab=overview');
+    await page.goto('http://localhost:3000/workspace?tab=overview');
     await page.waitForTimeout(3000); // Give time for auth check
     await page.screenshot({ 
       path: path.join(screenshotsDir, 'direct-04-dashboard-attempt.png'),

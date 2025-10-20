@@ -42,7 +42,7 @@ test.describe('Console Error Diagnosis', () => {
     try {
       console.log('📍 Loading dashboard with full error monitoring...');
       
-      await page.goto('http://localhost:3000/?tab=overview', { 
+      await page.goto('http://localhost:3000/workspace?tab=overview', { 
         waitUntil: 'domcontentloaded',
         timeout: 15000 
       });

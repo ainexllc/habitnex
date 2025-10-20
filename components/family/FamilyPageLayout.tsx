@@ -29,7 +29,7 @@ export function FamilyPageLayout({
   iconColor = "text-white",
   iconBgColor = "bg-blue-600 dark:bg-blue-500",
   backgroundVariant = 'normal',
-  backHref = '/?tab=overview',
+  backHref = '/workspace?tab=overview',
   backLabel = 'Back to Dashboard',
   className,
   showBackButton = true

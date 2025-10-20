@@ -112,6 +112,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
     
     const isFamilyRoute =
       pathname.startsWith('/family') ||
+      pathname.startsWith('/workspace') ||
       pathname === '/';
     
     const loadUserFamily = async () => {

@@ -16,11 +16,11 @@ test.describe('Avatar Preview Real-time Updates', () => {
     await loginButton.click();
     
     // Wait for login to complete and redirect
-    await page.waitForURL(/.*\/?tab=overview.*/, { timeout: 10000 });
+    await page.waitForURL(/.*\/workspace?tab=overview.*/, { timeout: 10000 });
     console.log('✅ Logged in successfully');
     
     // Navigate specifically to dashboard/family
-    await page.goto('/?tab=overview');
+    await page.goto('/workspace?tab=overview');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
     console.log('✅ Navigated to dashboard/family');
