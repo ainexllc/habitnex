@@ -26,6 +26,7 @@ import {
   Sparkles,
   Trophy,
 } from 'lucide-react';
+import { WorkspaceDashboardWithSuspense } from '@/components/workspace/WorkspaceDashboard';
 
 const featureHighlights: Array<{
   title: string;
@@ -637,12 +638,6 @@ function HomePageContent() {
   const router = useRouter();
   const isAuthenticated = !authLoading && Boolean(user);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/workspace?tab=overview');
-    }
-  }, [isAuthenticated, router]);
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
@@ -655,14 +650,7 @@ function HomePageContent() {
   }
 
   if (isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-orange-400 font-medium">Redirecting to your workspace...</p>
-        </div>
-      </div>
-    );
+    return <WorkspaceDashboardWithSuspense enforceWorkspaceRoute redirectIfUnauthenticated={false} />;
   }
 
   return <PublicHomePage />;
