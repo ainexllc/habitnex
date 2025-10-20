@@ -73,15 +73,20 @@ export default function SignUpPage() {
 
       const result = await signInWithGoogle(usePopup);
 
-      // If using popup and we get a result immediately, navigate
-      if (result) {
-        router.push('/workspace?tab=overview');
+      // For popup mode, don't redirect immediately to avoid race conditions
+      // The useEffect watching 'user' state will handle the redirect once auth state is fully propagated
+      // For redirect mode, AuthContext will handle the redirect after OAuth callback
+      if (!result) {
+        // Redirect mode - user will be redirected to Google OAuth
+        // Keep loading state true until page redirects
+      } else {
+        // Popup mode - auth succeeded but don't navigate yet
+        // Let the useEffect handle navigation after state updates
+        // Keep loading true to show loading state during auth state propagation
       }
-      // Redirect mode returns null and will be handled by AuthContext after redirect
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || 'Failed to sign in with Google');
-    } finally {
       setLoading(false);
     }
   };
