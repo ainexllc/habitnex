@@ -3,7 +3,7 @@ import { Squada_One } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { FamilyProvider } from '@/contexts/FamilyContext'
+import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { GlobalDataProvider } from '@/contexts/GlobalDataContext'
 import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay'
@@ -58,7 +58,7 @@ export default function RootLayout({
       <body className={`antialiased ${squadaOne.variable}`}>
         <ThemeProvider>
           <AuthProvider>
-            <FamilyProvider>
+            <WorkspaceProvider>
               <GlobalDataProvider>
                 <CelebrationProvider>
                   {children}
@@ -91,7 +91,7 @@ export default function RootLayout({
                   />
                 </CelebrationProvider>
               </GlobalDataProvider>
-            </FamilyProvider>
+            </WorkspaceProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

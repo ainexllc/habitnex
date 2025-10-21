@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useFamily } from '@/contexts/FamilyContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { 
   getFamilyCompletionsForAnalytics as getFamilyCompletions, 
   getFamilyMoods, 
   getFamilyRewards, 
   getRedemptionHistory,
-  getFamilyAnalyticsSummary
-} from '@/lib/familyDb';
-import type { FamilyAnalytics } from '@/types/family';
+  getWorkspaceAnalyticsSummary
+} from '@/lib/workspaceDb';
+import type { WorkspaceAnalytics } from '@/types/workspace';
 
 interface AnalyticsData {
   completions: any[];
@@ -51,9 +51,9 @@ interface TimeAnalytics {
   perfectDays: number; // Days where all habits were completed
 }
 
-export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
-  const { currentFamily } = useFamily();
-  const [analytics, setAnalytics] = useState<FamilyAnalytics | null>(null);
+export function useWorkspaceAnalytics(period: 'week' | 'month' | 'year' = 'week') {
+  const { currentWorkspace } = useWorkspace();
+  const [analytics, setAnalytics] = useState<WorkspaceAnalytics | null>(null);
   const [memberAnalytics, setMemberAnalytics] = useState<MemberAnalytics[]>([]);
   const [habitAnalytics, setHabitAnalytics] = useState<HabitAnalytics[]>([]);
   const [timeAnalytics, setTimeAnalytics] = useState<TimeAnalytics[]>([]);
@@ -81,7 +81,7 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
   }, []);
 
   const loadAnalyticsData = useCallback(async () => {
-    if (!currentFamily?.id) return;
+    if (!currentWorkspace?.id) return;
 
     try {
       setLoading(true);
@@ -91,17 +91,17 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
 
       // Load all necessary data
       const [completions, moods, rewards, redemptions] = await Promise.all([
-        getFamilyCompletions(currentFamily.id, startDate, endDate),
-        getFamilyMoods(currentFamily.id, startDate, endDate), 
-        getFamilyRewards(currentFamily.id),
-        getRedemptionHistory(currentFamily.id)
+        getFamilyCompletions(currentWorkspace.id, startDate, endDate),
+        getFamilyMoods(currentWorkspace.id, startDate, endDate), 
+        getWorkspaceRewards(currentWorkspace.id),
+        getRedemptionHistory(currentWorkspace.id)
       ]);
 
       const data: AnalyticsData = { completions, moods, rewards, redemptions };
       
       // Calculate analytics
       const overallAnalytics = calculateOverallAnalytics(data);
-      const memberStats = calculateMemberAnalytics(data, currentFamily.members);
+      const memberStats = calculateMemberAnalytics(data, currentWorkspace.members);
       const habitStats = calculateHabitAnalytics(data);
       const timeStats = calculateTimeAnalytics(data, period);
 
@@ -116,15 +116,15 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
     } finally {
       setLoading(false);
     }
-  }, [currentFamily?.id, period, calculateDateRange]);
+  }, [currentWorkspace?.id, period, calculateDateRange]);
 
   useEffect(() => {
     loadAnalyticsData();
   }, [loadAnalyticsData]);
 
-  const calculateOverallAnalytics = (data: AnalyticsData): FamilyAnalytics => {
+  const calculateOverallAnalytics = (data: AnalyticsData): WorkspaceAnalytics => {
     const totalCompletions = data.completions.length;
-    const totalMembers = currentFamily?.members.length || 0;
+    const totalMembers = currentWorkspace?.members.length || 0;
     const totalHabits = new Set(data.completions.map(c => c.habitId)).size;
     
     // Calculate completion rate (assuming each member should complete habits daily)
@@ -136,7 +136,7 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
     const activeMembers = new Set(data.completions.map(c => c.memberId)).size;
 
     return {
-      familyId: currentFamily?.id || '',
+      workspaceId: currentWorkspace?.id || '',
       period,
       overall: {
         totalCompletions,
@@ -207,7 +207,7 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
       const uniqueMembers = new Set(completions.map(c => c.memberId)).size;
       
       // Calculate completion rate based on active members
-      const totalMembers = currentFamily?.members.length || 1;
+      const totalMembers = currentWorkspace?.members.length || 1;
       const daysInPeriod = period === 'week' ? 7 : period === 'month' ? 30 : 365;
       const possibleCompletions = totalMembers * daysInPeriod;
       const completionRate = (totalCompletions / possibleCompletions) * 100;
@@ -222,7 +222,7 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
       const mostSuccessfulMemberId = Object.entries(memberCompletionCounts)
         .sort(([, a], [, b]) => b - a)[0]?.[0] || '';
 
-      const mostSuccessfulMember = currentFamily?.members.find(m => m.id === mostSuccessfulMemberId)?.displayName || 'Unknown';
+      const mostSuccessfulMember = currentWorkspace?.members.find(m => m.id === mostSuccessfulMemberId)?.displayName || 'Unknown';
 
       // Calculate trend (simplified - could be more sophisticated)
       const trendDirection = calculateHabitTrend(completions);
@@ -397,7 +397,7 @@ export function useFamilyAnalytics(period: 'week' | 'month' | 'year' = 'week') {
   const calculatePerfectDays = (completions: any[], timeKey: string): number => {
     // Simplified calculation - could be more accurate with actual habit requirements
     const uniqueDays = new Set(completions.map(c => c.date)).size;
-    const expectedCompletionsPerDay = currentFamily?.members.length || 1;
+    const expectedCompletionsPerDay = currentWorkspace?.members.length || 1;
     const actualCompletionsPerDay = completions.length / uniqueDays;
     
     return actualCompletionsPerDay >= expectedCompletionsPerDay ? uniqueDays : 0;

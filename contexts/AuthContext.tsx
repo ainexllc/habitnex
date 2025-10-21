@@ -144,7 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           setUserProfile(profile);
           
-          // Family creation is now optional - users can create families manually
+          // Workspace creation is now optional - users can create families manually
           // This gives users choice and control over their data structure
         } catch (error) {
           setAuthError('Failed to load user profile');

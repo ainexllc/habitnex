@@ -1,6 +1,27 @@
+/**
+ * @deprecated This file is deprecated. Use types/workspace.ts instead.
+ * These types are re-exported from workspace.ts for backward compatibility.
+ * All "family" terminology has been replaced with "workspace" for better scalability.
+ *
+ * Migration Path:
+ * - Family → Workspace
+ * - FamilyMember → WorkspaceMember
+ * - FamilyHabit → WorkspaceHabit
+ * - familyId → workspaceId
+ *
+ * This file will be removed in a future version.
+ */
+
 import { Timestamp } from 'firebase/firestore';
+import * as WS from './workspace';
+
+// Re-export workspace types with family aliases for backward compatibility
+/** @deprecated Use WorkspaceType from workspace.ts */
+export type { WorkspaceType as FamilyType } from './workspace';
 
 export type HabitNexModeId = 'personalPulse' | 'partnerBoost' | 'householdHarmony' | 'familyOrbit';
+
+/** @deprecated Use WorkspaceTabId from workspace.ts */
 export type FamilyTabId = 'overview' | 'members' | 'habits' | 'challenges' | 'rewards' | 'analytics' | 'settings';
 
 export interface Family {

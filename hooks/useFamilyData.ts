@@ -1,14 +1,14 @@
 'use client';
 
 import { useGlobalData } from '@/contexts/GlobalDataContext';
-import { useFamily } from '@/contexts/FamilyContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 
 /**
  * Hook for accessing ONLY family data
  * This should NEVER be used in individual dashboard components
  */
-export function useFamilyData() {
-  const { currentFamily } = useFamily();
+export function useWorkspaceData() {
+  const { currentWorkspace } = useWorkspace();
   const {
     familyHabits,
     familyCompletions,
@@ -19,7 +19,7 @@ export function useFamilyData() {
   } = useGlobalData();
 
   // Validate that we're only returning family data and only when in a family context
-  if (!currentFamily) {
+  if (!currentWorkspace) {
     return {
       habits: [],
       completions: [],
@@ -31,8 +31,8 @@ export function useFamilyData() {
   }
 
   // Additional validation - ensure all data belongs to current family
-  const validatedHabits = familyHabits.filter(habit => habit.familyId === currentFamily.id);
-  const validatedCompletions = familyCompletions.filter(completion => completion.familyId === currentFamily.id);
+  const validatedHabits = familyHabits.filter(habit => habit.workspaceId === currentWorkspace.id);
+  const validatedCompletions = familyCompletions.filter(completion => completion.workspaceId === currentWorkspace.id);
 
   return {
     habits: validatedHabits,

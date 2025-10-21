@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useFamily } from '@/contexts/FamilyContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { 
   collection, 
   query, 
@@ -14,7 +14,7 @@ import {
 import { db } from '@/lib/firebase';
 import { getTodayDateString } from '@/lib/utils';
 import type { Habit, HabitCompletion, MoodEntry } from '@/types';
-import type { FamilyHabit, FamilyHabitCompletion } from '@/types/family';
+import type { WorkspaceHabit, WorkspaceHabitCompletion } from '@/types/workspace';
 
 // Connection status for real-time updates
 export type ConnectionStatus = 'connected' | 'disconnected' | 'connecting';
@@ -49,9 +49,9 @@ interface GlobalDataContextType {
   completions: HabitCompletion[];
   moods: MoodEntry[];
   
-  // Family data
-  familyHabits: FamilyHabit[];
-  familyCompletions: FamilyHabitCompletion[];
+  // Workspace data
+  familyHabits: WorkspaceHabit[];
+  familyCompletions: WorkspaceHabitCompletion[];
   
   // State management
   loading: boolean;
@@ -75,7 +75,7 @@ const GlobalDataContext = createContext<GlobalDataContextType | undefined>(undef
 
 export function GlobalDataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { currentFamily, currentMember } = useFamily();
+  const { currentWorkspace, currentMember } = useWorkspace();
   
   // State for personal data
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -83,8 +83,8 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
   const [moods, setMoods] = useState<MoodEntry[]>([]);
   
   // State for family data
-  const [familyHabits, setFamilyHabits] = useState<FamilyHabit[]>([]);
-  const [familyCompletions, setFamilyCompletions] = useState<FamilyHabitCompletion[]>([]);
+  const [familyHabits, setWorkspaceHabits] = useState<WorkspaceHabit[]>([]);
+  const [familyCompletions, setFamilyCompletions] = useState<WorkspaceHabitCompletion[]>([]);
   
   // State management
   const [loading, setLoading] = useState(true);
@@ -191,48 +191,48 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
 
   // Setup real-time listeners for family data
   const setupFamilyListeners = useCallback(() => {
-    if (!currentFamily?.id) {
-      setFamilyHabits([]);
+    if (!currentWorkspace?.id) {
+      setWorkspaceHabits([]);
       setFamilyCompletions([]);
       return;
     }
 
     try {
-      // Family habits listener - ONLY from families collection, never users collection
+      // Workspace habits listener - ONLY from families collection, never users collection
       const familyHabitsQuery = query(
-        collection(db, 'families', currentFamily.id, 'habits'),
+        collection(db, 'workspaces', currentWorkspace.id, 'habits'),
         orderBy('createdAt', 'desc')
       );
       
-      const unsubscribeFamilyHabits = onSnapshot(
+      const unsubscribeWorkspaceHabits = onSnapshot(
         familyHabitsQuery,
         (snapshot) => {
           const familyHabitsData = snapshot.docs.map(doc => ({
             id: doc.id,
-            familyId: currentFamily.id,
+            workspaceId: currentWorkspace.id,
             ...doc.data()
-          })) as FamilyHabit[];
+          })) as WorkspaceHabit[];
           
           // Ensure these are definitively family habits, not individual habits, and are active
-          const validatedFamilyHabits = familyHabitsData.filter(habit =>
-            habit.familyId === currentFamily.id &&
+          const validatedWorkspaceHabits = familyHabitsData.filter(habit =>
+            habit.workspaceId === currentWorkspace.id &&
             habit.assignedMembers &&
             habit.isActive !== false &&
             habit.isArchived !== true
           );
           
-          setFamilyHabits(validatedFamilyHabits);
-          console.log('Family habits loaded:', validatedFamilyHabits.length, 'habits for family', currentFamily.id);
+          setWorkspaceHabits(validatedWorkspaceHabits);
+          console.log('Workspace habits loaded:', validatedWorkspaceHabits.length, 'habits for family', currentWorkspace.id);
         },
         (err) => {
-          console.error('Family habits listener error:', err);
+          console.error('Workspace habits listener error:', err);
           setError('Failed to sync family habits');
         }
       );
 
-      // Family completions listener - ONLY from families collection
+      // Workspace completions listener - ONLY from families collection
       const familyCompletionsQuery = query(
-        collection(db, 'families', currentFamily.id, 'completions'),
+        collection(db, 'workspaces', currentWorkspace.id, 'completions'),
         orderBy('date', 'desc')
       );
       
@@ -241,13 +241,13 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
         (snapshot) => {
           const familyCompletionsData = snapshot.docs.map(doc => ({
             id: doc.id,
-            familyId: currentFamily.id,
+            workspaceId: currentWorkspace.id,
             ...doc.data()
-          })) as FamilyHabitCompletion[];
+          })) as WorkspaceHabitCompletion[];
           
           // Ensure these are definitively family completions, not individual completions
           const validatedFamilyCompletions = familyCompletionsData.filter(completion => 
-            completion.familyId === currentFamily.id && completion.memberId
+            completion.workspaceId === currentWorkspace.id && completion.memberId
           );
           
           // Debug logging for completion data
@@ -275,23 +275,23 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
           }
           
           setFamilyCompletions(validatedFamilyCompletions);
-          console.log('Family completions loaded:', validatedFamilyCompletions.length, 'completions for family', currentFamily.id);
+          console.log('Workspace completions loaded:', validatedFamilyCompletions.length, 'completions for family', currentWorkspace.id);
         },
         (err) => {
-          console.error('Family completions listener error:', err);
+          console.error('Workspace completions listener error:', err);
           setError('Failed to sync family completions');
         }
       );
 
       // Register family subscriptions
-      subscriptionManager.add('familyHabits', unsubscribeFamilyHabits);
+      subscriptionManager.add('familyHabits', unsubscribeWorkspaceHabits);
       subscriptionManager.add('familyCompletions', unsubscribeFamilyCompletions);
 
     } catch (err) {
       console.error('Failed to setup family listeners:', err);
       setError('Failed to connect to family updates');
     }
-  }, [currentFamily?.id, subscriptionManager]);
+  }, [currentWorkspace?.id, subscriptionManager]);
 
   // Optimistic update functions
   const updateHabitOptimistic = useCallback((habitId: string, updates: Partial<Habit>) => {

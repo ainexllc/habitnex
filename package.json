@@ -24,7 +24,10 @@
     "firebase:rules": "firebase deploy --only firestore:rules",
     "firebase:indexes": "firebase deploy --only firestore:indexes",
     "firebase:deploy": "firebase deploy --only firestore",
-    "deploy": "npm run build && firebase deploy --only hosting"
+    "deploy": "npm run build && firebase deploy --only hosting",
+    "migrate:firestore": "tsx scripts/migrate-firestore.ts",
+    "migrate:firestore:dry-run": "tsx scripts/migrate-firestore.ts --dry-run",
+    "migrate:firestore:rollback": "tsx scripts/migrate-firestore.ts --rollback"
   },
   "keywords": [],
   "author": "",

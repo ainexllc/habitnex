@@ -26,6 +26,17 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+
+  // URL redirects for backward compatibility (family → workspace)
+  async redirects() {
+    return [
+      {
+        source: '/family/:path*',
+        destination: '/workspace/:path*',
+        permanent: true, // 308 redirect - permanently moved
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

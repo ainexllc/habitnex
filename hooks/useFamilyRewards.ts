@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useFamily } from '@/contexts/FamilyContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { 
   Reward, 
   RewardRedemption,
   CreateRewardRequest 
-} from '@/types/family';
+} from '@/types/workspace';
 import {
   createReward,
   getFamilyRewards,
   redeemReward
-} from '@/lib/familyDb';
+} from '@/lib/workspaceDb';
 
-export function useFamilyRewards(memberId?: string) {
-  const { currentFamily, currentMember, isParent } = useFamily();
+export function useWorkspaceRewards(memberId?: string) {
+  const { currentWorkspace, currentMember, isParent } = useWorkspace();
   
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
@@ -23,13 +23,13 @@ export function useFamilyRewards(memberId?: string) {
   
   // Load rewards data
   const loadData = useCallback(async () => {
-    if (!currentFamily?.id) return;
+    if (!currentWorkspace?.id) return;
     
     try {
       setLoading(true);
       setError(null);
       
-      const rewardsData = await getFamilyRewards(currentFamily.id, targetMemberId);
+      const rewardsData = await getWorkspaceRewards(currentWorkspace.id, targetMemberId);
       setRewards(rewardsData);
       
       // TODO: Load redemptions when implemented
@@ -42,7 +42,7 @@ export function useFamilyRewards(memberId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [currentFamily?.id, targetMemberId]);
+  }, [currentWorkspace?.id, targetMemberId]);
   
   // Load data when family or member changes
   useEffect(() => {
@@ -50,8 +50,8 @@ export function useFamilyRewards(memberId?: string) {
   }, [loadData]);
   
   // Create new reward (parent only)
-  const createNewReward = useCallback(async (rewardData: Omit<CreateRewardRequest['reward'], 'familyId'>) => {
-    if (!currentFamily?.id || !currentMember?.id || !isParent) {
+  const createNewReward = useCallback(async (rewardData: Omit<CreateRewardRequest['reward'], 'workspaceId'>) => {
+    if (!currentWorkspace?.id || !currentMember?.id || !isParent) {
       throw new Error('Only parents can create rewards');
     }
     
@@ -60,7 +60,7 @@ export function useFamilyRewards(memberId?: string) {
       setError(null);
       
       const request: CreateRewardRequest = {
-        familyId: currentFamily.id,
+        workspaceId: currentWorkspace.id,
         reward: {
           ...rewardData,
           createdBy: currentMember.id,
@@ -81,11 +81,11 @@ export function useFamilyRewards(memberId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [currentFamily?.id, currentMember?.id, isParent, loadData]);
+  }, [currentWorkspace?.id, currentMember?.id, isParent, loadData]);
   
   // Redeem a reward
   const redeemRewardForMember = useCallback(async (rewardId: string, memberId?: string) => {
-    if (!currentFamily?.id) {
+    if (!currentWorkspace?.id) {
       throw new Error('Must be in a family to redeem rewards');
     }
     
@@ -98,7 +98,7 @@ export function useFamilyRewards(memberId?: string) {
       setLoading(true);
       setError(null);
       
-      await redeemReward(currentFamily.id, rewardId, redeemingMemberId);
+      await redeemReward(currentWorkspace.id, rewardId, redeemingMemberId);
       await loadData(); // Refresh data
       
     } catch (err) {
@@ -108,7 +108,7 @@ export function useFamilyRewards(memberId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [currentFamily?.id, targetMemberId, loadData]);
+  }, [currentWorkspace?.id, targetMemberId, loadData]);
   
   // Get available rewards for a member (filters by points and availability)
   const getAvailableRewards = useCallback((memberPoints: number, specificMemberId?: string) => {
@@ -246,7 +246,7 @@ export function useRewardTemplates() {
   const experienceRewards = [
     { emoji: '🎬', title: 'Movie Night', description: 'Choose the family movie', points: 10 },
     { emoji: '🏊', title: 'Swimming Trip', description: 'Visit the local pool', points: 25 },
-    { emoji: '🎳', title: 'Bowling', description: 'Family bowling night', points: 20 },
+    { emoji: '🎳', title: 'Bowling', description: 'Workspace bowling night', points: 20 },
     { emoji: '🎮', title: 'Arcade Visit', description: 'Spend time at the arcade', points: 15 },
     { emoji: '🍕', title: 'Pizza Party', description: 'Order your favorite pizza', points: 12 }
   ];
@@ -278,7 +278,7 @@ export function useRewardTemplates() {
     { emoji: '🎨', title: 'Art Project', description: 'Do a fun craft together', points: 12 },
     { emoji: '👩‍🍳', title: 'Cooking Together', description: 'Help make a special meal', points: 15 },
     { emoji: '🏃', title: 'Playground Visit', description: 'Extra time at the park', points: 8 },
-    { emoji: '🎪', title: 'Family Game', description: 'Choose the family game night game', points: 6 }
+    { emoji: '🎪', title: 'Workspace Game', description: 'Choose the family game night game', points: 6 }
   ];
   
   return {
@@ -297,3 +297,6 @@ export function useRewardTemplates() {
     ]
   };
 }
+// Backward compatibility exports
+/** @deprecated Use useWorkspaceRewards instead */
+export const useFamilyRewards = useWorkspaceRewards;

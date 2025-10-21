@@ -1,19 +1,19 @@
 import { useCallback, useState, useEffect } from 'react';
-import { useFamily } from '@/contexts/FamilyContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useGlobalData } from '@/contexts/GlobalDataContext';
 import { 
-  FamilyHabit, 
-  FamilyHabitCompletion,
-  CreateFamilyHabitRequest 
-} from '@/types/family';
+  WorkspaceHabit, 
+  WorkspaceHabitCompletion,
+  CreateWorkspaceHabitRequest 
+} from '@/types/workspace';
 import {
-  createFamilyHabit,
-  getFamilyHabits,
-  updateFamilyHabit,
-  deleteFamilyHabit,
-  toggleFamilyHabitCompletion,
+  createWorkspaceHabit,
+  getWorkspaceHabits,
+  updateWorkspaceHabit,
+  deleteWorkspaceHabit,
+  toggleWorkspaceHabitCompletion,
   getFamilyCompletions
-} from '@/lib/familyDb';
+} from '@/lib/workspaceDb';
 import { getTodayDateString } from '@/lib/utils';
 
 // Helper function for default points
@@ -26,8 +26,8 @@ const getDefaultPoints = (difficulty: 'easy' | 'medium' | 'hard'): number => {
   }
 };
 
-export function useFamilyHabits(memberId?: string) {
-  const { currentFamily, currentMember } = useFamily();
+export function useWorkspaceHabits(memberId?: string) {
+  const { currentWorkspace, currentMember } = useWorkspace();
   const {
     familyHabits: habits,
     familyCompletions: completions,
@@ -48,14 +48,14 @@ export function useFamilyHabits(memberId?: string) {
   );
   
   // Create new habit
-  const createHabit = useCallback(async (habitData: Omit<CreateFamilyHabitRequest['habit'], 'familyId'>) => {
-    if (!currentFamily?.id || !currentMember?.id) {
+  const createHabit = useCallback(async (habitData: Omit<CreateWorkspaceHabitRequest['habit'], 'workspaceId'>) => {
+    if (!currentWorkspace?.id || !currentMember?.id) {
       throw new Error('Must be in a family to create habits');
     }
     
     try {
-      const request: CreateFamilyHabitRequest = {
-        familyId: currentFamily.id,
+      const request: CreateWorkspaceHabitRequest = {
+        workspaceId: currentWorkspace.id,
         habit: {
           ...habitData,
           createdBy: currentMember.id,
@@ -66,29 +66,29 @@ export function useFamilyHabits(memberId?: string) {
         }
       };
       
-      await createFamilyHabit(request);
+      await createWorkspaceHabit(request);
       // Real-time listener will update the habits automatically
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create habit';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, currentMember?.id]);
+  }, [currentWorkspace?.id, currentMember?.id]);
   
   // Update habit
-  const updateHabit = useCallback(async (habitId: string, updates: Partial<FamilyHabit>) => {
-    if (!currentFamily?.id) {
+  const updateHabit = useCallback(async (habitId: string, updates: Partial<WorkspaceHabit>) => {
+    if (!currentWorkspace?.id) {
       throw new Error('Must be in a family to update habits');
     }
     
     try {
-      await updateFamilyHabit(currentFamily.id, habitId, updates);
+      await updateWorkspaceHabit(currentWorkspace.id, habitId, updates);
       // Real-time listener will update the habits automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update habit';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id]);
+  }, [currentWorkspace?.id]);
   
   // Toggle habit completion
   const toggleCompletion = useCallback(async (
@@ -105,7 +105,7 @@ export function useFamilyHabits(memberId?: string) {
       const day = String(today.getDate()).padStart(2, '0');
       date = `${year}-${month}-${day}`;
     }
-    if (!currentFamily?.id || !targetMemberId) {
+    if (!currentWorkspace?.id || !targetMemberId) {
       throw new Error('Must be in a family to toggle completions');
     }
     
@@ -120,8 +120,8 @@ export function useFamilyHabits(memberId?: string) {
         completed = !existingCompletion?.completed;
       }
       
-      await toggleFamilyHabitCompletion(
-        currentFamily.id,
+      await toggleWorkspaceHabitCompletion(
+        currentWorkspace.id,
         habitId,
         targetMemberId,
         date,
@@ -134,7 +134,7 @@ export function useFamilyHabits(memberId?: string) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, targetMemberId, memberCompletions]);
+  }, [currentWorkspace?.id, targetMemberId, memberCompletions]);
   
   // Get today's habits for a member
   const getTodayHabits = useCallback(() => {
@@ -228,8 +228,8 @@ export function useFamilyHabits(memberId?: string) {
 
 
 // Hook for managing all family members' habits (for parents/dashboard view)
-export function useAllFamilyHabits() {
-  const { currentFamily, currentMember, isParent } = useFamily();
+export function useAllWorkspaceHabits() {
+  const { currentWorkspace, currentMember, isParent } = useWorkspace();
   const {
     familyHabits: allHabits,
     familyCompletions: allCompletions,
@@ -239,30 +239,30 @@ export function useAllFamilyHabits() {
   } = useGlobalData();
   
   // Create new habit
-  const createHabit = useCallback(async (habitData: Omit<CreateFamilyHabitRequest['habit'], 'familyId'>) => {
-    if (!currentFamily?.id || !currentMember?.id) {
+  const createHabit = useCallback(async (habitData: Omit<CreateWorkspaceHabitRequest['habit'], 'workspaceId'>) => {
+    if (!currentWorkspace?.id || !currentMember?.id) {
       throw new Error('Must be in a family to create habits');
     }
     
     try {
-      const request: CreateFamilyHabitRequest = {
-        familyId: currentFamily.id,
+      const request: CreateWorkspaceHabitRequest = {
+        workspaceId: currentWorkspace.id,
         habit: {
           ...habitData,
           createdBy: currentMember.id,
-          familyId: currentFamily.id,
+          workspaceId: currentWorkspace.id,
           points: habitData.points || getDefaultPoints(habitData.difficulty || 'medium'),
           bonusPoints: habitData.bonusPoints || 0
         }
       };
       
-      await createFamilyHabit(request);
+      await createWorkspaceHabit(request);
       // Real-time listener will update the habits automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create habit';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id, currentMember?.id]);
+  }, [currentWorkspace?.id, currentMember?.id]);
   
   // Get habits by member
   const getHabitsByMember = useCallback((memberId: string) => {
@@ -372,34 +372,34 @@ export function useAllFamilyHabits() {
   }, [allHabits, allCompletions, getHabitsByMember]);
   
   // Update habit
-  const updateHabit = useCallback(async (habitId: string, updates: Partial<FamilyHabit>) => {
-    if (!currentFamily?.id) {
+  const updateHabit = useCallback(async (habitId: string, updates: Partial<WorkspaceHabit>) => {
+    if (!currentWorkspace?.id) {
       throw new Error('Must be in a family to update habits');
     }
     
     try {
-      await updateFamilyHabit(currentFamily.id, habitId, updates);
+      await updateWorkspaceHabit(currentWorkspace.id, habitId, updates);
       // Real-time listener will update the habits automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update habit';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id]);
+  }, [currentWorkspace?.id]);
 
   // Delete habit
   const deleteHabit = useCallback(async (habitId: string) => {
-    if (!currentFamily?.id) {
+    if (!currentWorkspace?.id) {
       throw new Error('Must be in a family to delete habits');
     }
     
     try {
-      await deleteFamilyHabit(currentFamily.id, habitId);
+      await deleteWorkspaceHabit(currentWorkspace.id, habitId);
       // Real-time listener will handle removal from UI
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete habit';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id]);
+  }, [currentWorkspace?.id]);
 
   // Toggle completion for any family member
   const toggleMemberCompletion = useCallback(async (
@@ -409,15 +409,15 @@ export function useAllFamilyHabits() {
     date: string = getTodayDateString(),
     notes?: string
   ) => {
-    if (!currentFamily?.id) {
+    if (!currentWorkspace?.id) {
       throw new Error('Must be in a family to toggle completions');
     }
     
 
     
     try {
-      await toggleFamilyHabitCompletion(
-        currentFamily.id,
+      await toggleWorkspaceHabitCompletion(
+        currentWorkspace.id,
         habitId,
         memberId,
         date,
@@ -429,7 +429,7 @@ export function useAllFamilyHabits() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle completion';
       throw new Error(errorMessage);
     }
-  }, [currentFamily?.id]);
+  }, [currentWorkspace?.id]);
 
   // Get habit completion for a specific habit, member, and date
   const getHabitCompletion = useCallback((habitId: string, date: string, memberId?: string) => {
@@ -463,3 +463,8 @@ export function useAllFamilyHabits() {
     clearError: () => {} // No-op since error is managed globally
   };
 }
+// Backward compatibility exports
+/** @deprecated Use useWorkspaceHabits instead */
+export const useFamilyHabits = useWorkspaceHabits;
+/** @deprecated Use useAllWorkspaceHabits instead */
+export const useAllFamilyHabits = useAllWorkspaceHabits;

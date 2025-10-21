@@ -46,6 +46,7 @@ playwright/.cache/
 # firebase
 .firebase/
 firebase-debug.log
+serviceAccountKey.json
 
 # debug files and scripts
 debug-*.js

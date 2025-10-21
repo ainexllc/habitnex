@@ -14,17 +14,17 @@ import {
   Gift,
   BarChart3,
 } from 'lucide-react';
-import { FamilyMembersTab } from '@/components/family/tabs/FamilyMembersTab';
-import { FamilyHabitsTab } from '@/components/family/tabs/FamilyHabitsTab';
-import { FamilyChallengesTab } from '@/components/family/tabs/FamilyChallengesTab';
-import { FamilyRewardsTab } from '@/components/family/tabs/FamilyRewardsTab';
-import { FamilyAnalyticsTab } from '@/components/family/tabs/FamilyAnalyticsTab';
-import { FamilyOverviewTab } from '@/components/family/tabs/FamilyOverviewTab';
-import { FamilySettingsTab } from '@/components/family/tabs/FamilySettingsTab';
-import { MemberModal } from '@/components/family/MemberModal';
-import { CreateFamilyHabitModal } from '@/components/family/CreateFamilyHabitModal';
-import { CreateFamilyChallengeModal } from '@/components/family/CreateFamilyChallengeModal';
-import { ModernFamilyHeader } from '@/components/family/ModernFamilyHeader';
+import { WorkspaceMembersTab } from '@/components/workspace/tabs/WorkspaceMembersTab';
+import { WorkspaceHabitsTab } from '@/components/workspace/tabs/WorkspaceHabitsTab';
+import { WorkspaceChallengesTab } from '@/components/workspace/tabs/WorkspaceChallengesTab';
+import { WorkspaceRewardsTab } from '@/components/workspace/tabs/WorkspaceRewardsTab';
+import { WorkspaceAnalyticsTab } from '@/components/workspace/tabs/WorkspaceAnalyticsTab';
+import { WorkspaceOverviewTab } from '@/components/workspace/tabs/WorkspaceOverviewTab';
+import { WorkspaceSettingsTab } from '@/components/workspace/tabs/WorkspaceSettingsTab';
+import { MemberModal } from '@/components/workspace/MemberModal';
+import { CreateWorkspaceHabitModal } from '@/components/workspace/CreateWorkspaceHabitModal';
+import { CreateWorkspaceChallengeModal } from '@/components/workspace/CreateWorkspaceChallengeModal';
+import { ModernWorkspaceHeader } from '@/components/workspace/ModernWorkspaceHeader';
 import { FeedbackSystem } from '@/components/feedback';
 import type { FamilyTabId } from '@/types/family';
 
@@ -149,27 +149,27 @@ export function WorkspaceDashboard({
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <FamilyOverviewTab />;
+        return <WorkspaceOverviewTab />;
       case 'members':
-        return <FamilyMembersTab onAddMember={() => setShowAddMemberModal(true)} />;
+        return <WorkspaceMembersTab onAddMember={() => setShowAddMemberModal(true)} />;
       case 'habits':
-        return <FamilyHabitsTab onCreateHabit={() => setShowCreateHabitModal(true)} />;
+        return <WorkspaceHabitsTab onCreateHabit={() => setShowCreateHabitModal(true)} />;
       case 'challenges':
-        return <FamilyChallengesTab onCreateChallenge={() => setShowCreateChallengeModal(true)} />;
+        return <WorkspaceChallengesTab onCreateChallenge={() => setShowCreateChallengeModal(true)} />;
       case 'rewards':
-        return <FamilyRewardsTab />;
+        return <WorkspaceRewardsTab />;
       case 'analytics':
-        return <FamilyAnalyticsTab />;
+        return <WorkspaceAnalyticsTab />;
       case 'settings':
-        return <FamilySettingsTab />;
+        return <WorkspaceSettingsTab />;
       default:
-        return <FamilyOverviewTab />;
+        return <WorkspaceOverviewTab />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <ModernFamilyHeader
+      <ModernWorkspaceHeader
         familyName={currentFamily.name}
         date={today}
         isParent={isParent}
@@ -186,12 +186,12 @@ export function WorkspaceDashboard({
         onClose={() => setShowAddMemberModal(false)}
       />
 
-      <CreateFamilyHabitModal
+      <CreateWorkspaceHabitModal
         isOpen={showCreateHabitModal}
         onClose={() => setShowCreateHabitModal(false)}
       />
 
-      <CreateFamilyChallengeModal
+      <CreateWorkspaceChallengeModal
         isOpen={showCreateChallengeModal}
         onClose={() => setShowCreateChallengeModal(false)}
       />
