@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { signUp, signIn, signInWithGoogle, logOut, resetPassword, handleRedirectResult, getAuthErrorMessage } from '@/lib/auth';
+import { signUp, signIn, signInWithGoogle, logOut, resetPassword, handleRedirectResult, getAuthErrorMessage, REDIRECT_STORAGE_KEY, type SignInWithGoogleOptions } from '@/lib/auth';
 import { createUserProfile, getUserProfile } from '@/lib/db';
 import { defaultThemePreference, themePresets, themeFonts } from '@/lib/theme-presets';
 import type { User as UserType } from '@/types';
@@ -15,7 +15,7 @@ interface AuthContextType {
   authError: string | null;
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: (usePopup?: boolean) => Promise<User | null>;
+  signInWithGoogle: (options?: SignInWithGoogleOptions) => Promise<User | null>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   clearAuthError: () => void;
@@ -43,8 +43,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Mark that we have a pending redirect after OAuth
           // Don't redirect immediately - wait for auth state to be confirmed
           if (typeof window !== 'undefined') {
-            const intendedPath = sessionStorage.getItem('habitnex:redirect-after-auth');
-            sessionStorage.removeItem('habitnex:redirect-after-auth');
+            let intendedPath: string | null = null;
+            try {
+              intendedPath = sessionStorage.getItem(REDIRECT_STORAGE_KEY);
+              sessionStorage.removeItem(REDIRECT_STORAGE_KEY);
+            } catch {
+              // Ignore storage access issues (e.g., Safari private mode)
+            }
             const targetPath = intendedPath || '/workspace?tab=overview';
             setPendingRedirect(targetPath);
           }
@@ -182,10 +187,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const handleSignInWithGoogle = async (usePopup?: boolean) => {
+  const handleSignInWithGoogle = async (options?: SignInWithGoogleOptions) => {
     try {
       setAuthError(null);
-      const result = await signInWithGoogle(usePopup);
+      const result = await signInWithGoogle(options);
       return result;
     } catch (error: any) {
       const errorMessage = getAuthErrorMessage(error);

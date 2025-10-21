@@ -135,7 +135,7 @@ export default function FamilyOnboardingPage() {
             <p className={`${theme.text.secondary} mb-4`}>
               Not ready for family mode? You can always continue with individual habit tracking.
             </p>
-            <Link href="/">
+            <Link href="/workspace?tab=overview">
               <Button variant="ghost" className={theme.components.button.ghost}>
                 Continue with Individual Mode
               </Button>

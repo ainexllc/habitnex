@@ -12,6 +12,13 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
+export const REDIRECT_STORAGE_KEY = 'habitnex:redirect-after-auth';
+
+export interface SignInWithGoogleOptions {
+  redirectPath?: string;
+  forceRedirect?: boolean;
+}
+
 export const signUp = async (email: string, password: string) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -30,7 +37,37 @@ export const signIn = async (email: string, password: string) => {
   }
 };
 
-export const signInWithGoogle = async (usePopup: boolean = true) => {
+const isPopupRecoverableError = (error: any) => {
+  if (!error) return false;
+  const popupErrors = [
+    'auth/popup-blocked',
+    'auth/popup-closed-by-user',
+    'auth/cancelled-popup-request',
+  ];
+
+  return popupErrors.includes(error.code) || error.message?.includes('Cross-Origin-Opener-Policy');
+};
+
+const clearStoredRedirect = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.removeItem(REDIRECT_STORAGE_KEY);
+  } catch {
+    // Ignore storage access issues (e.g., Safari private mode)
+  }
+};
+
+const storeRedirectPath = (path: string) => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(REDIRECT_STORAGE_KEY, path);
+  } catch {
+    // Ignore storage access issues (e.g., Safari private mode)
+  }
+};
+
+export const signInWithGoogle = async (options: SignInWithGoogleOptions = {}) => {
+  const { redirectPath = '/workspace?tab=overview', forceRedirect = false } = options;
   const provider = new GoogleAuthProvider();
   
   // Add scopes for profile and email
@@ -41,27 +78,30 @@ export const signInWithGoogle = async (usePopup: boolean = true) => {
   // For production, use redirect (better for mobile)
   const isLocalhost = typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const isMobileDevice = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
+  const shouldTryPopup = !forceRedirect && (!isMobileDevice || isLocalhost);
   
   try {
-    if ((usePopup && !isLocalhost) || isLocalhost) {
-      // Use popup method for localhost or when requested for production
+    if (shouldTryPopup) {
       const result = await signInWithPopup(auth, provider);
+      clearStoredRedirect();
       return result.user;
-    } else {
-      // Use redirect method for production when popup not requested
-      await signInWithRedirect(auth, provider);
-      return null; // Redirect doesn't return immediately
     }
   } catch (error: any) {
     // If popup is blocked or fails, fallback to redirect
-    if (error.code === 'auth/popup-blocked' || 
-        error.code === 'auth/popup-closed-by-user' ||
-        error.message?.includes('Cross-Origin-Opener-Policy')) {
-      await signInWithRedirect(auth, provider);
-      return null;
+    if (!isPopupRecoverableError(error)) {
+      throw error;
     }
-    throw error;
   }
+
+  if (redirectPath) {
+    storeRedirectPath(redirectPath);
+  } else {
+    clearStoredRedirect();
+  }
+
+  await signInWithRedirect(auth, provider);
+  return null; // Redirect doesn't return immediately
 };
 
 export const handleRedirectResult = async () => {
@@ -122,6 +162,9 @@ export const getAuthErrorMessage = (error: any): string => {
       return 'Google sign-in was cancelled';
     case 'auth/network-request-failed':
       return 'Network error. Please check your connection.';
+    case 'auth/unauthorized-domain':
+    case 'auth/domain-not-authorized':
+      return 'This domain is not authorized for Google sign-in. Please verify the Firebase Auth configuration.';
     case 'auth/too-many-requests':
       return 'Too many failed attempts. Please try again later.';
     case 'auth/user-disabled':

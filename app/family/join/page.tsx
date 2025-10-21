@@ -75,7 +75,7 @@ export default function JoinFamilyPage() {
       };
       
       await joinExistingFamily(request);
-      router.push('/');
+      router.push('/workspace?tab=overview');
       
     } catch (err) {
       console.error('Failed to join family:', err);
@@ -109,7 +109,7 @@ export default function JoinFamilyPage() {
           
           {/* Back Button */}
           <div className="mb-6">
-            <Link href="/">
+            <Link href="/workspace?tab=overview">
               <Button variant="ghost" className={cn(
                 "flex items-center",
                 familyAnimations.hover

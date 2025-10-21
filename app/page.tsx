@@ -162,22 +162,11 @@ function PublicHomePage() {
   };
 
   const handleGoogleSignIn = async () => {
-    const isLocalhost =
-      typeof window !== 'undefined' &&
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const usePopup = isLocalhost; // Use popup on localhost, redirect on production
-
     try {
       setLoading(true);
       setError('');
       clearAuthError();
-
-      // Store intended redirect path for OAuth redirect flow
-      if (!usePopup && typeof window !== 'undefined') {
-        sessionStorage.setItem('habitnex:redirect-after-auth', '/workspace?tab=overview');
-      }
-
-      const result = await signInWithGoogle(usePopup);
+      const result = await signInWithGoogle({ redirectPath: '/workspace?tab=overview' });
       if (result) {
         // Popup mode returns user immediately
         router.replace('/workspace?tab=overview');

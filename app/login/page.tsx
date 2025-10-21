@@ -42,6 +42,9 @@ export default function LoginPage() {
       setError('');
       await signIn(data.email, data.password);
       router.push('/workspace?tab=overview');
+      if (typeof window !== 'undefined') {
+        window.location.replace('/workspace?tab=overview');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
@@ -50,21 +53,12 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    // Auto-detect best method based on environment
-    const isLocalhost = typeof window !== 'undefined' &&
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const usePopup = isLocalhost; // Use popup on localhost, redirect on production
     try {
       setLoading(true);
       setError('');
       clearAuthError();
 
-      // Store intended redirect path for OAuth redirect flow
-      if (!usePopup && typeof window !== 'undefined') {
-        sessionStorage.setItem('habitnex:redirect-after-auth', '/workspace?tab=overview');
-      }
-
-      const result = await signInWithGoogle(usePopup);
+      const result = await signInWithGoogle({ redirectPath: '/workspace?tab=overview' });
 
       // For popup mode, don't redirect immediately to avoid race conditions
       // The useEffect watching 'user' state will handle the redirect once auth state is fully propagated

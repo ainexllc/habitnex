@@ -88,6 +88,9 @@ export function WorkspaceDashboard({
       user
     ) {
       router.replace('/workspace?tab=overview');
+      if (typeof window !== 'undefined') {
+        window.location.replace('/workspace?tab=overview');
+      }
     }
   }, [enforceWorkspaceRoute, pathname, authLoading, user, router]);
 

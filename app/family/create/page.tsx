@@ -59,7 +59,7 @@ export default function CreateFamilyPage() {
       };
       
       await createNewFamily(request);
-      router.push('/');
+      router.push('/workspace?tab=overview');
 
     } catch {
       // Failed to create family - handle silently
@@ -95,7 +95,7 @@ export default function CreateFamilyPage() {
           
           {/* Back Button */}
           <div className="mb-6">
-            <Link href="/">
+            <Link href="/workspace?tab=overview">
               <Button variant="ghost" className={cn(
                 "flex items-center",
                 familyAnimations.hover
