@@ -43,7 +43,7 @@ import { cn } from '@/lib/utils';
 
 type Period = 'week' | 'month' | 'year';
 
-export function FamilyAnalyticsTab() {
+export function WorkspaceAnalyticsTab() {
   const { currentFamily, currentMember, isParent } = useFamily();
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('week');
   const {

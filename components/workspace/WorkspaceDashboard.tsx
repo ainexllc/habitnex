@@ -127,23 +127,10 @@ export function WorkspaceDashboard({
     return null;
   }
 
+  // If no workspace loaded yet, WorkspaceContext is creating one automatically
+  // Just return null and let the loading state handle it
   if (!currentFamily || !currentMember) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Family Found</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">You need to create or join a family first.</p>
-          <div className="space-x-4">
-            <Link href="/family/create">
-              <Button>Create Family</Button>
-            </Link>
-            <Link href="/family/join">
-              <Button variant="outline">Join Family</Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const renderTabContent = () => {

@@ -24,7 +24,7 @@ import {
   Settings
 } from 'lucide-react';
 
-interface ModernFamilyHeaderProps {
+interface ModernWorkspaceHeaderProps {
   familyName: string;
   date: string;
   touchMode?: boolean;
@@ -54,13 +54,13 @@ const getWeatherIcon = (condition: string | null) => {
   }
 };
 
-export function ModernFamilyHeader({
+export function ModernWorkspaceHeader({
   familyName,
   date,
   className,
   activeTab = 'overview',
   onTabChange,
-}: ModernFamilyHeaderProps) {
+}: ModernWorkspaceHeaderProps) {
   const router = useRouter();
   const { palette, mode } = useTheme();
   const { currentFamily, currentMember } = useFamily();

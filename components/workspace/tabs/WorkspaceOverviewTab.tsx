@@ -12,11 +12,11 @@ import { RewardMomentumStrip } from '@/components/workspace/RewardMomentumStrip'
 import { ManageFocusHabitsModal } from '@/components/workspace/modals/ManageFocusHabitsModal';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
-import { ArrowRight, CheckCircle, Flame, Plus, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, Flame, Plus, Sparkles, Users, Heart } from 'lucide-react';
 
-interface FamilyOverviewTabProps {}
+interface WorkspaceOverviewTabProps {}
 
-export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
+export function WorkspaceOverviewTab({}: WorkspaceOverviewTabProps) {
   const router = useRouter();
   const { currentFamily, currentMember, isParent, updateFamilyMember } = useFamily();
   const { allHabits, getHabitsByMember, getMemberStats, toggleMemberCompletion, getHabitCompletion } = useAllFamilyHabits();
@@ -298,6 +298,49 @@ export function FamilyOverviewTab({}: FamilyOverviewTabProps) {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[24px] border border-[#ff7a1c]/30 bg-gradient-to-br from-[#ff7a1c]/10 via-[#0d0d15]/90 to-[#0d0d15]/90 px-6 py-6 shadow-[0_30px_110px_rgba(255,122,28,0.15)]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-[#ff7a1c]" />
+              <span className="text-[11px] uppercase tracking-[0.35em] text-[#ff7a1c]">Share the journey</span>
+            </div>
+            <h3 className="mt-3 text-xl font-semibold text-white sm:text-2xl">
+              Build habits together with family, friends, or teammates
+            </h3>
+            <p className="mt-2 text-sm text-[#b8bccf]">
+              Create a shared workspace to track habits together, celebrate wins, and keep each other motivated. Perfect for families, friend groups, or teams building better routines.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3 text-xs text-[#9ea1b5]">
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                <Users className="h-3.5 w-3.5 text-[#ff7a1c]" />
+                <span>Multiple members</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#ff7a1c]" />
+                <span>Shared challenges</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                <Flame className="h-3.5 w-3.5 text-[#ff7a1c]" />
+                <span>Group rewards</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 lg:flex-shrink-0">
+            <Button
+              onClick={() => router.push('/workspace?tab=settings')}
+              className="rounded-full bg-[#ff7a1c] px-6 py-3 text-sm font-semibold text-black hover:bg-[#ff8a35]"
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Upgrade workspace
+            </Button>
+            <p className="text-center text-xs text-[#8a90a4] lg:text-right">
+              Add members in settings
+            </p>
           </div>
         </div>
       </section>

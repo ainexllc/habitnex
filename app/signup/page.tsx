@@ -34,7 +34,7 @@ export default function SignUpPage() {
   // Redirect to workspace if user is already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/workspace?tab=overview');
+      router.push('/workspace');
     }
   }, [user, authLoading, router]);
 
@@ -47,9 +47,9 @@ export default function SignUpPage() {
       setLoading(true);
       setError('');
       await signUp(data.email, data.password, data.displayName);
-      router.push('/workspace?tab=overview');
+      router.push('/workspace');
       if (typeof window !== 'undefined') {
-        window.location.replace('/workspace?tab=overview');
+        window.location.replace('/workspace');
       }
     } catch (err) {
       const error = err as { message?: string };
@@ -65,7 +65,7 @@ export default function SignUpPage() {
       setError('');
       clearAuthError();
 
-      const result = await signInWithGoogle({ redirectPath: '/workspace?tab=overview' });
+      const result = await signInWithGoogle({ redirectPath: '/workspace' });
 
       // For popup mode, don't redirect immediately to avoid race conditions
       // The useEffect watching 'user' state will handle the redirect once auth state is fully propagated

@@ -47,7 +47,7 @@ const MODE_OPTIONS: Array<{ id: HabitNexModeId; label: string; description: stri
   },
 ];
 
-export function FamilySettingsTab() {
+export function WorkspaceSettingsTab() {
   const { currentFamily, currentMember, isParent, updateFamilySettings, updateFamilyName } = useFamily();
   const { mode: themeMode } = useTheme();
 

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function FamilyRewardsTab() {
+export function WorkspaceRewardsTab() {
   const { currentFamily, currentMember, isParent } = useFamily();
   const {
     rewards,

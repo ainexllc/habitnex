@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface FamilyMembersTabProps {
+interface WorkspaceMembersTabProps {
   onAddMember: () => void;
 }
 
@@ -56,7 +56,7 @@ const roleStyles: Record<
   },
 };
 
-export function FamilyMembersTab({ onAddMember }: FamilyMembersTabProps) {
+export function WorkspaceMembersTab({ onAddMember }: WorkspaceMembersTabProps) {
   const { currentFamily, currentMember, isParent, removeMember } = useFamily();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);

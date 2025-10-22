@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 import { FamilyHabit } from '@/types/family';
 import { getNextDueDate, isHabitDueToday } from '@/lib/utils';
 
-interface FamilyHabitsTabProps {
+interface WorkspaceHabitsTabProps {
   onCreateHabit?: () => void;
 }
 
@@ -38,7 +38,7 @@ const VIEW_MODES: { id: ViewMode; label: string }[] = [
   { id: 'byMember', label: 'By member' },
 ];
 
-export function FamilyHabitsTab({ onCreateHabit }: FamilyHabitsTabProps = {}) {
+export function WorkspaceHabitsTab({ onCreateHabit }: WorkspaceHabitsTabProps = {}) {
   const { currentFamily, isParent } = useFamily();
   const {
     allHabits,

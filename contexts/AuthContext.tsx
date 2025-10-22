@@ -50,7 +50,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             } catch {
               // Ignore storage access issues (e.g., Safari private mode)
             }
-            const targetPath = intendedPath || '/workspace?tab=overview';
+            // Redirect to workspace (shows upgrade banner for solo users, full workspace for workspace users)
+            const targetPath = intendedPath || '/workspace';
             setPendingRedirect(targetPath);
           }
         }

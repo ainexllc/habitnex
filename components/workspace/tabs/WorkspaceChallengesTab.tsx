@@ -35,11 +35,11 @@ import { cn } from '@/lib/utils';
 import type { FamilyChallenge, ChallengeType } from '@/types/family';
 import { ChallengeDetailDrawer } from '@/components/workspace/challenges/ChallengeDetailDrawer';
 
-interface FamilyChallengesTabProps {
+interface WorkspaceChallengesTabProps {
   onCreateChallenge?: () => void;
 }
 
-export function FamilyChallengesTab({ onCreateChallenge }: FamilyChallengesTabProps = {}) {
+export function WorkspaceChallengesTab({ onCreateChallenge }: WorkspaceChallengesTabProps = {}) {
   const { currentFamily, currentMember, isParent } = useFamily();
   const { 
     activeChallenges, 

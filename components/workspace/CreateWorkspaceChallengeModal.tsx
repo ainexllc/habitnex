@@ -44,7 +44,7 @@ interface ChallengeFormData {
   participationReward?: string;
 }
 
-interface CreateFamilyChallengeModalProps {
+interface CreateWorkspaceChallengeModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -94,7 +94,7 @@ const challengeTemplates = [
 
 const challengeEmojis = ['🏆', '🎯', '🔥', '⭐', '🚀', '💪', '🎪', '🌟', '⚡', '🎊', '🎉', '👑', '🏃', '💯', '🎮', '🎲'];
 
-export function CreateFamilyChallengeModal({ isOpen, onClose }: CreateFamilyChallengeModalProps) {
+export function CreateWorkspaceChallengeModal({ isOpen, onClose }: CreateWorkspaceChallengeModalProps) {
   const { currentFamily, isParent } = useFamily();
   const { createChallenge } = useFamilyChallenges();
   const { habits } = useFamilyHabits();

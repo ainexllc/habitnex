@@ -3,11 +3,11 @@
 import React from 'react';
 import { FamilyHabitFormSimple } from './WorkspaceHabitFormSimple';
 
-interface CreateFamilyHabitModalProps {
+interface CreateWorkspaceHabitModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CreateFamilyHabitModal({ isOpen, onClose }: CreateFamilyHabitModalProps) {
+export function CreateWorkspaceHabitModal({ isOpen, onClose }: CreateWorkspaceHabitModalProps) {
   return <FamilyHabitFormSimple mode="create" isOpen={isOpen} onClose={onClose} />;
 }

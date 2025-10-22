@@ -626,11 +626,13 @@ function HomePageContent() {
   const router = useRouter();
   const isAuthenticated = !authLoading && Boolean(user);
 
+  // Redirect authenticated users to workspace
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
+      // All users go to workspace page (handles both solo and workspace users)
       router.replace('/workspace?tab=overview');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   if (authLoading) {
     return (

@@ -176,10 +176,22 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
             const selectedWorkspace = userWorkspaces[0];
             await switchWorkspace(selectedWorkspace.familyId); // TODO Phase 3: Update to workspaceId
           } else {
-            // Clear any existing workspace state
-            setCurrentWorkspace(null);
-            setCurrentMember(null);
-            setDashboardData(null);
+            // No workspaces found - create a default personal workspace for first-time users
+            try {
+              const defaultWorkspace: CreateWorkspaceRequest = {
+                name: `${user.displayName || user.email?.split('@')[0] || 'My'}'s Workspace`,
+                type: 'personal' as any, // TODO Phase 3: Fix type
+              };
+              const workspaceId = await createWorkspace_TEMP(user.uid, defaultWorkspace as any);
+              await updateUserSelectedWorkspace_TEMP(user.uid, workspaceId);
+              await switchWorkspace(workspaceId);
+            } catch (err) {
+              console.error('Failed to create default workspace:', err);
+              // If auto-creation fails, clear workspace state
+              setCurrentWorkspace(null);
+              setCurrentMember(null);
+              setDashboardData(null);
+            }
           }
         } else {
           // On non-workspace routes, just clear state if no saved workspace found
